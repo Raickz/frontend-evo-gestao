@@ -323,6 +323,21 @@ export const PedidosService = {
   },
 
   /**
+   * Busca as vendas relacionadas a uma lista de pedidos em lote (somente leitura).
+   */
+  async getVendasPorPedidos(empresaId: string, pedidoIds: string[]) {
+    if (!pedidoIds || pedidoIds.length === 0) {
+      return { data: [], error: null }
+    }
+
+    return supabase
+      .from('vendas')
+      .select('id, numero, pedido_id, total, forma_pagamento, status, created_at')
+      .in('pedido_id', pedidoIds)
+      .eq('empresa_id', empresaId)
+  },
+
+  /**
    * Busca a venda relacionada a um pedido (somente leitura).
    */
   async getVendaRelacionada(empresaId: string, pedidoId: string) {

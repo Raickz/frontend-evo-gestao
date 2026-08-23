@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { PageHeader, EmptyState, TableSkeleton, ErrorState } from '@/components/common/CommonUI'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -47,6 +48,7 @@ import {
   Receipt,
   Calendar,
   CreditCard,
+  ExternalLink,
   Loader2,
 } from 'lucide-react'
 
@@ -88,6 +90,7 @@ interface ProdutoOption {
 }
 
 export default function PedidosPage() {
+  const navigate = useNavigate()
   const { empresaId } = useEmpresa()
   const { usuario } = useAuth()
 
@@ -96,9 +99,10 @@ export default function PedidosPage() {
   const podeGerenciar = perfil === 'master' || perfil === 'admin' || perfil === 'gerente'
 
   // =========================================================================
-  // ESTADO DA LISTAGEM
+  // ESTADO DA LISTAGEM & MAPA DE VENDAS
   // =========================================================================
   const [pedidos, setPedidos] = useState<any[]>([])
+  const [vendasMap, setVendasMap] = useState<Record<string, any>>({})
   const [totalPedidos, setTotalPedidos] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -121,7 +125,7 @@ export default function PedidosPage() {
     return () => clearTimeout(timer)
   }, [filtroSearch])
 
-  // Carregamento de pedidos
+  // Carregamento de pedidos e vendas relacionadas
   const loadPedidos = useCallback(async () => {
     if (!empresaId) return
     setLoading(true)
@@ -144,8 +148,38 @@ export default function PedidosPage() {
       if (dataRes.error) throw dataRes.error
       if (countRes.error) throw countRes.error
 
-      setPedidos(dataRes.data || [])
+      const listaPedidos = dataRes.data || []
+      setPedidos(listaPedidos)
       setTotalPedidos(countRes.count || 0)
+
+      // Coletar IDs dos pedidos com status 'faturado' para buscar vendas relacionadas em lote
+      const faturadosIds = listaPedidos
+        .filter((p: any) => p.status === 'faturado')
+        .map((p: any) => p.id)
+
+      if (faturadosIds.length > 0) {
+        try {
+          const { data: vendasData, error: vendasErr } = await PedidosService.getVendasPorPedidos(
+            empresaId,
+            faturadosIds,
+          )
+          if (vendasErr) {
+            console.error('Erro ao buscar vendas relacionadas:', vendasErr)
+          } else if (vendasData) {
+            const map: Record<string, any> = {}
+            vendasData.forEach((v: any) => {
+              if (v.pedido_id) {
+                map[v.pedido_id] = v
+              }
+            })
+            setVendasMap(map)
+          }
+        } catch (vErr) {
+          console.error('Erro ao processar vendas relacionadas:', vErr)
+        }
+      } else {
+        setVendasMap({})
+      }
     } catch (e: any) {
       console.error('Erro ao buscar pedidos:', e)
       setError(e.message || 'Falha ao buscar pedidos')
@@ -952,17 +986,40 @@ export default function PedidosPage() {
                               </Button>
                             )}
 
-                            {/* Botão Converter em Venda (Apenas status faturado e usuário autorizado) */}
-                            {podeGerenciar && ped.status === 'faturado' && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => abrirModalConversao(ped)}
-                                className="h-8 text-[11px] px-2.5 border-teal-600 text-teal-700 hover:bg-teal-50 hover:text-teal-800 font-medium flex items-center gap-1"
-                              >
-                                <ArrowRightCircle className="w-3.5 h-3.5 text-teal-600" />
-                                Converter em Venda
-                              </Button>
+                            {/* Pedido faturado: Identificar se já foi convertido em venda */}
+                            {ped.status === 'faturado' && vendasMap[ped.id] ? (
+                              <div className="flex items-center gap-1.5">
+                                <Badge
+                                  variant="outline"
+                                  className="bg-teal-50 text-teal-700 border-teal-300 font-medium text-[11px] px-2.5 py-1 flex items-center gap-1"
+                                >
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                                  <span>✓ Venda #{vendasMap[ped.id].numero} gerada</span>
+                                </Badge>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => navigate('/app/vendas')}
+                                  className="h-8 text-[11px] px-2.5 border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium flex items-center gap-1"
+                                  title="Ir para Vendas"
+                                >
+                                  <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+                                  Ver Venda
+                                </Button>
+                              </div>
+                            ) : (
+                              podeGerenciar &&
+                              ped.status === 'faturado' && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => abrirModalConversao(ped)}
+                                  className="h-8 text-[11px] px-2.5 border-teal-600 text-teal-700 hover:bg-teal-50 hover:text-teal-800 font-medium flex items-center gap-1"
+                                >
+                                  <ArrowRightCircle className="w-3.5 h-3.5 text-teal-600" />
+                                  Converter em Venda
+                                </Button>
+                              )
                             )}
                           </div>
                         </td>
@@ -1465,7 +1522,7 @@ export default function PedidosPage() {
                 {/* Venda Relacionada (se houver) */}
                 {vendaRelacionada && (
                   <Card className="border-teal-200 bg-teal-50/40">
-                    <CardContent className="p-3.5 space-y-2">
+                    <CardContent className="p-3.5 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Receipt className="w-4 h-4 text-teal-700" />
@@ -1473,15 +1530,26 @@ export default function PedidosPage() {
                             Venda Gerada #{vendaRelacionada.numero}
                           </span>
                         </div>
-                        <Badge
-                          variant="outline"
-                          className="bg-teal-100 text-teal-800 border-teal-300 font-semibold text-[10px]"
-                        >
-                          {vendaRelacionada.status || 'Concluída'}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant="outline"
+                            className="bg-teal-100 text-teal-800 border-teal-300 font-semibold text-[10px]"
+                          >
+                            {vendaRelacionada.status || 'Concluída'}
+                          </Badge>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate('/app/vendas')}
+                            className="h-7 text-[11px] px-2.5 bg-white border-teal-300 text-teal-800 hover:bg-teal-50 flex items-center gap-1 font-medium"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            Ver Venda
+                          </Button>
+                        </div>
                       </div>
 
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px] text-slate-600">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px] text-slate-600 border-t border-teal-100">
                         <div>
                           <span className="text-slate-400 block text-[10px]">Data da Venda</span>
                           <span className="font-semibold text-slate-800">
@@ -1525,18 +1593,20 @@ export default function PedidosPage() {
 
             <DialogFooter className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-2 justify-between items-center">
               <div className="flex items-center gap-2">
-                {/* Botão Converter em Venda no modal (Apenas status faturado e podeGerenciar) */}
-                {podeGerenciar && pedidoDetalhe?.status === 'faturado' && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => abrirModalConversao(pedidoDetalhe)}
-                    className="text-xs border-teal-600 text-teal-700 hover:bg-teal-50 hover:text-teal-800 font-medium flex items-center gap-1.5"
-                  >
-                    <ArrowRightCircle className="w-3.5 h-3.5 text-teal-600" />
-                    Converter em Venda
-                  </Button>
-                )}
+                {/* Botão Converter em Venda no modal (Apenas status faturado, sem venda vinculada e podeGerenciar) */}
+                {podeGerenciar &&
+                  pedidoDetalhe?.status === 'faturado' &&
+                  !vendaRelacionada && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => abrirModalConversao(pedidoDetalhe)}
+                      className="text-xs border-teal-600 text-teal-700 hover:bg-teal-50 hover:text-teal-800 font-medium flex items-center gap-1.5"
+                    >
+                      <ArrowRightCircle className="w-3.5 h-3.5 text-teal-600" />
+                      Converter em Venda
+                    </Button>
+                  )}
 
                 {/* Botão Editar se pendente */}
                 {podeGerenciar && pedidoDetalhe?.status === 'pendente' && (
