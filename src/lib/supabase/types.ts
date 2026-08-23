@@ -1001,6 +1001,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      converter_pedido_em_venda: {
+        Args: {
+          p_forma_pagamento?: string
+          p_pedido_id: string
+          p_vencimento?: string
+        }
+        Returns: Json
+      }
       criar_pedido: {
         Args: {
           p_cliente_id?: string
