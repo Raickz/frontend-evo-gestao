@@ -1,122 +1,1367 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { PageHeader, EmptyState, TableSkeleton, ErrorState } from '@/components/common/CommonUI'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Card, CardContent } from '@/components/ui/card'
 import { useEmpresa } from '@/hooks/use-empresa'
-import { VendasService } from '@/services/vendas'
-import { ShoppingCart, Plus, Calendar, DollarSign, UserCheck } from 'lucide-react'
+import { VendasService, type FinalizarVendaPayloadItem } from '@/services/vendas'
+import {
+  ShoppingCart,
+  Plus,
+  ArrowLeft,
+  Search,
+  CheckCircle2,
+  AlertCircle,
+  Banknote,
+  CreditCard,
+  QrCode,
+  Clock,
+  Trash2,
+  Minus,
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
+  Package,
+  User,
+  Percent,
+} from 'lucide-react'
+
+interface CartItem {
+  produto_id: string
+  nome: string
+  codigo: string | null
+  preco_venda: number
+  quantidade: number
+  estoque_atual: number
+}
+
+interface ClienteOption {
+  id: string
+  nome: string
+  documento: string | null
+}
+
+interface VendedorOption {
+  id: string
+  nome: string
+  percentual_comissao: number
+}
+
+interface ProdutoOption {
+  id: string
+  nome: string
+  codigo: string | null
+  codigo_barras: string | null
+  preco_venda: number
+  preco_custo: number
+  unidade: string
+  estoque_minimo: number
+  estoques: { quantidade: number }[] | null
+}
 
 export default function VendasPage() {
   const { empresaId } = useEmpresa()
-  const [vendas, setVendas] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
-  const loadVendas = async () => {
+  // Modo de visualização: 'listagem' ou 'nova'
+  const [modo, setModo] = useState<'listagem' | 'nova'>('listagem')
+
+  // Estado da listagem
+  const [vendas, setVendas] = useState<any[]>([])
+  const [totalVendas, setTotalVendas] = useState(0)
+  const [loadingList, setLoadingList] = useState(true)
+  const [errorList, setErrorList] = useState<string | null>(null)
+
+  // Filtros de listagem
+  const [filtroSearch, setFiltroSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [filtroStatus, setFiltroStatus] = useState<string>('todos')
+  const [filtroFormaPagamento, setFiltroFormaPagamento] = useState<string>('todas')
+  const [filtroDataInicio, setFiltroDataInicio] = useState<string>('')
+  const [filtroDataFim, setFiltroDataFim] = useState<string>('')
+  const [pagina, setPagina] = useState(1)
+  const limitePorPagina = 20
+
+  // Estado da Nova Venda
+  const [produtosDisponiveis, setProdutosDisponiveis] = useState<ProdutoOption[]>([])
+  const [loadingProdutos, setLoadingProdutos] = useState(false)
+  const [buscaProduto, setBuscaProduto] = useState('')
+  const [debouncedBuscaProduto, setDebouncedBuscaProduto] = useState('')
+
+  const [clientes, setClientes] = useState<ClienteOption[]>([])
+  const [vendedores, setVendedores] = useState<VendedorOption[]>([])
+  const [buscaCliente, setBuscaCliente] = useState('')
+  const [buscaVendedor, setBuscaVendedor] = useState('')
+
+  const [clienteSelecionadoId, setClienteSelecionadoId] = useState<string | null>(null)
+  const [vendedorSelecionadoId, setVendedorSelecionadoId] = useState<string | null>(null)
+  const [carrinho, setCarrinho] = useState<CartItem[]>([])
+  const [desconto, setDesconto] = useState<number>(0)
+  const [descontoInput, setDescontoInput] = useState<string>('0')
+  const [formaPagamento, setFormaPagamento] = useState<string>('pix')
+  const [vencimento, setVencimento] = useState<string>('')
+  const [observacoes, setObservacoes] = useState<string>('')
+
+  const [submetendoVenda, setSubmetendoVenda] = useState(false)
+  const [erroVenda, setErroVenda] = useState<string | null>(null)
+
+  // Modal de sucesso pós-venda
+  const [resultadoModal, setResultadoModal] = useState<{
+    aberto: boolean
+    dados?: {
+      venda_id: string
+      numero: number
+      subtotal: number
+      desconto: number
+      total: number
+      forma_pagamento: string
+      comissao: number
+    }
+  }>({ aberto: false })
+
+  // Debounce busca na listagem
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(filtroSearch)
+      setPagina(1)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [filtroSearch])
+
+  // Debounce busca de produtos na nova venda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedBuscaProduto(buscaProduto)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [buscaProduto])
+
+  // Carregar lista de vendas
+  const carregarVendas = async () => {
     if (!empresaId) return
-    setLoading(true)
-    setError(null)
+    setLoadingList(true)
+    setErrorList(null)
     try {
-      const { data, error: err } = await VendasService.list(empresaId)
-      if (err) throw err
-      setVendas(data || [])
+      const filters = {
+        search: debouncedSearch,
+        status: filtroStatus,
+        formaPagamento: filtroFormaPagamento,
+        dataInicio: filtroDataInicio,
+        dataFim: filtroDataFim,
+        pagina,
+        limite: limitePorPagina,
+      }
+
+      const [dataRes, countRes] = await Promise.all([
+        VendasService.listFiltered(empresaId, filters),
+        VendasService.countFiltered(empresaId, filters),
+      ])
+
+      if (dataRes.error) throw dataRes.error
+      if (countRes.error) throw countRes.error
+
+      setVendas(dataRes.data || [])
+      setTotalVendas(countRes.count || 0)
     } catch (e: any) {
-      setError(e.message || 'Falha ao buscar vendas')
+      console.error('Erro ao carregar vendas:', e)
+      setErrorList(e.message || 'Falha ao carregar o histórico de vendas.')
     } finally {
-      setLoading(false)
+      setLoadingList(false)
     }
   }
 
   useEffect(() => {
-    loadVendas()
-  }, [empresaId])
+    if (modo === 'listagem') {
+      carregarVendas()
+    }
+  }, [
+    empresaId,
+    modo,
+    debouncedSearch,
+    filtroStatus,
+    filtroFormaPagamento,
+    filtroDataInicio,
+    filtroDataFim,
+    pagina,
+  ])
+
+  // Carregar dados de suporte para nova venda (produtos, clientes, vendedores)
+  const carregarProdutosDisponiveis = async (search?: string) => {
+    if (!empresaId) return
+    setLoadingProdutos(true)
+    try {
+      const { data, error } = await VendasService.listProdutosDisponiveis(empresaId, search)
+      if (error) throw error
+      setProdutosDisponiveis((data as unknown as ProdutoOption[]) || [])
+    } catch (e: any) {
+      console.error('Erro ao carregar produtos:', e)
+    } finally {
+      setLoadingProdutos(false)
+    }
+  }
+
+  const carregarClientes = async (search?: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await VendasService.listClientesAtivos(empresaId, search)
+      if (error) throw error
+      setClientes((data as unknown as ClienteOption[]) || [])
+    } catch (e: any) {
+      console.error('Erro ao carregar clientes:', e)
+    }
+  }
+
+  const carregarVendedores = async (search?: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await VendasService.listVendedoresAtivos(empresaId, search)
+      if (error) throw error
+      setVendedores((data as unknown as VendedorOption[]) || [])
+    } catch (e: any) {
+      console.error('Erro ao carregar vendedores:', e)
+    }
+  }
+
+  // Efeito ao entrar no modo 'nova'
+  useEffect(() => {
+    if (modo === 'nova' && empresaId) {
+      carregarProdutosDisponiveis(debouncedBuscaProduto)
+      carregarClientes()
+      carregarVendedores()
+    }
+  }, [modo, empresaId, debouncedBuscaProduto])
+
+  // Filtragem de clientes e vendedores no cliente
+  const clientesFiltrados = useMemo(() => {
+    if (!buscaCliente.trim()) return clientes
+    const termo = buscaCliente.toLowerCase()
+    return clientes.filter(
+      (c) =>
+        c.nome.toLowerCase().includes(termo) ||
+        (c.documento && c.documento.toLowerCase().includes(termo)),
+    )
+  }, [clientes, buscaCliente])
+
+  const vendedoresFiltrados = useMemo(() => {
+    if (!buscaVendedor.trim()) return vendedores
+    const termo = buscaVendedor.toLowerCase()
+    return vendedores.filter((v) => v.nome.toLowerCase().includes(termo))
+  }, [vendedores, buscaVendedor])
+
+  // Funções do carrinho
+  const adicionarAoCarrinho = (produto: ProdutoOption) => {
+    setCarrinho((prev) => {
+      const jaExiste = prev.find((item) => item.produto_id === produto.id)
+      if (jaExiste) return prev
+
+      const estoqueAtual = produto.estoques?.[0]?.quantidade ?? 0
+
+      return [
+        ...prev,
+        {
+          produto_id: produto.id,
+          nome: produto.nome,
+          codigo: produto.codigo,
+          preco_venda: produto.preco_venda || 0,
+          quantidade: 1,
+          estoque_atual: estoqueAtual,
+        },
+      ]
+    })
+  }
+
+  const alterarQuantidade = (produtoId: string, delta: number) => {
+    setCarrinho((prev) =>
+      prev.map((item) => {
+        if (item.produto_id === produtoId) {
+          const novaQtd = Math.max(1, item.quantidade + delta)
+          return { ...item, quantidade: novaQtd }
+        }
+        return item
+      }),
+    )
+  }
+
+  const setQuantidadeItem = (produtoId: string, quantidade: number) => {
+    const val = isNaN(quantidade) || quantidade <= 0 ? 1 : Math.floor(quantidade)
+    setCarrinho((prev) =>
+      prev.map((item) => (item.produto_id === produtoId ? { ...item, quantidade: val } : item)),
+    )
+  }
+
+  const removerDoCarrinho = (produtoId: string) => {
+    setCarrinho((prev) => prev.filter((item) => item.produto_id !== produtoId))
+  }
+
+  const limparNovaVenda = () => {
+    setCarrinho([])
+    setClienteSelecionadoId(null)
+    setVendedorSelecionadoId(null)
+    setDesconto(0)
+    setDescontoInput('0')
+    setFormaPagamento('pix')
+    setVencimento('')
+    setObservacoes('')
+    setErroVenda(null)
+    setBuscaProduto('')
+    setBuscaCliente('')
+    setBuscaVendedor('')
+  }
+
+  // Cálculos visuais da venda
+  const subtotalVisual = useMemo(() => {
+    return carrinho.reduce((acc, item) => acc + item.quantidade * item.preco_venda, 0)
+  }, [carrinho])
+
+  const totalVisual = useMemo(() => {
+    return Math.max(0, subtotalVisual - (desconto || 0))
+  }, [subtotalVisual, desconto])
+
+  const handleDescontoChange = (valorTexto: string) => {
+    setDescontoInput(valorTexto)
+    const parsed = parseFloat(valorTexto.replace(',', '.'))
+    if (!isNaN(parsed) && parsed >= 0) {
+      setDesconto(parsed)
+    } else if (valorTexto === '') {
+      setDesconto(0)
+    }
+  }
+
+  // Finalização de venda chamando a RPC
+  const handleFinalizarVenda = async () => {
+    setErroVenda(null)
+
+    // Validações locais amigáveis
+    if (carrinho.length === 0) {
+      setErroVenda('Adicione pelo menos um produto ao carrinho.')
+      return
+    }
+
+    const itemInvalido = carrinho.find((item) => !item.quantidade || item.quantidade <= 0)
+    if (itemInvalido) {
+      setErroVenda(`A quantidade para o produto "${itemInvalido.nome}" deve ser maior que zero.`)
+      return
+    }
+
+    if (formaPagamento === 'fiado') {
+      if (!clienteSelecionadoId) {
+        setErroVenda(
+          'Para vendas na forma "Fiado", é obrigatório selecionar um cliente cadastrado.',
+        )
+        return
+      }
+      if (!vencimento) {
+        setErroVenda('Para vendas na forma "Fiado", a data de vencimento é obrigatória.')
+        return
+      }
+    }
+
+    if (desconto < 0) {
+      setErroVenda('O desconto não pode ser negativo.')
+      return
+    }
+
+    if (desconto > subtotalVisual) {
+      setErroVenda('O desconto não pode ser maior que o subtotal da venda.')
+      return
+    }
+
+    setSubmetendoVenda(true)
+
+    try {
+      // Montar apenas {produto_id, quantidade} para cada item
+      const payloadItens: FinalizarVendaPayloadItem[] = carrinho.map((item) => ({
+        produto_id: item.produto_id,
+        quantidade: item.quantidade,
+      }))
+
+      const { data, error } = await VendasService.finalizarVendaViaRpc({
+        clienteId: clienteSelecionadoId,
+        vendedorId: vendedorSelecionadoId,
+        itens: payloadItens,
+        desconto,
+        formaPagamento,
+        vencimento: formaPagamento === 'fiado' ? vencimento : null,
+        observacoes: observacoes.trim() ? observacoes.trim() : null,
+      })
+
+      if (error) {
+        throw error
+      }
+
+      // data é o json retornado pela RPC: {sucesso, venda_id, numero, subtotal, desconto, total, forma_pagamento, comissao}
+      const res = data as any
+      if (res && res.sucesso) {
+        setResultadoModal({
+          aberto: true,
+          dados: {
+            venda_id: res.venda_id,
+            numero: res.numero,
+            subtotal: Number(res.subtotal || 0),
+            desconto: Number(res.desconto || 0),
+            total: Number(res.total || 0),
+            forma_pagamento: res.forma_pagamento || formaPagamento,
+            comissao: Number(res.comissao || 0),
+          },
+        })
+      } else {
+        throw new Error('Não foi possível confirmar a finalização da venda.')
+      }
+    } catch (err: any) {
+      console.error('Erro ao finalizar venda na RPC:', err)
+      let msgAmigavel = err.message || 'Falha ao finalizar venda.'
+
+      if (msgAmigavel.includes('Estoque insuficiente')) {
+        msgAmigavel =
+          'Estoque insuficiente para um ou mais produtos selecionados. Verifique o saldo.'
+      } else if (msgAmigavel.includes('Venda fiada precisa possuir um cliente')) {
+        msgAmigavel = 'Para vendas fiadas, selecione um cliente cadastrado.'
+      } else if (msgAmigavel.includes('não possui permissão')) {
+        msgAmigavel = 'Você não possui permissão para registrar vendas nesta empresa.'
+      } else if (msgAmigavel.includes('Desconto não pode ser maior')) {
+        msgAmigavel = 'O desconto aplicado é superior ao valor total dos produtos.'
+      }
+
+      setErroVenda(msgAmigavel)
+    } finally {
+      setSubmetendoVenda(false)
+    }
+  }
 
   const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0)
+  }
+
+  const limparFiltros = () => {
+    setFiltroSearch('')
+    setDebouncedSearch('')
+    setFiltroStatus('todos')
+    setFiltroFormaPagamento('todas')
+    setFiltroDataInicio('')
+    setFiltroDataFim('')
+    setPagina(1)
+  }
+
+  const temFiltroAtivo =
+    debouncedSearch !== '' ||
+    filtroStatus !== 'todos' ||
+    filtroFormaPagamento !== 'todas' ||
+    filtroDataInicio !== '' ||
+    filtroDataFim !== ''
+
+  const totalPaginas = Math.ceil(totalVendas / limitePorPagina) || 1
+
+  const getFormaPagamentoBadge = (forma: string | null) => {
+    const f = forma?.toLowerCase() || 'pix'
+    switch (f) {
+      case 'dinheiro':
+        return (
+          <span className="inline-flex items-center gap-1 uppercase text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-md">
+            <Banknote className="w-3 h-3" />
+            Dinheiro
+          </span>
+        )
+      case 'pix':
+        return (
+          <span className="inline-flex items-center gap-1 uppercase text-[11px] font-semibold bg-blue-100 text-blue-800 border border-blue-200 px-2 py-0.5 rounded-md">
+            <QrCode className="w-3 h-3" />
+            PIX
+          </span>
+        )
+      case 'cartao':
+        return (
+          <span className="inline-flex items-center gap-1 uppercase text-[11px] font-semibold bg-purple-100 text-purple-800 border border-purple-200 px-2 py-0.5 rounded-md">
+            <CreditCard className="w-3 h-3" />
+            Cartão
+          </span>
+        )
+      case 'fiado':
+        return (
+          <span className="inline-flex items-center gap-1 uppercase text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md">
+            <Clock className="w-3 h-3" />
+            Fiado
+          </span>
+        )
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 uppercase text-[11px] font-semibold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md">
+            {f}
+          </span>
+        )
+    }
+  }
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'finalizada':
+        return (
+          <Badge
+            variant="outline"
+            className="bg-emerald-50 text-emerald-700 border-emerald-200 font-medium"
+          >
+            Finalizada
+          </Badge>
+        )
+      case 'cancelada':
+        return (
+          <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200 font-medium">
+            Cancelada
+          </Badge>
+        )
+      case 'rascunho':
+      default:
+        return (
+          <Badge
+            variant="outline"
+            className="bg-amber-50 text-amber-700 border-amber-200 font-medium"
+          >
+            Rascunho
+          </Badge>
+        )
+    }
   }
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Vendas Comerciais"
-        description="Registro e histórico de faturamento e pedidos de vendas finalizados."
-        badge={`${vendas.length} Registradas`}
-        actions={
-          <Button className="bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-sm">
-            <Plus className="w-4 h-4" />
-            Nova Venda (PDV)
-          </Button>
-        }
-      />
-
-      {loading ? (
-        <TableSkeleton rows={5} cols={6} />
-      ) : error ? (
-        <ErrorState message={error} onRetry={loadVendas} />
-      ) : vendas.length === 0 ? (
-        <EmptyState
-          icon={ShoppingCart}
-          title="Nenhuma venda realizada ainda"
-          description="Registre novas vendas para movimentar o estoque e alimentar as contas a receber e comissões."
-          actionLabel="Iniciar Primeira Venda"
-          onAction={() => {}}
+      {/* HEADER DINÂMICO */}
+      {modo === 'listagem' ? (
+        <PageHeader
+          title="Vendas Comerciais"
+          description="Histórico completo de vendas, relatórios e emissão de pedidos no PDV."
+          badge={
+            totalVendas > 0 ? `${totalVendas} ${totalVendas === 1 ? 'venda' : 'vendas'}` : undefined
+          }
+          actions={
+            <Button
+              onClick={() => {
+                limparNovaVenda()
+                setModo('nova')
+              }}
+              className="bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-sm font-medium"
+            >
+              <Plus className="w-4 h-4" />
+              Nova Venda (PDV)
+            </Button>
+          }
         />
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                <tr>
-                  <th className="py-3.5 px-4">Nº / Data</th>
-                  <th className="py-3.5 px-4">Cliente</th>
-                  <th className="py-3.5 px-4">Vendedor</th>
-                  <th className="py-3.5 px-4">Forma Pagto</th>
-                  <th className="py-3.5 px-4">Total</th>
-                  <th className="py-3.5 px-4">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {vendas.map((venda) => (
-                  <tr key={venda.id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-3 px-4">
-                      <span className="font-bold font-mono text-slate-900">#{venda.numero}</span>
-                      <p className="text-[11px] text-slate-500">
-                        {new Date(venda.created_at).toLocaleDateString('pt-BR')}
+        <PageHeader
+          title="Nova Venda (PDV)"
+          description="Selecione os produtos, cliente e forma de pagamento para registrar a venda."
+          actions={
+            <Button
+              variant="outline"
+              onClick={() => {
+                limparNovaVenda()
+                setModo('listagem')
+              }}
+              className="border-slate-300 text-slate-700 hover:bg-slate-100 flex items-center gap-1.5"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar para Listagem
+            </Button>
+          }
+        />
+      )}
+
+      {/* ========================================================
+          MODO LISTAGEM
+          ======================================================== */}
+      {modo === 'listagem' && (
+        <div className="space-y-4">
+          {/* BARRA DE FILTROS */}
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              {/* Busca de número ou observações */}
+              <div className="lg:col-span-2 relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Input
+                  placeholder="Buscar por Nº da venda ou obs..."
+                  value={filtroSearch}
+                  onChange={(e) => setFiltroSearch(e.target.value)}
+                  className="pl-9 bg-slate-50/50 border-slate-200 focus:bg-white text-xs h-9"
+                />
+              </div>
+
+              {/* Status */}
+              <div>
+                <Select
+                  value={filtroStatus}
+                  onValueChange={(val) => {
+                    setFiltroStatus(val)
+                    setPagina(1)
+                  }}
+                >
+                  <SelectTrigger className="text-xs h-9 bg-slate-50/50 border-slate-200">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos os status</SelectItem>
+                    <SelectItem value="finalizada">Finalizada</SelectItem>
+                    <SelectItem value="cancelada">Cancelada</SelectItem>
+                    <SelectItem value="rascunho">Rascunho</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Forma de Pagamento */}
+              <div>
+                <Select
+                  value={filtroFormaPagamento}
+                  onValueChange={(val) => {
+                    setFiltroFormaPagamento(val)
+                    setPagina(1)
+                  }}
+                >
+                  <SelectTrigger className="text-xs h-9 bg-slate-50/50 border-slate-200">
+                    <SelectValue placeholder="Forma Pagto" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todas">Todas as formas</SelectItem>
+                    <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                    <SelectItem value="pix">PIX</SelectItem>
+                    <SelectItem value="cartao">Cartão</SelectItem>
+                    <SelectItem value="fiado">Fiado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Botão Limpar Filtros */}
+              <div className="flex items-center">
+                {temFiltroAtivo ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={limparFiltros}
+                    className="text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1.5 h-9 w-full justify-center"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    Limpar filtros
+                  </Button>
+                ) : (
+                  <div className="hidden lg:block text-xs text-slate-400 text-center w-full">
+                    Filtros desativados
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Segunda linha de filtros: Datas */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-slate-100">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-500 whitespace-nowrap">De:</span>
+                <Input
+                  type="date"
+                  value={filtroDataInicio}
+                  onChange={(e) => {
+                    setFiltroDataInicio(e.target.value)
+                    setPagina(1)
+                  }}
+                  className="text-xs h-8 bg-slate-50/50 border-slate-200"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-500 whitespace-nowrap">Até:</span>
+                <Input
+                  type="date"
+                  value={filtroDataFim}
+                  onChange={(e) => {
+                    setFiltroDataFim(e.target.value)
+                    setPagina(1)
+                  }}
+                  className="text-xs h-8 bg-slate-50/50 border-slate-200"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ESTADOS DA TABELA */}
+          {loadingList ? (
+            <TableSkeleton rows={6} cols={6} />
+          ) : errorList ? (
+            <ErrorState message={errorList} onRetry={carregarVendas} />
+          ) : vendas.length === 0 ? (
+            <EmptyState
+              icon={ShoppingCart}
+              title={temFiltroAtivo ? 'Nenhuma venda encontrada' : 'Nenhuma venda realizada ainda'}
+              description={
+                temFiltroAtivo
+                  ? 'Ajuste os filtros de busca ou período para encontrar outros registros de vendas.'
+                  : 'Registre a primeira venda pelo PDV para movimentar o estoque e gerar lançamentos financeiros.'
+              }
+              actionLabel={temFiltroAtivo ? 'Limpar Filtros' : '+ Nova Venda (PDV)'}
+              onAction={
+                temFiltroAtivo
+                  ? limparFiltros
+                  : () => {
+                      limparNovaVenda()
+                      setModo('nova')
+                    }
+              }
+            />
+          ) : (
+            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-600">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    <tr>
+                      <th className="py-3.5 px-4">Nº</th>
+                      <th className="py-3.5 px-4">Data</th>
+                      <th className="py-3.5 px-4">Cliente</th>
+                      <th className="py-3.5 px-4">Vendedor</th>
+                      <th className="py-3.5 px-4">Forma Pagto</th>
+                      <th className="py-3.5 px-4 text-right">Total</th>
+                      <th className="py-3.5 px-4 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {vendas.map((venda) => (
+                      <tr key={venda.id} className="hover:bg-slate-50/70 transition-colors">
+                        <td className="py-3.5 px-4">
+                          <span className="font-bold font-mono text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded text-[11px]">
+                            #{venda.numero}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-slate-600">
+                          {new Date(venda.created_at).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </td>
+                        <td className="py-3.5 px-4 font-semibold text-slate-900">
+                          {venda.clientes?.nome ? (
+                            <div>
+                              <span>{venda.clientes.nome}</span>
+                              {venda.clientes.documento && (
+                                <span className="block text-[10px] text-slate-400 font-normal">
+                                  {venda.clientes.documento}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-slate-500 font-normal italic">
+                              Consumidor Final
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 text-slate-600">
+                          {venda.vendedores?.nome || <span className="text-slate-400">-</span>}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          {getFormaPagamentoBadge(venda.forma_pagamento)}
+                        </td>
+                        <td className="py-3.5 px-4 font-bold text-slate-900 tabular-nums text-right text-sm">
+                          {formatCurrency(venda.total || 0)}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">{getStatusBadge(venda.status)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* PAGINAÇÃO */}
+              <div className="py-3 px-4 bg-slate-50/70 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
+                <div>
+                  Mostrando{' '}
+                  <span className="font-semibold text-slate-900">
+                    {Math.min((pagina - 1) * limitePorPagina + 1, totalVendas)}
+                  </span>{' '}
+                  a{' '}
+                  <span className="font-semibold text-slate-900">
+                    {Math.min(pagina * limitePorPagina, totalVendas)}
+                  </span>{' '}
+                  de <span className="font-semibold text-slate-900">{totalVendas}</span> vendas
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={pagina <= 1}
+                    onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <span className="text-xs px-2 font-medium">
+                    Página {pagina} de {totalPaginas}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={pagina >= totalPaginas}
+                    onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                    className="h-8 w-8 p-0"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========================================================
+          MODO NOVA VENDA (PDV)
+          ======================================================== */}
+      {modo === 'nova' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* COLUNA ESQUERDA: SELEÇÃO DE PRODUTOS (~60% / 7 cols) */}
+          <div className="lg:col-span-7 space-y-4">
+            <Card className="border-slate-200 shadow-xs">
+              <div className="p-4 border-b border-slate-100 bg-slate-50/60 rounded-t-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Package className="w-5 h-5 text-teal-700" />
+                  <h3 className="font-bold text-slate-900 text-sm">Catálogo de Produtos</h3>
+                </div>
+                <div className="w-full sm:w-64 relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Input
+                    placeholder="Buscar por nome ou código..."
+                    value={buscaProduto}
+                    onChange={(e) => setBuscaProduto(e.target.value)}
+                    className="pl-9 h-9 text-xs bg-white border-slate-200"
+                  />
+                </div>
+              </div>
+
+              <CardContent className="p-4">
+                {loadingProdutos ? (
+                  <div className="space-y-3 py-6">
+                    <TableSkeleton rows={4} cols={3} />
+                  </div>
+                ) : produtosDisponiveis.length === 0 ? (
+                  <div className="py-12 text-center text-slate-500 text-xs">
+                    <Package className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <p className="font-semibold text-slate-700">Nenhum produto encontrado</p>
+                    <p className="text-slate-400 mt-1">
+                      Verifique se existem produtos ativos cadastrados.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[540px] overflow-y-auto pr-1">
+                    {produtosDisponiveis.map((prod) => {
+                      const estoqueAtual = prod.estoques?.[0]?.quantidade ?? 0
+                      const itemNoCarrinho = carrinho.find((c) => c.produto_id === prod.id)
+                      const isZerado = estoqueAtual <= 0
+                      const isBaixo = estoqueAtual > 0 && estoqueAtual <= (prod.estoque_minimo || 5)
+
+                      return (
+                        <div
+                          key={prod.id}
+                          className={`p-3.5 rounded-xl border transition-all flex flex-col justify-between gap-3 ${
+                            itemNoCarrinho
+                              ? 'border-teal-300 bg-teal-50/40'
+                              : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs'
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-start justify-between gap-2">
+                              <h4
+                                className="font-bold text-slate-900 text-xs line-clamp-1"
+                                title={prod.nome}
+                              >
+                                {prod.nome}
+                              </h4>
+                              {prod.codigo && (
+                                <span className="text-[10px] font-mono text-slate-400 bg-slate-100 px-1 py-0.5 rounded shrink-0">
+                                  {prod.codigo}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="text-[11px] text-slate-500">Estoque:</span>
+                              <Badge
+                                variant="outline"
+                                className={`text-[10px] px-1.5 py-0 ${
+                                  isZerado
+                                    ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                    : isBaixo
+                                      ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                      : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                }`}
+                              >
+                                {estoqueAtual} {prod.unidade || 'UN'}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-2 border-t border-slate-100/80">
+                            <div>
+                              <span className="text-[10px] text-slate-400 uppercase font-semibold block">
+                                Preço
+                              </span>
+                              <span className="text-sm font-bold text-teal-800">
+                                {formatCurrency(prod.preco_venda || 0)}
+                              </span>
+                            </div>
+
+                            {itemNoCarrinho ? (
+                              <div className="flex items-center gap-1.5 bg-white border border-teal-300 rounded-lg p-1 shadow-xs">
+                                <button
+                                  type="button"
+                                  onClick={() => alterarQuantidade(prod.id, -1)}
+                                  className="w-6 h-6 rounded flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors"
+                                >
+                                  <Minus className="w-3 h-3" />
+                                </button>
+                                <span className="w-7 text-center font-bold text-xs text-teal-900">
+                                  {itemNoCarrinho.quantidade}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => alterarQuantidade(prod.id, 1)}
+                                  className="w-6 h-6 rounded flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors"
+                                >
+                                  <Plus className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ) : (
+                              <Button
+                                size="sm"
+                                onClick={() => adicionarAoCarrinho(prod)}
+                                disabled={isZerado}
+                                className={`text-xs h-8 px-3 ${
+                                  isZerado
+                                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed hover:bg-slate-200'
+                                    : 'bg-teal-700 hover:bg-teal-800 text-white shadow-xs'
+                                }`}
+                              >
+                                <Plus className="w-3.5 h-3.5 mr-1" />
+                                Adicionar
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* COLUNA DIREITA: CARRINHO E FINALIZAÇÃO (~40% / 5 cols) */}
+          <div className="lg:col-span-5 space-y-4">
+            <Card className="border-slate-200 shadow-sm sticky top-4">
+              <div className="p-4 border-b border-slate-100 bg-slate-50/60 rounded-t-xl flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="w-5 h-5 text-teal-700" />
+                  <h3 className="font-bold text-slate-900 text-sm">Resumo da Venda</h3>
+                </div>
+                {carrinho.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setCarrinho([])}
+                    className="text-[11px] text-rose-600 hover:text-rose-800 font-semibold"
+                  >
+                    Esvaziar
+                  </button>
+                )}
+              </div>
+
+              <CardContent className="p-4 space-y-4">
+                {/* SELECT CLIENTE */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-slate-500" />
+                    Cliente
+                  </Label>
+                  <Select
+                    value={clienteSelecionadoId || 'consumidor_final'}
+                    onValueChange={(val) =>
+                      setClienteSelecionadoId(val === 'consumidor_final' ? null : val)
+                    }
+                  >
+                    <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                      <SelectValue placeholder="Selecione o cliente" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      <div className="p-1 border-b border-slate-100">
+                        <Input
+                          placeholder="Pesquisar cliente..."
+                          value={buscaCliente}
+                          onChange={(e) => setBuscaCliente(e.target.value)}
+                          className="h-7 text-xs"
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      <SelectItem value="consumidor_final" className="text-xs font-semibold">
+                        👤 Consumidor Final (Sem cadastro)
+                      </SelectItem>
+                      {clientesFiltrados.map((cli) => (
+                        <SelectItem key={cli.id} value={cli.id} className="text-xs">
+                          {cli.nome} {cli.documento ? `(${cli.documento})` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* SELECT VENDEDOR */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                    <Percent className="w-3.5 h-3.5 text-slate-500" />
+                    Vendedor
+                  </Label>
+                  <Select
+                    value={vendedorSelecionadoId || 'sem_vendedor'}
+                    onValueChange={(val) =>
+                      setVendedorSelecionadoId(val === 'sem_vendedor' ? null : val)
+                    }
+                  >
+                    <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                      <SelectValue placeholder="Selecione o vendedor" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      <div className="p-1 border-b border-slate-100">
+                        <Input
+                          placeholder="Pesquisar vendedor..."
+                          value={buscaVendedor}
+                          onChange={(e) => setBuscaVendedor(e.target.value)}
+                          className="h-7 text-xs"
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      <SelectItem value="sem_vendedor" className="text-xs font-semibold">
+                        Sem vendedor vinculado
+                      </SelectItem>
+                      {vendedoresFiltrados.map((vend) => (
+                        <SelectItem key={vend.id} value={vend.id} className="text-xs">
+                          {vend.nome}{' '}
+                          {vend.percentual_comissao > 0
+                            ? `(${vend.percentual_comissao}% comissão)`
+                            : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* LISTA DE ITENS DO CARRINHO */}
+                <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700">
+                      Itens adicionados ({carrinho.length})
+                    </span>
+                  </div>
+
+                  {carrinho.length === 0 ? (
+                    <div className="py-6 text-center border border-dashed border-slate-200 rounded-lg bg-slate-50/50">
+                      <ShoppingCart className="w-6 h-6 text-slate-300 mx-auto mb-1" />
+                      <p className="text-xs text-slate-500">
+                        Adicione produtos para iniciar a venda
                       </p>
-                    </td>
-                    <td className="py-3 px-4 font-semibold text-slate-900">
-                      {venda.clientes?.nome || 'Consumidor Final'}
-                    </td>
-                    <td className="py-3 px-4 text-slate-600">
-                      {venda.vendedores?.nome || venda.usuarios?.nome || '-'}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="uppercase text-[11px] font-semibold bg-slate-100 px-2 py-0.5 rounded text-slate-700">
-                        {venda.forma_pagamento || 'PIX'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 font-bold text-slate-900 tabular-nums text-sm">
-                      {formatCurrency(venda.total || 0)}
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge
-                        variant="outline"
-                        className={
-                          venda.status === 'finalizada'
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            : 'bg-amber-50 text-amber-700 border-amber-200'
-                        }
-                      >
-                        {venda.status}
-                      </Badge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {carrinho.map((item) => (
+                        <div
+                          key={item.produto_id}
+                          className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 text-xs"
+                        >
+                          <div className="flex-1 min-w-0 mr-2">
+                            <p className="font-semibold text-slate-900 truncate">{item.nome}</p>
+                            <p className="text-[11px] text-slate-500 tabular-nums">
+                              {formatCurrency(item.preco_venda)} un.
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex items-center gap-1 bg-white border border-slate-200 rounded px-1 py-0.5">
+                              <button
+                                type="button"
+                                onClick={() => alterarQuantidade(item.produto_id, -1)}
+                                className="w-5 h-5 text-slate-500 hover:text-slate-900 flex items-center justify-center"
+                              >
+                                -
+                              </button>
+                              <input
+                                type="number"
+                                min="1"
+                                value={item.quantidade}
+                                onChange={(e) =>
+                                  setQuantidadeItem(item.produto_id, parseInt(e.target.value, 10))
+                                }
+                                className="w-8 text-center text-xs font-bold text-slate-800 bg-transparent border-0 focus:outline-none p-0"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => alterarQuantidade(item.produto_id, 1)}
+                                className="w-5 h-5 text-slate-500 hover:text-slate-900 flex items-center justify-center"
+                              >
+                                +
+                              </button>
+                            </div>
+
+                            <span className="font-bold text-slate-900 tabular-nums w-16 text-right">
+                              {formatCurrency(item.quantidade * item.preco_venda)}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => removerDoCarrinho(item.produto_id)}
+                              className="text-slate-400 hover:text-rose-600 transition-colors p-1"
+                              title="Remover item"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* TOTAIS E DESCONTO */}
+                <div className="space-y-2 pt-3 border-t border-slate-200 text-xs">
+                  <div className="flex justify-between text-slate-600">
+                    <span>Subtotal</span>
+                    <span className="font-semibold text-slate-900 tabular-nums">
+                      {formatCurrency(subtotalVisual)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-slate-600">Desconto (R$)</span>
+                    <div className="w-28">
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={descontoInput}
+                        onChange={(e) => handleDescontoChange(e.target.value)}
+                        className="h-8 text-xs text-right font-medium border-slate-200"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2 border-t border-slate-200">
+                    <span className="text-sm font-bold text-slate-900">Total a Pagar</span>
+                    <span className="text-xl font-black text-teal-700 tabular-nums">
+                      {formatCurrency(totalVisual)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* FORMA DE PAGAMENTO */}
+                <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                  <Label className="text-xs font-semibold text-slate-700">Forma de Pagamento</Label>
+                  <Select value={formaPagamento} onValueChange={(val) => setFormaPagamento(val)}>
+                    <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pix">
+                        <div className="flex items-center gap-2">
+                          <QrCode className="w-4 h-4 text-blue-600" />
+                          <span>PIX (À vista)</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="dinheiro">
+                        <div className="flex items-center gap-2">
+                          <Banknote className="w-4 h-4 text-emerald-600" />
+                          <span>Dinheiro (À vista)</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="cartao">
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="w-4 h-4 text-purple-600" />
+                          <span>Cartão Débito / Crédito</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="fiado">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-amber-600" />
+                          <span>Fiado / A Prazo (Gera a Receber)</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* VENCIMENTO (CONDICIONAL FIADO) */}
+                {formaPagamento === 'fiado' && (
+                  <div className="space-y-1.5 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs animate-in fade-in">
+                    <Label className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-amber-700" />
+                      Data de Vencimento do Fiado *
+                    </Label>
+                    <Input
+                      type="date"
+                      value={vencimento}
+                      onChange={(e) => setVencimento(e.target.value)}
+                      className="text-xs h-8 bg-white border-amber-300"
+                      required
+                    />
+                    <p className="text-[10px] text-amber-700">
+                      Um registro de contas a receber será gerado no nome do cliente selecionado.
+                    </p>
+                  </div>
+                )}
+
+                {/* OBSERVAÇÕES */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-700">
+                    Observações (opcional)
+                  </Label>
+                  <Textarea
+                    placeholder="Informações adicionais do pedido ou entrega..."
+                    value={observacoes}
+                    onChange={(e) => setObservacoes(e.target.value)}
+                    rows={2}
+                    className="text-xs border-slate-200 resize-none"
+                  />
+                </div>
+
+                {/* FEEDBACK DE ERRO */}
+                {erroVenda && (
+                  <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+                    <div>
+                      <p className="font-semibold">Erro na validação da venda</p>
+                      <p className="mt-0.5">{erroVenda}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* BOTÃO FINALIZAR VENDA */}
+                <Button
+                  onClick={handleFinalizarVenda}
+                  disabled={carrinho.length === 0 || submetendoVenda}
+                  className="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold h-11 text-sm shadow-md transition-all flex items-center justify-center gap-2"
+                >
+                  {submetendoVenda ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Finalizando Venda...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      Finalizar Venda • {formatCurrency(totalVisual)}
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       )}
+
+      {/* ========================================================
+          MODAL RESUMO PÓS-VENDA COM SUCESSO
+          ======================================================== */}
+      <Dialog
+        open={resultadoModal.aberto}
+        onOpenChange={(aberto) => {
+          if (!aberto) {
+            setResultadoModal({ aberto: false })
+            limparNovaVenda()
+            setModo('listagem')
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mx-auto w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2">
+              <CheckCircle2 className="w-7 h-7" />
+            </div>
+            <DialogTitle className="text-center text-lg font-bold text-slate-900">
+              Venda #{resultadoModal.dados?.numero} finalizada com sucesso!
+            </DialogTitle>
+            <DialogDescription className="text-center text-xs text-slate-500">
+              A venda foi registrada atomicamente no banco, os itens foram baixados do estoque e os
+              lançamentos foram gerados.
+            </DialogDescription>
+          </DialogHeader>
+
+          {resultadoModal.dados && (
+            <div className="space-y-2 py-3 border-y border-slate-100 text-xs">
+              <div className="flex justify-between text-slate-600">
+                <span>Subtotal dos Itens:</span>
+                <span className="font-medium text-slate-900">
+                  {formatCurrency(resultadoModal.dados.subtotal)}
+                </span>
+              </div>
+              {resultadoModal.dados.desconto > 0 && (
+                <div className="flex justify-between text-rose-600">
+                  <span>Desconto Aplicado:</span>
+                  <span className="font-medium">
+                    - {formatCurrency(resultadoModal.dados.desconto)}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between text-slate-900 font-bold text-sm pt-1 border-t border-slate-100">
+                <span>Total Final:</span>
+                <span className="text-teal-700">{formatCurrency(resultadoModal.dados.total)}</span>
+              </div>
+              <div className="flex justify-between text-slate-600 pt-1">
+                <span>Forma de Pagamento:</span>
+                <span className="font-semibold uppercase">
+                  {resultadoModal.dados.forma_pagamento}
+                </span>
+              </div>
+              {resultadoModal.dados.comissao > 0 && (
+                <div className="flex justify-between text-emerald-700 bg-emerald-50 p-2 rounded border border-emerald-200 mt-2">
+                  <span>Comissão do Vendedor:</span>
+                  <span className="font-bold">{formatCurrency(resultadoModal.dados.comissao)}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setResultadoModal({ aberto: false })
+                limparNovaVenda()
+                setModo('listagem')
+              }}
+              className="w-full sm:w-auto text-xs"
+            >
+              Ver Listagem
+            </Button>
+            <Button
+              onClick={() => {
+                setResultadoModal({ aberto: false })
+                limparNovaVenda()
+                setModo('nova')
+              }}
+              className="w-full sm:w-auto bg-teal-700 hover:bg-teal-800 text-white text-xs"
+            >
+              + Realizar Outra Venda
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
