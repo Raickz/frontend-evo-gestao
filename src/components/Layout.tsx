@@ -6,6 +6,7 @@ import {
   ShoppingCart,
   ClipboardList,
   Package,
+  Truck,
   Boxes,
   UserCheck,
   CircleDollarSign,
@@ -67,6 +68,7 @@ const ALL_NAV_SECTIONS: NavSection[] = [
     title: 'Cadastros',
     items: [
       { title: 'Produtos', href: '/app/produtos', icon: Package, page: 'produtos' },
+      { title: 'Fornecedores', href: '/app/fornecedores', icon: Truck, page: 'fornecedores' },
       { title: 'Estoque', href: '/app/estoque', icon: Boxes, page: 'estoque' },
       { title: 'Vendedores', href: '/app/vendedores', icon: UserCheck, page: 'vendedores' },
     ],

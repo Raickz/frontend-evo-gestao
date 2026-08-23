@@ -1594,19 +1594,17 @@ export default function PedidosPage() {
             <DialogFooter className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-2 justify-between items-center">
               <div className="flex items-center gap-2">
                 {/* Botão Converter em Venda no modal (Apenas status faturado, sem venda vinculada e podeGerenciar) */}
-                {podeGerenciar &&
-                  pedidoDetalhe?.status === 'faturado' &&
-                  !vendaRelacionada && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => abrirModalConversao(pedidoDetalhe)}
-                      className="text-xs border-teal-600 text-teal-700 hover:bg-teal-50 hover:text-teal-800 font-medium flex items-center gap-1.5"
-                    >
-                      <ArrowRightCircle className="w-3.5 h-3.5 text-teal-600" />
-                      Converter em Venda
-                    </Button>
-                  )}
+                {podeGerenciar && pedidoDetalhe?.status === 'faturado' && !vendaRelacionada && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => abrirModalConversao(pedidoDetalhe)}
+                    className="text-xs border-teal-600 text-teal-700 hover:bg-teal-50 hover:text-teal-800 font-medium flex items-center gap-1.5"
+                  >
+                    <ArrowRightCircle className="w-3.5 h-3.5 text-teal-600" />
+                    Converter em Venda
+                  </Button>
+                )}
 
                 {/* Botão Editar se pendente */}
                 {podeGerenciar && pedidoDetalhe?.status === 'pendente' && (

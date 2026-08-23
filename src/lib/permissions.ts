@@ -11,21 +11,23 @@ export type AppPage =
   | 'vendedores'
   | 'comissoes'
   | 'configuracoes'
+  | 'fornecedores'
 
 /**
  * Matriz explícita de permissões por perfil (sem herança implícita).
  *
- * MASTER: acesso completo — Dashboard, Clientes, Produtos, Estoque, Vendas, Pedidos, Financeiro, Vendedores, Comissões, Configurações
- * ADMIN: Dashboard, Clientes, Produtos, Estoque, Vendas, Pedidos, Financeiro, Vendedores, Comissões, Configurações
- * GERENTE: Dashboard, Clientes, Produtos, Estoque, Vendas, Pedidos, Financeiro, Comissões
+ * MASTER: acesso completo — Dashboard, Clientes, Produtos, Fornecedores, Estoque, Vendas, Pedidos, Financeiro, Vendedores, Comissões, Configurações
+ * ADMIN: Dashboard, Clientes, Produtos, Fornecedores, Estoque, Vendas, Pedidos, Financeiro, Vendedores, Comissões, Configurações
+ * GERENTE: Dashboard, Clientes, Produtos, Fornecedores, Estoque, Vendas, Pedidos, Financeiro, Comissões
  * VENDEDOR: Dashboard, Clientes, Vendas, Pedidos
- * OPERADOR: Dashboard, Produtos, Estoque
+ * OPERADOR: Dashboard, Produtos, Fornecedores, Estoque
  */
 export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
   master: [
     'dashboard',
     'clientes',
     'produtos',
+    'fornecedores',
     'estoque',
     'vendas',
     'pedidos',
@@ -38,6 +40,7 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'dashboard',
     'clientes',
     'produtos',
+    'fornecedores',
     'estoque',
     'vendas',
     'pedidos',
@@ -50,6 +53,7 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'dashboard',
     'clientes',
     'produtos',
+    'fornecedores',
     'estoque',
     'vendas',
     'pedidos',
@@ -57,7 +61,7 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'comissoes',
   ],
   vendedor: ['dashboard', 'clientes', 'vendas', 'pedidos'],
-  operador: ['dashboard', 'produtos', 'estoque'],
+  operador: ['dashboard', 'produtos', 'fornecedores', 'estoque'],
 }
 
 /**
@@ -67,6 +71,7 @@ export const PATH_TO_PAGE_MAP: Record<string, AppPage> = {
   '/app/dashboard': 'dashboard',
   '/app/clientes': 'clientes',
   '/app/produtos': 'produtos',
+  '/app/fornecedores': 'fornecedores',
   '/app/estoque': 'estoque',
   '/app/vendas': 'vendas',
   '/app/pedidos': 'pedidos',
