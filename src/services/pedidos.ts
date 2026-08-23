@@ -298,6 +298,20 @@ export const PedidosService = {
   },
 
   /**
+   * Confirma um pedido pendente.
+   */
+  async confirmar(empresaId: string, id: string) {
+    return this.updateStatus(empresaId, id, 'confirmado')
+  },
+
+  /**
+   * Fatura um pedido confirmado.
+   */
+  async faturar(empresaId: string, id: string) {
+    return this.updateStatus(empresaId, id, 'faturado')
+  },
+
+  /**
    * Converte um pedido em venda através da RPC `converter_pedido_em_venda`.
    */
   async converterEmVenda(pedidoId: string, formaPagamento: string, vencimento?: string | null) {

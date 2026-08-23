@@ -480,6 +480,48 @@ export default function PedidosPage() {
   }
 
   // =========================================================================
+  // MODAL: CONFIRMAÇÃO DE AÇÃO (CONFIRMAR / FATURAR)
+  // =========================================================================
+  const [modalConfirmarAcaoAberto, setModalConfirmarAcaoAberto] = useState(false)
+  const [acaoPedido, setAcaoPedido] = useState<{
+    pedido: any
+    acao: 'confirmar' | 'faturar'
+  } | null>(null)
+  const [executandoAcao, setExecutandoAcao] = useState(false)
+
+  const abrirConfirmarPedido = (ped: any) => {
+    setAcaoPedido({ pedido: ped, acao: 'confirmar' })
+    setModalConfirmarAcaoAberto(true)
+  }
+
+  const abrirFaturarPedido = (ped: any) => {
+    setAcaoPedido({ pedido: ped, acao: 'faturar' })
+    setModalConfirmarAcaoAberto(true)
+  }
+
+  const handleExecutarAcao = async () => {
+    if (!empresaId || !acaoPedido) return
+    setExecutandoAcao(true)
+    try {
+      const novoStatus = acaoPedido.acao === 'confirmar' ? 'confirmado' : 'faturado'
+      const { error: err } = await PedidosService.updateStatus(
+        empresaId,
+        acaoPedido.pedido.id,
+        novoStatus,
+      )
+      if (err) throw err
+      const label = acaoPedido.acao === 'confirmar' ? 'confirmado' : 'faturado'
+      toast.success(`Pedido #${acaoPedido.pedido.numero} ${label} com sucesso.`)
+      setModalConfirmarAcaoAberto(false)
+      loadPedidos()
+    } catch (err: any) {
+      toast.error(err.message || 'Falha ao atualizar o pedido.')
+    } finally {
+      setExecutandoAcao(false)
+    }
+  }
+
+  // =========================================================================
   // MODAL: CONVERTER EM VENDA & CONFIRMAÇÃO
   // =========================================================================
   const [modalConversaoAberto, setModalConversaoAberto] = useState(false)
@@ -871,6 +913,19 @@ export default function PedidosPage() {
                               <Eye className="w-4 h-4" />
                             </Button>
 
+                            {/* Botão Confirmar Pedido (Apenas status pendente e podeGerenciar) */}
+                            {podeGerenciar && isPendente && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => abrirConfirmarPedido(ped)}
+                                className="h-8 text-[11px] px-2.5 border-teal-600 text-teal-700 hover:bg-teal-50 hover:text-teal-800 font-medium flex items-center gap-1"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
+                                Confirmar Pedido
+                              </Button>
+                            )}
+
                             {/* Botão Editar (Apenas status pendente) */}
                             {podeGerenciar && isPendente && (
                               <Button
@@ -881,6 +936,19 @@ export default function PedidosPage() {
                                 title="Editar Pedido"
                               >
                                 <Edit className="w-4 h-4" />
+                              </Button>
+                            )}
+
+                            {/* Botão Faturar Pedido (Apenas status confirmado e podeGerenciar) */}
+                            {podeGerenciar && ped.status === 'confirmado' && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => abrirFaturarPedido(ped)}
+                                className="h-8 text-[11px] px-2.5 border-teal-600 text-teal-700 hover:bg-teal-50 hover:text-teal-800 font-medium flex items-center gap-1"
+                              >
+                                <Receipt className="w-3.5 h-3.5 text-teal-600" />
+                                Faturar Pedido
                               </Button>
                             )}
 
@@ -1589,6 +1657,92 @@ export default function PedidosPage() {
                 className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold"
               >
                 {salvandoEdicao ? 'Salvando...' : 'Salvar Alterações'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* =========================================================================
+            MODAL GENÉRICO: CONFIRMAR / FATURAR PEDIDO
+            ========================================================================= */}
+        <Dialog
+          open={modalConfirmarAcaoAberto}
+          onOpenChange={(open) => {
+            if (!executandoAcao) setModalConfirmarAcaoAberto(open)
+          }}
+        >
+          <DialogContent className="max-w-md w-full">
+            <DialogHeader>
+              <div className="flex items-center gap-2 text-teal-800">
+                {acaoPedido?.acao === 'confirmar' ? (
+                  <CheckCircle2 className="w-5 h-5 text-teal-600" />
+                ) : (
+                  <Receipt className="w-5 h-5 text-teal-600" />
+                )}
+                <DialogTitle className="text-base font-bold text-slate-900">
+                  {acaoPedido?.acao === 'confirmar' ? 'Confirmar Pedido' : 'Faturar Pedido'}
+                </DialogTitle>
+              </div>
+              <DialogDescription className="text-xs text-slate-600 pt-2 leading-relaxed">
+                {acaoPedido?.acao === 'confirmar'
+                  ? 'Confirmar este pedido? O pedido será marcado como confirmado e poderá ser faturado em seguida.'
+                  : 'Faturar este pedido? O pedido ficará disponível para conversão em venda.'}
+              </DialogDescription>
+            </DialogHeader>
+
+            {acaoPedido?.pedido && (
+              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-1.5 my-2">
+                <div className="flex justify-between text-slate-700">
+                  <span>Número do Pedido:</span>
+                  <span className="font-bold text-slate-900">#{acaoPedido.pedido.numero}</span>
+                </div>
+                <div className="flex justify-between text-slate-700">
+                  <span>Cliente:</span>
+                  <span className="font-semibold text-slate-900 truncate max-w-[200px]">
+                    {acaoPedido.pedido.clientes?.nome || 'Consumidor / Não informado'}
+                  </span>
+                </div>
+                <div className="flex justify-between text-slate-700 pt-1 border-t border-slate-200 font-bold">
+                  <span>Total:</span>
+                  <span className="text-teal-700 font-black">
+                    {formatCurrency(acaoPedido.pedido.total || 0)}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter className="pt-2 flex flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                type="button"
+                disabled={executandoAcao}
+                onClick={() => setModalConfirmarAcaoAberto(false)}
+                className="text-xs"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={executandoAcao}
+                onClick={handleExecutarAcao}
+                className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-2"
+              >
+                {executandoAcao ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    {acaoPedido?.acao === 'confirmar' ? 'Confirmando...' : 'Faturando...'}
+                  </>
+                ) : acaoPedido?.acao === 'confirmar' ? (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Confirmar Pedido
+                  </>
+                ) : (
+                  <>
+                    <Receipt className="w-3.5 h-3.5" />
+                    Faturar Pedido
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
