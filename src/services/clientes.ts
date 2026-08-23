@@ -14,6 +14,14 @@ export const ClientesService = {
       .order('nome', { ascending: true })
   },
 
+  async countAtivos(empresaId: string) {
+    return supabase
+      .from('clientes')
+      .select('id', { count: 'exact', head: true })
+      .eq('empresa_id', empresaId)
+      .eq('ativo', true)
+  },
+
   async getById(empresaId: string, id: string) {
     return supabase
       .from('clientes')
