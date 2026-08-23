@@ -603,6 +603,7 @@ export type Database = {
         Row: {
           created_at: string
           empresa_id: string
+          fornecedor_id: string | null
           id: string
           motivo: string | null
           produto_id: string
@@ -614,6 +615,7 @@ export type Database = {
         Insert: {
           created_at?: string
           empresa_id: string
+          fornecedor_id?: string | null
           id?: string
           motivo?: string | null
           produto_id: string
@@ -625,6 +627,7 @@ export type Database = {
         Update: {
           created_at?: string
           empresa_id?: string
+          fornecedor_id?: string | null
           id?: string
           motivo?: string | null
           produto_id?: string
@@ -634,6 +637,13 @@ export type Database = {
           usuario_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: 'fk_movimentacoes_fornecedor'
+            columns: ['fornecedor_id']
+            isOneToOne: false
+            referencedRelation: 'fornecedores'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'movimentacoes_estoque_empresa_id_fkey'
             columns: ['empresa_id']
@@ -1063,6 +1073,16 @@ export type Database = {
       is_vendedor_or_above: { Args: never; Returns: boolean }
       registrar_entrada_estoque: {
         Args: { p_motivo?: string; p_produto_id: string; p_quantidade: number }
+        Returns: Json
+      }
+      registrar_entrada_estoque_por_fornecedor: {
+        Args: {
+          p_fornecedor_id: string
+          p_motivo?: string
+          p_preco_custo: number
+          p_produto_id: string
+          p_quantidade: number
+        }
         Returns: Json
       }
       registrar_pagamento: {
