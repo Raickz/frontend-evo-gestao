@@ -345,48 +345,42 @@ export default function PedidosPage() {
       return
     }
 
-    if (descontoTotal > subtotalNovo) {
-      toast.error('O desconto não pode ser maior que o subtotal.')
-      return
-    }
-
     setSubmetendoNovo(true)
 
     try {
-      const payload: CreatePedidoData = {
+      const payload = {
         cliente_id: novoClienteId,
         vendedor_id: novoVendedorId,
-        total: totalNovo,
-        status: 'pendente',
-        observacoes: novoObservacoes.trim() || null,
         itens: carrinho.map((c) => ({
           produto_id: c.produto_id,
           quantidade: c.quantidade,
-          preco_unitario: c.preco_unitario,
           desconto: 0,
-          subtotal: c.subtotal,
         })),
+        observacoes: novoObservacoes.trim() || null,
       }
 
-      const result = await PedidosService.create(empresaId, payload)
+      const { data: rpcResult, error: rpcErr } = await PedidosService.criarViaRpc(
+        empresaId,
+        payload,
+      )
 
-      if (result.error) {
-        // Se falhou nos itens devido à falta de policy de INSERT em itens_pedido:
-        if (result.itensFailed) {
-          toast.error(
-            'Não foi possível criar o pedido com itens: a política de segurança do banco não permite inserir em itens_pedido. É necessário criar uma RPC no backend para criar pedidos com itens.',
-            { duration: 6000 },
-          )
-          // Realizar cleanup do pedido cabeçalho órfão criado se aplicável
-          if (result.data?.id) {
-            await PedidosService.delete(empresaId, result.data.id)
-          }
-          return
-        }
-        throw result.error
+      if (rpcErr) {
+        throw rpcErr
       }
 
-      toast.success('Pedido criado com sucesso!')
+      // O retorno da RPC vem como jsonb
+      const res = rpcResult as any
+      if (res && res.sucesso === false) {
+        throw new Error(res.erro || res.mensagem || 'Falha ao criar pedido.')
+      }
+
+      const numPedido = res?.numero || ''
+      const totalFormatado = formatCurrency(res?.total || 0)
+      const qtdItens = res?.quantidade_itens ?? carrinho.length
+
+      toast.success(
+        `Pedido #${numPedido} criado com sucesso. Total: ${totalFormatado}, ${qtdItens} itens.`,
+      )
       setModalNovoAberto(false)
       loadPedidos()
     } catch (err: any) {
@@ -505,13 +499,13 @@ export default function PedidosPage() {
   const getStatusBadge = (status: string) => {
     const s = status?.toLowerCase() || 'pendente'
     switch (s) {
-      case 'aprovado':
+      case 'confirmado':
         return (
           <Badge
             variant="outline"
             className="bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold"
           >
-            Aprovado
+            Confirmado
           </Badge>
         )
       case 'pendente':
@@ -532,13 +526,13 @@ export default function PedidosPage() {
             Cancelado
           </Badge>
         )
-      case 'convertido':
+      case 'faturado':
         return (
           <Badge
             variant="outline"
             className="bg-purple-50 text-purple-700 border-purple-200 font-semibold"
           >
-            Convertido
+            Faturado
           </Badge>
         )
       default:
@@ -639,9 +633,9 @@ export default function PedidosPage() {
                 <SelectContent>
                   <SelectItem value="todos">Todos os status</SelectItem>
                   <SelectItem value="pendente">Pendente</SelectItem>
-                  <SelectItem value="aprovado">Aprovado</SelectItem>
+                  <SelectItem value="confirmado">Confirmado</SelectItem>
+                  <SelectItem value="faturado">Faturado</SelectItem>
                   <SelectItem value="cancelado">Cancelado</SelectItem>
-                  <SelectItem value="convertido">Convertido</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -726,8 +720,8 @@ export default function PedidosPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {pedidos.map((ped) => {
-                    const isPendenteOuAprovado =
-                      ped.status === 'pendente' || ped.status === 'aprovado'
+                    const isPendenteOuConfirmado =
+                      ped.status === 'pendente' || ped.status === 'confirmado'
                     const isPendente = ped.status === 'pendente'
 
                     return (
@@ -786,7 +780,7 @@ export default function PedidosPage() {
                             )}
 
                             {/* Botão Converter em Venda (Desabilitado com Tooltip) */}
-                            {isPendenteOuAprovado && (
+                            {isPendenteOuConfirmado && (
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <span tabIndex={0} className="inline-block">
@@ -1319,7 +1313,8 @@ export default function PedidosPage() {
             <DialogFooter className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-2 justify-between items-center">
               <div className="flex items-center gap-2">
                 {/* Botão Converter em Venda no modal */}
-                {(pedidoDetalhe?.status === 'pendente' || pedidoDetalhe?.status === 'aprovado') && (
+                {(pedidoDetalhe?.status === 'pendente' ||
+                  pedidoDetalhe?.status === 'confirmado') && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span tabIndex={0} className="inline-block">

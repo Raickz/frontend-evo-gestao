@@ -1001,6 +1001,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      criar_pedido: {
+        Args: {
+          p_cliente_id?: string
+          p_itens?: Json
+          p_observacoes?: string
+          p_vendedor_id?: string
+        }
+        Returns: Json
+      }
       criar_produto: {
         Args: {
           p_categoria_id?: string

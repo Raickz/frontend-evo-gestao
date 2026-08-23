@@ -28,17 +28,15 @@
  *
  * 3. Status Existentes em Pedidos:
  *    - 'pendente' (default)
- *    - 'aprovado'
+ *    - 'confirmado'
+ *    - 'faturado'
  *    - 'cancelado'
- *    - 'convertido'
  *
  * 4. RPCs Existentes:
- *    - NENHUMA RPC para pedidos no backend (não existe `criar_pedido` nem `converter_pedido_em_venda`).
+ *    - `criar_pedido`: RPC que cria o pedido e seus itens de forma atômica, buscando os preços oficiais dos produtos.
  *
  * 5. Limitações de Negócio / Backend Conhecidas:
- *    - Limitação 1: A tabela `itens_pedido` NÃO tem policy de INSERT. Tentativas de salvar itens
- *      via direct client INSERT falharão por violação de RLS.
- *    - Limitação 2: Sem RPC para conversão em venda. O botão 'Converter em Venda' deve permanecer
+ *    - Limitação 1: Sem RPC para conversão em venda. O botão 'Converter em Venda' deve permanecer
  *      desabilitado com tooltip informativo, sem realizar inserções parciais em tabelas de vendas.
  * -----------------------------------------------------------------------------------------
  */
@@ -73,6 +71,19 @@ export interface CreatePedidoData {
   status?: string
   observacoes?: string | null
   itens?: PedidoItemInput[]
+}
+
+export interface CriarPedidoRpcItem {
+  produto_id: string
+  quantidade: number
+  desconto?: number
+}
+
+export interface CriarPedidoRpcData {
+  cliente_id?: string | null
+  vendedor_id?: string | null
+  itens: CriarPedidoRpcItem[]
+  observacoes?: string | null
 }
 
 export interface UpdatePedidoData {
@@ -181,6 +192,26 @@ export const PedidosService = {
    * A inserção de itens falhará por política de RLS do Supabase até que uma RPC ou policy seja criada no backend.
    * Este método insere o cabeçalho e tenta inserir os itens, reportando erro se falhar.
    */
+  /**
+   * Cria um pedido via RPC `criar_pedido` no Supabase (atômico e com cálculo de preços no backend).
+   */
+  async criarViaRpc(empresaId: string, data: CriarPedidoRpcData) {
+    return supabase.rpc('criar_pedido', {
+      p_cliente_id: data.cliente_id || null,
+      p_vendedor_id: data.vendedor_id || null,
+      p_itens: data.itens.map((item) => ({
+        produto_id: item.produto_id,
+        quantidade: item.quantidade,
+        desconto: item.desconto || 0,
+      })),
+      p_observacoes: data.observacoes || null,
+    })
+  },
+
+  /**
+   * Tenta criar um pedido e seus itens via INSERT direto (legado).
+   * NOTA: A criação recomendada é via `criarViaRpc`.
+   */
   async create(empresaId: string, data: CreatePedidoData) {
     // 1. Inserir cabeçalho do pedido
     const { data: pedidoCriado, error: pedidoErr } = await supabase
@@ -254,7 +285,7 @@ export const PedidosService = {
   },
 
   /**
-   * Atualiza o status do pedido (ex: 'pendente', 'aprovado', 'cancelado', 'convertido').
+   * Atualiza o status do pedido (ex: 'pendente', 'confirmado', 'faturado', 'cancelado').
    */
   async updateStatus(empresaId: string, id: string, status: string) {
     return supabase
