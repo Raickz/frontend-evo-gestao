@@ -1038,6 +1038,22 @@ export type Database = {
         Args: { p_motivo?: string; p_produto_id: string; p_quantidade: number }
         Returns: Json
       }
+      registrar_pagamento: {
+        Args: {
+          p_conta_id: string
+          p_data_pagamento?: string
+          p_valor_pago: number
+        }
+        Returns: Json
+      }
+      registrar_recebimento: {
+        Args: {
+          p_conta_id: string
+          p_data_pagamento?: string
+          p_valor_recebido: number
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

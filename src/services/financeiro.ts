@@ -29,6 +29,28 @@ export interface FinanceiroIndicadores {
   aVencer: number
 }
 
+export interface BaixaRecebimentoResult {
+  sucesso?: boolean
+  conta_id?: string
+  saldo_anterior?: number
+  valor_recebido?: number
+  valor_pago?: number
+  saldo_restante?: number
+  status?: string
+  [key: string]: any
+}
+
+export interface BaixaPagamentoResult {
+  sucesso?: boolean
+  conta_id?: string
+  saldo_anterior?: number
+  valor_pago?: number
+  total_pago?: number
+  saldo_restante?: number
+  status?: string
+  [key: string]: any
+}
+
 export const FinanceiroService = {
   // Legacy / Basic methods
   async listContasReceber(empresaId: string) {
@@ -315,6 +337,32 @@ export const FinanceiroService = {
     }
 
     return query
+  },
+
+  async registrarRecebimento(
+    _empresaId: string,
+    contaId: string,
+    valorRecebido: number,
+    dataPagamento?: string,
+  ) {
+    return supabase.rpc('registrar_recebimento', {
+      p_conta_id: contaId,
+      p_valor_recebido: valorRecebido,
+      p_data_pagamento: dataPagamento || undefined,
+    })
+  },
+
+  async registrarPagamento(
+    _empresaId: string,
+    contaId: string,
+    valorPago: number,
+    dataPagamento?: string,
+  ) {
+    return supabase.rpc('registrar_pagamento', {
+      p_conta_id: contaId,
+      p_valor_pago: valorPago,
+      p_data_pagamento: dataPagamento || undefined,
+    })
   },
 
   async getIndicadoresPagar(empresaId: string): Promise<FinanceiroIndicadores> {

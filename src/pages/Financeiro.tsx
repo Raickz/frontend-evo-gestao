@@ -9,6 +9,15 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   Select,
   SelectContent,
@@ -17,6 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useEmpresa } from '@/hooks/use-empresa'
+import { useAuth } from '@/hooks/use-auth'
 import {
   FinanceiroService,
   type ContasReceberItem,
@@ -33,11 +43,19 @@ import {
   RotateCcw,
   ChevronLeft,
   ChevronRight,
-  Info,
+  Banknote,
+  Loader2,
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function FinanceiroPage() {
   const { empresaId } = useEmpresa()
+  const { usuario } = useAuth()
+
+  // Permissão de baixa: apenas master, admin e gerente
+  const perfilUsuario = usuario?.perfil?.toLowerCase()
+  const podeFazerBaixa =
+    perfilUsuario === 'master' || perfilUsuario === 'admin' || perfilUsuario === 'gerente'
 
   // Tab: 'receber' | 'pagar'
   const [activeTab, setActiveTab] = useState<'receber' | 'pagar'>('receber')
@@ -75,6 +93,21 @@ export default function FinanceiroPage() {
   // Loading / Erro
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Estados dos Modais de Baixa
+  const [modalRecebimentoOpen, setModalRecebimentoOpen] = useState(false)
+  const [contaReceberSelecionada, setContaReceberSelecionada] = useState<ContasReceberItem | null>(
+    null,
+  )
+  const [valorRecebimento, setValorRecebimento] = useState('')
+  const [dataRecebimento, setDataRecebimento] = useState('')
+  const [submittingRecebimento, setSubmittingRecebimento] = useState(false)
+
+  const [modalPagamentoOpen, setModalPagamentoOpen] = useState(false)
+  const [contaPagarSelecionada, setContaPagarSelecionada] = useState<ContasPagarItem | null>(null)
+  const [valorPagamento, setValorPagamento] = useState('')
+  const [dataPagamento, setDataPagamento] = useState('')
+  const [submittingPagamento, setSubmittingPagamento] = useState(false)
 
   // Debounce search input
   useEffect(() => {
@@ -226,6 +259,164 @@ export default function FinanceiroPage() {
     }
   }
 
+  // Funções de abertura de modais
+  const getTodayDateStr = () => new Date().toISOString().split('T')[0]
+
+  const handleOpenRecebimento = (conta: ContasReceberItem) => {
+    const valor = Number(conta.valor) || 0
+    const valorPago = Number(conta.valor_pago) || 0
+    const saldo = Math.max(0, valor - valorPago)
+
+    setContaReceberSelecionada(conta)
+    setValorRecebimento(saldo > 0 ? saldo.toFixed(2) : '0.00')
+    setDataRecebimento(getTodayDateStr())
+    setModalRecebimentoOpen(true)
+  }
+
+  const handleOpenPagamento = (conta: ContasPagarItem) => {
+    const valor = Number(conta.valor) || 0
+    const valorPago = Number(conta.valor_pago) || 0
+    const saldo = Math.max(0, valor - valorPago)
+
+    setContaPagarSelecionada(conta)
+    setValorPagamento(saldo > 0 ? saldo.toFixed(2) : '0.00')
+    setDataPagamento(getTodayDateStr())
+    setModalPagamentoOpen(true)
+  }
+
+  // Submissão de Recebimento
+  const handleConfirmarRecebimento = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!empresaId || !contaReceberSelecionada) return
+
+    const valor = parseFloat(valorRecebimento)
+    const saldoRestante = Math.max(
+      0,
+      (Number(contaReceberSelecionada.valor) || 0) -
+        (Number(contaReceberSelecionada.valor_pago) || 0),
+    )
+
+    if (isNaN(valor) || valor <= 0) {
+      toast.error('O valor recebido deve ser maior que zero.')
+      return
+    }
+
+    if (valor > saldoRestante + 0.001) {
+      toast.error('O valor recebido é maior que o saldo restante.')
+      return
+    }
+
+    if (!dataRecebimento) {
+      toast.error('Informe a data do pagamento.')
+      return
+    }
+
+    setSubmittingRecebimento(true)
+    try {
+      const { data, error: rpcError } = await FinanceiroService.registrarRecebimento(
+        empresaId,
+        contaReceberSelecionada.id,
+        valor,
+        dataRecebimento,
+      )
+
+      if (rpcError) {
+        toast.error(rpcError.message || 'Falha ao registrar recebimento.')
+        return
+      }
+
+      const res = data as any
+      const valorRecebidoFmt = formatCurrency(res?.valor_recebido ?? valor)
+      const totalPagoFmt = formatCurrency(
+        res?.valor_pago ?? (Number(contaReceberSelecionada.valor_pago) || 0) + valor,
+      )
+      const saldoRestanteFmt = formatCurrency(
+        res?.saldo_restante ?? Math.max(0, saldoRestante - valor),
+      )
+      const statusFmt = res?.status ? res.status.toUpperCase() : 'ATUALIZADO'
+
+      toast.success('Recebimento registrado com sucesso.', {
+        description: `Recebido: ${valorRecebidoFmt} | Total Pago: ${totalPagoFmt} | Saldo: ${saldoRestanteFmt} | Status: ${statusFmt}`,
+      })
+
+      setModalRecebimentoOpen(false)
+      setContaReceberSelecionada(null)
+      loadLista()
+      loadIndicadores()
+    } catch (err: any) {
+      console.error('Erro ao registrar recebimento:', err)
+      toast.error(err.message || 'Erro inesperado ao registrar recebimento.')
+    } finally {
+      setSubmittingRecebimento(false)
+    }
+  }
+
+  // Submissão de Pagamento
+  const handleConfirmarPagamento = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!empresaId || !contaPagarSelecionada) return
+
+    const valor = parseFloat(valorPagamento)
+    const saldoRestante = Math.max(
+      0,
+      (Number(contaPagarSelecionada.valor) || 0) - (Number(contaPagarSelecionada.valor_pago) || 0),
+    )
+
+    if (isNaN(valor) || valor <= 0) {
+      toast.error('O valor do pagamento deve ser maior que zero.')
+      return
+    }
+
+    if (valor > saldoRestante + 0.001) {
+      toast.error('O valor pago é maior que o saldo restante.')
+      return
+    }
+
+    if (!dataPagamento) {
+      toast.error('Informe a data do pagamento.')
+      return
+    }
+
+    setSubmittingPagamento(true)
+    try {
+      const { data, error: rpcError } = await FinanceiroService.registrarPagamento(
+        empresaId,
+        contaPagarSelecionada.id,
+        valor,
+        dataPagamento,
+      )
+
+      if (rpcError) {
+        toast.error(rpcError.message || 'Falha ao registrar pagamento.')
+        return
+      }
+
+      const res = data as any
+      const valorPagoFmt = formatCurrency(res?.valor_pago ?? valor)
+      const totalPagoFmt = formatCurrency(
+        res?.total_pago ?? (Number(contaPagarSelecionada.valor_pago) || 0) + valor,
+      )
+      const saldoRestanteFmt = formatCurrency(
+        res?.saldo_restante ?? Math.max(0, saldoRestante - valor),
+      )
+      const statusFmt = res?.status ? res.status.toUpperCase() : 'ATUALIZADO'
+
+      toast.success('Pagamento registrado com sucesso.', {
+        description: `Pago: ${valorPagoFmt} | Total Pago: ${totalPagoFmt} | Saldo: ${saldoRestanteFmt} | Status: ${statusFmt}`,
+      })
+
+      setModalPagamentoOpen(false)
+      setContaPagarSelecionada(null)
+      loadLista()
+      loadIndicadores()
+    } catch (err: any) {
+      console.error('Erro ao registrar pagamento:', err)
+      toast.error(err.message || 'Erro inesperado ao registrar pagamento.')
+    } finally {
+      setSubmittingPagamento(false)
+    }
+  }
+
   const currentTotal = activeTab === 'receber' ? totalContasReceber : totalContasPagar
   const totalPages = Math.max(1, Math.ceil(currentTotal / pageSize))
 
@@ -238,18 +429,6 @@ export default function FinanceiroPage() {
         title="Financeiro"
         description="Acompanhamento gerencial de contas a receber de clientes e contas a pagar a fornecedores."
       />
-
-      {/* Info Box Informativo sobre baixas */}
-      <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50/90 border border-amber-200 text-amber-900 shadow-xs">
-        <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-        <div className="text-xs leading-relaxed">
-          <p className="font-semibold text-amber-950">Módulo em modo de consulta</p>
-          <p className="text-amber-800 mt-0.5">
-            As baixas de recebimento e pagamento serão implementadas em breve. Por enquanto, os
-            lançamentos originados de vendas a prazo (fiado) aparecem automaticamente aqui.
-          </p>
-        </div>
-      </div>
 
       {/* 4 KPIs dinâmicos conforme a aba ativa */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -427,7 +606,7 @@ export default function FinanceiroPage() {
 
       {/* Conteúdo da Tabela */}
       {loading ? (
-        <TableSkeleton rows={6} cols={activeTab === 'receber' ? 9 : 8} />
+        <TableSkeleton rows={6} cols={activeTab === 'receber' ? 10 : 9} />
       ) : error ? (
         <ErrorState message={error} onRetry={loadLista} />
       ) : activeTab === 'receber' ? (
@@ -462,6 +641,7 @@ export default function FinanceiroPage() {
                     <th className="py-3.5 px-4">Vencimento</th>
                     <th className="py-3.5 px-4 text-center">Status</th>
                     <th className="py-3.5 px-4">Data Pagto</th>
+                    <th className="py-3.5 px-4 text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -469,6 +649,11 @@ export default function FinanceiroPage() {
                     const valor = Number(item.valor) || 0
                     const valorPago = Number(item.valor_pago) || 0
                     const saldo = Math.max(0, valor - valorPago)
+                    const podeBaixarLinha =
+                      podeFazerBaixa &&
+                      saldo > 0 &&
+                      item.status !== 'cancelado' &&
+                      item.status !== 'pago'
 
                     return (
                       <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
@@ -502,6 +687,21 @@ export default function FinanceiroPage() {
                         <td className="py-3.5 px-4 text-center">{getStatusBadge(item.status)}</td>
                         <td className="py-3.5 px-4 text-slate-600">
                           {formatDate(item.data_pagamento)}
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          {podeBaixarLinha ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenRecebimento(item)}
+                              className="h-8 px-2.5 text-xs text-emerald-700 border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 font-medium inline-flex items-center gap-1.5"
+                            >
+                              <Banknote className="w-3.5 h-3.5" />
+                              <span>Registrar recebimento</span>
+                            </Button>
+                          ) : (
+                            <span className="text-slate-400">-</span>
+                          )}
                         </td>
                       </tr>
                     )
@@ -579,6 +779,7 @@ export default function FinanceiroPage() {
                   <th className="py-3.5 px-4">Vencimento</th>
                   <th className="py-3.5 px-4 text-center">Status</th>
                   <th className="py-3.5 px-4">Data Pagto</th>
+                  <th className="py-3.5 px-4 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -586,6 +787,11 @@ export default function FinanceiroPage() {
                   const valor = Number(item.valor) || 0
                   const valorPago = Number(item.valor_pago) || 0
                   const saldo = Math.max(0, valor - valorPago)
+                  const podeBaixarLinha =
+                    podeFazerBaixa &&
+                    saldo > 0 &&
+                    item.status !== 'cancelado' &&
+                    item.status !== 'pago'
 
                   return (
                     <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
@@ -608,6 +814,21 @@ export default function FinanceiroPage() {
                       <td className="py-3.5 px-4 text-center">{getStatusBadge(item.status)}</td>
                       <td className="py-3.5 px-4 text-slate-600">
                         {formatDate(item.data_pagamento)}
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        {podeBaixarLinha ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenPagamento(item)}
+                            className="h-8 px-2.5 text-xs text-blue-700 border-blue-300 hover:bg-blue-50 hover:text-blue-800 font-medium inline-flex items-center gap-1.5"
+                          >
+                            <Banknote className="w-3.5 h-3.5" />
+                            <span>Registrar pagamento</span>
+                          </Button>
+                        ) : (
+                          <span className="text-slate-400">-</span>
+                        )}
                       </td>
                     </tr>
                   )
@@ -656,6 +877,272 @@ export default function FinanceiroPage() {
           </div>
         </div>
       )}
+
+      {/* Modal de Recebimento */}
+      <Dialog
+        open={modalRecebimentoOpen}
+        onOpenChange={(open) => {
+          if (!submittingRecebimento) {
+            setModalRecebimentoOpen(open)
+            if (!open) setContaReceberSelecionada(null)
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
+              <Banknote className="w-5 h-5 text-emerald-600" />
+              Registrar Recebimento
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              Informe o valor e a data do recebimento do título selecionado.
+            </DialogDescription>
+          </DialogHeader>
+
+          {contaReceberSelecionada && (
+            <form onSubmit={handleConfirmarRecebimento} className="space-y-4 pt-2">
+              <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200 space-y-2 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 font-medium">Cliente:</span>
+                  <span className="font-semibold text-slate-900">
+                    {contaReceberSelecionada.clientes?.nome || 'Não informado'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 font-medium">Descrição:</span>
+                  <span className="text-slate-700 text-right font-medium">
+                    {contaReceberSelecionada.descricao}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pt-1 border-t border-slate-200/60">
+                  <span className="text-slate-500 font-medium">Valor da conta:</span>
+                  <span className="tabular-nums text-slate-700 font-medium">
+                    {formatCurrency(Number(contaReceberSelecionada.valor))}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 font-medium">Valor já recebido:</span>
+                  <span className="tabular-nums text-slate-600 font-medium">
+                    {formatCurrency(Number(contaReceberSelecionada.valor_pago))}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pt-1 border-t border-slate-200/60 bg-emerald-50/50 p-1.5 rounded -mx-1.5">
+                  <span className="text-emerald-900 font-bold">Saldo restante:</span>
+                  <span className="tabular-nums font-bold text-emerald-700 text-sm">
+                    {formatCurrency(
+                      Math.max(
+                        0,
+                        (Number(contaReceberSelecionada.valor) || 0) -
+                          (Number(contaReceberSelecionada.valor_pago) || 0),
+                      ),
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="rec-valor" className="text-xs font-semibold text-slate-700">
+                    Valor do recebimento (R$) *
+                  </Label>
+                  <Input
+                    id="rec-valor"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    max={Math.max(
+                      0,
+                      (Number(contaReceberSelecionada.valor) || 0) -
+                        (Number(contaReceberSelecionada.valor_pago) || 0),
+                    )}
+                    required
+                    value={valorRecebimento}
+                    onChange={(e) => setValorRecebimento(e.target.value)}
+                    disabled={submittingRecebimento}
+                    placeholder="0.00"
+                    className="text-sm font-semibold"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="rec-data" className="text-xs font-semibold text-slate-700">
+                    Data do pagamento *
+                  </Label>
+                  <Input
+                    id="rec-data"
+                    type="date"
+                    required
+                    value={dataRecebimento}
+                    onChange={(e) => setDataRecebimento(e.target.value)}
+                    disabled={submittingRecebimento}
+                    className="text-sm"
+                  />
+                </div>
+              </div>
+
+              <DialogFooter className="pt-3 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={submittingRecebimento}
+                  onClick={() => setModalRecebimentoOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={submittingRecebimento}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2"
+                >
+                  {submittingRecebimento ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Processando...</span>
+                    </>
+                  ) : (
+                    <span>Confirmar recebimento</span>
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Pagamento */}
+      <Dialog
+        open={modalPagamentoOpen}
+        onOpenChange={(open) => {
+          if (!submittingPagamento) {
+            setModalPagamentoOpen(open)
+            if (!open) setContaPagarSelecionada(null)
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
+              <Banknote className="w-5 h-5 text-blue-600" />
+              Registrar Pagamento
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              Informe o valor e a data do pagamento do título selecionado.
+            </DialogDescription>
+          </DialogHeader>
+
+          {contaPagarSelecionada && (
+            <form onSubmit={handleConfirmarPagamento} className="space-y-4 pt-2">
+              <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200 space-y-2 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 font-medium">Fornecedor:</span>
+                  <span className="font-semibold text-slate-900">
+                    {contaPagarSelecionada.fornecedores?.nome || 'Não informado'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 font-medium">Descrição:</span>
+                  <span className="text-slate-700 text-right font-medium">
+                    {contaPagarSelecionada.descricao}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pt-1 border-t border-slate-200/60">
+                  <span className="text-slate-500 font-medium">Valor da conta:</span>
+                  <span className="tabular-nums text-slate-700 font-medium">
+                    {formatCurrency(Number(contaPagarSelecionada.valor))}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 font-medium">Valor já pago:</span>
+                  <span className="tabular-nums text-slate-600 font-medium">
+                    {formatCurrency(Number(contaPagarSelecionada.valor_pago))}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pt-1 border-t border-slate-200/60 bg-blue-50/50 p-1.5 rounded -mx-1.5">
+                  <span className="text-blue-900 font-bold">Saldo restante:</span>
+                  <span className="tabular-nums font-bold text-blue-700 text-sm">
+                    {formatCurrency(
+                      Math.max(
+                        0,
+                        (Number(contaPagarSelecionada.valor) || 0) -
+                          (Number(contaPagarSelecionada.valor_pago) || 0),
+                      ),
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="pag-valor" className="text-xs font-semibold text-slate-700">
+                    Valor do pagamento (R$) *
+                  </Label>
+                  <Input
+                    id="pag-valor"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    max={Math.max(
+                      0,
+                      (Number(contaPagarSelecionada.valor) || 0) -
+                        (Number(contaPagarSelecionada.valor_pago) || 0),
+                    )}
+                    required
+                    value={valorPagamento}
+                    onChange={(e) => setValorPagamento(e.target.value)}
+                    disabled={submittingPagamento}
+                    placeholder="0.00"
+                    className="text-sm font-semibold"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="pag-data" className="text-xs font-semibold text-slate-700">
+                    Data do pagamento *
+                  </Label>
+                  <Input
+                    id="pag-data"
+                    type="date"
+                    required
+                    value={dataPagamento}
+                    onChange={(e) => setDataPagamento(e.target.value)}
+                    disabled={submittingPagamento}
+                    className="text-sm"
+                  />
+                </div>
+              </div>
+
+              <DialogFooter className="pt-3 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={submittingPagamento}
+                  onClick={() => setModalPagamentoOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={submittingPagamento}
+                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+                >
+                  {submittingPagamento ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Processando...</span>
+                    </>
+                  ) : (
+                    <span>Confirmar pagamento</span>
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
