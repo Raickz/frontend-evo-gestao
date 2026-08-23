@@ -882,6 +882,7 @@ export type Database = {
           id: string
           numero: number
           observacoes: string | null
+          pedido_id: string | null
           status: string
           subtotal: number
           total: number
@@ -898,6 +899,7 @@ export type Database = {
           id?: string
           numero?: never
           observacoes?: string | null
+          pedido_id?: string | null
           status?: string
           subtotal?: number
           total?: number
@@ -914,6 +916,7 @@ export type Database = {
           id?: string
           numero?: never
           observacoes?: string | null
+          pedido_id?: string | null
           status?: string
           subtotal?: number
           total?: number
@@ -940,6 +943,13 @@ export type Database = {
             columns: ['empresa_id']
             isOneToOne: false
             referencedRelation: 'empresas'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'vendas_pedido_id_fkey'
+            columns: ['pedido_id']
+            isOneToOne: false
+            referencedRelation: 'pedidos'
             referencedColumns: ['id']
           },
           {

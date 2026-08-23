@@ -298,6 +298,29 @@ export const PedidosService = {
   },
 
   /**
+   * Converte um pedido em venda através da RPC `converter_pedido_em_venda`.
+   */
+  async converterEmVenda(pedidoId: string, formaPagamento: string, vencimento?: string | null) {
+    return supabase.rpc('converter_pedido_em_venda', {
+      p_pedido_id: pedidoId,
+      p_forma_pagamento: formaPagamento,
+      p_vencimento: vencimento || null,
+    })
+  },
+
+  /**
+   * Busca a venda relacionada a um pedido (somente leitura).
+   */
+  async getVendaRelacionada(empresaId: string, pedidoId: string) {
+    return supabase
+      .from('vendas')
+      .select('id, numero, total, forma_pagamento, status, created_at')
+      .eq('pedido_id', pedidoId)
+      .eq('empresa_id', empresaId)
+      .maybeSingle()
+  },
+
+  /**
    * Lista clientes ativos para seleção no formulário de pedidos.
    */
   async listClientesAtivos(empresaId: string, search?: string) {

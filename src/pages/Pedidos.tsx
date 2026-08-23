@@ -20,11 +20,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { Card, CardContent } from '@/components/ui/card'
 import { useEmpresa } from '@/hooks/use-empresa'
 import { useAuth } from '@/hooks/use-auth'
-import { PedidosService, type CreatePedidoData } from '@/services/pedidos'
+import { PedidosService } from '@/services/pedidos'
 import { toast } from 'sonner'
 import {
   ClipboardList,
@@ -40,10 +40,14 @@ import {
   Eye,
   Edit,
   ArrowRightCircle,
-  HelpCircle,
   AlertTriangle,
   FileText,
   Percent,
+  CheckCircle2,
+  Receipt,
+  Calendar,
+  CreditCard,
+  Loader2,
 } from 'lucide-react'
 
 interface CartItem {
@@ -368,7 +372,6 @@ export default function PedidosPage() {
         throw rpcErr
       }
 
-      // O retorno da RPC vem como jsonb
       const res = rpcResult as any
       if (res && res.sucesso === false) {
         throw new Error(res.erro || res.mensagem || 'Falha ao criar pedido.')
@@ -396,16 +399,23 @@ export default function PedidosPage() {
   // =========================================================================
   const [modalDetalhesAberto, setModalDetalhesAberto] = useState(false)
   const [pedidoDetalhe, setPedidoDetalhe] = useState<any | null>(null)
+  const [vendaRelacionada, setVendaRelacionada] = useState<any | null>(null)
   const [loadingDetalhes, setLoadingDetalhes] = useState(false)
 
   const abrirDetalhes = async (pedidoId: string) => {
     if (!empresaId) return
     setModalDetalhesAberto(true)
     setLoadingDetalhes(true)
+    setVendaRelacionada(null)
     try {
-      const { data, error: err } = await PedidosService.getById(empresaId, pedidoId)
-      if (err) throw err
-      setPedidoDetalhe(data)
+      const [detalhesRes, vendaRes] = await Promise.all([
+        PedidosService.getById(empresaId, pedidoId),
+        PedidosService.getVendaRelacionada(empresaId, pedidoId),
+      ])
+
+      if (detalhesRes.error) throw detalhesRes.error
+      setPedidoDetalhe(detalhesRes.data)
+      setVendaRelacionada(vendaRes.data || null)
     } catch (e: any) {
       console.error('Erro ao carregar detalhes do pedido:', e)
       toast.error('Falha ao carregar os detalhes do pedido.')
@@ -466,6 +476,108 @@ export default function PedidosPage() {
       toast.error(err.message || 'Falha ao salvar alterações do pedido.')
     } finally {
       setSalvandoEdicao(false)
+    }
+  }
+
+  // =========================================================================
+  // MODAL: CONVERTER EM VENDA & CONFIRMAÇÃO
+  // =========================================================================
+  const [modalConversaoAberto, setModalConversaoAberto] = useState(false)
+  const [modalConfirmacaoAberto, setModalConfirmacaoAberto] = useState(false)
+  const [pedidoParaConverter, setPedidoParaConverter] = useState<any | null>(null)
+  const [formaPagamentoConversao, setFormaPagamentoConversao] = useState<string>('pix')
+  const [vencimentoConversao, setVencimentoConversao] = useState<string>('')
+  const [convertendo, setConvertendo] = useState(false)
+
+  const abrirModalConversao = (pedido: any) => {
+    if (!podeGerenciar) {
+      toast.error('Você não tem permissão para converter pedidos em venda.')
+      return
+    }
+    if (pedido.status !== 'faturado') {
+      toast.error('Apenas pedidos com status "faturado" podem ser convertidos em venda.')
+      return
+    }
+
+    setPedidoParaConverter(pedido)
+    setFormaPagamentoConversao('pix')
+    // Data default para fiado: hoje
+    const hojeStr = new Date().toISOString().split('T')[0]
+    setVencimentoConversao(hojeStr)
+    setModalConversaoAberto(true)
+  }
+
+  const validarEAvancarConfirmacao = () => {
+    if (!pedidoParaConverter?.id) {
+      toast.error('Pedido inválido para conversão.')
+      return
+    }
+
+    const formasValidas = ['pix', 'dinheiro', 'cartao', 'fiado']
+    if (!formasValidas.includes(formaPagamentoConversao)) {
+      toast.error('Selecione uma forma de pagamento válida.')
+      return
+    }
+
+    if (formaPagamentoConversao === 'fiado') {
+      if (!vencimentoConversao) {
+        toast.error('Data de vencimento é obrigatória para pagamento Fiado.')
+        return
+      }
+
+      const hoje = new Date()
+      hoje.setHours(0, 0, 0, 0)
+      const [y, m, d] = vencimentoConversao.split('-').map(Number)
+      const dataVenc = new Date(y, m - 1, d)
+      dataVenc.setHours(0, 0, 0, 0)
+
+      if (dataVenc < hoje) {
+        toast.error('A data de vencimento para venda fiado deve ser hoje ou uma data futura.')
+        return
+      }
+    }
+
+    setModalConfirmacaoAberto(true)
+  }
+
+  const handleExecutarConversao = async () => {
+    if (!pedidoParaConverter?.id) return
+    setConvertendo(true)
+    try {
+      const { data, error: errRpc } = await PedidosService.converterEmVenda(
+        pedidoParaConverter.id,
+        formaPagamentoConversao,
+        formaPagamentoConversao === 'fiado' ? vencimentoConversao : null,
+      )
+
+      if (errRpc) {
+        throw errRpc
+      }
+
+      const res = data as any
+      if (res && res.sucesso === false) {
+        throw new Error(res.erro || res.mensagem || 'Falha ao converter pedido em venda.')
+      }
+
+      const numPedido = res?.numero_pedido || pedidoParaConverter.numero || ''
+      const numVenda = res?.numero_venda ? `#${res.numero_venda}` : ''
+
+      toast.success(`Pedido #${numPedido} convertido na Venda ${numVenda} com sucesso.`)
+
+      setModalConfirmacaoAberto(false)
+      setModalConversaoAberto(false)
+      setModalDetalhesAberto(false)
+      setPedidoParaConverter(null)
+
+      // Recarregar pedidos mantendo filtros atuais
+      loadPedidos()
+    } catch (err: any) {
+      console.error('Erro na conversão em venda:', err)
+      const msg = err.message || err.details || 'Erro ao converter pedido em venda.'
+      toast.error(msg)
+      setModalConfirmacaoAberto(false)
+    } finally {
+      setConvertendo(false)
     }
   }
 
@@ -720,8 +832,6 @@ export default function PedidosPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {pedidos.map((ped) => {
-                    const isPendenteOuConfirmado =
-                      ped.status === 'pendente' || ped.status === 'confirmado'
                     const isPendente = ped.status === 'pendente'
 
                     return (
@@ -748,12 +858,7 @@ export default function PedidosPage() {
                           {formatCurrency(ped.total || 0)}
                         </td>
                         <td className="py-3 px-4 text-center">{getStatusBadge(ped.status)}</td>
-                        <td
-                          className="py-3 px-4 text-right"
-                          onClick={
-                            (e) => e.stopPropagation() /* não abrir modal ao clicar nas ações */
-                          }
-                        >
+                        <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1.5">
                             {/* Botão Visualizar Detalhes */}
                             <Button
@@ -779,26 +884,17 @@ export default function PedidosPage() {
                               </Button>
                             )}
 
-                            {/* Botão Converter em Venda (Desabilitado com Tooltip) */}
-                            {isPendenteOuConfirmado && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span tabIndex={0} className="inline-block">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      disabled
-                                      className="h-8 text-[11px] px-2.5 bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed flex items-center gap-1"
-                                    >
-                                      <ArrowRightCircle className="w-3.5 h-3.5" />
-                                      Converter em Venda
-                                    </Button>
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-xs text-xs">
-                                  <p>Conversão será implementada após criação da RPC no backend</p>
-                                </TooltipContent>
-                              </Tooltip>
+                            {/* Botão Converter em Venda (Apenas status faturado e usuário autorizado) */}
+                            {podeGerenciar && ped.status === 'faturado' && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => abrirModalConversao(ped)}
+                                className="h-8 text-[11px] px-2.5 border-teal-600 text-teal-700 hover:bg-teal-50 hover:text-teal-800 font-medium flex items-center gap-1"
+                              >
+                                <ArrowRightCircle className="w-3.5 h-3.5 text-teal-600" />
+                                Converter em Venda
+                              </Button>
                             )}
                           </div>
                         </td>
@@ -1298,6 +1394,55 @@ export default function PedidosPage() {
                   </div>
                 </div>
 
+                {/* Venda Relacionada (se houver) */}
+                {vendaRelacionada && (
+                  <Card className="border-teal-200 bg-teal-50/40">
+                    <CardContent className="p-3.5 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Receipt className="w-4 h-4 text-teal-700" />
+                          <span className="font-bold text-slate-900 text-xs">
+                            Venda Gerada #{vendaRelacionada.numero}
+                          </span>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className="bg-teal-100 text-teal-800 border-teal-300 font-semibold text-[10px]"
+                        >
+                          {vendaRelacionada.status || 'Concluída'}
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px] text-slate-600">
+                        <div>
+                          <span className="text-slate-400 block text-[10px]">Data da Venda</span>
+                          <span className="font-semibold text-slate-800">
+                            {formatDateTime(vendaRelacionada.created_at)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block text-[10px]">Total da Venda</span>
+                          <span className="font-bold text-teal-800 tabular-nums">
+                            {formatCurrency(vendaRelacionada.total || 0)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block text-[10px]">Forma de Pagto</span>
+                          <span className="font-semibold text-slate-800 uppercase">
+                            {vendaRelacionada.forma_pagamento || '-'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block text-[10px]">Status</span>
+                          <span className="font-semibold text-slate-800 capitalize">
+                            {vendaRelacionada.status || 'Finalizada'}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 {/* Observações */}
                 {pedidoDetalhe.observacoes && (
                   <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
@@ -1312,27 +1457,17 @@ export default function PedidosPage() {
 
             <DialogFooter className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-2 justify-between items-center">
               <div className="flex items-center gap-2">
-                {/* Botão Converter em Venda no modal */}
-                {(pedidoDetalhe?.status === 'pendente' ||
-                  pedidoDetalhe?.status === 'confirmado') && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span tabIndex={0} className="inline-block">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled
-                          className="text-xs bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed flex items-center gap-1.5"
-                        >
-                          <ArrowRightCircle className="w-3.5 h-3.5" />
-                          Converter em Venda
-                        </Button>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs text-xs">
-                      <p>Conversão será implementada após criação da RPC no backend</p>
-                    </TooltipContent>
-                  </Tooltip>
+                {/* Botão Converter em Venda no modal (Apenas status faturado e podeGerenciar) */}
+                {podeGerenciar && pedidoDetalhe?.status === 'faturado' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => abrirModalConversao(pedidoDetalhe)}
+                    className="text-xs border-teal-600 text-teal-700 hover:bg-teal-50 hover:text-teal-800 font-medium flex items-center gap-1.5"
+                  >
+                    <ArrowRightCircle className="w-3.5 h-3.5 text-teal-600" />
+                    Converter em Venda
+                  </Button>
                 )}
 
                 {/* Botão Editar se pendente */}
@@ -1454,6 +1589,248 @@ export default function PedidosPage() {
                 className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold"
               >
                 {salvandoEdicao ? 'Salvando...' : 'Salvar Alterações'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* =========================================================================
+            MODAL 4: CONVERTER PEDIDO EM VENDA
+            ========================================================================= */}
+        <Dialog
+          open={modalConversaoAberto}
+          onOpenChange={(open) => {
+            if (!convertendo) setModalConversaoAberto(open)
+          }}
+        >
+          <DialogContent className="max-w-md w-full sm:max-w-lg">
+            <DialogHeader>
+              <div className="flex items-center gap-2">
+                <ArrowRightCircle className="w-5 h-5 text-teal-700" />
+                <DialogTitle className="text-base sm:text-lg font-bold text-slate-900">
+                  Converter Pedido #{pedidoParaConverter?.numero} em Venda
+                </DialogTitle>
+              </div>
+              <DialogDescription className="text-xs text-slate-500">
+                Selecione a forma de pagamento para faturar este pedido e gerar a venda.
+              </DialogDescription>
+            </DialogHeader>
+
+            {pedidoParaConverter && (
+              <div className="space-y-4 py-2 text-xs">
+                {/* Resumo do Pedido */}
+                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                        Cliente
+                      </span>
+                      <span className="font-semibold text-slate-900 truncate block">
+                        {pedidoParaConverter.clientes?.nome || 'Consumidor / Não informado'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                        Vendedor
+                      </span>
+                      <span className="font-semibold text-slate-900 truncate block">
+                        {pedidoParaConverter.vendedores?.nome || 'Nenhum vendedor'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-200 text-slate-900">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                        Itens
+                      </span>
+                      <span className="font-semibold">
+                        {pedidoParaConverter.itens_pedido?.length ??
+                          (pedidoParaConverter.itens?.length || 'Itens inclusos')}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                        Total do Pedido
+                      </span>
+                      <span className="text-sm sm:text-base font-black text-teal-700 tabular-nums">
+                        {formatCurrency(pedidoParaConverter.total || 0)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Aviso Importante */}
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2.5 text-amber-900 text-xs">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <p className="leading-relaxed">
+                    Esta operação irá registrar a venda e realizar a baixa dos produtos no estoque.
+                  </p>
+                </div>
+
+                {/* Campo: Forma de Pagamento */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                    <CreditCard className="w-3.5 h-3.5 text-slate-500" />
+                    Forma de Pagamento <span className="text-rose-500">*</span>
+                  </Label>
+                  <Select
+                    value={formaPagamentoConversao}
+                    onValueChange={(val) => setFormaPagamentoConversao(val)}
+                    disabled={convertendo}
+                  >
+                    <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                      <SelectValue placeholder="Selecione a forma de pagamento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pix" className="text-xs">
+                        Pix
+                      </SelectItem>
+                      <SelectItem value="dinheiro" className="text-xs">
+                        Dinheiro
+                      </SelectItem>
+                      <SelectItem value="cartao" className="text-xs">
+                        Cartão
+                      </SelectItem>
+                      <SelectItem value="fiado" className="text-xs">
+                        Fiado
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Campo Condicional: Data de Vencimento (apenas Fiado) */}
+                {formaPagamentoConversao === 'fiado' && (
+                  <div className="space-y-1.5 p-3 bg-amber-50/50 rounded-lg border border-amber-200">
+                    <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-amber-600" />
+                      Data de Vencimento <span className="text-rose-500">*</span>
+                    </Label>
+                    <Input
+                      type="date"
+                      value={vencimentoConversao}
+                      min={new Date().toISOString().split('T')[0]}
+                      onChange={(e) => setVencimentoConversao(e.target.value)}
+                      disabled={convertendo}
+                      className="text-xs h-9 bg-white border-slate-200"
+                    />
+                    <p className="text-[11px] text-slate-500">
+                      Informe a data limite para o pagamento da conta a receber do cliente.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <DialogFooter className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                type="button"
+                disabled={convertendo}
+                onClick={() => setModalConversaoAberto(false)}
+                className="text-xs"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={convertendo}
+                onClick={validarEAvancarConfirmacao}
+                className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-2"
+              >
+                {convertendo ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Convertendo...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Continuar para Conversão
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* =========================================================================
+            MODAL 5: DIALOG DE CONFIRMAÇÃO DE CONVERSÃO
+            ========================================================================= */}
+        <Dialog
+          open={modalConfirmacaoAberto}
+          onOpenChange={(open) => {
+            if (!convertendo) setModalConfirmacaoAberto(open)
+          }}
+        >
+          <DialogContent className="max-w-md w-full">
+            <DialogHeader>
+              <div className="flex items-center gap-2 text-teal-800">
+                <AlertTriangle className="w-5 h-5 text-amber-500" />
+                <DialogTitle className="text-base font-bold text-slate-900">
+                  Confirmar Conversão
+                </DialogTitle>
+              </div>
+              <DialogDescription className="text-xs text-slate-600 pt-2 leading-relaxed">
+                Converter este pedido em venda? Esta operação irá registrar a venda e realizar a
+                baixa dos produtos no estoque.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-1 my-2">
+              <div className="flex justify-between text-slate-700">
+                <span>Pedido:</span>
+                <span className="font-bold text-slate-900">#{pedidoParaConverter?.numero}</span>
+              </div>
+              <div className="flex justify-between text-slate-700">
+                <span>Forma de Pagamento:</span>
+                <span className="font-bold text-slate-900 uppercase">
+                  {formaPagamentoConversao}
+                </span>
+              </div>
+              {formaPagamentoConversao === 'fiado' && vencimentoConversao && (
+                <div className="flex justify-between text-slate-700">
+                  <span>Vencimento:</span>
+                  <span className="font-bold text-slate-900">
+                    {formatDate(vencimentoConversao)}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between text-slate-700 pt-1 border-t border-slate-200 font-bold">
+                <span>Total a Faturar:</span>
+                <span className="text-teal-700 font-black">
+                  {formatCurrency(pedidoParaConverter?.total || 0)}
+                </span>
+              </div>
+            </div>
+
+            <DialogFooter className="pt-2 flex flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                type="button"
+                disabled={convertendo}
+                onClick={() => setModalConfirmacaoAberto(false)}
+                className="text-xs"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={convertendo}
+                onClick={handleExecutarConversao}
+                className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-2"
+              >
+                {convertendo ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Convertendo...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Converter em Venda
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
