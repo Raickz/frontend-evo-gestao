@@ -21,6 +21,7 @@ export interface ListSaldosOptions {
 export interface ListMovimentacoesOptions {
   search?: string
   tipo?: 'todos' | 'entrada' | 'saida'
+  fornecedorId?: string
   dataInicio?: string
   dataFim?: string
   page?: number
@@ -52,7 +53,13 @@ export interface ProdutoParaEntrada {
   codigo: string | null
   unidade: string
   estoque_minimo: number
+  preco_custo: number
   saldoAtual: number
+}
+
+export interface FornecedorAtivoItem {
+  id: string
+  nome: string
 }
 
 export const EstoqueService = {
@@ -89,7 +96,7 @@ export const EstoqueService = {
   async listMovimentacoes(empresaId: string) {
     return supabase
       .from('movimentacoes_estoque')
-      .select('*, produtos(nome, codigo), usuarios(nome)')
+      .select('*, produtos(nome, codigo), usuarios(nome), fornecedores(nome)')
       .eq('empresa_id', empresaId)
       .order('created_at', { ascending: false })
       .limit(100)
@@ -105,6 +112,31 @@ export const EstoqueService = {
       p_quantidade: quantidade,
       p_motivo: motivo,
     })
+  },
+
+  async registrarEntradaPorFornecedor(
+    fornecedorId: string,
+    produtoId: string,
+    quantidade: number,
+    precoCusto: number,
+    motivo: string = 'Entrada de estoque',
+  ) {
+    return (supabase.rpc as any)('registrar_entrada_estoque_por_fornecedor', {
+      p_fornecedor_id: fornecedorId,
+      p_produto_id: produtoId,
+      p_quantidade: quantidade,
+      p_preco_custo: precoCusto,
+      p_motivo: motivo,
+    })
+  },
+
+  async listFornecedoresAtivosParaEntrada(empresaId: string) {
+    return supabase
+      .from('fornecedores')
+      .select('id, nome')
+      .eq('empresa_id', empresaId)
+      .eq('ativo', true)
+      .order('nome', { ascending: true })
   },
 
   async registrarMovimentacaoManual(
@@ -319,12 +351,12 @@ export const EstoqueService = {
    * Busca histórico de movimentações com paginação e filtros.
    */
   async listMovimentacoesFiltered(empresaId: string, options: ListMovimentacoesOptions = {}) {
-    const { search, tipo, dataInicio, dataFim, page = 1, pageSize = 20 } = options
+    const { search, tipo, fornecedorId, dataInicio, dataFim, page = 1, pageSize = 20 } = options
 
     let query = supabase
       .from('movimentacoes_estoque')
       .select(
-        'id, empresa_id, produto_id, tipo, quantidade, motivo, referencia_id, usuario_id, created_at, produtos!inner(nome, codigo), usuarios(nome)',
+        'id, empresa_id, produto_id, fornecedor_id, tipo, quantidade, motivo, referencia_id, usuario_id, created_at, produtos!inner(nome, codigo), usuarios(nome), fornecedores(nome)',
         { count: 'exact' },
       )
       .eq('empresa_id', empresaId)
@@ -336,6 +368,10 @@ export const EstoqueService = {
 
     if (tipo && tipo !== 'todos') {
       query = query.eq('tipo', tipo)
+    }
+
+    if (fornecedorId && fornecedorId !== 'todos') {
+      query = (query as any).eq('fornecedor_id', fornecedorId)
     }
 
     if (dataInicio) {
@@ -367,7 +403,7 @@ export const EstoqueService = {
     empresaId: string,
     options: Omit<ListMovimentacoesOptions, 'page' | 'pageSize'> = {},
   ) {
-    const { search, tipo, dataInicio, dataFim } = options
+    const { search, tipo, fornecedorId, dataInicio, dataFim } = options
 
     let query = supabase
       .from('movimentacoes_estoque')
@@ -381,6 +417,10 @@ export const EstoqueService = {
 
     if (tipo && tipo !== 'todos') {
       query = query.eq('tipo', tipo)
+    }
+
+    if (fornecedorId && fornecedorId !== 'todos') {
+      query = (query as any).eq('fornecedor_id', fornecedorId)
     }
 
     if (dataInicio) {
@@ -405,7 +445,7 @@ export const EstoqueService = {
   ): Promise<{ data: ProdutoParaEntrada[] | null; error: any }> {
     let query = supabase
       .from('produtos')
-      .select('id, nome, codigo, unidade, estoque_minimo, estoques(quantidade)')
+      .select('id, nome, codigo, unidade, preco_custo, estoque_minimo, estoques(quantidade)')
       .eq('empresa_id', empresaId)
       .eq('ativo', true)
       .order('nome', { ascending: true })
@@ -432,6 +472,7 @@ export const EstoqueService = {
         codigo: p.codigo,
         unidade: p.unidade || 'UN',
         estoque_minimo: Number(p.estoque_minimo) || 0,
+        preco_custo: Number(p.preco_custo) || 0,
         saldoAtual: Number(saldoQtd) || 0,
       }
     })
