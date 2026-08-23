@@ -69,6 +69,29 @@ export const ProdutosService = {
       .single()
   },
 
+  async search(empresaId: string, termo: string) {
+    const cleanTerm = termo.trim()
+    if (!cleanTerm) {
+      return this.list(empresaId)
+    }
+    return supabase
+      .from('produtos')
+      .select('*, categorias(nome), fornecedores(nome), estoques(quantidade)')
+      .eq('empresa_id', empresaId)
+      .or(`nome.ilike.%${cleanTerm}%,codigo.ilike.%${cleanTerm}%`)
+      .order('nome', { ascending: true })
+  },
+
+  async toggleAtivo(empresaId: string, id: string, ativo: boolean) {
+    return supabase
+      .from('produtos')
+      .update({ ativo })
+      .eq('empresa_id', empresaId)
+      .eq('id', id)
+      .select()
+      .single()
+  },
+
   async listCategorias(empresaId: string) {
     return supabase
       .from('categorias')
