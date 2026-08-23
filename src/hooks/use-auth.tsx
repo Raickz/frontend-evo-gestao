@@ -5,18 +5,18 @@ import type { Tables } from '@/lib/supabase/types'
 
 export type UsuarioPerfil = 'master' | 'admin' | 'gerente' | 'vendedor' | 'operador' | string
 
-export interface UsuarioProfile extends Tables<'usuarios'> {}
+export interface Usuario extends Tables<'usuarios'> {}
 
 interface AuthContextType {
   user: User | null
   session: Session | null
-  profile: UsuarioProfile | null
+  usuario: Usuario | null
   empresaId: string | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>
-  signOut: () => Promise<{ error: Error | null }>
-  refreshProfile: () => Promise<void>
+  logout: () => Promise<{ error: Error | null }>
+  refreshUsuario: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -32,38 +32,52 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
-  const [profile, setProfile] = useState<UsuarioProfile | null>(null)
+  const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [empresaId, setEmpresaId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   const fetchUserProfile = async (authUserId: string) => {
     try {
-      // 1. Fetch user row from usuarios table
+      // Consultar public.usuarios pelo auth_user_id filtrando apenas ativos
       const { data: usuarioData, error: usuarioErr } = await supabase
         .from('usuarios')
         .select('*')
         .eq('auth_user_id', authUserId)
+        .eq('ativo', true)
         .maybeSingle()
 
-      if (!usuarioErr && usuarioData) {
-        setProfile(usuarioData)
+      if (!usuarioErr && usuarioData && usuarioData.ativo) {
+        setUsuario(usuarioData)
         if (usuarioData.empresa_id) {
           setEmpresaId(usuarioData.empresa_id)
           return
         }
+
+        // Fallback para get_my_empresa_id() caso empresa_id não venha preenchido
+        const { data: rpcEmpresaId, error: rpcErr } = await supabase.rpc('get_my_empresa_id')
+        if (!rpcErr && rpcEmpresaId) {
+          setEmpresaId(rpcEmpresaId)
+          return
+        }
       }
 
-      // 2. Fallback to RPC get_my_empresa_id() if empresa_id was not populated directly
-      const { data: rpcEmpresaId, error: rpcErr } = await supabase.rpc('get_my_empresa_id')
-      if (!rpcErr && rpcEmpresaId) {
-        setEmpresaId(rpcEmpresaId)
-      } else {
-        setEmpresaId(null)
-      }
-    } catch (e) {
-      console.error('Erro ao resolver perfil/empresa do usuário:', e)
-      setProfile(null)
+      // Se o usuário autenticado NÃO existir em usuarios OU estiver inativo: desconectar e limpar
+      await supabase.auth.signOut()
+      setUsuario(null)
       setEmpresaId(null)
+      setUser(null)
+      setSession(null)
+    } catch (e) {
+      console.error('Erro ao resolver usuario/empresa autenticada:', e)
+      try {
+        await supabase.auth.signOut()
+      } catch {
+        // ignore
+      }
+      setUsuario(null)
+      setEmpresaId(null)
+      setUser(null)
+      setSession(null)
     }
   }
 
@@ -81,7 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setLoading(false)
         })
       } else {
-        setProfile(null)
+        setUsuario(null)
         setEmpresaId(null)
         setLoading(false)
       }
@@ -105,7 +119,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [])
 
-  const refreshProfile = async () => {
+  const refreshUsuario = async () => {
     if (user) {
       await fetchUserProfile(user.id)
     }
@@ -127,10 +141,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: null }
   }
 
-  const signOut = async () => {
+  const logout = async () => {
     const { error } = await supabase.auth.signOut()
-    setProfile(null)
+    setUsuario(null)
     setEmpresaId(null)
+    setUser(null)
+    setSession(null)
     if (error) return { error }
     return { error: null }
   }
@@ -140,13 +156,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       value={{
         user,
         session,
-        profile,
+        usuario,
         empresaId,
         loading,
         signIn,
         signUp,
-        signOut,
-        refreshProfile,
+        logout,
+        refreshUsuario,
       }}
     >
       {children}

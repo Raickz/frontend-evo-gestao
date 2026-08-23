@@ -26,7 +26,7 @@ import { FinanceiroService } from '@/services/financeiro'
 
 export default function DashboardPage() {
   const { empresaId, empresa } = useEmpresa()
-  const { profile } = useAuth()
+  const { usuario } = useAuth()
 
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
@@ -85,11 +85,11 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <PageHeader
         title="Visão Geral"
-        description={`Bem-vindo de volta, ${profile?.nome || 'Usuário'}. Aqui está o resumo comercial da ${
+        description={`Bem-vindo de volta, ${usuario?.nome || 'Usuário'}. Aqui está o resumo comercial da ${
           empresa?.nome_fantasia || empresa?.nome || 'sua distribuidora'
         }.`}
         actions={
-          canAccessPage(profile?.perfil, 'vendas') ? (
+          canAccessPage(usuario?.perfil, 'vendas') ? (
             <div className="flex items-center gap-2">
               <Link to="/app/vendas">
                 <Button className="bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-sm">
@@ -150,7 +150,7 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="pt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {canAccessPage(profile?.perfil, 'clientes') && (
+            {canAccessPage(usuario?.perfil, 'clientes') && (
               <Link
                 to="/app/clientes"
                 className="p-3.5 rounded-xl border border-slate-200 hover:border-teal-500 hover:bg-teal-50/30 transition-all flex items-start gap-3 group"
@@ -169,7 +169,7 @@ export default function DashboardPage() {
               </Link>
             )}
 
-            {canAccessPage(profile?.perfil, 'produtos') && (
+            {canAccessPage(usuario?.perfil, 'produtos') && (
               <Link
                 to="/app/produtos"
                 className="p-3.5 rounded-xl border border-slate-200 hover:border-teal-500 hover:bg-teal-50/30 transition-all flex items-start gap-3 group"
@@ -188,7 +188,7 @@ export default function DashboardPage() {
               </Link>
             )}
 
-            {canAccessPage(profile?.perfil, 'estoque') && (
+            {canAccessPage(usuario?.perfil, 'estoque') && (
               <Link
                 to="/app/estoque"
                 className="p-3.5 rounded-xl border border-slate-200 hover:border-teal-500 hover:bg-teal-50/30 transition-all flex items-start gap-3 group"
@@ -207,7 +207,7 @@ export default function DashboardPage() {
               </Link>
             )}
 
-            {canAccessPage(profile?.perfil, 'financeiro') && (
+            {canAccessPage(usuario?.perfil, 'financeiro') && (
               <Link
                 to="/app/financeiro"
                 className="p-3.5 rounded-xl border border-slate-200 hover:border-teal-500 hover:bg-teal-50/30 transition-all flex items-start gap-3 group"
@@ -250,7 +250,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between text-xs py-1.5 border-b border-slate-100">
               <span className="text-slate-500">Perfil de Acesso:</span>
               <span className="font-bold text-teal-700 uppercase">
-                {profile?.perfil || 'vendedor'}
+                {usuario?.perfil || 'vendedor'}
               </span>
             </div>
             <div className="flex items-center justify-between text-xs py-1.5 border-b border-slate-100">
@@ -259,7 +259,7 @@ export default function DashboardPage() {
                 <CheckCircle2 className="w-3.5 h-3.5" /> Ativa
               </span>
             </div>
-            {canAccessPage(profile?.perfil, 'configuracoes') && (
+            {canAccessPage(usuario?.perfil, 'configuracoes') && (
               <div className="pt-2">
                 <Link to="/app/configuracoes">
                   <Button

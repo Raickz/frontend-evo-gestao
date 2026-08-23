@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
 import { Building2, ArrowRight, Lock, Mail, Loader2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -14,35 +14,55 @@ import {
   CardFooter,
 } from '@/components/ui/card'
 
+function mapAuthError(errorMessage?: string): string {
+  if (!errorMessage) {
+    return 'Email ou senha inválidos. Por favor, verifique suas credenciais.'
+  }
+  const lower = errorMessage.toLowerCase()
+  if (lower.includes('invalid login credentials') || lower.includes('invalid_grant')) {
+    return 'Email ou senha inválidos.'
+  }
+  if (lower.includes('email not confirmed')) {
+    return 'Email não confirmado. Por favor, verifique sua caixa de entrada.'
+  }
+  if (lower.includes('user not found')) {
+    return 'Usuário não cadastrado no sistema.'
+  }
+  if (lower.includes('too many requests') || lower.includes('rate limit')) {
+    return 'Muitas tentativas de acesso. Tente novamente em alguns instantes.'
+  }
+  return 'Email ou senha inválidos. Por favor, verifique suas credenciais.'
+}
+
 export default function AuthPage() {
-  const { signIn, user } = useAuth()
+  const { signIn, user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  // If already authenticated, redirect to dashboard
-  if (user) {
-    navigate('/app/dashboard', { replace: true })
+  // Se já autenticado e carregamento concluído, redirecionar para a aplicação
+  if (user && !authLoading) {
+    return <Navigate to="/app/dashboard" replace />
   }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMessage(null)
-    setLoading(true)
+    setSubmitting(true)
 
     try {
-      const { error } = await signIn(email, password)
+      const { error } = await signIn(email.trim(), password)
       if (error) {
-        setErrorMessage('Email ou senha inválidos. Por favor, verifique suas credenciais.')
+        setErrorMessage(mapAuthError(error.message))
       } else {
         navigate('/app/dashboard', { replace: true })
       }
     } catch {
       setErrorMessage('Ocorreu um erro ao tentar realizar o login. Tente novamente.')
     } finally {
-      setLoading(false)
+      setSubmitting(false)
     }
   }
 
@@ -121,10 +141,10 @@ export default function AuthPage() {
 
               <Button
                 type="submit"
-                disabled={loading}
-                className="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold h-10 rounded-lg shadow-lg shadow-teal-900/30 transition-all flex items-center justify-center gap-2"
+                disabled={submitting}
+                className="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold h-10 rounded-lg shadow-lg shadow-teal-900/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                {loading ? (
+                {submitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Autenticando...</span>

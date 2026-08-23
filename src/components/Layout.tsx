@@ -87,31 +87,31 @@ const ALL_NAV_SECTIONS: NavSection[] = [
 ]
 
 export default function Layout() {
-  const { user, profile, signOut } = useAuth()
+  const { user, usuario, logout } = useAuth()
   const { empresa } = useEmpresa()
   const location = useLocation()
   const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  const handleSignOut = async () => {
-    await signOut()
-    navigate('/auth')
+  const handleLogout = async () => {
+    await logout()
+    navigate('/auth', { replace: true })
   }
 
-  const roleInfo = formatPerfilBadge(profile?.perfil)
+  const roleInfo = formatPerfilBadge(usuario?.perfil)
 
   // Filtragem das seções e itens conforme perfil do usuário
   const visibleNavSections = useMemo(() => {
     return ALL_NAV_SECTIONS.map((section) => ({
       ...section,
-      items: section.items.filter((item) => canAccessPage(profile?.perfil, item.page)),
+      items: section.items.filter((item) => canAccessPage(usuario?.perfil, item.page)),
     })).filter((section) => section.items.length > 0)
-  }, [profile?.perfil])
+  }, [usuario?.perfil])
 
   const canAccessSettings = useMemo(() => {
-    return canAccessPage(profile?.perfil, 'configuracoes')
-  }, [profile?.perfil])
+    return canAccessPage(usuario?.perfil, 'configuracoes')
+  }, [usuario?.perfil])
 
   const currentRouteName = () => {
     for (const section of ALL_NAV_SECTIONS) {
@@ -124,8 +124,8 @@ export default function Layout() {
     return 'EVO Gestão'
   }
 
-  const userInitials = profile?.nome
-    ? profile.nome
+  const userInitials = usuario?.nome
+    ? usuario.nome
         .split(' ')
         .map((n) => n[0])
         .slice(0, 2)
@@ -235,7 +235,7 @@ export default function Layout() {
                 </Avatar>
                 <div className="truncate">
                   <p className="text-xs font-semibold text-white truncate">
-                    {profile?.nome || user?.email?.split('@')[0] || 'Usuário'}
+                    {usuario?.nome || user?.email?.split('@')[0] || 'Usuário'}
                   </p>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-teal-950/80 text-teal-300 font-medium border border-teal-800/40">
                     {roleInfo.label}
@@ -243,8 +243,8 @@ export default function Layout() {
                 </div>
               </div>
               <button
-                onClick={handleSignOut}
-                className="p-1.5 text-slate-400 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors"
+                onClick={handleLogout}
+                className="p-1.5 text-slate-400 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
                 title="Sair do sistema"
               >
                 <LogOut className="w-4 h-4" />
@@ -253,8 +253,8 @@ export default function Layout() {
           ) : (
             <div className="flex justify-center">
               <button
-                onClick={handleSignOut}
-                className="p-2 text-slate-400 hover:text-red-400 rounded-lg hover:bg-slate-800 transition-colors"
+                onClick={handleLogout}
+                className="p-2 text-slate-400 hover:text-red-400 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
                 title="Sair do sistema"
               >
                 <LogOut className="w-5 h-5" />
@@ -314,7 +314,7 @@ export default function Layout() {
                   </Avatar>
                   <div className="text-left hidden sm:block">
                     <p className="text-xs font-bold text-slate-900 leading-tight">
-                      {profile?.nome || 'Usuário'}
+                      {usuario?.nome || 'Usuário'}
                     </p>
                     <p className="text-[10px] text-slate-600 font-medium">{roleInfo.label}</p>
                   </div>
@@ -324,7 +324,7 @@ export default function Layout() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-semibold text-slate-900">
-                      {profile?.nome || 'Usuário EVO'}
+                      {usuario?.nome || 'Usuário EVO'}
                     </p>
                     <p className="text-xs text-slate-600 truncate">{user?.email}</p>
                     <div className="pt-1 flex items-center gap-1 text-[11px] text-teal-700 font-medium">
@@ -343,7 +343,10 @@ export default function Layout() {
                   </>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="text-red-600 font-medium">
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-red-600 font-medium cursor-pointer"
+                >
                   <LogOut className="w-4 h-4 mr-2" />
                   Sair do EVO Gestão
                 </DropdownMenuItem>

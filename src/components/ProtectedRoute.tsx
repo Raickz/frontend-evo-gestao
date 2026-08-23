@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth()
+  const { user, usuario, loading } = useAuth()
 
   if (loading) {
     return (
@@ -33,7 +33,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     )
   }
 
-  if (!user) {
+  // Se não estiver logado, ou se user existir mas usuario for nulo (não encontrado em public.usuarios ou inativo)
+  if (!user || !usuario || usuario.ativo === false) {
     return <Navigate to="/auth" replace />
   }
 
@@ -50,13 +51,13 @@ interface RoleRouteGuardProps {
  * Se o perfil não tiver acesso à página solicitada, redireciona para o Dashboard.
  */
 export function RoleRouteGuard({ page, children }: RoleRouteGuardProps) {
-  const { profile, loading } = useAuth()
+  const { usuario, loading } = useAuth()
 
   if (loading) {
     return null
   }
 
-  const allowed = canAccessPage(profile?.perfil, page)
+  const allowed = canAccessPage(usuario?.perfil, page)
 
   if (!allowed) {
     return <Navigate to="/app/dashboard" replace />

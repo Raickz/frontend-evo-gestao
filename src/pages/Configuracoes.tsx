@@ -9,7 +9,7 @@ import { Building2, Shield, Users, CreditCard, CheckCircle2 } from 'lucide-react
 
 export default function ConfiguracoesPage() {
   const { empresaId, empresa } = useEmpresa()
-  const { profile } = useAuth()
+  const { usuario } = useAuth()
   const [usuarios, setUsuarios] = useState<any[]>([])
   const [assinatura, setAssinatura] = useState<any>(null)
   const [loading, setLoading] = useState(true)
