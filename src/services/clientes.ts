@@ -48,4 +48,28 @@ export const ClientesService = {
       .select()
       .single()
   },
+
+  async search(empresaId: string, termo: string) {
+    const cleanTerm = termo.trim()
+    if (!cleanTerm) {
+      return this.list(empresaId)
+    }
+    // Search by nome, documento, or telefone using PostgREST ilike
+    return supabase
+      .from('clientes')
+      .select('*, vendedores(nome)')
+      .eq('empresa_id', empresaId)
+      .or(`nome.ilike.%${cleanTerm}%,documento.ilike.%${cleanTerm}%,telefone.ilike.%${cleanTerm}%`)
+      .order('nome', { ascending: true })
+  },
+
+  async toggleAtivo(empresaId: string, id: string, ativo: boolean) {
+    return supabase
+      .from('clientes')
+      .update({ ativo })
+      .eq('empresa_id', empresaId)
+      .eq('id', id)
+      .select()
+      .single()
+  },
 }
