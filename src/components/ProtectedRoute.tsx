@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
 import { Building2, Loader2 } from 'lucide-react'
+import { canAccessPage, AppPage } from '@/lib/permissions'
 
 interface ProtectedRouteProps {
   children: ReactNode
@@ -34,6 +35,31 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!user) {
     return <Navigate to="/auth" replace />
+  }
+
+  return <>{children}</>
+}
+
+interface RoleRouteGuardProps {
+  page: AppPage
+  children: ReactNode
+}
+
+/**
+ * Guarda de rota baseado na matriz explícita de permissões do usuário.
+ * Se o perfil não tiver acesso à página solicitada, redireciona para o Dashboard.
+ */
+export function RoleRouteGuard({ page, children }: RoleRouteGuardProps) {
+  const { profile, loading } = useAuth()
+
+  if (loading) {
+    return null
+  }
+
+  const allowed = canAccessPage(profile?.perfil, page)
+
+  if (!allowed) {
+    return <Navigate to="/app/dashboard" replace />
   }
 
   return <>{children}</>

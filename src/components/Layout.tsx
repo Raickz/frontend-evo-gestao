@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useEmpresa } from '@/hooks/use-empresa'
-import { formatPerfilBadge } from '@/lib/permissions'
+import { formatPerfilBadge, canAccessPage, AppPage } from '@/lib/permissions'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -35,47 +35,54 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-interface NavSection {
+interface NavItem {
   title: string
-  items: {
-    title: string
-    href: string
-    icon: React.ElementType
-    badge?: string
-  }[]
+  href: string
+  icon: React.ElementType
+  page: AppPage
+  badge?: string
 }
 
-const navSections: NavSection[] = [
+interface NavSection {
+  title: string
+  items: NavItem[]
+}
+
+const ALL_NAV_SECTIONS: NavSection[] = [
   {
     title: 'Visão Geral',
-    items: [{ title: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard }],
+    items: [
+      { title: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard, page: 'dashboard' },
+    ],
   },
   {
     title: 'Comercial',
     items: [
-      { title: 'Clientes', href: '/app/clientes', icon: Users },
-      { title: 'Vendas', href: '/app/vendas', icon: ShoppingCart },
-      { title: 'Pedidos', href: '/app/pedidos', icon: ClipboardList },
+      { title: 'Clientes', href: '/app/clientes', icon: Users, page: 'clientes' },
+      { title: 'Vendas', href: '/app/vendas', icon: ShoppingCart, page: 'vendas' },
+      { title: 'Pedidos', href: '/app/pedidos', icon: ClipboardList, page: 'pedidos' },
     ],
   },
   {
     title: 'Cadastros',
     items: [
-      { title: 'Produtos', href: '/app/produtos', icon: Package },
-      { title: 'Estoque', href: '/app/estoque', icon: Boxes },
-      { title: 'Vendedores', href: '/app/vendedores', icon: UserCheck },
+      { title: 'Produtos', href: '/app/produtos', icon: Package, page: 'produtos' },
+      { title: 'Estoque', href: '/app/estoque', icon: Boxes, page: 'estoque' },
+      { title: 'Vendedores', href: '/app/vendedores', icon: UserCheck, page: 'vendedores' },
     ],
   },
   {
     title: 'Financeiro',
     items: [
-      { title: 'Financeiro', href: '/app/financeiro', icon: CircleDollarSign },
-      { title: 'Comissões', href: '/app/comissoes', icon: Percent },
+      { title: 'Financeiro', href: '/app/financeiro', icon: CircleDollarSign, page: 'financeiro' },
+      { title: 'Comissões', href: '/app/comissoes', icon: Percent, page: 'comissoes' },
     ],
   },
   {
     title: 'Sistema',
-    items: [{ title: 'Configurações', href: '/app/configuracoes', icon: Settings }],
+    items: [
+      { title: 'Configurações', href: '/app/configuracoes', icon: Settings, page: 'configuracoes' },
+    ],
   },
 ]
 
@@ -94,8 +101,20 @@ export default function Layout() {
 
   const roleInfo = formatPerfilBadge(profile?.perfil)
 
+  // Filtragem das seções e itens conforme perfil do usuário
+  const visibleNavSections = useMemo(() => {
+    return ALL_NAV_SECTIONS.map((section) => ({
+      ...section,
+      items: section.items.filter((item) => canAccessPage(profile?.perfil, item.page)),
+    })).filter((section) => section.items.length > 0)
+  }, [profile?.perfil])
+
+  const canAccessSettings = useMemo(() => {
+    return canAccessPage(profile?.perfil, 'configuracoes')
+  }, [profile?.perfil])
+
   const currentRouteName = () => {
-    for (const section of navSections) {
+    for (const section of ALL_NAV_SECTIONS) {
       for (const item of section.items) {
         if (location.pathname.startsWith(item.href)) {
           return item.title
@@ -164,7 +183,7 @@ export default function Layout() {
 
         {/* Navigation Links */}
         <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6 custom-scrollbar">
-          {navSections.map((section) => (
+          {visibleNavSections.map((section) => (
             <div key={section.title} className="space-y-1">
               {!collapsed ? (
                 <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400/80 mb-2">
@@ -314,11 +333,15 @@ export default function Layout() {
                     </div>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/app/configuracoes')}>
-                  <Settings className="w-4 h-4 mr-2" />
-                  Configurações da Empresa
-                </DropdownMenuItem>
+                {canAccessSettings && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/app/configuracoes')}>
+                      <Settings className="w-4 h-4 mr-2" />
+                      Configurações da Empresa
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-red-600 font-medium">
                   <LogOut className="w-4 h-4 mr-2" />

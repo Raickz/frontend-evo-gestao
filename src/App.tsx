@@ -4,7 +4,7 @@ import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AuthProvider } from '@/hooks/use-auth'
 import { EmpresaProvider } from '@/hooks/use-empresa'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { ProtectedRoute, RoleRouteGuard } from '@/components/ProtectedRoute'
 import Layout from '@/components/Layout'
 
 // Pages
@@ -45,16 +45,86 @@ const App = () => (
               }
             >
               <Route index element={<Navigate to="/app/dashboard" replace />} />
-              <Route path="dashboard" element={<DashboardPage />} />
-              <Route path="clientes" element={<ClientesPage />} />
-              <Route path="produtos" element={<ProdutosPage />} />
-              <Route path="estoque" element={<EstoquePage />} />
-              <Route path="vendas" element={<VendasPage />} />
-              <Route path="pedidos" element={<PedidosPage />} />
-              <Route path="financeiro" element={<FinanceiroPage />} />
-              <Route path="vendedores" element={<VendedoresPage />} />
-              <Route path="comissoes" element={<ComissoesPage />} />
-              <Route path="configuracoes" element={<ConfiguracoesPage />} />
+              <Route
+                path="dashboard"
+                element={
+                  <RoleRouteGuard page="dashboard">
+                    <DashboardPage />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
+                path="clientes"
+                element={
+                  <RoleRouteGuard page="clientes">
+                    <ClientesPage />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
+                path="produtos"
+                element={
+                  <RoleRouteGuard page="produtos">
+                    <ProdutosPage />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
+                path="estoque"
+                element={
+                  <RoleRouteGuard page="estoque">
+                    <EstoquePage />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
+                path="vendas"
+                element={
+                  <RoleRouteGuard page="vendas">
+                    <VendasPage />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
+                path="pedidos"
+                element={
+                  <RoleRouteGuard page="pedidos">
+                    <PedidosPage />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
+                path="financeiro"
+                element={
+                  <RoleRouteGuard page="financeiro">
+                    <FinanceiroPage />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
+                path="vendedores"
+                element={
+                  <RoleRouteGuard page="vendedores">
+                    <VendedoresPage />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
+                path="comissoes"
+                element={
+                  <RoleRouteGuard page="comissoes">
+                    <ComissoesPage />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
+                path="configuracoes"
+                element={
+                  <RoleRouteGuard page="configuracoes">
+                    <ConfiguracoesPage />
+                  </RoleRouteGuard>
+                }
+              />
             </Route>
 
             {/* 404 Route */}
