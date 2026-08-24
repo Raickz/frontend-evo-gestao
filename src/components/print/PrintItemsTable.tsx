@@ -1,5 +1,7 @@
 import React from 'react'
 
+import { Package } from 'lucide-react'
+
 export interface PrintItem {
   id?: string | number
   nome: string
@@ -9,12 +11,14 @@ export interface PrintItem {
   preco_unitario: number
   desconto?: number | null
   subtotal: number
+  foto_url?: string | null
 }
 
 interface PrintItemsTableProps {
   itens: PrintItem[]
   precoLabel?: string
   hasDesconto?: boolean
+  showPhotos?: boolean
 }
 
 const formatCurrency = (val: number | null | undefined): string => {
@@ -37,11 +41,14 @@ export const PrintItemsTable: React.FC<PrintItemsTableProps> = ({
   itens,
   precoLabel = 'Preço Unit.',
   hasDesconto,
+  showPhotos = false,
 }) => {
   const showDiscountCol =
     hasDesconto !== undefined
       ? hasDesconto
       : itens.some((it) => it.desconto && Number(it.desconto) > 0)
+
+  const totalCols = (showDiscountCol ? 8 : 7) + (showPhotos ? 1 : 0)
 
   return (
     <div className="w-full my-6 overflow-hidden rounded border border-slate-300 print:border-black">
@@ -49,8 +56,9 @@ export const PrintItemsTable: React.FC<PrintItemsTableProps> = ({
         <thead>
           <tr className="bg-slate-100 text-slate-800 uppercase font-semibold border-b border-slate-300 print:bg-slate-100 print:text-black print:border-black">
             <th className="py-2.5 px-3 w-12 text-center">Item</th>
-            <th className="py-2.5 px-3">Produto / Descrição</th>
             <th className="py-2.5 px-3 w-20 text-center">Código</th>
+            {showPhotos && <th className="py-2.5 px-2 w-14 text-center">Foto</th>}
+            <th className="py-2.5 px-3">Produto / Descrição</th>
             <th className="py-2.5 px-3 w-14 text-center">UN</th>
             <th className="py-2.5 px-3 w-16 text-right">Qtd</th>
             <th className="py-2.5 px-3 w-24 text-right">{precoLabel}</th>
@@ -61,10 +69,7 @@ export const PrintItemsTable: React.FC<PrintItemsTableProps> = ({
         <tbody className="divide-y divide-slate-200 print:divide-slate-300">
           {itens.length === 0 ? (
             <tr>
-              <td
-                colSpan={showDiscountCol ? 8 : 7}
-                className="py-6 text-center text-slate-500 italic"
-              >
+              <td colSpan={totalCols} className="py-6 text-center text-slate-500 italic">
                 Nenhum item registrado.
               </td>
             </tr>
@@ -74,32 +79,48 @@ export const PrintItemsTable: React.FC<PrintItemsTableProps> = ({
                 key={item.id || idx}
                 className={idx % 2 === 1 ? 'bg-slate-50/70 print:bg-slate-50/50' : 'bg-white'}
               >
-                <td className="py-2 px-3 text-center text-slate-500 font-mono text-[11px] print:text-slate-700">
+                <td className="py-2 px-3 text-center text-slate-500 font-mono text-[11px] print:text-slate-700 align-middle">
                   {String(idx + 1).padStart(2, '0')}
                 </td>
-                <td className="py-2 px-3 font-medium text-slate-900 print:text-black">
-                  {item.nome}
-                </td>
-                <td className="py-2 px-3 text-center text-slate-600 font-mono text-[11px] print:text-slate-800">
+                <td className="py-2 px-3 text-center text-slate-600 font-mono text-[11px] print:text-slate-800 align-middle">
                   {item.codigo || '-'}
                 </td>
-                <td className="py-2 px-3 text-center text-slate-600 uppercase text-[11px] print:text-slate-800">
+                {showPhotos && (
+                  <td className="py-1.5 px-2 text-center align-middle">
+                    <div className="w-10 h-10 mx-auto rounded border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center print:border-slate-300">
+                      {item.foto_url ? (
+                        <img
+                          src={item.foto_url}
+                          alt={item.nome}
+                          className="w-full h-full object-contain max-h-[40px] max-w-[40px]"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <Package className="w-4 h-4 text-slate-300 print:text-slate-400" />
+                      )}
+                    </div>
+                  </td>
+                )}
+                <td className="py-2 px-3 font-medium text-slate-900 print:text-black align-middle">
+                  {item.nome}
+                </td>
+                <td className="py-2 px-3 text-center text-slate-600 uppercase text-[11px] print:text-slate-800 align-middle">
                   {item.unidade || 'UN'}
                 </td>
-                <td className="py-2 px-3 text-right font-medium text-slate-900 tabular-nums print:text-black">
+                <td className="py-2 px-3 text-right font-medium text-slate-900 tabular-nums print:text-black align-middle">
                   {formatQuantity(item.quantidade)}
                 </td>
-                <td className="py-2 px-3 text-right text-slate-700 tabular-nums print:text-black">
+                <td className="py-2 px-3 text-right text-slate-700 tabular-nums print:text-black align-middle">
                   {formatCurrency(item.preco_unitario)}
                 </td>
                 {showDiscountCol && (
-                  <td className="py-2 px-3 text-right text-red-600 tabular-nums print:text-black font-medium">
+                  <td className="py-2 px-3 text-right text-red-600 tabular-nums print:text-black font-medium align-middle">
                     {item.desconto && Number(item.desconto) > 0
                       ? `-${formatCurrency(item.desconto)}`
                       : '-'}
                   </td>
                 )}
-                <td className="py-2 px-3 text-right font-semibold text-slate-900 tabular-nums print:text-black">
+                <td className="py-2 px-3 text-right font-semibold text-slate-900 tabular-nums print:text-black align-middle">
                   {formatCurrency(item.subtotal)}
                 </td>
               </tr>

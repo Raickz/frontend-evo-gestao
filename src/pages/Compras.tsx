@@ -91,6 +91,7 @@ export default function ComprasPage() {
   const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
   const [loadingDetalhes, setLoadingDetalhes] = useState(false)
   const [printCompraAberto, setPrintCompraAberto] = useState(false)
+  const [showFotosPrint, setShowFotosPrint] = useState(false)
 
   const abrirDetalhes = async (compraId: string) => {
     if (!empresaId) return
@@ -2042,6 +2043,8 @@ export default function ComprasPage() {
           open={printCompraAberto}
           onOpenChange={setPrintCompraAberto}
           title={`Impressão - Compra #${compraDetalhe.numero}`}
+          showPhotos={showFotosPrint}
+          onShowPhotosChange={setShowFotosPrint}
         >
           <CompraPrintDocument
             empresa={{
@@ -2053,6 +2056,7 @@ export default function ComprasPage() {
               logo_url: empresa?.logo_url,
             }}
             compra={compraDetalhe}
+            showPhotos={showFotosPrint}
           />
         </PrintPreviewDialog>
       )}

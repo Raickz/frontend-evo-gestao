@@ -7,13 +7,17 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Printer, X } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Printer, X, Image as ImageIcon } from 'lucide-react'
 
 interface PrintPreviewDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   title?: string
   children: React.ReactNode
+  showPhotos?: boolean
+  onShowPhotosChange?: (value: boolean) => void
 }
 
 export const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({
@@ -21,6 +25,8 @@ export const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({
   onOpenChange,
   title = 'Visualização de Impressão',
   children,
+  showPhotos = false,
+  onShowPhotosChange,
 }) => {
   const handlePrint = () => {
     window.print()
@@ -29,7 +35,7 @@ export const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[92vh] flex flex-col p-0 overflow-hidden bg-slate-100 border-slate-300">
-        <DialogHeader className="p-4 bg-white border-b border-slate-200 flex flex-row items-center justify-between space-y-0">
+        <DialogHeader className="p-4 bg-white border-b border-slate-200 flex flex-row items-center justify-between space-y-0 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-md bg-teal-50 text-teal-700">
               <Printer className="w-5 h-5" />
@@ -37,7 +43,24 @@ export const PrintPreviewDialog: React.FC<PrintPreviewDialogProps> = ({
             <DialogTitle className="text-base font-bold text-slate-800">{title}</DialogTitle>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            {onShowPhotosChange && (
+              <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 text-xs">
+                <ImageIcon className="w-3.5 h-3.5 text-slate-500" />
+                <Label
+                  htmlFor="toggle-print-photos"
+                  className="text-xs font-medium text-slate-700 cursor-pointer select-none"
+                >
+                  Imprimir com fotos dos produtos
+                </Label>
+                <Switch
+                  id="toggle-print-photos"
+                  checked={showPhotos}
+                  onCheckedChange={onShowPhotosChange}
+                />
+              </div>
+            )}
+
             <Button
               onClick={handlePrint}
               className="bg-teal-700 hover:bg-teal-800 text-white gap-2 h-9 px-4 font-medium shadow-sm"

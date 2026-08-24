@@ -180,7 +180,7 @@ export const ComprasService = {
     return supabase
       .from('compras')
       .select(
-        '*, fornecedores(*), itens_compra(*, produtos(id, nome, codigo, unidade, preco_custo, preco_venda))',
+        '*, fornecedores(*), itens_compra(*, produtos(id, nome, codigo, unidade, preco_custo, preco_venda, foto_url))',
       )
       .eq('empresa_id', empresaId)
       .eq('id', id)
@@ -301,7 +301,7 @@ export const ComprasService = {
     let query = supabase
       .from('produtos')
       .select(
-        'id, nome, codigo, codigo_barras, preco_custo, preco_venda, unidade, estoque_minimo, estoques(quantidade)',
+        'id, nome, codigo, codigo_barras, preco_custo, preco_venda, unidade, estoque_minimo, foto_url, estoques(quantidade)',
       )
       .eq('empresa_id', empresaId)
       .eq('ativo', true)

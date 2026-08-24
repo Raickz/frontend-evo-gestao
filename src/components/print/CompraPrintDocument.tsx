@@ -25,6 +25,7 @@ interface ItemCompraData {
     nome: string
     codigo?: string | null
     unidade?: string | null
+    foto_url?: string | null
   } | null
 }
 
@@ -43,6 +44,7 @@ interface CompraDocumentProps {
     fornecedores?: FornecedorData | null
     itens_compra?: ItemCompraData[]
   }
+  showPhotos?: boolean
 }
 
 const statusLabels: Record<string, { title: string; badgeLabel: string; className: string }> = {
@@ -63,7 +65,11 @@ const statusLabels: Record<string, { title: string; badgeLabel: string; classNam
   },
 }
 
-export const CompraPrintDocument: React.FC<CompraDocumentProps> = ({ empresa, compra }) => {
+export const CompraPrintDocument: React.FC<CompraDocumentProps> = ({
+  empresa,
+  compra,
+  showPhotos = false,
+}) => {
   const statusMeta = statusLabels[compra.status] || {
     title: `ORDEM DE COMPRA (${compra.status.toUpperCase()})`,
     badgeLabel: compra.status.toUpperCase(),
@@ -78,6 +84,7 @@ export const CompraPrintDocument: React.FC<CompraDocumentProps> = ({ empresa, co
     quantidade: Number(it.quantidade || 0),
     preco_unitario: Number(it.preco_unitario || 0),
     subtotal: Number(it.subtotal || 0),
+    foto_url: it.produtos?.foto_url || null,
   }))
 
   const subtotal = itensTable.reduce(
@@ -173,7 +180,12 @@ export const CompraPrintDocument: React.FC<CompraDocumentProps> = ({ empresa, co
       </div>
 
       {/* Itens */}
-      <PrintItemsTable itens={itensTable} precoLabel="Preço Custo" hasDesconto={false} />
+      <PrintItemsTable
+        itens={itensTable}
+        precoLabel="Preço Custo"
+        hasDesconto={false}
+        showPhotos={showPhotos}
+      />
 
       {/* Totais */}
       <PrintTotals

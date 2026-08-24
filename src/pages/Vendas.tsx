@@ -79,6 +79,7 @@ interface ProdutoOption {
   preco_custo: number
   unidade: string
   estoque_minimo: number
+  foto_url?: string | null
   estoques: { quantidade: number }[] | null
 }
 
@@ -99,6 +100,7 @@ export default function VendasPage() {
   const [vendaDetalhe, setVendaDetalhe] = useState<any | null>(null)
   const [contasReceberVenda, setContasReceberVenda] = useState<any[] | null>(null)
   const [loadingPrint, setLoadingPrint] = useState(false)
+  const [showFotosPrint, setShowFotosPrint] = useState(false)
 
   // Filtros de listagem
   const [filtroSearch, setFiltroSearch] = useState('')
@@ -963,34 +965,48 @@ export default function VendasPage() {
                           }`}
                         >
                           <div>
-                            <div className="flex items-start justify-between gap-2">
-                              <h4
-                                className="font-bold text-slate-900 text-xs line-clamp-1"
-                                title={prod.nome}
-                              >
-                                {prod.nome}
-                              </h4>
-                              {prod.codigo && (
-                                <span className="text-[10px] font-mono text-slate-400 bg-slate-100 px-1 py-0.5 rounded shrink-0">
-                                  {prod.codigo}
-                                </span>
+                            <div className="flex items-start gap-2.5">
+                              {prod.foto_url && (
+                                <div className="w-12 h-12 rounded-lg border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center shrink-0">
+                                  <img
+                                    src={prod.foto_url}
+                                    alt={prod.nome}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                  />
+                                </div>
                               )}
-                            </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2">
+                                  <h4
+                                    className="font-bold text-slate-900 text-xs line-clamp-1"
+                                    title={prod.nome}
+                                  >
+                                    {prod.nome}
+                                  </h4>
+                                  {prod.codigo && (
+                                    <span className="text-[10px] font-mono text-slate-400 bg-slate-100 px-1 py-0.5 rounded shrink-0">
+                                      {prod.codigo}
+                                    </span>
+                                  )}
+                                </div>
 
-                            <div className="flex items-center gap-2 mt-2">
-                              <span className="text-[11px] text-slate-500">Estoque:</span>
-                              <Badge
-                                variant="outline"
-                                className={`text-[10px] px-1.5 py-0 ${
-                                  isZerado
-                                    ? 'bg-rose-50 text-rose-700 border-rose-200'
-                                    : isBaixo
-                                      ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                      : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                }`}
-                              >
-                                {estoqueAtual} {prod.unidade || 'UN'}
-                              </Badge>
+                                <div className="flex items-center gap-2 mt-1.5">
+                                  <span className="text-[11px] text-slate-500">Estoque:</span>
+                                  <Badge
+                                    variant="outline"
+                                    className={`text-[10px] px-1.5 py-0 ${
+                                      isZerado
+                                        ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                        : isBaixo
+                                          ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                    }`}
+                                  >
+                                    {estoqueAtual} {prod.unidade || 'UN'}
+                                  </Badge>
+                                </div>
+                              </div>
                             </div>
                           </div>
 
@@ -1472,6 +1488,8 @@ export default function VendasPage() {
           open={printVendaAberto}
           onOpenChange={setPrintVendaAberto}
           title={`Impressão - Venda #${vendaDetalhe.numero}`}
+          showPhotos={showFotosPrint}
+          onShowPhotosChange={setShowFotosPrint}
         >
           <VendaPrintDocument
             empresa={{
@@ -1484,6 +1502,7 @@ export default function VendasPage() {
             }}
             venda={vendaDetalhe}
             contasReceber={contasReceberVenda}
+            showPhotos={showFotosPrint}
           />
         </PrintPreviewDialog>
       )}

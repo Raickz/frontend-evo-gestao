@@ -30,6 +30,7 @@ interface ItemVendaData {
     nome: string
     codigo?: string | null
     unidade?: string | null
+    foto_url?: string | null
   } | null
 }
 
@@ -62,6 +63,7 @@ interface VendaDocumentProps {
     } | null
   }
   contasReceber?: ContaReceberData[] | null
+  showPhotos?: boolean
 }
 
 const formatCurrency = (val: number | null | undefined): string => {
@@ -77,6 +79,7 @@ export const VendaPrintDocument: React.FC<VendaDocumentProps> = ({
   empresa,
   venda,
   contasReceber,
+  showPhotos = false,
 }) => {
   const itensTable: PrintItem[] = (venda.itens_venda || []).map((it) => ({
     id: it.id,
@@ -87,6 +90,7 @@ export const VendaPrintDocument: React.FC<VendaDocumentProps> = ({
     preco_unitario: Number(it.preco_unitario || 0),
     desconto: it.desconto ? Number(it.desconto) : 0,
     subtotal: Number(it.subtotal || 0),
+    foto_url: it.produtos?.foto_url || null,
   }))
 
   const totalDesconto =
@@ -187,7 +191,7 @@ export const VendaPrintDocument: React.FC<VendaDocumentProps> = ({
       </div>
 
       {/* Itens */}
-      <PrintItemsTable itens={itensTable} precoLabel="Preço Venda" />
+      <PrintItemsTable itens={itensTable} precoLabel="Preço Venda" showPhotos={showPhotos} />
 
       {/* Totais & Detalhes de Pagamento */}
       <PrintTotals

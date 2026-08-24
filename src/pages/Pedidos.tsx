@@ -439,6 +439,7 @@ export default function PedidosPage() {
   const [vendaRelacionada, setVendaRelacionada] = useState<any | null>(null)
   const [loadingDetalhes, setLoadingDetalhes] = useState(false)
   const [printPreviewAberto, setPrintPreviewAberto] = useState(false)
+  const [showFotosPrint, setShowFotosPrint] = useState(false)
 
   const abrirDetalhes = async (pedidoId: string) => {
     if (!empresaId) return
@@ -783,6 +784,8 @@ export default function PedidosPage() {
             open={printPreviewAberto}
             onOpenChange={setPrintPreviewAberto}
             title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
           >
             <PedidoPrintDocument
               empresa={{
@@ -795,6 +798,7 @@ export default function PedidosPage() {
               }}
               pedido={pedidoDetalhe}
               vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
             />
           </PrintPreviewDialog>
         )}

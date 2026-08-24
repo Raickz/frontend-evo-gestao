@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { PageHeader, EmptyState, TableSkeleton, ErrorState } from '@/components/common/CommonUI'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,6 +31,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { useEmpresa } from '@/hooks/use-empresa'
+import { supabase } from '@/lib/supabase/client'
 import { ProdutosService, Produto, Categoria, Fornecedor } from '@/services/produtos'
 import { toast } from 'sonner'
 import {
@@ -44,6 +45,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
+  Upload,
+  Trash2,
+  ImageIcon,
 } from 'lucide-react'
 
 const UNIDADES_MEDIDA = [
@@ -76,6 +80,7 @@ interface FormState {
   estoque_minimo: string
   estoque_inicial: string
   descricao: string
+  foto_url: string | null
 }
 
 const initialFormState: FormState = {
@@ -89,6 +94,7 @@ const initialFormState: FormState = {
   estoque_minimo: '0',
   estoque_inicial: '0',
   descricao: '',
+  foto_url: null,
 }
 
 type StatusFilter = 'todos' | 'ativos' | 'inativos'
@@ -114,6 +120,13 @@ export default function ProdutosPage() {
   const [formData, setFormData] = useState<FormState>(initialFormState)
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
+
+  // Foto state
+  const [selectedFotoFile, setSelectedFotoFile] = useState<File | null>(null)
+  const [fotoPreviewUrl, setFotoPreviewUrl] = useState<string | null>(null)
+  const [fotoRemovida, setFotoRemovida] = useState(false)
+  const [uploadingFoto, setUploadingFoto] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   // Toggle ativo state
   const [confirmToggleProduto, setConfirmToggleProduto] = useState<ProdutoComRelacoes | null>(null)
@@ -195,6 +208,9 @@ export default function ProdutosPage() {
     setEditingProduto(null)
     setFormData(initialFormState)
     setFormErrors({})
+    setSelectedFotoFile(null)
+    setFotoPreviewUrl(null)
+    setFotoRemovida(false)
     setDialogOpen(true)
     loadAuxiliaryData()
   }
@@ -222,10 +238,48 @@ export default function ProdutosPage() {
           : '0',
       estoque_inicial: '0',
       descricao: produto.descricao || '',
+      foto_url: produto.foto_url || null,
     })
+    setSelectedFotoFile(null)
+    setFotoPreviewUrl(produto.foto_url || null)
+    setFotoRemovida(false)
     setFormErrors({})
     setDialogOpen(true)
     loadAuxiliaryData()
+  }
+
+  // Foto handlers
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validar tipo
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Formato inválido! Envie uma imagem JPG, PNG ou WEBP.')
+      return
+    }
+
+    // Validar tamanho (5MB)
+    const maxSize = 5 * 1024 * 1024
+    if (file.size > maxSize) {
+      toast.error('A imagem deve ter no máximo 5MB.')
+      return
+    }
+
+    setSelectedFotoFile(file)
+    setFotoRemovida(false)
+    const localUrl = URL.createObjectURL(file)
+    setFotoPreviewUrl(localUrl)
+  }
+
+  const handleRemoverFoto = () => {
+    setSelectedFotoFile(null)
+    setFotoPreviewUrl(null)
+    setFotoRemovida(true)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
   // Validate form
@@ -282,6 +336,61 @@ export default function ProdutosPage() {
       const descricaoVal = formData.descricao.trim() || undefined
 
       if (editingProduto) {
+        let finalFotoUrl: string | null = editingProduto.foto_url || null
+
+        // 1. Se o usuário escolheu uma nova foto
+        if (selectedFotoFile) {
+          setUploadingFoto(true)
+          const ext = selectedFotoFile.name.split('.').pop()?.toLowerCase() || 'jpg'
+          const timestamp = Date.now()
+          const randomStr = Math.random().toString(36).substring(2, 8)
+          const storagePath = `${empresaId}/produtos/${editingProduto.id}/${timestamp}-${randomStr}.${ext}`
+
+          const { error: uploadErr } = await supabase.storage
+            .from('produtos')
+            .upload(storagePath, selectedFotoFile, {
+              cacheControl: '3600',
+              upsert: true,
+            })
+
+          if (uploadErr) {
+            throw new Error(`Falha no upload da foto: ${uploadErr.message}`)
+          }
+
+          const { data: publicUrlData } = supabase.storage
+            .from('produtos')
+            .getPublicUrl(storagePath)
+
+          finalFotoUrl = publicUrlData.publicUrl
+
+          // Tentar remover foto antiga se existia
+          if (editingProduto.foto_url) {
+            try {
+              const urlObj = new URL(editingProduto.foto_url)
+              const pathPart = urlObj.pathname.split('/produtos/')[1]
+              if (pathPart) {
+                await supabase.storage.from('produtos').remove([decodeURIComponent(pathPart)])
+              }
+            } catch {
+              // Remoção de arquivo antigo silenciosa se falhar
+            }
+          }
+        } else if (fotoRemovida) {
+          // Remover foto antiga se existia
+          if (editingProduto.foto_url) {
+            try {
+              const urlObj = new URL(editingProduto.foto_url)
+              const pathPart = urlObj.pathname.split('/produtos/')[1]
+              if (pathPart) {
+                await supabase.storage.from('produtos').remove([decodeURIComponent(pathPart)])
+              }
+            } catch {
+              // Remoção silenciosa
+            }
+          }
+          finalFotoUrl = null
+        }
+
         const payload = {
           nome: formData.nome.trim(),
           codigo: formData.codigo.trim() || null,
@@ -298,12 +407,14 @@ export default function ProdutosPage() {
           preco_venda: parseFloat(formData.preco_venda) || 0,
           estoque_minimo: parseFloat(formData.estoque_minimo) || 0,
           descricao: formData.descricao.trim() || null,
+          foto_url: finalFotoUrl,
         }
 
         const { error: err } = await ProdutosService.update(empresaId, editingProduto.id, payload)
         if (err) throw err
         toast.success('Produto atualizado com sucesso!')
       } else {
+        // Criar produto via RPC
         const { data: rpcRes, error: err } = await ProdutosService.createViaRpc({
           nome: formData.nome.trim(),
           codigo: codigoVal,
@@ -318,11 +429,49 @@ export default function ProdutosPage() {
         })
         if (err) throw err
 
-        // If RPC returned an error object inside json
-        if (rpcRes && typeof rpcRes === 'object' && 'sucesso' in (rpcRes as Record<string, any>)) {
-          const resObj = rpcRes as { sucesso: boolean; erro?: string }
+        // Se RPC retornou sucesso
+        let newProdutoId: string | null = null
+        if (rpcRes && typeof rpcRes === 'object') {
+          const resObj = rpcRes as Record<string, any>
           if (resObj.sucesso === false) {
             throw new Error(resObj.erro || 'Falha ao cadastrar produto via RPC.')
+          }
+          newProdutoId = resObj.produto_id
+        }
+
+        // Se uma foto foi selecionada na criação, fazer upload agora usando o ID gerado
+        if (selectedFotoFile && newProdutoId) {
+          try {
+            setUploadingFoto(true)
+            const ext = selectedFotoFile.name.split('.').pop()?.toLowerCase() || 'jpg'
+            const timestamp = Date.now()
+            const randomStr = Math.random().toString(36).substring(2, 8)
+            const storagePath = `${empresaId}/produtos/${newProdutoId}/${timestamp}-${randomStr}.${ext}`
+
+            const { error: uploadErr } = await supabase.storage
+              .from('produtos')
+              .upload(storagePath, selectedFotoFile, {
+                cacheControl: '3600',
+                upsert: true,
+              })
+
+            if (!uploadErr) {
+              const { data: publicUrlData } = supabase.storage
+                .from('produtos')
+                .getPublicUrl(storagePath)
+
+              if (publicUrlData.publicUrl) {
+                await ProdutosService.update(empresaId, newProdutoId, {
+                  foto_url: publicUrlData.publicUrl,
+                })
+              }
+            } else {
+              toast.error(
+                'O produto foi criado, mas houve uma falha no upload da imagem. Você pode adicioná-la editando o produto.',
+              )
+            }
+          } catch (uploadError: any) {
+            console.error('Erro no upload pós criação:', uploadError)
           }
         }
 
@@ -335,6 +484,7 @@ export default function ProdutosPage() {
       toast.error(err.message || 'Erro ao salvar produto. Verifique os dados e tente novamente.')
     } finally {
       setSubmitting(false)
+      setUploadingFoto(false)
     }
   }
 
@@ -467,6 +617,7 @@ export default function ProdutosPage() {
             <table className="w-full text-left text-xs text-slate-600">
               <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 <tr>
+                  <th className="py-3.5 px-3 w-14 text-center">Foto</th>
                   <th className="py-3.5 px-4">Código</th>
                   <th className="py-3.5 px-4">Produto</th>
                   <th className="py-3.5 px-4">Unidade</th>
@@ -486,7 +637,21 @@ export default function ProdutosPage() {
 
                   return (
                     <tr key={produto.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="py-3 px-4 font-mono text-slate-600">
+                      <td className="py-2.5 px-3 text-center align-middle">
+                        <div className="w-10 h-10 mx-auto rounded-lg border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center">
+                          {produto.foto_url ? (
+                            <img
+                              src={produto.foto_url}
+                              alt={produto.nome}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <Package className="w-4 h-4 text-slate-300" />
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 font-mono text-slate-600 align-middle">
                         {produto.codigo ? (
                           <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[11px]">
                             {produto.codigo}
@@ -495,7 +660,7 @@ export default function ProdutosPage() {
                           <span className="text-slate-400">-</span>
                         )}
                       </td>
-                      <td className="py-3 px-4 font-semibold text-slate-900">
+                      <td className="py-3 px-4 font-semibold text-slate-900 align-middle">
                         <div>{produto.nome}</div>
                         <div className="flex items-center gap-2 mt-0.5">
                           {produto.categorias?.nome && (
@@ -761,6 +926,66 @@ export default function ProdutosPage() {
               </div>
             </div>
 
+            {/* Foto do Produto */}
+            <div className="space-y-3 pt-1">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 pb-1 border-b border-slate-100">
+                Foto do Produto
+              </h4>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <div className="w-20 h-20 rounded-lg border-2 border-dashed border-slate-300 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                  {fotoPreviewUrl ? (
+                    <img
+                      src={fotoPreviewUrl}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center">
+                      <ImageIcon className="w-6 h-6 mb-1 text-slate-300" />
+                      <span className="text-[9px]">Sem foto</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-1.5 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="text-xs h-8 gap-1.5 bg-white border-slate-300 hover:bg-slate-50"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      {fotoPreviewUrl ? 'Alterar foto' : 'Adicionar foto'}
+                    </Button>
+                    {fotoPreviewUrl && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRemoverFoto}
+                        className="text-xs h-8 gap-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Remover foto
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    Formatos aceitos: JPG, PNG ou WEBP. Tamanho máximo: 5 MB.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Preços e Estoque */}
             <div className="space-y-3 pt-2">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 pb-1 border-b border-slate-100">
@@ -893,13 +1118,13 @@ export default function ProdutosPage() {
               </Button>
               <Button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || uploadingFoto}
                 className="bg-teal-700 hover:bg-teal-800 text-white text-xs h-9 flex items-center gap-1.5"
               >
-                {submitting ? (
+                {submitting || uploadingFoto ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Salvando...
+                    {uploadingFoto ? 'Enviando foto...' : 'Salvando...'}
                   </>
                 ) : (
                   'Salvar'

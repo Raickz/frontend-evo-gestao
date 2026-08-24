@@ -179,7 +179,7 @@ export const PedidosService = {
     return supabase
       .from('pedidos')
       .select(
-        '*, clientes(*), vendedores(*), itens_pedido(*, produtos(nome, codigo, unidade, preco_venda))',
+        '*, clientes(*), vendedores(*), itens_pedido(*, produtos(nome, codigo, unidade, preco_venda, foto_url))',
       )
       .eq('empresa_id', empresaId)
       .eq('id', id)
@@ -392,7 +392,7 @@ export const PedidosService = {
     let query = supabase
       .from('produtos')
       .select(
-        'id, nome, codigo, codigo_barras, preco_venda, preco_custo, unidade, estoque_minimo, estoques(quantidade)',
+        'id, nome, codigo, codigo_barras, preco_venda, preco_custo, unidade, estoque_minimo, foto_url, estoques(quantidade)',
       )
       .eq('empresa_id', empresaId)
       .eq('ativo', true)

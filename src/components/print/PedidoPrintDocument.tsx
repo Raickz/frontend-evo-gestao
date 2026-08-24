@@ -30,6 +30,7 @@ interface ItemPedidoData {
     nome: string
     codigo?: string | null
     unidade?: string | null
+    foto_url?: string | null
   } | null
 }
 
@@ -50,6 +51,7 @@ interface PedidoDocumentProps {
     numero?: number | string | null
     id?: string
   } | null
+  showPhotos?: boolean
 }
 
 const statusLabels: Record<string, { label: string; className: string }> = {
@@ -66,6 +68,7 @@ export const PedidoPrintDocument: React.FC<PedidoDocumentProps> = ({
   empresa,
   pedido,
   vendaRelacionada,
+  showPhotos = false,
 }) => {
   const isFaturado = pedido.status === 'faturado'
   const documentTitle = isFaturado ? 'PEDIDO FATURADO' : 'PEDIDO / ORÇAMENTO'
@@ -79,6 +82,7 @@ export const PedidoPrintDocument: React.FC<PedidoDocumentProps> = ({
     preco_unitario: Number(it.preco_unitario || 0),
     desconto: it.desconto ? Number(it.desconto) : 0,
     subtotal: Number(it.subtotal || 0),
+    foto_url: it.produtos?.foto_url || null,
   }))
 
   const totalDesconto = itensTable.reduce((acc, it) => acc + (it.desconto || 0), 0)
@@ -168,7 +172,7 @@ export const PedidoPrintDocument: React.FC<PedidoDocumentProps> = ({
       </div>
 
       {/* Itens */}
-      <PrintItemsTable itens={itensTable} precoLabel="Preço Unit." />
+      <PrintItemsTable itens={itensTable} precoLabel="Preço Unit." showPhotos={showPhotos} />
 
       {/* Totais */}
       <PrintTotals

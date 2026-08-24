@@ -144,7 +144,7 @@ export const VendasService = {
     let query = supabase
       .from('produtos')
       .select(
-        'id, nome, codigo, codigo_barras, preco_venda, preco_custo, unidade, estoque_minimo, estoques(quantidade)',
+        'id, nome, codigo, codigo_barras, preco_venda, preco_custo, unidade, estoque_minimo, foto_url, estoques(quantidade)',
       )
       .eq('empresa_id', empresaId)
       .eq('ativo', true)
