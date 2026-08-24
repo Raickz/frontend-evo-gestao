@@ -9,6 +9,131 @@ export type Database = {
   }
   public: {
     Tables: {
+      compras: {
+        Row: {
+          id: string
+          empresa_id: string
+          fornecedor_id: string
+          numero: number
+          total: number
+          status: string
+          observacoes: string | null
+          data_compra: string
+          forma_pagamento: string
+          vencimento: string | null
+          valor_pago: number
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          empresa_id: string
+          fornecedor_id: string
+          numero?: number
+          total?: number
+          status?: string
+          observacoes?: string | null
+          data_compra?: string
+          forma_pagamento?: string
+          vencimento?: string | null
+          valor_pago?: number
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          empresa_id?: string
+          fornecedor_id?: string
+          numero?: number
+          total?: number
+          status?: string
+          observacoes?: string | null
+          data_compra?: string
+          forma_pagamento?: string
+          vencimento?: string | null
+          valor_pago?: number
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'compras_empresa_id_fkey'
+            columns: ['empresa_id']
+            isOneToOne: false
+            referencedRelation: 'empresas'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'compras_fornecedor_id_fkey'
+            columns: ['fornecedor_id']
+            isOneToOne: false
+            referencedRelation: 'fornecedores'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'compras_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'usuarios'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      itens_compra: {
+        Row: {
+          id: string
+          empresa_id: string
+          compra_id: string
+          produto_id: string
+          quantidade: number
+          preco_unitario: number
+          subtotal: number
+        }
+        Insert: {
+          id?: string
+          empresa_id: string
+          compra_id: string
+          produto_id: string
+          quantidade: number
+          preco_unitario?: number
+          subtotal?: number
+        }
+        Update: {
+          id?: string
+          empresa_id?: string
+          compra_id?: string
+          produto_id?: string
+          quantidade?: number
+          preco_unitario?: number
+          subtotal?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'itens_compra_empresa_id_fkey'
+            columns: ['empresa_id']
+            isOneToOne: false
+            referencedRelation: 'empresas'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'itens_compra_compra_id_fkey'
+            columns: ['compra_id']
+            isOneToOne: false
+            referencedRelation: 'compras'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'itens_compra_produto_id_fkey'
+            columns: ['produto_id']
+            isOneToOne: false
+            referencedRelation: 'produtos'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       assinaturas: {
         Row: {
           created_at: string

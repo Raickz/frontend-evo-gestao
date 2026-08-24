@@ -441,7 +441,7 @@ export default function EstoquePage() {
             onClick={handleOpenModalEntrada}
             className="bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-sm font-medium text-xs h-9"
           >
-            <Plus className="w-4 h-4" />+ Nova Entrada
+            <Plus className="w-4 h-4" /> Nova Entrada
           </Button>
         }
       />

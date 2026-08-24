@@ -13,6 +13,7 @@ import DashboardPage from '@/pages/Dashboard'
 import ClientesPage from '@/pages/Clientes'
 import ProdutosPage from '@/pages/Produtos'
 import FornecedoresPage from '@/pages/Fornecedores'
+import ComprasPage from '@/pages/Compras'
 import EstoquePage from '@/pages/Estoque'
 import VendasPage from '@/pages/Vendas'
 import PedidosPage from '@/pages/Pedidos'
@@ -75,6 +76,14 @@ const App = () => (
                 element={
                   <RoleRouteGuard page="fornecedores">
                     <FornecedoresPage />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
+                path="compras"
+                element={
+                  <RoleRouteGuard page="compras">
+                    <ComprasPage />
                   </RoleRouteGuard>
                 }
               />

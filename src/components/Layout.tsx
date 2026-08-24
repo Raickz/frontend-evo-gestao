@@ -21,6 +21,8 @@ import {
   Search,
   ShieldCheck,
   ChevronLeft,
+  Layers,
+  Briefcase,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useEmpresa } from '@/hooks/use-empresa'
@@ -69,8 +71,9 @@ const ALL_NAV_SECTIONS: NavSection[] = [
     items: [
       { title: 'Produtos', href: '/app/produtos', icon: Package, page: 'produtos' },
       { title: 'Fornecedores', href: '/app/fornecedores', icon: Truck, page: 'fornecedores' },
-      { title: 'Estoque', href: '/app/estoque', icon: Boxes, page: 'estoque' },
-      { title: 'Vendedores', href: '/app/vendedores', icon: UserCheck, page: 'vendedores' },
+      { title: 'Compras', href: '/app/compras', icon: ShoppingCart, page: 'compras' },
+      { title: 'Estoque', href: '/app/estoque', icon: Layers, page: 'estoque' },
+      { title: 'Vendedores', href: '/app/vendedores', icon: Briefcase, page: 'vendedores' },
     ],
   },
   {

@@ -4,6 +4,8 @@ export type AppPage =
   | 'dashboard'
   | 'clientes'
   | 'produtos'
+  | 'fornecedores'
+  | 'compras'
   | 'estoque'
   | 'vendas'
   | 'pedidos'
@@ -11,16 +13,15 @@ export type AppPage =
   | 'vendedores'
   | 'comissoes'
   | 'configuracoes'
-  | 'fornecedores'
 
 /**
- * Matriz explícita de permissões por perfil (sem herança implícita).
- *
- * MASTER: acesso completo — Dashboard, Clientes, Produtos, Fornecedores, Estoque, Vendas, Pedidos, Financeiro, Vendedores, Comissões, Configurações
- * ADMIN: Dashboard, Clientes, Produtos, Fornecedores, Estoque, Vendas, Pedidos, Financeiro, Vendedores, Comissões, Configurações
- * GERENTE: Dashboard, Clientes, Produtos, Fornecedores, Estoque, Vendas, Pedidos, Financeiro, Comissões
- * VENDEDOR: Dashboard, Clientes, Vendas, Pedidos
- * OPERADOR: Dashboard, Produtos, Fornecedores, Estoque
+ * Mapeamento estrito de quais páginas cada papel pode acessar.
+ * Regras:
+ * MASTER: Acesso irrestrito a todas as páginas
+ * ADMIN: Dashboard, Clientes, Produtos, Fornecedores, Compras, Estoque, Vendas, Pedidos, Financeiro, Vendedores, Comissões, Configurações
+ * GERENTE: Dashboard, Clientes, Produtos, Fornecedores, Compras, Estoque, Vendas, Pedidos, Financeiro, Vendedores, Comissões
+ * VENDEDOR: Dashboard, Clientes, Produtos, Vendas, Pedidos, Comissões
+ * OPERADOR: Dashboard, Clientes, Fornecedores, Produtos, Compras, Estoque, Vendas, Pedidos
  */
 export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
   master: [
@@ -28,6 +29,7 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'clientes',
     'produtos',
     'fornecedores',
+    'compras',
     'estoque',
     'vendas',
     'pedidos',
@@ -41,6 +43,7 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'clientes',
     'produtos',
     'fornecedores',
+    'compras',
     'estoque',
     'vendas',
     'pedidos',
@@ -54,24 +57,37 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'clientes',
     'produtos',
     'fornecedores',
+    'compras',
     'estoque',
     'vendas',
     'pedidos',
     'financeiro',
+    'vendedores',
     'comissoes',
   ],
-  vendedor: ['dashboard', 'clientes', 'vendas', 'pedidos'],
-  operador: ['dashboard', 'produtos', 'fornecedores', 'estoque'],
+  operador: [
+    'dashboard',
+    'clientes',
+    'fornecedores',
+    'produtos',
+    'compras',
+    'estoque',
+    'vendas',
+    'pedidos',
+  ],
+  vendedor: ['dashboard', 'clientes', 'produtos', 'vendas', 'pedidos', 'comissoes'],
 }
 
 /**
  * Mapeamento de rotas/caminhos para identificador de página AppPage.
  */
 export const PATH_TO_PAGE_MAP: Record<string, AppPage> = {
+  '/app': 'dashboard',
   '/app/dashboard': 'dashboard',
   '/app/clientes': 'clientes',
   '/app/produtos': 'produtos',
   '/app/fornecedores': 'fornecedores',
+  '/app/compras': 'compras',
   '/app/estoque': 'estoque',
   '/app/vendas': 'vendas',
   '/app/pedidos': 'pedidos',
@@ -84,9 +100,9 @@ export const PATH_TO_PAGE_MAP: Record<string, AppPage> = {
 /**
  * Normaliza uma string de perfil para o tipo UserRole suportado.
  */
-export function normalizeRole(perfil?: string | null): UserRole | null {
+export function normalizeRole(perfil: string | null | undefined): UserRole | null {
   if (!perfil) return null
-  const normalized = perfil.trim().toLowerCase()
+  const normalized = perfil.toLowerCase().trim()
   if (['master', 'admin', 'gerente', 'vendedor', 'operador'].includes(normalized)) {
     return normalized as UserRole
   }
@@ -94,85 +110,49 @@ export function normalizeRole(perfil?: string | null): UserRole | null {
 }
 
 /**
- * Retorna se o perfil fornecido pode acessar determinada página.
+ * Verifica se um determinado perfil possui permissão para acessar uma página.
  */
 export function canAccessPage(perfil: string | null | undefined, page: AppPage | string): boolean {
   const role = normalizeRole(perfil)
   if (!role) return false
+  if (role === 'master') return true
 
-  // Se passou uma rota como '/app/clientes' ou 'clientes'
   const targetPage: AppPage | undefined =
-    PATH_TO_PAGE_MAP[page] ||
+    (PATH_TO_PAGE_MAP[page] as AppPage) ||
     (Object.values(PATH_TO_PAGE_MAP).includes(page as AppPage) ? (page as AppPage) : undefined)
 
   if (!targetPage) return false
 
-  const allowedPages = ROLE_PAGES[role]
+  const allowedPages = ROLE_PAGES[role] || []
   return allowedPages.includes(targetPage)
 }
 
 /**
- * Retorna o conjunto / array de páginas permitidas para o perfil.
+ * Retorna as páginas permitidas para o perfil.
  */
 export function getAllowedPages(perfil?: string | null): readonly AppPage[] {
   const role = normalizeRole(perfil)
   if (!role) return []
-  return ROLE_PAGES[role]
+  return ROLE_PAGES[role] || []
 }
 
-export const ROLE_HIERARCHY: Record<UserRole, number> = {
-  master: 5,
-  admin: 4,
-  gerente: 3,
-  vendedor: 2,
-  operador: 1,
-}
-
-export function hasMinimumRole(
-  userRole: string | undefined | null,
-  requiredRole: UserRole,
-): boolean {
-  const role = normalizeRole(userRole)
-  if (!role) return false
-  const userLevel = ROLE_HIERARCHY[role] || 0
-  const requiredLevel = ROLE_HIERARCHY[requiredRole] || 0
-  return userLevel >= requiredLevel
-}
-
-export function canManageUsers(perfil?: string | null): boolean {
-  return canAccessPage(perfil, 'vendedores') || canAccessPage(perfil, 'configuracoes')
-}
-
-export function canManageProducts(perfil?: string | null): boolean {
-  return canAccessPage(perfil, 'produtos')
-}
-
-export function canManageFinance(perfil?: string | null): boolean {
-  return canAccessPage(perfil, 'financeiro')
-}
-
-export function canMakeSales(perfil?: string | null): boolean {
-  return canAccessPage(perfil, 'vendas')
-}
-
-export function canManageStock(perfil?: string | null): boolean {
-  return canAccessPage(perfil, 'estoque')
-}
-
+/**
+ * Retorna label e cor para exibição do perfil do usuário.
+ */
 export function formatPerfilBadge(perfil?: string | null): { label: string; color: string } {
   const role = normalizeRole(perfil)
   switch (role) {
     case 'master':
-      return { label: 'Master', color: 'bg-purple-100 text-purple-800 border-purple-200' }
+      return { label: 'Master', color: 'bg-purple-100 text-purple-700 border-purple-200' }
     case 'admin':
-      return { label: 'Administrador', color: 'bg-teal-100 text-teal-800 border-teal-200' }
+      return { label: 'Administrador', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' }
     case 'gerente':
-      return { label: 'Gerente', color: 'bg-blue-100 text-blue-800 border-blue-200' }
-    case 'vendedor':
-      return { label: 'Vendedor', color: 'bg-amber-100 text-amber-800 border-amber-200' }
+      return { label: 'Gerente', color: 'bg-blue-100 text-blue-700 border-blue-200' }
     case 'operador':
-      return { label: 'Operador', color: 'bg-slate-100 text-slate-800 border-slate-200' }
+      return { label: 'Operador', color: 'bg-amber-100 text-amber-700 border-amber-200' }
+    case 'vendedor':
+      return { label: 'Vendedor', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' }
     default:
-      return { label: perfil || 'Usuário', color: 'bg-gray-100 text-gray-800 border-gray-200' }
+      return { label: perfil || 'Usuário', color: 'bg-slate-100 text-slate-700 border-slate-200' }
   }
 }
