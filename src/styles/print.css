@@ -1,0 +1,71 @@
+/* Print Stylesheet for EVO Gestão Documents */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 15mm;
+  }
+
+  /* Esconder tudo exceto o documento de impressão */
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 12px;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #print-document,
+  #print-document * {
+    visibility: visible;
+  }
+
+  #print-document {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Forçar fundo branco e texto preto */
+  .print-doc {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Prevenir quebras estranhas de página */
+  table {
+    page-break-inside: auto;
+    width: 100% !important;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-page-break-before {
+    page-break-before: always;
+  }
+}

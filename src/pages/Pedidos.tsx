@@ -50,7 +50,10 @@ import {
   CreditCard,
   ExternalLink,
   Loader2,
+  Printer,
 } from 'lucide-react'
+import { PrintPreviewDialog } from '@/components/print/PrintPreviewDialog'
+import { PedidoPrintDocument } from '@/components/print/PedidoPrintDocument'
 
 interface CartItem {
   produto_id: string
@@ -91,7 +94,7 @@ interface ProdutoOption {
 
 export default function PedidosPage() {
   const navigate = useNavigate()
-  const { empresaId } = useEmpresa()
+  const { empresaId, empresa } = useEmpresa()
   const { usuario } = useAuth()
 
   // Permissões
@@ -435,6 +438,7 @@ export default function PedidosPage() {
   const [pedidoDetalhe, setPedidoDetalhe] = useState<any | null>(null)
   const [vendaRelacionada, setVendaRelacionada] = useState<any | null>(null)
   const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printPreviewAberto, setPrintPreviewAberto] = useState(false)
 
   const abrirDetalhes = async (pedidoId: string) => {
     if (!empresaId) return
@@ -770,7 +774,32 @@ export default function PedidosPage() {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* PAGE HEADER */}
+        MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente') =======
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')PAGE HEADER */}
         <PageHeader
           title="Gestão de Pedidos & Orçamentos"
           description="Acompanhe orçamentos e pedidos comerciais antes da emissão e faturamento final."
@@ -791,7 +820,6 @@ export default function PedidosPage() {
             )
           }
         />
-
         {/* BARRA DE FILTROS */}
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
@@ -871,7 +899,6 @@ export default function PedidosPage() {
             </div>
           )}
         </div>
-
         {/* TABELA DE PEDIDOS OU ESTADOS */}
         {loading ? (
           <TableSkeleton rows={6} cols={6} />
@@ -887,7 +914,7 @@ export default function PedidosPage() {
                 : 'Crie orçamentos e pré-pedidos de clientes para aprovação comercial e acompanhamento.'
             }
             actionLabel={
-              temFiltroAtivo ? 'Limpar Filtros' : podeGerenciar ? '+ Novo Pedido' : undefined
+              temFiltroAtivo ? 'Limpar Filtros' : podeGerenciar ? 'Novo Pedido' : undefined
             }
             onAction={temFiltroAtivo ? limparFiltros : podeGerenciar ? abrirModalNovo : undefined}
           />
@@ -945,6 +972,20 @@ export default function PedidosPage() {
                               title="Ver Detalhes"
                             >
                               <Eye className="w-4 h-4" />
+                            </Button>
+
+                            {/* Botão Imprimir Direto da Listagem */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={async () => {
+                                await abrirDetalhes(ped.id)
+                                setPrintPreviewAberto(true)
+                              }}
+                              className="h-8 w-8 p-0 text-slate-500 hover:text-teal-700"
+                              title="Imprimir Pedido / Orçamento"
+                            >
+                              <Printer className="w-4 h-4" />
                             </Button>
 
                             {/* Botão Confirmar Pedido (Apenas status pendente e podeGerenciar) */}
@@ -1070,7 +1111,6 @@ export default function PedidosPage() {
             </div>
           </div>
         )}
-
         {/* =========================================================================
             MODAL 1: NOVO PEDIDO (UI COMPLETA COM CATÁLOGO E CARRINHO)
             ========================================================================= */}
@@ -1400,7 +1440,6 @@ export default function PedidosPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-
         {/* =========================================================================
             MODAL 2: DETALHES DO PEDIDO
             ========================================================================= */}
@@ -1593,6 +1632,17 @@ export default function PedidosPage() {
 
             <DialogFooter className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-2 justify-between items-center">
               <div className="flex items-center gap-2">
+                {/* Botão Imprimir Pedido */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPrintPreviewAberto(true)}
+                  className="text-xs border-slate-300 text-slate-700 hover:bg-slate-50 flex items-center gap-1.5"
+                >
+                  <Printer className="w-3.5 h-3.5 text-teal-700" />
+                  Imprimir
+                </Button>
+
                 {/* Botão Converter em Venda no modal (Apenas status faturado, sem venda vinculada e podeGerenciar) */}
                 {podeGerenciar && pedidoDetalhe?.status === 'faturado' && !vendaRelacionada && (
                   <Button
@@ -1631,7 +1681,6 @@ export default function PedidosPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-
         {/* =========================================================================
             MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')
             ========================================================================= */}
@@ -1729,7 +1778,6 @@ export default function PedidosPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-
         {/* =========================================================================
             MODAL GENÉRICO: CONFIRMAR / FATURAR PEDIDO
             ========================================================================= */}
@@ -1815,7 +1863,6 @@ export default function PedidosPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-
         {/* =========================================================================
             MODAL 4: CONVERTER PEDIDO EM VENDA
             ========================================================================= */}
@@ -1975,7 +2022,6 @@ export default function PedidosPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-
         {/* =========================================================================
             MODAL 5: DIALOG DE CONFIRMAÇÃO DE CONVERSÃO
             ========================================================================= */}
