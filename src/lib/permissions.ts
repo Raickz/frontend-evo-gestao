@@ -2,6 +2,7 @@ export type UserRole = 'master' | 'admin' | 'gerente' | 'vendedor' | 'operador'
 
 export type AppPage =
   | 'dashboard'
+  | 'relatorios'
   | 'clientes'
   | 'produtos'
   | 'fornecedores'
@@ -26,6 +27,7 @@ export type AppPage =
 export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
   master: [
     'dashboard',
+    'relatorios',
     'clientes',
     'produtos',
     'fornecedores',
@@ -40,6 +42,7 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
   ],
   admin: [
     'dashboard',
+    'relatorios',
     'clientes',
     'produtos',
     'fornecedores',
@@ -54,6 +57,7 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
   ],
   gerente: [
     'dashboard',
+    'relatorios',
     'clientes',
     'produtos',
     'fornecedores',
@@ -67,6 +71,7 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
   ],
   operador: [
     'dashboard',
+    'relatorios',
     'clientes',
     'fornecedores',
     'produtos',
@@ -84,6 +89,7 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
 export const PATH_TO_PAGE_MAP: Record<string, AppPage> = {
   '/app': 'dashboard',
   '/app/dashboard': 'dashboard',
+  '/app/relatorios': 'relatorios',
   '/app/clientes': 'clientes',
   '/app/produtos': 'produtos',
   '/app/fornecedores': 'fornecedores',

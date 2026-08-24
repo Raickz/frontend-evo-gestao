@@ -810,7 +810,7 @@ export default function ComprasPage() {
               onClick={abrirModalNovaCompra}
               className="bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-sm font-medium text-xs h-9"
             >
-              <Plus className="w-4 h-4" />+ Nova Compra
+              <Plus className="w-4 h-4" /> Nova Compra
             </Button>
           )
         }
@@ -993,7 +993,7 @@ export default function ComprasPage() {
               ? 'Nenhuma compra corresponde aos filtros informados. Ajuste os termos da busca.'
               : 'Cadastre ordens de compra a fornecedores para gerenciar estoque e contas a pagar.'
           }
-          actionLabel={temFiltroAtivo ? 'Limpar Filtros' : podeCriar ? '+ Nova Compra' : undefined}
+          actionLabel={temFiltroAtivo ? 'Limpar Filtros' : podeCriar ? 'Nova Compra' : undefined}
           onAction={temFiltroAtivo ? limparFiltros : podeCriar ? abrirModalNovaCompra : undefined}
         />
       ) : (

@@ -21,6 +21,7 @@ import FinanceiroPage from '@/pages/Financeiro'
 import VendedoresPage from '@/pages/Vendedores'
 import ComissoesPage from '@/pages/Comissoes'
 import ConfiguracoesPage from '@/pages/Configuracoes'
+import RelatoriosPage from '@/pages/Relatorios'
 import NotFound from '@/pages/NotFound'
 
 const App = () => (
@@ -52,6 +53,14 @@ const App = () => (
                 element={
                   <RoleRouteGuard page="dashboard">
                     <DashboardPage />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
+                path="relatorios"
+                element={
+                  <RoleRouteGuard page="relatorios">
+                    <RelatoriosPage />
                   </RoleRouteGuard>
                 }
               />

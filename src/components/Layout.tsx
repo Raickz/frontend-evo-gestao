@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
 import {
   LayoutDashboard,
+  BarChart3,
   Users,
   ShoppingCart,
   ClipboardList,
@@ -56,6 +57,7 @@ const ALL_NAV_SECTIONS: NavSection[] = [
     title: 'Visão Geral',
     items: [
       { title: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard, page: 'dashboard' },
+      { title: 'Relatórios', href: '/app/relatorios', icon: BarChart3, page: 'relatorios' },
     ],
   },
   {

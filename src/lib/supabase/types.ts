@@ -9,131 +9,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      compras: {
-        Row: {
-          id: string
-          empresa_id: string
-          fornecedor_id: string
-          numero: number
-          total: number
-          status: string
-          observacoes: string | null
-          data_compra: string
-          forma_pagamento: string
-          vencimento: string | null
-          valor_pago: number
-          created_by: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          empresa_id: string
-          fornecedor_id: string
-          numero?: number
-          total?: number
-          status?: string
-          observacoes?: string | null
-          data_compra?: string
-          forma_pagamento?: string
-          vencimento?: string | null
-          valor_pago?: number
-          created_by?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          empresa_id?: string
-          fornecedor_id?: string
-          numero?: number
-          total?: number
-          status?: string
-          observacoes?: string | null
-          data_compra?: string
-          forma_pagamento?: string
-          vencimento?: string | null
-          valor_pago?: number
-          created_by?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'compras_empresa_id_fkey'
-            columns: ['empresa_id']
-            isOneToOne: false
-            referencedRelation: 'empresas'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'compras_fornecedor_id_fkey'
-            columns: ['fornecedor_id']
-            isOneToOne: false
-            referencedRelation: 'fornecedores'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'compras_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'usuarios'
-            referencedColumns: ['id']
-          },
-        ]
-      }
-      itens_compra: {
-        Row: {
-          id: string
-          empresa_id: string
-          compra_id: string
-          produto_id: string
-          quantidade: number
-          preco_unitario: number
-          subtotal: number
-        }
-        Insert: {
-          id?: string
-          empresa_id: string
-          compra_id: string
-          produto_id: string
-          quantidade: number
-          preco_unitario?: number
-          subtotal?: number
-        }
-        Update: {
-          id?: string
-          empresa_id?: string
-          compra_id?: string
-          produto_id?: string
-          quantidade?: number
-          preco_unitario?: number
-          subtotal?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'itens_compra_empresa_id_fkey'
-            columns: ['empresa_id']
-            isOneToOne: false
-            referencedRelation: 'empresas'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'itens_compra_compra_id_fkey'
-            columns: ['compra_id']
-            isOneToOne: false
-            referencedRelation: 'compras'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'itens_compra_produto_id_fkey'
-            columns: ['produto_id']
-            isOneToOne: false
-            referencedRelation: 'produtos'
-            referencedColumns: ['id']
-          },
-        ]
-      }
       assinaturas: {
         Row: {
           created_at: string
@@ -355,6 +230,79 @@ export type Database = {
             columns: ['vendedor_id']
             isOneToOne: false
             referencedRelation: 'vendedores'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      compras: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          data_compra: string | null
+          empresa_id: string
+          forma_pagamento: string | null
+          fornecedor_id: string
+          id: string
+          numero: number
+          observacoes: string | null
+          status: string
+          total: number | null
+          updated_at: string | null
+          valor_pago: number | null
+          vencimento: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          data_compra?: string | null
+          empresa_id: string
+          forma_pagamento?: string | null
+          fornecedor_id: string
+          id?: string
+          numero?: number
+          observacoes?: string | null
+          status?: string
+          total?: number | null
+          updated_at?: string | null
+          valor_pago?: number | null
+          vencimento?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          data_compra?: string | null
+          empresa_id?: string
+          forma_pagamento?: string | null
+          fornecedor_id?: string
+          id?: string
+          numero?: number
+          observacoes?: string | null
+          status?: string
+          total?: number | null
+          updated_at?: string | null
+          valor_pago?: number | null
+          vencimento?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'compras_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'usuarios'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'compras_empresa_id_fkey'
+            columns: ['empresa_id']
+            isOneToOne: false
+            referencedRelation: 'empresas'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'compras_fornecedor_id_fkey'
+            columns: ['fornecedor_id']
+            isOneToOne: false
+            referencedRelation: 'fornecedores'
             referencedColumns: ['id']
           },
         ]
@@ -610,6 +558,58 @@ export type Database = {
             columns: ['empresa_id']
             isOneToOne: false
             referencedRelation: 'empresas'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      itens_compra: {
+        Row: {
+          compra_id: string
+          empresa_id: string
+          id: string
+          preco_unitario: number
+          produto_id: string
+          quantidade: number
+          subtotal: number
+        }
+        Insert: {
+          compra_id: string
+          empresa_id: string
+          id?: string
+          preco_unitario?: number
+          produto_id: string
+          quantidade: number
+          subtotal?: number
+        }
+        Update: {
+          compra_id?: string
+          empresa_id?: string
+          id?: string
+          preco_unitario?: number
+          produto_id?: string
+          quantidade?: number
+          subtotal?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'itens_compra_compra_id_fkey'
+            columns: ['compra_id']
+            isOneToOne: false
+            referencedRelation: 'compras'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'itens_compra_empresa_id_fkey'
+            columns: ['empresa_id']
+            isOneToOne: false
+            referencedRelation: 'empresas'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'itens_compra_produto_id_fkey'
+            columns: ['produto_id']
+            isOneToOne: false
+            referencedRelation: 'produtos'
             referencedColumns: ['id']
           },
         ]
@@ -1146,10 +1146,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      confirmar_compra: { Args: { p_compra_id: string }; Returns: Json }
       converter_pedido_em_venda: {
         Args: {
           p_forma_pagamento?: string
           p_pedido_id: string
+          p_vencimento?: string
+        }
+        Returns: Json
+      }
+      criar_compra: {
+        Args: {
+          p_data_compra?: string
+          p_forma_pagamento?: string
+          p_fornecedor_id: string
+          p_itens: Json
+          p_observacoes?: string
+          p_valor_pago?: number
           p_vencimento?: string
         }
         Returns: Json
