@@ -740,23 +740,310 @@ export default function PedidosPage() {
     }
   }
 
-  const limparFiltros = () => {
-    setFiltroSearch('')
-    setDebouncedSearch('')
-    setFiltroStatus('todos')
-    setFiltroDataInicio('')
-    setFiltroDataFim('')
-    setPagina(1)
-  }
-
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+=======
   const temFiltroAtivo =
     debouncedSearch !== '' ||
     filtroStatus !== 'todos' ||
     filtroDataInicio !== '' ||
     filtroDataFim !== ''
 
-  const totalPaginas = Math.ceil(totalPedidos / limitePorPagina) || 1
+  const totalPaginas = Math.ceil(totalPedidos / limitePorPagina) || 1=========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader=======
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')PAGE HEADER */}
+        <PageHeader
+=======
+  const vendedoresFiltradosModal = useMemo(() => {
+    if (!buscaVendedorModal.trim()) return vendedores
+    const t = buscaVendedorModal.toLowerCase()
+    return vendedores.filter((v) => v.nome.toLowerCase().includes(t))
+  }, [vendedores, buscaVendedorModal])
 
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowFotosPrintChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader=========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')PAGE HEADER */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader=======
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')PAGE HEADER */}
+        <PageHeader
+          title="Gestão de Pedidos & Orçamentos"
+=======
   // Filtros de seleção dentro dos selects
   const clientesFiltradosModal = useMemo(() => {
     if (!buscaClienteModal.trim()) return clientes
@@ -775,7 +1062,812 @@ export default function PedidosPage() {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente') =======
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+          title="Gestão de Pedidos & Orçamentos"=========================================================================
+            MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')PAGE HEADER */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader=======
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')PAGE HEADER */}
+        <PageHeader
+          title="Gestão de Pedidos & Orçamentos"
+=======
+  // Filtros de seleção dentro dos selects
+  const clientesFiltradosModal = useMemo(() => {
+    if (!buscaClienteModal.trim()) return clientes
+    const t = buscaClienteModal.toLowerCase()
+    return clientes.filter(
+      (c) => c.nome.toLowerCase().includes(t) || (c.documento && c.documento.includes(t)),
+    )
+  }, [clientes, buscaClienteModal])
+
+  const vendedoresFiltradosModal = useMemo(() => {
+    if (!buscaVendedorModal.trim()) return vendedores
+    const t = buscaVendedorModal.toLowerCase()
+    return vendedores.filter((v) => v.nome.toLowerCase().includes(t))
+  }, [vendedores, buscaVendedorModal])
+
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+          title="Gestão de Pedidos & Orçamentos"=========================================================================
+            MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')PAGE HEADER */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+          title="Gestão de Pedidos & Orçamentos"=========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+=======
+  const temFiltroAtivo =
+    debouncedSearch !== '' ||
+    filtroStatus !== 'todos' ||
+    filtroDataInicio !== '' ||
+    filtroDataFim !== ''
+
+  const totalPaginas = Math.ceil(totalPedidos / limitePorPagina) || 1=========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader=======
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')PAGE HEADER */}
+        <PageHeader
+=======
+  const vendedoresFiltradosModal = useMemo(() => {
+    if (!buscaVendedorModal.trim()) return vendedores
+    const t = buscaVendedorModal.toLowerCase()
+    return vendedores.filter((v) => v.nome.toLowerCase().includes(t))
+  }, [vendedores, buscaVendedorModal])
+
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader=========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')PAGE HEADER */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader=======
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')PAGE HEADER */}
+        <PageHeader
+          title="Gestão de Pedidos & Orçamentos"
+=======
+  // Filtros de seleção dentro dos selects
+  const clientesFiltradosModal = useMemo(() => {
+    if (!buscaClienteModal.trim()) return clientes
+    const t = buscaClienteModal.toLowerCase()
+    return clientes.filter(
+      (c) => c.nome.toLowerCase().includes(t) || (c.documento && c.documento.includes(t)),
+    )
+  }, [clientes, buscaClienteModal])
+
+  const vendedoresFiltradosModal = useMemo(() => {
+    if (!buscaVendedorModal.trim()) return vendedores
+    const t = buscaVendedorModal.toLowerCase()
+    return vendedores.filter((v) => v.nome.toLowerCase().includes(t))
+  }, [vendedores, buscaVendedorModal])
+
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+          title="Gestão de Pedidos & Orçamentos"=========================================================================
+            MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')PAGE HEADER */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader=======
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')PAGE HEADER */}
+        <PageHeader
+=======
+  const vendedoresFiltradosModal = useMemo(() => {
+    if (!buscaVendedorModal.trim()) return vendedores
+    const t = buscaVendedorModal.toLowerCase()
+    return vendedores.filter((v) => v.nome.toLowerCase().includes(t))
+  }, [vendedores, buscaVendedorModal])
+
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader=========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')PAGE HEADER */}
+        <PageHeader
+=======
+  return (
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* =========================================================================
+            MODAL DE IMPRESSÃO DO PEDIDO
+            ========================================================================= */}
+        {pedidoDetalhe && (
+          <PrintPreviewDialog
+            open={printPreviewAberto}
+            onOpenChange={setPrintPreviewAberto}
+            title={`Impressão - Pedido #${pedidoDetalhe.numero}`}
+            showPhotos={showFotosPrint}
+            onShowPhotosChange={setShowFotosPrint}
+          >
+            <PedidoPrintDocument
+              empresa={{
+                nome: empresa?.nome || 'EVO Gestão Comercial',
+                nome_fantasia: empresa?.nome_fantasia,
+                cnpj: empresa?.cnpj,
+                telefone: empresa?.telefone,
+                email: empresa?.email,
+                logo_url: empresa?.logo_url,
+              }}
+              pedido={pedidoDetalhe}
+              vendaRelacionada={vendaRelacionada}
+              showPhotos={showFotosPrint}
+            />
+          </PrintPreviewDialog>
+        )}
+        {/* =========================================================================
+            PAGE HEADER
+            ========================================================================= */}
+        <PageHeader=======
         {/* =========================================================================
             MODAL DE IMPRESSÃO DO PEDIDO
             ========================================================================= */}

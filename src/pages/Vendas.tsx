@@ -1474,7 +1474,7 @@ export default function VendasPage() {
               }}
               className="w-full sm:w-auto bg-teal-700 hover:bg-teal-800 text-white text-xs"
             >
-              + Realizar Outra Venda
+              Realizar Outra Venda
             </Button>
           </DialogFooter>
         </DialogContent>
