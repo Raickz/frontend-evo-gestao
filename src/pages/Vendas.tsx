@@ -42,7 +42,12 @@ import {
   Package,
   User,
   Percent,
+  Printer,
 } from 'lucide-react'
+import { PrintPreviewDialog } from '@/components/print/PrintPreviewDialog'
+import { VendaPrintDocument } from '@/components/print/VendaPrintDocument'
+import { supabase } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 interface CartItem {
   produto_id: string
@@ -78,7 +83,7 @@ interface ProdutoOption {
 }
 
 export default function VendasPage() {
-  const { empresaId } = useEmpresa()
+  const { empresaId, empresa } = useEmpresa()
 
   // Modo de visualização: 'listagem' ou 'nova'
   const [modo, setModo] = useState<'listagem' | 'nova'>('listagem')
@@ -88,6 +93,12 @@ export default function VendasPage() {
   const [totalVendas, setTotalVendas] = useState(0)
   const [loadingList, setLoadingList] = useState(true)
   const [errorList, setErrorList] = useState<string | null>(null)
+
+  // Estados de Impressão
+  const [printVendaAberto, setPrintVendaAberto] = useState(false)
+  const [vendaDetalhe, setVendaDetalhe] = useState<any | null>(null)
+  const [contasReceberVenda, setContasReceberVenda] = useState<any[] | null>(null)
+  const [loadingPrint, setLoadingPrint] = useState(false)
 
   // Filtros de listagem
   const [filtroSearch, setFiltroSearch] = useState('')
@@ -341,6 +352,64 @@ export default function VendasPage() {
       setDesconto(parsed)
     } else if (valorTexto === '') {
       setDesconto(0)
+    }
+  }
+
+  // Função para abrir modal de impressão de venda
+  const abrirImpressaoVenda = async (vendaId: string) => {
+    if (!empresaId) return
+    setLoadingPrint(true)
+    try {
+      const { data: vendaData, error: vendaErr } = await VendasService.getById(empresaId, vendaId)
+      if (vendaErr) throw vendaErr
+      if (!vendaData) throw new Error('Venda não encontrada.')
+
+      // Se houver pedido_id e não tiver pedidos vinculado, buscar dados do pedido
+      let vendaFinal = { ...vendaData }
+      if (vendaData.pedido_id && !vendaData.pedidos) {
+        try {
+          const { data: pedData } = await supabase
+            .from('pedidos')
+            .select('numero')
+            .eq('id', vendaData.pedido_id)
+            .maybeSingle()
+          if (pedData) {
+            vendaFinal.pedidos = pedData
+          }
+        } catch (pedErr) {
+          console.error('Erro ao buscar dados do pedido vinculado:', pedErr)
+        }
+      }
+
+      // Buscar contas_receber se for venda fiado ou a prazo
+      let contas: any[] | null = null
+      const isFiado =
+        vendaData.forma_pagamento === 'fiado' || vendaData.forma_pagamento === 'a_prazo'
+      if (isFiado) {
+        try {
+          const { data: crData } = await supabase
+            .from('contas_receber')
+            .select('*')
+            .eq('empresa_id', empresaId)
+            .eq('cliente_id', vendaData.cliente_id)
+            .ilike('descricao', `%Venda #${vendaData.numero}%`)
+
+          if (crData && crData.length > 0) {
+            contas = crData
+          }
+        } catch (crErr) {
+          console.error('Erro ao buscar contas a receber vinculadas:', crErr)
+        }
+      }
+
+      setVendaDetalhe(vendaFinal)
+      setContasReceberVenda(contas)
+      setPrintVendaAberto(true)
+    } catch (err: any) {
+      console.error('Erro ao preparar impressão de venda:', err)
+      toast.error(err.message || 'Falha ao carregar dados da venda para impressão.')
+    } finally {
+      setLoadingPrint(false)
     }
   }
 
@@ -706,7 +775,7 @@ export default function VendasPage() {
                   ? 'Ajuste os filtros de busca ou período para encontrar outros registros de vendas.'
                   : 'Registre a primeira venda pelo PDV para movimentar o estoque e gerar lançamentos financeiros.'
               }
-              actionLabel={temFiltroAtivo ? 'Limpar Filtros' : '+ Nova Venda (PDV)'}
+              actionLabel={temFiltroAtivo ? 'Limpar Filtros' : 'Nova Venda (PDV)'}
               onAction={
                 temFiltroAtivo
                   ? limparFiltros
@@ -729,11 +798,16 @@ export default function VendasPage() {
                       <th className="py-3.5 px-4">Forma Pagto</th>
                       <th className="py-3.5 px-4 text-right">Total</th>
                       <th className="py-3.5 px-4 text-center">Status</th>
+                      <th className="py-3.5 px-4 text-right">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {vendas.map((venda) => (
-                      <tr key={venda.id} className="hover:bg-slate-50/70 transition-colors">
+                      <tr
+                        key={venda.id}
+                        className="hover:bg-slate-50/70 transition-colors cursor-pointer"
+                        onClick={() => abrirImpressaoVenda(venda.id)}
+                      >
                         <td className="py-3.5 px-4">
                           <span className="font-bold font-mono text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded text-[11px]">
                             #{venda.numero}
@@ -774,6 +848,17 @@ export default function VendasPage() {
                           {formatCurrency(venda.total || 0)}
                         </td>
                         <td className="py-3.5 px-4 text-center">{getStatusBadge(venda.status)}</td>
+                        <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => abrirImpressaoVenda(venda.id)}
+                            className="h-8 w-8 p-0 text-slate-500 hover:text-teal-700"
+                            title="Imprimir Comprovante de Venda"
+                          >
+                            <Printer className="w-4 h-4" />
+                          </Button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -1341,6 +1426,22 @@ export default function VendasPage() {
             <Button
               variant="outline"
               onClick={() => {
+                const vendaId = resultadoModal.dados?.venda_id
+                setResultadoModal({ aberto: false })
+                limparNovaVenda()
+                setModo('listagem')
+                if (vendaId) {
+                  abrirImpressaoVenda(vendaId)
+                }
+              }}
+              className="w-full sm:w-auto text-xs flex items-center justify-center gap-1.5"
+            >
+              <Printer className="w-3.5 h-3.5 text-teal-700" />
+              Imprimir Venda
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
                 setResultadoModal({ aberto: false })
                 limparNovaVenda()
                 setModo('listagem')
@@ -1362,6 +1463,30 @@ export default function VendasPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ========================================================
+          MODAL DE IMPRESSÃO DE VENDA
+          ======================================================== */}
+      {vendaDetalhe && (
+        <PrintPreviewDialog
+          open={printVendaAberto}
+          onOpenChange={setPrintVendaAberto}
+          title={`Impressão - Venda #${vendaDetalhe.numero}`}
+        >
+          <VendaPrintDocument
+            empresa={{
+              nome: empresa?.nome || 'EVO Gestão Comercial',
+              nome_fantasia: empresa?.nome_fantasia,
+              cnpj: empresa?.cnpj,
+              telefone: empresa?.telefone,
+              email: empresa?.email,
+              logo_url: empresa?.logo_url,
+            }}
+            venda={vendaDetalhe}
+            contasReceber={contasReceberVenda}
+          />
+        </PrintPreviewDialog>
+      )}
     </div>
   )
 }

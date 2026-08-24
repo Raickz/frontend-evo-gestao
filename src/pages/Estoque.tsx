@@ -626,7 +626,7 @@ export default function EstoquePage() {
                   : 'Cadastre produtos e registre entradas de estoque para começar.'
               }
               actionLabel={
-                debouncedSearchSaldo || statusFilterSaldo !== 'todos' ? undefined : '+ Nova Entrada'
+                debouncedSearchSaldo || statusFilterSaldo !== 'todos' ? undefined : 'Nova Entrada'
               }
               onAction={
                 debouncedSearchSaldo || statusFilterSaldo !== 'todos'
@@ -920,7 +920,7 @@ export default function EstoquePage() {
                 dataInicioMov ||
                 dataFimMov
                   ? undefined
-                  : '+ Nova Entrada'
+                  : 'Nova Entrada'
               }
               onAction={
                 debouncedSearchMov ||

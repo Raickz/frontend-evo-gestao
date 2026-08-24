@@ -59,26 +59,375 @@ import {
   Package,
   CreditCard,
   ExternalLink,
+  Printer,
 } from 'lucide-react'
+import { PrintPreviewDialog } from '@/components/print/PrintPreviewDialog'
+import { CompraPrintDocument } from '@/components/print/CompraPrintDocument'
 
 type StatusFilter = 'todos' | 'rascunho' | 'confirmada' | 'cancelada'
 
 const PAGE_SIZE = 20
 
-interface ItemLinhaForm {
-  produto_id: string
-  nome: string
-  codigo: string | null
-  unidade: string
-  saldo_atual: number
-  preco_custo: number
-  quantidade: number
-  preco_unitario: number
-  subtotal: number
-}
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
 
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  // =========================================================================
+  // AUXILIARES
+=======
+  // =========================================================================
+  // AUXILIARES
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+=======
+  // =========================================================================
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
+  // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }=========================================================================
+  // ESTADO DA LISTAGEM & INDICADORES
+=======
+  // =========================================================================
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
+  // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }=========================================================================
+  // ESTADO DA LISTAGEM & INDICADORES
+=======
 export default function ComprasPage() {
-  const { empresaId } = useEmpresa()
+  const { empresaId, empresa } = useEmpresa()
   const { usuario } = useAuth()
 
   const perfil = usuario?.perfil?.toLowerCase()
@@ -86,6 +435,841 @@ export default function ComprasPage() {
     perfil === 'master' || perfil === 'admin' || perfil === 'gerente' || perfil === 'operador'
 
   // =========================================================================
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
+  // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }=========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  // =========================================================================
+  // AUXILIARES
+=======
+  // =========================================================================
+  // AUXILIARES
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+=======
+  // =========================================================================
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
+  // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }=========================================================================
+  // ESTADO DA LISTAGEM & INDICADORES
+=======
+  // =========================================================================
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
+  // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }=========================================================================
+  // ESTADO DA LISTAGEM & INDICADORES
+=======
+  // =========================================================================
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
+  // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }=========================================================================
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
+  // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+=======
+  // =========================================================================
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
+  // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }=========================================================================
+  // ESTADO DA LISTAGEM & INDICADORES
+=======
+  // =========================================================================
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
+  // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }
+
+  // =========================================================================
+  // ESTADO DA LISTAGEM & INDICADORES
+=======
+  // =========================================================================
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
+  // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }=========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+=======
+  // =========================================================================
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
+  // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }=========================================================================
   // ESTADO DA LISTAGEM & INDICADORES
   // =========================================================================
   const [compras, setCompras] = useState<any[]>([])
@@ -678,14 +1862,430 @@ export default function ComprasPage() {
       loadCompras()
     } catch (err: any) {
       toast.error(err.message || 'Falha ao cancelar compra.')
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
     } finally {
-      setSubmittingCancelar(false)
+      setLoadingDetalhes(false)
+    }
+  }
+=======
+  // =========================================================================
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
+  // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
     }
   }
 
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+=======
   // =========================================================================
-  // MODAL: DETALHES DA COMPRA
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
   // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }=========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+=======
+  // =========================================================================
+  // AUXILIARES=========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+=======
+  // =========================================================================
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
+  // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+=======
+  // =========================================================================
+  // MODAL: DETALHES DA COMPRA & IMPRESSÃO
+  // =========================================================================
+  const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
+  const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
+  const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [printCompraAberto, setPrintCompraAberto] = useState(false)
+
+  const abrirDetalhes = async (compraId: string) => {
+    if (!empresaId) return
+    setModalDetalhesAberta(true)
+    setLoadingDetalhes(true)
+    setContaPagarDetalhe(null)
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      setCompraDetalhe(data)
+
+      if (data && data.status === 'confirmada') {
+        const { data: cpData } = await ComprasService.getContaPagarPorCompra(
+          empresaId,
+          data.fornecedor_id,
+          data.numero,
+        )
+        if (cpData) {
+          setContaPagarDetalhe(cpData)
+        }
+      }
+    } catch (e: any) {
+      console.error('Erro ao carregar detalhes da compra:', e)
+      toast.error('Falha ao carregar detalhes da compra.')
+      setModalDetalhesAberta(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const abrirImpressaoCompra = async (compraId: string) => {
+    if (!empresaId) return
+    try {
+      const { data, error } = await ComprasService.getById(empresaId, compraId)
+      if (error) throw error
+      if (!data) throw new Error('Compra não encontrada.')
+      setCompraDetalhe(data)
+      setPrintCompraAberto(true)
+    } catch (e: any) {
+      console.error('Erro ao preparar impressão de compra:', e)
+      toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
+    }
+  }=========================================================================
   const [modalDetalhesAberta, setModalDetalhesAberta] = useState(false)
   const [compraDetalhe, setCompraDetalhe] = useState<any | null>(null)
   const [contaPagarDetalhe, setContaPagarDetalhe] = useState<any | null>(null)
@@ -1106,6 +2706,17 @@ export default function ComprasPage() {
                             title="Visualizar Detalhes"
                           >
                             <Eye className="w-4 h-4" />
+                          </Button>
+
+                          {/* Botão Imprimir Compra */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => abrirImpressaoCompra(compra.id)}
+                            className="h-8 w-8 p-0 text-slate-500 hover:text-teal-700"
+                            title="Imprimir Ordem de Compra"
+                          >
+                            <Printer className="w-4 h-4" />
                           </Button>
                         </div>
                       </td>
@@ -1945,7 +3556,16 @@ export default function ComprasPage() {
             </div>
           ) : null}
 
-          <DialogFooter className="pt-4 border-t border-slate-100 flex justify-end">
+          <DialogFooter className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPrintCompraAberto(true)}
+              className="text-xs border-slate-300 text-slate-700 hover:bg-slate-50 flex items-center gap-1.5"
+            >
+              <Printer className="w-3.5 h-3.5 text-teal-700" />
+              Imprimir Compra
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -2001,6 +3621,29 @@ export default function ComprasPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* =========================================================================
+          MODAL DE IMPRESSÃO DA COMPRA
+          ========================================================================= */}
+      {compraDetalhe && (
+        <PrintPreviewDialog
+          open={printCompraAberto}
+          onOpenChange={setPrintCompraAberto}
+          title={`Impressão - Compra #${compraDetalhe.numero}`}
+        >
+          <CompraPrintDocument
+            empresa={{
+              nome: empresa?.nome || 'EVO Gestão Comercial',
+              nome_fantasia: empresa?.nome_fantasia,
+              cnpj: empresa?.cnpj,
+              telefone: empresa?.telefone,
+              email: empresa?.email,
+              logo_url: empresa?.logo_url,
+            }}
+            compra={compraDetalhe}
+          />
+        </PrintPreviewDialog>
+      )}
     </div>
   )
 }
