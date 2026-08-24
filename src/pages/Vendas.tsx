@@ -365,8 +365,8 @@ export default function VendasPage() {
       if (!vendaData) throw new Error('Venda não encontrada.')
 
       // Se houver pedido_id e não tiver pedidos vinculado, buscar dados do pedido
-      let vendaFinal = { ...vendaData }
-      if (vendaData.pedido_id && !vendaData.pedidos) {
+      let vendaFinal: any = { ...vendaData }
+      if (vendaData.pedido_id && !(vendaData as any).pedidos) {
         try {
           const { data: pedData } = await supabase
             .from('pedidos')
