@@ -44,10 +44,7 @@ import {
   Save,
   Image as ImageIcon,
   UserCheck,
-  Calendar,
   Lock,
-  Mail,
-  Phone,
   HelpCircle,
 } from 'lucide-react'
 
@@ -254,7 +251,7 @@ export default function ConfiguracoesPage() {
   const totalPaginasUsuarios = Math.ceil(totalUsuarios / PAGE_SIZE) || 1
 
   // =========================================================================
-  // DIALOGS: USUÁRIOS (Toggle Ativo e Alterar Perfil)
+  // DIALOGS: USUÁRIOS (Toggle Ativo, Alterar Perfil e Novo Usuário)
   // =========================================================================
   const [dialogToggleUser, setDialogToggleUser] = useState<UsuarioType | null>(null)
   const [submittingToggle, setSubmittingToggle] = useState(false)
@@ -262,6 +259,64 @@ export default function ConfiguracoesPage() {
   const [dialogPerfilUser, setDialogPerfilUser] = useState<UsuarioType | null>(null)
   const [novoPerfilSelecionado, setNovoPerfilSelecionado] = useState<string>('')
   const [submittingPerfil, setSubmittingPerfil] = useState(false)
+
+  // =========================================================================
+  // DIALOG: NOVO USUÁRIO
+  // =========================================================================
+  const [dialogNovoUsuario, setDialogNovoUsuario] = useState(false)
+  const [novoUsuarioNome, setNovoUsuarioNome] = useState('')
+  const [novoUsuarioEmail, setNovoUsuarioEmail] = useState('')
+  const [novoUsuarioPerfil, setNovoUsuarioPerfil] = useState('vendedor')
+  const [novoUsuarioSenha, setNovoUsuarioSenha] = useState('')
+  const [submittingNovoUsuario, setSubmittingNovoUsuario] = useState(false)
+
+  const handleCreateUsuario = async () => {
+    // Validações frontend
+    if (!novoUsuarioNome.trim()) {
+      toast.error('Nome é obrigatório.')
+      return
+    }
+    if (!novoUsuarioEmail.trim()) {
+      toast.error('E-mail é obrigatório.')
+      return
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(novoUsuarioEmail.trim())) {
+      toast.error('E-mail inválido.')
+      return
+    }
+    if (!novoUsuarioSenha || novoUsuarioSenha.length < 6) {
+      toast.error('Senha deve ter no mínimo 6 caracteres.')
+      return
+    }
+    if (!novoUsuarioPerfil) {
+      toast.error('Perfil é obrigatório.')
+      return
+    }
+
+    setSubmittingNovoUsuario(true)
+    try {
+      const { error } = await ConfiguracoesService.createUsuario({
+        nome: novoUsuarioNome.trim(),
+        email: novoUsuarioEmail.trim().toLowerCase(),
+        perfil: novoUsuarioPerfil,
+        senha: novoUsuarioSenha,
+      })
+      if (error) throw error
+      toast.success('Usuário criado com sucesso.')
+      setDialogNovoUsuario(false)
+      // Limpar formulário
+      setNovoUsuarioNome('')
+      setNovoUsuarioEmail('')
+      setNovoUsuarioPerfil('vendedor')
+      setNovoUsuarioSenha('')
+      loadUsuarios()
+    } catch (err: any) {
+      toast.error(err.message || 'Não foi possível criar o usuário.')
+    } finally {
+      setSubmittingNovoUsuario(false)
+    }
+  }
 
   const handleConfirmToggleAtivo = async () => {
     if (!dialogToggleUser) return
@@ -746,32 +801,19 @@ export default function ConfiguracoesPage() {
                     </div>
                   </div>
 
-                  {/* Botão Novo Usuário (Disabled com Tooltip) */}
-                  <div className="flex flex-col items-start sm:items-end">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span tabIndex={0}>
-                          <Button
-                            type="button"
-                            disabled
-                            className="bg-teal-700 text-white opacity-60 cursor-not-allowed text-xs h-9 flex items-center gap-1.5"
-                          >
-                            <Plus className="w-4 h-4" />
-                            Novo Usuário
-                          </Button>
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="text-xs">
-                          A criação de usuários requer configuração de função administrativa segura.
-                          Disponível em breve.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <span className="text-[10px] text-slate-400 mt-1">
-                      Para adicionar novos usuários, entre em contato com o suporte EVO.
-                    </span>
-                  </div>
+                  {/* Botão Novo Usuário */}
+                  {isMasterOrAdmin && (
+                    <div className="flex flex-col items-start sm:items-end">
+                      <Button
+                        type="button"
+                        onClick={() => setDialogNovoUsuario(true)}
+                        className="bg-teal-700 hover:bg-teal-800 text-white text-xs h-9 flex items-center gap-1.5"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Novo Usuário
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </CardHeader>
 
@@ -1274,6 +1316,153 @@ export default function ConfiguracoesPage() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* =========================================================================
+            DIALOG 0: NOVO USUÁRIO
+            ========================================================================= */}
+        <Dialog
+          open={dialogNovoUsuario}
+          onOpenChange={(open) => {
+            if (!open && !submittingNovoUsuario) {
+              setDialogNovoUsuario(false)
+              setNovoUsuarioNome('')
+              setNovoUsuarioEmail('')
+              setNovoUsuarioPerfil('vendedor')
+              setNovoUsuarioSenha('')
+            }
+          }}
+        >
+          <DialogContent className="max-w-md w-full">
+            <DialogHeader>
+              <div className="flex items-center gap-2 text-teal-800">
+                <Users className="w-5 h-5 text-teal-600" />
+                <DialogTitle className="text-base font-bold text-slate-900">
+                  Novo Usuário
+                </DialogTitle>
+              </div>
+              <DialogDescription className="text-xs text-slate-600 pt-1">
+                Cadastre um novo usuário para acessar esta empresa.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              {/* Nome */}
+              <div className="space-y-1.5">
+                <Label htmlFor="novo-user-nome" className="text-xs font-semibold text-slate-700">
+                  Nome <span className="text-rose-500">*</span>
+                </Label>
+                <Input
+                  id="novo-user-nome"
+                  placeholder="Nome completo do usuário"
+                  value={novoUsuarioNome}
+                  onChange={(e) => setNovoUsuarioNome(e.target.value)}
+                  disabled={submittingNovoUsuario}
+                  className="text-xs h-9 bg-white border-slate-200"
+                />
+              </div>
+
+              {/* Email */}
+              <div className="space-y-1.5">
+                <Label htmlFor="novo-user-email" className="text-xs font-semibold text-slate-700">
+                  E-mail <span className="text-rose-500">*</span>
+                </Label>
+                <Input
+                  id="novo-user-email"
+                  type="email"
+                  placeholder="email@empresa.com.br"
+                  value={novoUsuarioEmail}
+                  onChange={(e) => setNovoUsuarioEmail(e.target.value)}
+                  disabled={submittingNovoUsuario}
+                  className="text-xs h-9 bg-white border-slate-200"
+                />
+              </div>
+
+              {/* Perfil */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-slate-700">
+                  Perfil <span className="text-rose-500">*</span>
+                </Label>
+                <Select
+                  value={novoUsuarioPerfil}
+                  onValueChange={setNovoUsuarioPerfil}
+                  disabled={submittingNovoUsuario}
+                >
+                  <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                    <SelectValue placeholder="Selecione o perfil..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {isMaster && (
+                      <SelectItem value="master" className="text-xs font-semibold text-purple-700">
+                        Master (Acesso Irrestrito)
+                      </SelectItem>
+                    )}
+                    <SelectItem value="admin" className="text-xs font-semibold text-indigo-700">
+                      Administrador (Gestão Completa)
+                    </SelectItem>
+                    <SelectItem value="gerente" className="text-xs font-semibold text-blue-700">
+                      Gerente (Operacional & Financeiro)
+                    </SelectItem>
+                    <SelectItem value="operador" className="text-xs font-semibold text-amber-700">
+                      Operador (Estoque & Vendas)
+                    </SelectItem>
+                    <SelectItem value="vendedor" className="text-xs font-semibold text-emerald-700">
+                      Vendedor (Vendas & Carteira)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Senha */}
+              <div className="space-y-1.5">
+                <Label htmlFor="novo-user-senha" className="text-xs font-semibold text-slate-700">
+                  Senha Inicial <span className="text-rose-500">*</span>
+                </Label>
+                <Input
+                  id="novo-user-senha"
+                  type="password"
+                  placeholder="Mínimo 6 caracteres"
+                  value={novoUsuarioSenha}
+                  onChange={(e) => setNovoUsuarioSenha(e.target.value)}
+                  disabled={submittingNovoUsuario}
+                  className="text-xs h-9 bg-white border-slate-200"
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="pt-2 flex gap-2">
+              <Button
+                variant="outline"
+                type="button"
+                disabled={submittingNovoUsuario}
+                onClick={() => {
+                  setDialogNovoUsuario(false)
+                  setNovoUsuarioNome('')
+                  setNovoUsuarioEmail('')
+                  setNovoUsuarioPerfil('vendedor')
+                  setNovoUsuarioSenha('')
+                }}
+                className="text-xs"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={submittingNovoUsuario}
+                onClick={handleCreateUsuario}
+                className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-1.5"
+              >
+                {submittingNovoUsuario ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Criando...
+                  </>
+                ) : (
+                  'Criar Usuário'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* =========================================================================
             DIALOG 1: TOGGLE ATIVO/INATIVO USUÁRIO

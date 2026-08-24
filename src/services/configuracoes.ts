@@ -128,4 +128,39 @@ export const ConfiguracoesService = {
       .select()
       .single()
   },
+
+  async createUsuario(data: { nome: string; email: string; perfil: string; senha: string }) {
+    // Obter token de sessão atual
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session?.access_token) {
+      return { data: null, error: new Error('Sessão não encontrada.') }
+    }
+
+    // Chamar a Edge Function
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-create-user`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(data),
+      },
+    )
+
+    let result: any
+    try {
+      result = await response.json()
+    } catch {
+      return { data: null, error: new Error('Resposta inválida do servidor.') }
+    }
+
+    if (!response.ok || !result.sucesso) {
+      return { data: null, error: new Error(result?.erro || 'Falha ao criar usuário.') }
+    }
+    return { data: result.usuario, error: null }
+  },
 }
