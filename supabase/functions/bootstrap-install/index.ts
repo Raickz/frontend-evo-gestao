@@ -160,6 +160,9 @@ Deno.serve(async (req: Request) => {
     const admin_email =
       typeof body?.admin_email === 'string' ? body.admin_email.trim().toLowerCase() : ''
     const admin_senha = typeof body?.admin_senha === 'string' ? body.admin_senha : ''
+    const raw_plano_slug =
+      typeof body?.plano_slug === 'string' ? body.plano_slug.trim().toLowerCase() : ''
+    const plano_slug = raw_plano_slug || 'profissional'
 
     // Validações obrigatórias
     if (!empresa_nome) {
@@ -407,17 +410,20 @@ Deno.serve(async (req: Request) => {
       })
     }
 
-    // 6. Criar assinatura trial padrão (Plano Profissional)
-    const { data: planoProfissional, error: planoError } = await supabaseAdmin
+    // 6. Validar plano escolhido no banco (nunca confiar em valores enviados pelo cliente)
+    const { data: planoEscolhido, error: planoError } = await supabaseAdmin
       .from('planos')
       .select('id, valor_mensal, periodo_teste_dias')
-      .eq('slug', 'profissional')
+      .eq('slug', plano_slug)
       .eq('ativo', true)
       .limit(1)
       .maybeSingle()
 
-    if (planoError || !planoProfissional) {
-      console.error('bootstrap-install: Plano Profissional não encontrado', planoError)
+    if (planoError || !planoEscolhido) {
+      console.error('bootstrap-install: Plano inválido ou não encontrado', {
+        plano_slug,
+        planoError,
+      })
 
       // Rollback completo: remover usuário público, auth user e empresa
       if (usuarioInserido?.id) {
@@ -445,16 +451,16 @@ Deno.serve(async (req: Request) => {
       return new Response(
         JSON.stringify({
           sucesso: false,
-          erro: 'Plano padrão do sistema não encontrado. Não foi possível concluir o cadastro.',
+          erro: 'Plano inválido ou indisponível.',
         }),
         {
-          status: 500,
+          status: 400,
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
         },
       )
     }
 
-    const trialDias = planoProfissional.periodo_teste_dias ?? 14
+    const trialDias = planoEscolhido.periodo_teste_dias ?? 14
     const hoje = new Date()
     const dataFimTrial = new Date(hoje)
     dataFimTrial.setDate(dataFimTrial.getDate() + trialDias)
@@ -464,8 +470,8 @@ Deno.serve(async (req: Request) => {
 
     const { error: insertAssinaturaError } = await supabaseAdmin.from('assinaturas').insert({
       empresa_id: createdEmpresaId,
-      plano_id: planoProfissional.id,
-      valor: planoProfissional.valor_mensal,
+      plano_id: planoEscolhido.id,
+      valor: planoEscolhido.valor_mensal,
       inicio: dataInicioStr,
       fim_periodo_teste: dataFimTrialStr,
       status: 'trial',

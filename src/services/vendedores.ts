@@ -125,6 +125,40 @@ export const VendedoresService = {
    * Criação de novo vendedor associado à empresa
    */
   async create(empresaId: string, data: Omit<TablesInsert<'vendedores'>, 'empresa_id'>) {
+    // Validar limite de vendedores do plano antes do insert
+    const { data: assinaturaData } = await supabase
+      .from('assinaturas')
+      .select('status, planos(limite_vendedores)')
+      .eq('empresa_id', empresaId)
+      .in('status', ['trial', 'ativa'])
+      .maybeSingle()
+
+    if (assinaturaData) {
+      const planoInfo = assinaturaData.planos as { limite_vendedores: number | null } | null
+      const limiteVendedores = planoInfo?.limite_vendedores
+
+      if (limiteVendedores !== null && limiteVendedores !== undefined) {
+        const { count: vendedoresAtivosCount } = await supabase
+          .from('vendedores')
+          .select('id', { count: 'exact', head: true })
+          .eq('empresa_id', empresaId)
+          .eq('ativo', true)
+
+        if (
+          typeof vendedoresAtivosCount === 'number' &&
+          vendedoresAtivosCount >= limiteVendedores
+        ) {
+          return {
+            data: null,
+            error: {
+              message:
+                'Limite de vendedores do plano atingido. Faça upgrade do seu plano para adicionar novos vendedores.',
+            },
+          }
+        }
+      }
+    }
+
     return supabase
       .from('vendedores')
       .insert({ ...data, empresa_id: empresaId })

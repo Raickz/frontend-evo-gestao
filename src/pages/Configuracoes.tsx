@@ -74,6 +74,21 @@ export default function ConfiguracoesPage() {
   const [loadingAssinatura, setLoadingAssinatura] = useState(true)
   const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
 
+  // Contagens de uso atual para a aba Plano & Assinatura
+  const [limitesUso, setLimitesUso] = useState<{
+    usuarios: number
+    vendedores: number
+    produtos: number
+    clientes: number
+    vendasMes: number
+  }>({
+    usuarios: 0,
+    vendedores: 0,
+    produtos: 0,
+    clientes: 0,
+    vendasMes: 0,
+  })
+
   const loadAssinatura = useCallback(async () => {
     if (!empresaId || !isMasterOrAdmin) {
       setLoadingAssinatura(false)
@@ -83,9 +98,51 @@ export default function ConfiguracoesPage() {
     setLoadingAssinatura(true)
     setErrorAssinatura(null)
     try {
-      const { data, error } = await AssinaturasService.getByEmpresaId(empresaId)
-      if (error) throw error
-      setAssinatura(data)
+      const inicioMes = new Date()
+      inicioMes.setDate(1)
+      inicioMes.setHours(0, 0, 0, 0)
+
+      const [assinaturaRes, usuariosRes, vendedoresRes, produtosRes, clientesRes, vendasMesRes] =
+        await Promise.all([
+          AssinaturasService.getByEmpresaId(empresaId),
+          supabase
+            .from('usuarios')
+            .select('id', { count: 'exact', head: true })
+            .eq('empresa_id', empresaId)
+            .eq('ativo', true),
+          supabase
+            .from('vendedores')
+            .select('id', { count: 'exact', head: true })
+            .eq('empresa_id', empresaId)
+            .eq('ativo', true),
+          supabase
+            .from('produtos')
+            .select('id', { count: 'exact', head: true })
+            .eq('empresa_id', empresaId)
+            .eq('ativo', true),
+          supabase
+            .from('clientes')
+            .select('id', { count: 'exact', head: true })
+            .eq('empresa_id', empresaId)
+            .eq('ativo', true),
+          supabase
+            .from('vendas')
+            .select('id', { count: 'exact', head: true })
+            .eq('empresa_id', empresaId)
+            .eq('status', 'finalizada')
+            .gte('created_at', inicioMes.toISOString()),
+        ])
+
+      if (assinaturaRes.error) throw assinaturaRes.error
+      setAssinatura(assinaturaRes.data)
+
+      setLimitesUso({
+        usuarios: usuariosRes.count ?? 0,
+        vendedores: vendedoresRes.count ?? 0,
+        produtos: produtosRes.count ?? 0,
+        clientes: clientesRes.count ?? 0,
+        vendasMes: vendasMesRes.count ?? 0,
+      })
     } catch (err: any) {
       if (import.meta.env.DEV) {
         console.error('Erro ao carregar assinatura:', err)
@@ -1608,6 +1665,158 @@ export default function ConfiguracoesPage() {
                             As assinaturas e limites operacionais são gerenciados diretamente pelo
                             suporte da plataforma EVO Gestão.
                           </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Card de Limites do Plano (Consumo Atual) */}
+                    <Card className="border border-slate-200 bg-white shadow-xs lg:col-span-3">
+                      <CardHeader className="border-b border-slate-100 pb-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                          <div className="flex items-center gap-2 text-teal-700">
+                            <Shield className="w-5 h-5" />
+                            <div>
+                              <CardTitle className="text-base font-bold text-slate-900">
+                                Limites do Plano
+                              </CardTitle>
+                              <CardDescription className="text-xs text-slate-500 mt-0.5">
+                                Acompanhamento de capacidade e uso atual dos recursos contratados
+                              </CardDescription>
+                            </div>
+                          </div>
+                          <Badge
+                            variant="outline"
+                            className="bg-teal-50 text-teal-700 border-teal-200 font-semibold text-xs"
+                          >
+                            Plano {assinatura.planos?.nome || 'Atual'}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                          {[
+                            {
+                              label: 'Usuários Ativos',
+                              current: limitesUso.usuarios,
+                              limit: assinatura.planos?.limite_usuarios,
+                              desc: 'Usuários com login habilitado',
+                            },
+                            {
+                              label: 'Vendedores Ativos',
+                              current: limitesUso.vendedores,
+                              limit: assinatura.planos?.limite_vendedores,
+                              desc: 'Equipe comercial cadastrada',
+                            },
+                            {
+                              label: 'Produtos Cadastrados',
+                              current: limitesUso.produtos,
+                              limit: assinatura.planos?.limite_produtos,
+                              desc: 'Itens ativos no catálogo',
+                            },
+                            {
+                              label: 'Clientes Cadastrados',
+                              current: limitesUso.clientes,
+                              limit: assinatura.planos?.limite_clientes,
+                              desc: 'Carteira de clientes ativos',
+                            },
+                            {
+                              label: 'Vendas no Mês',
+                              current: limitesUso.vendasMes,
+                              limit: assinatura.planos?.limite_vendas_mes,
+                              desc: 'Vendas finalizadas no mês',
+                            },
+                          ].map((limItem, lIdx) => {
+                            const isUnlimited =
+                              limItem.limit === null || limItem.limit === undefined
+                            const percent = isUnlimited
+                              ? 100
+                              : limItem.limit > 0
+                                ? Math.min(Math.round((limItem.current / limItem.limit) * 100), 100)
+                                : 0
+                            const isReached =
+                              !isUnlimited &&
+                              limItem.limit !== null &&
+                              limItem.current >= limItem.limit
+                            const isWarning =
+                              !isUnlimited && limItem.limit !== null && percent > 70 && !isReached
+
+                            const badgeStatus = isReached
+                              ? 'bg-rose-100 text-rose-800 border-rose-200'
+                              : isWarning
+                                ? 'bg-amber-100 text-amber-800 border-amber-200'
+                                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+
+                            const barColor = isUnlimited
+                              ? 'bg-emerald-500'
+                              : isReached
+                                ? 'bg-rose-500'
+                                : isWarning
+                                  ? 'bg-amber-500'
+                                  : 'bg-emerald-500'
+
+                            const cardBg = isReached
+                              ? 'bg-rose-50/20 border-rose-200'
+                              : isWarning
+                                ? 'bg-amber-50/20 border-amber-200'
+                                : 'bg-slate-50/60 border-slate-200'
+
+                            return (
+                              <div
+                                key={lIdx}
+                                className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 transition-colors ${cardBg}`}
+                              >
+                                <div>
+                                  <div className="flex items-start justify-between gap-1.5 mb-1.5">
+                                    <span className="text-xs font-bold text-slate-900 leading-tight">
+                                      {limItem.label}
+                                    </span>
+                                    {isReached ? (
+                                      <Badge
+                                        variant="outline"
+                                        className={`text-[9px] px-1.5 py-0 font-bold ${badgeStatus}`}
+                                      >
+                                        Limite atingido
+                                      </Badge>
+                                    ) : isWarning ? (
+                                      <Badge
+                                        variant="outline"
+                                        className={`text-[9px] px-1.5 py-0 font-semibold ${badgeStatus}`}
+                                      >
+                                        Atenção ({percent}%)
+                                      </Badge>
+                                    ) : null}
+                                  </div>
+                                  <p className="text-[11px] text-slate-500">{limItem.desc}</p>
+                                </div>
+
+                                <div>
+                                  <div className="flex items-baseline justify-between text-xs mb-1.5">
+                                    <span
+                                      className={`text-xl font-extrabold ${
+                                        isReached
+                                          ? 'text-rose-700'
+                                          : isWarning
+                                            ? 'text-amber-700'
+                                            : 'text-slate-900'
+                                      }`}
+                                    >
+                                      {limItem.current}
+                                    </span>
+                                    <span className="text-slate-500 text-xs font-medium">
+                                      {isUnlimited ? '/ Ilimitado' : `/ ${limItem.limit}`}
+                                    </span>
+                                  </div>
+
+                                  <div className="w-full bg-slate-200/80 rounded-full h-2 overflow-hidden">
+                                    <div
+                                      className={`h-2 rounded-full transition-all duration-500 ${barColor}`}
+                                      style={{ width: `${percent}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
                         </div>
                       </CardContent>
                     </Card>

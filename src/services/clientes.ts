@@ -32,6 +32,37 @@ export const ClientesService = {
   },
 
   async create(empresaId: string, data: Omit<ClienteInsert, 'empresa_id'>) {
+    // Validar limite de clientes do plano antes do insert
+    const { data: assinaturaData } = await supabase
+      .from('assinaturas')
+      .select('status, planos(limite_clientes)')
+      .eq('empresa_id', empresaId)
+      .in('status', ['trial', 'ativa'])
+      .maybeSingle()
+
+    if (assinaturaData) {
+      const planoInfo = assinaturaData.planos as { limite_clientes: number | null } | null
+      const limiteClientes = planoInfo?.limite_clientes
+
+      if (limiteClientes !== null && limiteClientes !== undefined) {
+        const { count: clientesAtivosCount } = await supabase
+          .from('clientes')
+          .select('id', { count: 'exact', head: true })
+          .eq('empresa_id', empresaId)
+          .eq('ativo', true)
+
+        if (typeof clientesAtivosCount === 'number' && clientesAtivosCount >= limiteClientes) {
+          return {
+            data: null,
+            error: {
+              message:
+                'Limite de clientes do plano atingido. Faça upgrade do seu plano para adicionar novos clientes.',
+            },
+          }
+        }
+      }
+    }
+
     return supabase
       .from('clientes')
       .insert({ ...data, empresa_id: empresaId })

@@ -108,6 +108,21 @@ export default function DashboardPage() {
   const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
   const [loadingAssinatura, setLoadingAssinatura] = useState(true)
 
+  // Contadores de Uso do Plano (para Master/Admin)
+  const [planUsage, setPlanUsage] = useState<{
+    usuarios: number
+    vendedores: number
+    produtos: number
+    clientes: number
+    vendasMes: number
+  }>({
+    usuarios: 0,
+    vendedores: 0,
+    produtos: 0,
+    clientes: 0,
+    vendasMes: 0,
+  })
+
   const loadAssinatura = useCallback(async () => {
     if (!empresaId || !isMasterOrAdmin) {
       setLoadingAssinatura(false)
@@ -216,6 +231,9 @@ export default function DashboardPage() {
         produtosCountRes,
         estoqueBaixoRes,
         vendasRecentesRes,
+        usuariosCountRes,
+        vendedoresCountRes,
+        vendasMesTotalRes,
       ] = await Promise.all([
         VendasService.getFaturamentoMensal(empresaId, resolvedVendedorId),
         VendasService.getCountMensal(empresaId, resolvedVendedorId),
@@ -223,6 +241,17 @@ export default function DashboardPage() {
         ProdutosService.countAtivos(empresaId),
         EstoqueService.listEstoqueBaixo(empresaId),
         VendasService.getRecentes(empresaId, resolvedVendedorId),
+        supabase
+          .from('usuarios')
+          .select('id', { count: 'exact', head: true })
+          .eq('empresa_id', empresaId)
+          .eq('ativo', true),
+        supabase
+          .from('vendedores')
+          .select('id', { count: 'exact', head: true })
+          .eq('empresa_id', empresaId)
+          .eq('ativo', true),
+        VendasService.getCountMensal(empresaId, null), // Todas as vendas finalizadas da empresa no mês
       ])
 
       // Verifica se houve erro em alguma das chamadas
@@ -249,6 +278,14 @@ export default function DashboardPage() {
         estoqueBaixoCount: estoqueBaixoList.length,
         vendasRecentes: vendasRecentesList,
         estoqueBaixoItens: estoqueBaixoList,
+      })
+
+      setPlanUsage({
+        usuarios: usuariosCountRes.count ?? 0,
+        vendedores: vendedoresCountRes.count ?? 0,
+        produtos: produtosCountRes.count ?? 0,
+        clientes: clientesCountRes.count ?? 0,
+        vendasMes: vendasMesTotalRes.count ?? 0,
       })
     } catch (err: any) {
       if (import.meta.env.DEV) {
@@ -411,9 +448,9 @@ export default function DashboardPage() {
         }
       />
 
-      {/* Card de Status da Assinatura (Apenas Master/Admin) */}
+      {/* Card de Status da Assinatura & Uso do Plano (Apenas Master/Admin) */}
       {isMasterOrAdmin && !loadingAssinatura && assinatura && (
-        <div>
+        <div className="space-y-4">
           {(() => {
             const planoNome = assinatura.planos?.nome || 'Profissional'
             const status = assinatura.status
@@ -612,6 +649,104 @@ export default function DashboardPage() {
               </Card>
             )
           })()}
+
+          {/* Nova Seção: Uso do Plano (Master/Admin) */}
+          {assinatura.planos && (
+            <Card className="rounded-xl border border-slate-200 bg-white shadow-xs p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-teal-700" />
+                  <h3 className="text-sm font-bold text-slate-900">Uso do Plano</h3>
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] bg-slate-50 text-slate-600 border-slate-200 font-medium"
+                  >
+                    {assinatura.planos.nome}
+                  </Badge>
+                </div>
+                <span className="text-[11px] text-slate-500">
+                  Consumo em tempo real dos limites da empresa
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+                {[
+                  {
+                    label: 'Usuários',
+                    current: planUsage.usuarios,
+                    limit: assinatura.planos.limite_usuarios,
+                  },
+                  {
+                    label: 'Vendedores',
+                    current: planUsage.vendedores,
+                    limit: assinatura.planos.limite_vendedores,
+                  },
+                  {
+                    label: 'Produtos',
+                    current: planUsage.produtos,
+                    limit: assinatura.planos.limite_produtos,
+                  },
+                  {
+                    label: 'Clientes',
+                    current: planUsage.clientes,
+                    limit: assinatura.planos.limite_clientes,
+                  },
+                  {
+                    label: 'Vendas no mês',
+                    current: planUsage.vendasMes,
+                    limit: assinatura.planos.limite_vendas_mes,
+                  },
+                ].map((item, idx) => {
+                  const isUnlimited = item.limit === null || item.limit === undefined
+                  const percent = isUnlimited
+                    ? 100
+                    : item.limit > 0
+                      ? Math.min(Math.round((item.current / item.limit) * 100), 100)
+                      : 0
+                  const isFull = !isUnlimited && item.limit !== null && item.current >= item.limit
+
+                  // Cores: Verde (<= 70%), Amarelo (> 70% e < 100%), Vermelho (100%)
+                  const barColor = isUnlimited
+                    ? 'bg-emerald-500'
+                    : percent >= 100
+                      ? 'bg-rose-500'
+                      : percent > 70
+                        ? 'bg-amber-500'
+                        : 'bg-emerald-500'
+
+                  return (
+                    <div
+                      key={idx}
+                      className="p-3 rounded-lg border border-slate-100 bg-slate-50/60 flex flex-col justify-between space-y-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-slate-700">{item.label}</span>
+                        {isFull && (
+                          <Badge className="bg-rose-100 text-rose-800 border-rose-200 text-[9px] px-1.5 py-0 font-bold">
+                            Limite atingido
+                          </Badge>
+                        )}
+                      </div>
+
+                      <div className="flex items-baseline justify-between text-xs">
+                        <span className="font-bold text-slate-900 text-sm">{item.current}</span>
+                        <span className="text-slate-500 text-[11px]">
+                          {isUnlimited ? '/ Ilimitado' : `/ ${item.limit}`}
+                        </span>
+                      </div>
+
+                      <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className={`h-1.5 rounded-full transition-all duration-500 ${barColor}`}
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </Card>
+          )}
         </div>
       )}
 

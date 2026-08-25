@@ -139,6 +139,44 @@ Deno.serve(async (req: Request) => {
       )
     }
 
+    // Verificar limite de usuários do plano da empresa
+    const { data: assinaturaData, error: assinaturaErr } = await supabaseAdmin
+      .from('assinaturas')
+      .select('status, planos(limite_usuarios)')
+      .eq('empresa_id', empresaId)
+      .in('status', ['trial', 'ativa'])
+      .maybeSingle()
+
+    if (!assinaturaErr && assinaturaData) {
+      const planoInfo = assinaturaData.planos as { limite_usuarios: number | null } | null
+      const limiteUsuarios = planoInfo?.limite_usuarios
+
+      if (limiteUsuarios !== null && limiteUsuarios !== undefined) {
+        const { count: usuariosAtivosCount, error: countErr } = await supabaseAdmin
+          .from('usuarios')
+          .select('id', { count: 'exact', head: true })
+          .eq('empresa_id', empresaId)
+          .eq('ativo', true)
+
+        if (
+          !countErr &&
+          typeof usuariosAtivosCount === 'number' &&
+          usuariosAtivosCount >= limiteUsuarios
+        ) {
+          return new Response(
+            JSON.stringify({
+              sucesso: false,
+              erro: 'Limite de usuários do plano atingido. Faça upgrade do seu plano para adicionar novos usuários.',
+            }),
+            {
+              status: 400,
+              headers: { 'Content-Type': 'application/json', ...corsHeaders },
+            },
+          )
+        }
+      }
+    }
+
     // Extrair e validar o payload
     let body: any
     try {
