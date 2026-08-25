@@ -27,6 +27,7 @@ export interface LucroPorVendedor {
 interface RawItemVendaRow {
   quantidade: number
   subtotal: number
+  custo_unitario: number
   vendas: {
     id: string
     total: number
@@ -34,14 +35,12 @@ interface RawItemVendaRow {
     status: string
     vendedor_id: string | null
   } | null
-  produtos: {
-    preco_custo: number
-  } | null
 }
 
 interface RawItemVendaPorVendedorRow {
   quantidade: number
   subtotal: number
+  custo_unitario: number
   vendas: {
     id: string
     total: number
@@ -52,9 +51,6 @@ interface RawItemVendaPorVendedorRow {
       id: string
       nome: string
     } | null
-  } | null
-  produtos: {
-    preco_custo: number
   } | null
 }
 
@@ -70,7 +66,7 @@ export const RelatorioLucroService = {
     let query = supabase
       .from('itens_venda')
       .select(
-        'quantidade, subtotal, vendas!inner(id, total, created_at, status, vendedor_id), produtos!inner(preco_custo)',
+        'quantidade, subtotal, custo_unitario, vendas!inner(id, total, created_at, status, vendedor_id)',
       )
       .eq('empresa_id', empresaId)
       .eq('vendas.status', 'finalizada')
@@ -96,10 +92,9 @@ export const RelatorioLucroService = {
     for (const item of rows) {
       const subtotalItem = Number(item.subtotal || 0)
       const quantidade = Number(item.quantidade || 0)
-      const precoCusto = Number(item.produtos?.preco_custo || 0)
 
       faturamento += subtotalItem
-      custoProdutos += quantidade * precoCusto
+      custoProdutos += quantidade * Number(item.custo_unitario || 0)
 
       if (item.vendas?.id) {
         vendasUnicas.add(item.vendas.id)
@@ -128,7 +123,7 @@ export const RelatorioLucroService = {
     const query = supabase
       .from('itens_venda')
       .select(
-        'quantidade, subtotal, vendas!inner(id, total, created_at, status, vendedor_id, vendedores(id, nome)), produtos!inner(preco_custo)',
+        'quantidade, subtotal, custo_unitario, vendas!inner(id, total, created_at, status, vendedor_id, vendedores(id, nome))',
       )
       .eq('empresa_id', empresaId)
       .eq('vendas.status', 'finalizada')
@@ -173,10 +168,9 @@ export const RelatorioLucroService = {
       const g = grouped.get(vendId)!
       const subtotalItem = Number(item.subtotal || 0)
       const quantidade = Number(item.quantidade || 0)
-      const precoCusto = Number(item.produtos?.preco_custo || 0)
 
       g.faturamento += subtotalItem
-      g.custo += quantidade * precoCusto
+      g.custo += quantidade * Number(item.custo_unitario || 0)
 
       if (item.vendas?.id) {
         g.vendasSet.add(item.vendas.id)

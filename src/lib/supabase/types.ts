@@ -671,6 +671,7 @@ export type Database = {
       }
       itens_venda: {
         Row: {
+          custo_unitario: number
           desconto: number
           empresa_id: string
           id: string
@@ -681,6 +682,7 @@ export type Database = {
           venda_id: string
         }
         Insert: {
+          custo_unitario?: number
           desconto?: number
           empresa_id: string
           id?: string
@@ -691,6 +693,7 @@ export type Database = {
           venda_id: string
         }
         Update: {
+          custo_unitario?: number
           desconto?: number
           empresa_id?: string
           id?: string

@@ -219,7 +219,7 @@ export default function RelatorioLucroPage() {
     <div className="space-y-6">
       <PageHeader
         title="Relatório de Lucro"
-        description="Análise de rentabilidade com base no custo atual dos produtos."
+        description="Análise de rentabilidade com base no custo histórico registrado no momento de cada venda."
         actions={
           <Button
             variant="outline"
@@ -234,15 +234,17 @@ export default function RelatorioLucroPage() {
         }
       />
 
-      {/* Aviso de Preço de Custo Atual */}
-      <div className="flex items-start gap-2.5 rounded-lg border border-blue-100 bg-blue-50/80 p-3.5 text-xs text-blue-900">
-        <Info className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
-        <div>
-          <span className="font-semibold">Aviso importante:</span> Os custos são calculados com base
-          no preço de custo atual dos produtos cadastrados, não no custo histórico do momento de
-          cada venda.
+      {/* Aviso sobre Vendas Antigas sem Custo Histórico */}
+      {resumo.custoProdutos === 0 && resumo.faturamento > 0 && !loading && (
+        <div className="flex items-start gap-2.5 rounded-lg border border-amber-100 bg-amber-50/80 p-3.5 text-xs text-amber-900">
+          <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <span className="font-semibold">Aviso:</span> Algumas vendas neste período foram
+            registradas antes da implementação do custo histórico e podem exibir custo zerado,
+            afetando o cálculo do lucro.
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Barra de Filtros */}
       <Card className="border-slate-200 shadow-sm">
@@ -363,7 +365,7 @@ export default function RelatorioLucroPage() {
           <MetricCard
             title="Custo dos Produtos"
             value={loading ? 'Carregando...' : formatCurrency(resumo.custoProdutos)}
-            subtitle="Baseado no preço de custo atual"
+            subtitle="Custo histórico registrado na venda"
             icon={ShoppingCart}
           />
 
