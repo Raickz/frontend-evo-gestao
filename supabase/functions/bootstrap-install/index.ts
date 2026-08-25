@@ -407,6 +407,108 @@ Deno.serve(async (req: Request) => {
       })
     }
 
+    // 6. Criar assinatura trial padrão (Plano Profissional)
+    const { data: planoProfissional, error: planoError } = await supabaseAdmin
+      .from('planos')
+      .select('id, valor_mensal, periodo_teste_dias')
+      .eq('slug', 'profissional')
+      .eq('ativo', true)
+      .limit(1)
+      .maybeSingle()
+
+    if (planoError || !planoProfissional) {
+      console.error('bootstrap-install: Plano Profissional não encontrado', planoError)
+
+      // Rollback completo: remover usuário público, auth user e empresa
+      if (usuarioInserido?.id) {
+        try {
+          await supabaseAdmin.from('usuarios').delete().eq('id', usuarioInserido.id)
+        } catch {
+          // Rollback silencioso
+        }
+      }
+      if (createdAuthUserId) {
+        try {
+          await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId)
+        } catch {
+          // Rollback silencioso
+        }
+      }
+      if (createdEmpresaId) {
+        try {
+          await supabaseAdmin.from('empresas').delete().eq('id', createdEmpresaId)
+        } catch {
+          // Rollback silencioso
+        }
+      }
+
+      return new Response(
+        JSON.stringify({
+          sucesso: false,
+          erro: 'Plano padrão do sistema não encontrado. Não foi possível concluir o cadastro.',
+        }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        },
+      )
+    }
+
+    const trialDias = planoProfissional.periodo_teste_dias ?? 14
+    const hoje = new Date()
+    const dataFimTrial = new Date(hoje)
+    dataFimTrial.setDate(dataFimTrial.getDate() + trialDias)
+
+    const dataInicioStr = hoje.toISOString().split('T')[0]
+    const dataFimTrialStr = dataFimTrial.toISOString().split('T')[0]
+
+    const { error: insertAssinaturaError } = await supabaseAdmin.from('assinaturas').insert({
+      empresa_id: createdEmpresaId,
+      plano_id: planoProfissional.id,
+      valor: planoProfissional.valor_mensal,
+      inicio: dataInicioStr,
+      fim_periodo_teste: dataFimTrialStr,
+      status: 'trial',
+    })
+
+    if (insertAssinaturaError) {
+      console.error('bootstrap-install: Criação de assinatura falhou', insertAssinaturaError)
+
+      // Rollback completo
+      if (usuarioInserido?.id) {
+        try {
+          await supabaseAdmin.from('usuarios').delete().eq('id', usuarioInserido.id)
+        } catch {
+          // Rollback silencioso
+        }
+      }
+      if (createdAuthUserId) {
+        try {
+          await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId)
+        } catch {
+          // Rollback silencioso
+        }
+      }
+      if (createdEmpresaId) {
+        try {
+          await supabaseAdmin.from('empresas').delete().eq('id', createdEmpresaId)
+        } catch {
+          // Rollback silencioso
+        }
+      }
+
+      return new Response(
+        JSON.stringify({
+          sucesso: false,
+          erro: 'Falha ao vincular o plano de assinatura inicial.',
+        }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        },
+      )
+    }
+
     // Retorno de sucesso
     return new Response(
       JSON.stringify({

@@ -49,7 +49,13 @@ import {
   HelpCircle,
   Upload,
   Trash2,
+  CreditCard,
+  Clock,
+  Check,
+  Calendar,
+  Sparkles,
 } from 'lucide-react'
+import { AssinaturasService, AssinaturaComPlano, AssinaturaStatus } from '@/services/assinaturas'
 
 const PAGE_SIZE = 20
 
@@ -60,6 +66,99 @@ export default function ConfiguracoesPage() {
   const perfilLogado = (usuarioLogado?.perfil || '').toLowerCase()
   const isMasterOrAdmin = perfilLogado === 'master' || perfilLogado === 'admin'
   const isMaster = perfilLogado === 'master'
+
+  // =========================================================================
+  // ABA PLANO E ASSINATURA (apenas Master / Admin)
+  // =========================================================================
+  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
+  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
+  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
+
+  const loadAssinatura = useCallback(async () => {
+    if (!empresaId || !isMasterOrAdmin) {
+      setLoadingAssinatura(false)
+      return
+    }
+
+    setLoadingAssinatura(true)
+    setErrorAssinatura(null)
+    try {
+      const { data, error } = await AssinaturasService.getByEmpresaId(empresaId)
+      if (error) throw error
+      setAssinatura(data)
+    } catch (err: any) {
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar assinatura:', err)
+      }
+      setErrorAssinatura(err.message || 'Falha ao carregar informações de plano e assinatura.')
+    } finally {
+      setLoadingAssinatura(false)
+    }
+  }, [empresaId, isMasterOrAdmin])
+
+  useEffect(() => {
+    if (isMasterOrAdmin) {
+      loadAssinatura()
+    }
+  }, [isMasterOrAdmin, loadAssinatura])
+
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
+  }
+
+  const formatStatusAssinatura = (status?: AssinaturaStatus | string) => {
+    switch (status) {
+      case 'trial':
+        return {
+          label: 'Período de Teste (Trial)',
+          color: 'bg-amber-100 text-amber-800 border-amber-200',
+        }
+      case 'ativa':
+        return {
+          label: 'Assinatura Ativa',
+          color: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+        }
+      case 'pendente':
+        return {
+          label: 'Pagamento Pendente',
+          color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        }
+      case 'atrasada':
+        return {
+          label: 'Fatura Atrasada',
+          color: 'bg-orange-100 text-orange-800 border-orange-200',
+        }
+      case 'cancelada':
+        return {
+          label: 'Assinatura Cancelada',
+          color: 'bg-rose-100 text-rose-800 border-rose-200',
+        }
+      case 'bloqueada':
+        return {
+          label: 'Acesso Bloqueado',
+          color: 'bg-slate-200 text-slate-800 border-slate-300',
+        }
+      default:
+        return {
+          label: status || 'Sem Assinatura',
+          color: 'bg-slate-100 text-slate-700 border-slate-200',
+        }
+    }
+  }
+
+  const calcularDiasRestantesTrial = (fimStr?: string | null): number => {
+    if (!fimStr) return 0
+    try {
+      const fim = new Date(fimStr)
+      const hoje = new Date()
+      hoje.setHours(0, 0, 0, 0)
+      fim.setHours(0, 0, 0, 0)
+      const diffMs = fim.getTime() - hoje.getTime()
+      return Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+    } catch {
+      return 0
+    }
+  }
 
   // =========================================================================
   // ABA 1: EMPRESA
@@ -222,7 +321,6 @@ export default function ConfiguracoesPage() {
       if (uploadError) throw uploadError
 
       const { data: publicData } = supabase.storage.from('logos').getPublicUrl(filePath)
-      // Adicionar timestamp de cache busting para a URL da imagem pública
       const publicUrl = `${publicData.publicUrl}?t=${Date.now()}`
 
       const { error: updateError } = await ConfiguracoesService.updateEmpresa(empresaId, {
@@ -256,7 +354,6 @@ export default function ConfiguracoesPage() {
 
     setRemovingLogo(true)
     try {
-      // Tentar remover arquivos do storage se for URL do storage
       if (empresa?.logo_url && empresa.logo_url.includes('/logos/')) {
         try {
           const urlObj = new URL(empresa.logo_url)
@@ -428,7 +525,6 @@ export default function ConfiguracoesPage() {
   const [submittingNovoUsuario, setSubmittingNovoUsuario] = useState(false)
 
   const handleCreateUsuario = async () => {
-    // Validações frontend
     if (!novoUsuarioNome.trim()) {
       toast.error('Nome é obrigatório.')
       return
@@ -462,7 +558,6 @@ export default function ConfiguracoesPage() {
       if (error) throw error
       toast.success('Usuário criado com sucesso.')
       setDialogNovoUsuario(false)
-      // Limpar formulário
       setNovoUsuarioNome('')
       setNovoUsuarioEmail('')
       setNovoUsuarioPerfil('vendedor')
@@ -503,13 +598,10 @@ export default function ConfiguracoesPage() {
   }
 
   const handleOpenDialogPerfil = (targetUser: UsuarioType) => {
-    // Regras de proteção:
-    // 1. Não permitir alterar o próprio perfil
     if (targetUser.id === usuarioLogado?.id) {
       toast.error('Você não pode alterar o seu próprio perfil.')
       return
     }
-    // 2. Não permitir que admin altere perfil de um master
     const targetPerfil = (targetUser.perfil || '').toLowerCase()
     if (!isMaster && targetPerfil === 'master') {
       toast.error('Apenas usuários Master podem gerenciar outros usuários Master.')
@@ -562,7 +654,6 @@ export default function ConfiguracoesPage() {
     }
   }
 
-  // Formatador de data
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return '-'
     try {
@@ -601,7 +692,11 @@ export default function ConfiguracoesPage() {
 
         <Tabs defaultValue="empresa" className="space-y-6">
           {/* Navegação de Abas */}
-          <TabsList className="bg-slate-100 p-1 border border-slate-200 grid grid-cols-2 sm:grid-cols-4 w-full sm:w-auto h-auto gap-1">
+          <TabsList
+            className={`bg-slate-100 p-1 border border-slate-200 grid ${
+              isMasterOrAdmin ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-2 sm:grid-cols-4'
+            } w-full sm:w-auto h-auto gap-1`}
+          >
             <TabsTrigger
               value="empresa"
               className="flex items-center gap-2 text-xs font-semibold py-2 data-[state=active]:bg-white data-[state=active]:text-teal-800 data-[state=active]:shadow-xs"
@@ -625,6 +720,16 @@ export default function ConfiguracoesPage() {
               <Users className="w-4 h-4" />
               <span>Usuários</span>
             </TabsTrigger>
+
+            {isMasterOrAdmin && (
+              <TabsTrigger
+                value="plano"
+                className="flex items-center gap-2 text-xs font-semibold py-2 data-[state=active]:bg-white data-[state=active]:text-teal-800 data-[state=active]:shadow-xs"
+              >
+                <CreditCard className="w-4 h-4" />
+                <span>Plano & Assinatura</span>
+              </TabsTrigger>
+            )}
 
             <TabsTrigger
               value="seguranca"
@@ -1356,6 +1461,207 @@ export default function ConfiguracoesPage() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* =========================================================================
+              ABA PLANO E ASSINATURA (Master/Admin)
+              ========================================================================= */}
+          {isMasterOrAdmin && (
+            <TabsContent value="plano" className="space-y-6">
+              {loadingAssinatura ? (
+                <TableSkeleton rows={4} cols={2} />
+              ) : errorAssinatura ? (
+                <ErrorState message={errorAssinatura} onRetry={loadAssinatura} />
+              ) : !assinatura ? (
+                <EmptyState
+                  icon={CreditCard}
+                  title="Nenhuma assinatura ativa"
+                  description="Esta empresa não possui um plano ou assinatura vinculado no momento."
+                />
+              ) : (
+                <div className="space-y-6">
+                  {/* Card Principal da Assinatura */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <Card className="border border-slate-200 bg-white shadow-xs lg:col-span-2">
+                      <CardHeader className="border-b border-slate-100 pb-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <div className="flex items-center gap-2.5 text-teal-700">
+                            <CreditCard className="w-5 h-5" />
+                            <div>
+                              <CardTitle className="text-base font-bold text-slate-900">
+                                Detalhes da Assinatura
+                              </CardTitle>
+                              <CardDescription className="text-xs text-slate-500 mt-0.5">
+                                Informações do plano contratado e vigência da conta
+                              </CardDescription>
+                            </div>
+                          </div>
+                          {(() => {
+                            const badge = formatStatusAssinatura(assinatura.status)
+                            return (
+                              <Badge
+                                variant="outline"
+                                className={`text-xs font-semibold px-2.5 py-1 ${badge.color}`}
+                              >
+                                {badge.label}
+                              </Badge>
+                            )
+                          })()}
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="pt-6 space-y-6">
+                        {/* Bloco Destaque: Plano e Valor */}
+                        <div className="p-4 rounded-xl border border-teal-100 bg-teal-50/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div>
+                            <span className="text-xs font-medium text-teal-800 uppercase tracking-wider block">
+                              Plano Atual
+                            </span>
+                            <h3 className="text-xl font-bold text-slate-900 mt-0.5">
+                              {assinatura.planos?.nome || 'Plano Personalizado'}
+                            </h3>
+                            {assinatura.planos?.descricao && (
+                              <p className="text-xs text-slate-600 mt-1 max-w-md">
+                                {assinatura.planos.descricao}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="sm:text-right">
+                            <span className="text-xs font-medium text-slate-500 block">
+                              Valor Mensal
+                            </span>
+                            <div className="text-2xl font-extrabold text-teal-900 mt-0.5">
+                              {formatCurrency(
+                                Number(assinatura.valor || assinatura.planos?.valor_mensal || 0),
+                              )}
+                              <span className="text-xs font-normal text-slate-500"> /mês</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Grade de Datas e Prazos */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                          <div className="p-3.5 rounded-lg border border-slate-100 bg-slate-50/70 space-y-1">
+                            <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                              Data de Início
+                            </span>
+                            <p className="text-sm font-semibold text-slate-800">
+                              {formatDate(assinatura.inicio)}
+                            </p>
+                          </div>
+
+                          {assinatura.status === 'trial' ? (
+                            <div className="p-3.5 rounded-lg border border-amber-200 bg-amber-50/50 space-y-1">
+                              <span className="text-amber-800 font-medium flex items-center gap-1.5">
+                                <Clock className="w-3.5 h-3.5 text-amber-600" />
+                                Fim do Período de Teste
+                              </span>
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-sm font-bold text-amber-950">
+                                  {formatDate(assinatura.fim_periodo_teste)}
+                                </p>
+                                {(() => {
+                                  const dias = calcularDiasRestantesTrial(
+                                    assinatura.fim_periodo_teste,
+                                  )
+                                  const cor =
+                                    dias <= 0
+                                      ? 'text-red-700 bg-red-100 border-red-200'
+                                      : dias <= 5
+                                        ? 'text-amber-800 bg-amber-100 border-amber-300'
+                                        : 'text-teal-800 bg-teal-100 border-teal-200'
+                                  return (
+                                    <Badge
+                                      variant="outline"
+                                      className={`text-[11px] font-semibold ${cor}`}
+                                    >
+                                      {dias <= 0
+                                        ? 'Expirado'
+                                        : dias === 1
+                                          ? 'Resta 1 dia'
+                                          : `Restam ${dias} dias`}
+                                    </Badge>
+                                  )
+                                })()}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-3.5 rounded-lg border border-slate-100 bg-slate-50/70 space-y-1">
+                              <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                                Próxima Cobrança
+                              </span>
+                              <p className="text-sm font-semibold text-slate-800">
+                                {assinatura.proxima_cobranca
+                                  ? formatDate(assinatura.proxima_cobranca)
+                                  : 'Não agendada'}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Aviso informativo de leitura */}
+                        <div className="p-3 rounded-lg border border-slate-200 bg-slate-50 text-[11px] text-slate-500 flex items-center gap-2">
+                          <HelpCircle className="w-4 h-4 shrink-0 text-slate-400" />
+                          <span>
+                            As assinaturas e limites operacionais são gerenciados diretamente pelo
+                            suporte da plataforma EVO Gestão.
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Card de Recursos Inclusos do Plano */}
+                    <Card className="border border-slate-200 bg-white shadow-xs">
+                      <CardHeader className="border-b border-slate-100 pb-3">
+                        <div className="flex items-center gap-2 text-teal-700">
+                          <Sparkles className="w-5 h-5" />
+                          <CardTitle className="text-base font-bold text-slate-900">
+                            Recursos do Plano
+                          </CardTitle>
+                        </div>
+                        <CardDescription className="text-xs text-slate-500">
+                          Benefícios disponíveis no plano {assinatura.planos?.nome || ''}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="pt-4 space-y-3">
+                        {(() => {
+                          const recursos = Array.isArray(assinatura.planos?.recursos)
+                            ? (assinatura.planos.recursos as string[])
+                            : []
+
+                          if (recursos.length === 0) {
+                            return (
+                              <p className="text-xs text-slate-400 italic">
+                                Nenhum recurso detalhado para este plano.
+                              </p>
+                            )
+                          }
+
+                          return (
+                            <ul className="space-y-2.5">
+                              {recursos.map((rec, idx) => (
+                                <li
+                                  key={idx}
+                                  className="flex items-start gap-2.5 text-xs text-slate-700"
+                                >
+                                  <div className="h-4 w-4 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
+                                    <Check className="w-3 h-3" />
+                                  </div>
+                                  <span className="leading-snug">{rec}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )
+                        })()}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+          )}
 
           {/* =========================================================================
               ABA 4: SEGURANÇA

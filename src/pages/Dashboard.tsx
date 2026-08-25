@@ -27,6 +27,9 @@ import {
   ChevronDown,
   ChevronUp,
   EyeOff,
+  CreditCard,
+  Clock,
+  ShieldAlert,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { canAccessPage } from '@/lib/permissions'
@@ -35,6 +38,7 @@ import { VendasService } from '@/services/vendas'
 import { ClientesService } from '@/services/clientes'
 import { ProdutosService } from '@/services/produtos'
 import { EstoqueService } from '@/services/estoque'
+import { AssinaturasService, AssinaturaComPlano } from '@/services/assinaturas'
 
 interface OnboardingProgress {
   empresaNome: string | null
@@ -99,6 +103,28 @@ export default function DashboardPage() {
   const [onboardingData, setOnboardingData] = useState<OnboardingProgress | null>(null)
   const [loadingOnboarding, setLoadingOnboarding] = useState(true)
   const [checklistDismissed, setChecklistDismissed] = useState(false)
+
+  // Assinatura do usuário / empresa
+  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
+  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
+
+  const loadAssinatura = useCallback(async () => {
+    if (!empresaId || !isMasterOrAdmin) {
+      setLoadingAssinatura(false)
+      return
+    }
+
+    try {
+      const { data: assData } = await AssinaturasService.getByEmpresaId(empresaId)
+      setAssinatura(assData)
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar assinatura no Dashboard:', err)
+      }
+    } finally {
+      setLoadingAssinatura(false)
+    }
+  }, [empresaId, isMasterOrAdmin])
 
   // Recuperar estado dismissível de checklist completo do localStorage
   useEffect(() => {
@@ -239,7 +265,8 @@ export default function DashboardPage() {
   useEffect(() => {
     loadDashboardData()
     loadOnboardingProgress()
-  }, [loadDashboardData, loadOnboardingProgress])
+    loadAssinatura()
+  }, [loadDashboardData, loadOnboardingProgress, loadAssinatura])
 
   const handleDismissChecklist = () => {
     if (empresaId) {
@@ -304,6 +331,20 @@ export default function DashboardPage() {
   const isComplete = completedCount === 7
   const showFirstAccessBanner = isMasterOrAdmin && completedCount < 4
 
+  const calcularDiasRestantesTrial = (fimStr?: string | null): number => {
+    if (!fimStr) return 0
+    try {
+      const fim = new Date(fimStr)
+      const hoje = new Date()
+      hoje.setHours(0, 0, 0, 0)
+      fim.setHours(0, 0, 0, 0)
+      const diffMs = fim.getTime() - hoje.getTime()
+      return Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+    } catch {
+      return 0
+    }
+  }
+
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
   }
@@ -350,6 +391,7 @@ export default function DashboardPage() {
               onClick={() => {
                 loadDashboardData()
                 loadOnboardingProgress()
+                loadAssinatura()
               }}
               disabled={loading}
               className="text-slate-700 hover:bg-slate-50"
@@ -368,6 +410,210 @@ export default function DashboardPage() {
           </div>
         }
       />
+
+      {/* Card de Status da Assinatura (Apenas Master/Admin) */}
+      {isMasterOrAdmin && !loadingAssinatura && assinatura && (
+        <div>
+          {(() => {
+            const planoNome = assinatura.planos?.nome || 'Profissional'
+            const status = assinatura.status
+
+            if (status === 'trial') {
+              const diasRestantes = calcularDiasRestantesTrial(assinatura.fim_periodo_teste)
+              const isVencido = diasRestantes <= 0
+              const isUrgente = diasRestantes <= 5 && !isVencido
+
+              const badgeColor = isVencido
+                ? 'bg-rose-100 text-rose-800 border-rose-200'
+                : isUrgente
+                  ? 'bg-amber-100 text-amber-800 border-amber-300'
+                  : 'bg-teal-100 text-teal-800 border-teal-200'
+
+              const borderColor = isVencido
+                ? 'border-rose-200 bg-rose-50/20'
+                : isUrgente
+                  ? 'border-amber-200 bg-amber-50/20'
+                  : 'border-slate-200 bg-white'
+
+              const iconColor = isVencido
+                ? 'bg-rose-100 text-rose-700'
+                : isUrgente
+                  ? 'bg-amber-100 text-amber-700'
+                  : 'bg-teal-50 text-teal-700'
+
+              return (
+                <Card className={`rounded-xl border ${borderColor} shadow-xs p-3.5 sm:p-4`}>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${iconColor}`}
+                      >
+                        <Clock className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-sm font-bold text-slate-900">
+                            Plano {planoNome}
+                          </span>
+                          <span className="text-slate-400 text-xs">·</span>
+                          <span className="text-xs font-medium text-slate-600">
+                            Período de teste
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className={`text-[11px] font-semibold py-0.5 px-2 ${badgeColor}`}
+                          >
+                            {isVencido
+                              ? 'Teste expirado'
+                              : diasRestantes === 1
+                                ? 'Resta 1 dia'
+                                : `Restam ${diasRestantes} dias`}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Aproveite todos os recursos liberados durante o período de avaliação da
+                          sua distribuidora.
+                        </p>
+                      </div>
+                    </div>
+
+                    <Link to="/app/configuracoes" className="shrink-0 self-end sm:self-auto">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 text-xs text-teal-700 hover:text-teal-800 hover:bg-teal-50 font-medium flex items-center gap-1"
+                      >
+                        Ver assinatura
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Button>
+                    </Link>
+                  </div>
+                </Card>
+              )
+            }
+
+            if (status === 'ativa') {
+              return (
+                <Card className="rounded-xl border border-slate-200 bg-white shadow-xs p-3.5 sm:p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-slate-900">
+                            Plano {planoNome}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border-emerald-200 py-0.5 px-2"
+                          >
+                            Assinatura ativa
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Sua assinatura está regular e todas as funcionalidades estão disponíveis.
+                        </p>
+                      </div>
+                    </div>
+
+                    <Link to="/app/configuracoes" className="shrink-0 self-end sm:self-auto">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 text-xs text-teal-700 hover:text-teal-800 hover:bg-teal-50 font-medium flex items-center gap-1"
+                      >
+                        Ver assinatura
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Button>
+                    </Link>
+                  </div>
+                </Card>
+              )
+            }
+
+            // Outros status: pendente, atrasada, cancelada, bloqueada
+            const statusConfigMap: Record<
+              string,
+              { label: string; badge: string; icon: any; iconStyle: string }
+            > = {
+              pendente: {
+                label: 'Pagamento pendente',
+                badge: 'bg-yellow-50 text-yellow-800 border-yellow-200',
+                icon: Clock,
+                iconStyle: 'bg-yellow-50 text-yellow-700',
+              },
+              atrasada: {
+                label: 'Fatura em atraso',
+                badge: 'bg-orange-50 text-orange-800 border-orange-200',
+                icon: AlertTriangle,
+                iconStyle: 'bg-orange-50 text-orange-700',
+              },
+              cancelada: {
+                label: 'Assinatura cancelada',
+                badge: 'bg-rose-50 text-rose-800 border-rose-200',
+                icon: ShieldAlert,
+                iconStyle: 'bg-rose-50 text-rose-700',
+              },
+              bloqueada: {
+                label: 'Acesso bloqueado',
+                badge: 'bg-slate-100 text-slate-800 border-slate-300',
+                icon: ShieldAlert,
+                iconStyle: 'bg-slate-100 text-slate-700',
+              },
+            }
+
+            const currentConfig = statusConfigMap[status] || {
+              label: status,
+              badge: 'bg-slate-50 text-slate-700 border-slate-200',
+              icon: CreditCard,
+              iconStyle: 'bg-slate-50 text-slate-700',
+            }
+
+            const StatusIcon = currentConfig.icon
+
+            return (
+              <Card className="rounded-xl border border-slate-200 bg-white shadow-xs p-3.5 sm:p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${currentConfig.iconStyle}`}
+                    >
+                      <StatusIcon className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-slate-900">Plano {planoNome}</span>
+                        <Badge
+                          variant="outline"
+                          className={`text-[11px] font-semibold py-0.5 px-2 ${currentConfig.badge}`}
+                        >
+                          {currentConfig.label}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Status atualizado dos serviços da sua empresa no EVO Gestão.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Link to="/app/configuracoes" className="shrink-0 self-end sm:self-auto">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 text-xs text-teal-700 hover:text-teal-800 hover:bg-teal-50 font-medium flex items-center gap-1"
+                    >
+                      Ver assinatura
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            )
+          })()}
+        </div>
+      )}
 
       {/* PARTE 5: Banner de Primeiro Acesso (< 4 itens concluídos para Master/Admin) */}
       {showFirstAccessBanner && (
