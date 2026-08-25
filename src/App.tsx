@@ -26,6 +26,7 @@ import VendedoresPage from '@/pages/Vendedores'
 import ComissoesPage from '@/pages/Comissoes'
 import ConfiguracoesPage from '@/pages/Configuracoes'
 import RelatoriosPage from '@/pages/Relatorios'
+import RelatorioLucroPage from '@/pages/RelatorioLucro'
 import NotFound from '@/pages/NotFound'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
@@ -130,6 +131,14 @@ const App = () => (
                 element={
                   <RoleRouteGuard page="relatorios">
                     <RelatoriosPage />
+                  </RoleRouteGuard>
+                }
+              />
+              <Route
+                path="relatorio-lucro"
+                element={
+                  <RoleRouteGuard page="relatorio_lucro">
+                    <RelatorioLucroPage />
                   </RoleRouteGuard>
                 }
               />

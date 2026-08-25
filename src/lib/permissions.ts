@@ -3,6 +3,7 @@ export type UserRole = 'master' | 'admin' | 'gerente' | 'vendedor' | 'operador'
 export type AppPage =
   | 'dashboard'
   | 'relatorios'
+  | 'relatorio_lucro'
   | 'clientes'
   | 'produtos'
   | 'fornecedores'
@@ -19,15 +20,16 @@ export type AppPage =
  * Mapeamento estrito de quais páginas cada papel pode acessar.
  * Regras:
  * MASTER: Acesso irrestrito a todas as páginas
- * ADMIN: Dashboard, Clientes, Produtos, Fornecedores, Compras, Estoque, Vendas, Pedidos, Financeiro, Vendedores, Comissões, Configurações
- * GERENTE: Dashboard, Clientes, Produtos, Fornecedores, Compras, Estoque, Vendas, Pedidos, Financeiro, Vendedores, Comissões
+ * ADMIN: Dashboard, Relatórios, Relatório de Lucro, Clientes, Produtos, Fornecedores, Compras, Estoque, Vendas, Pedidos, Financeiro, Vendedores, Comissões, Configurações
+ * GERENTE: Dashboard, Relatórios, Clientes, Produtos, Fornecedores, Compras, Estoque, Vendas, Pedidos, Financeiro, Vendedores, Comissões
  * VENDEDOR: Dashboard, Clientes, Produtos, Vendas, Pedidos, Comissões
- * OPERADOR: Dashboard, Clientes, Fornecedores, Produtos, Compras, Estoque, Vendas, Pedidos
+ * OPERADOR: Dashboard, Relatórios, Clientes, Fornecedores, Produtos, Compras, Estoque, Vendas, Pedidos
  */
 export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
   master: [
     'dashboard',
     'relatorios',
+    'relatorio_lucro',
     'clientes',
     'produtos',
     'fornecedores',
@@ -43,6 +45,7 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
   admin: [
     'dashboard',
     'relatorios',
+    'relatorio_lucro',
     'clientes',
     'produtos',
     'fornecedores',
@@ -90,6 +93,7 @@ export const PATH_TO_PAGE_MAP: Record<string, AppPage> = {
   '/app': 'dashboard',
   '/app/dashboard': 'dashboard',
   '/app/relatorios': 'relatorios',
+  '/app/relatorio-lucro': 'relatorio_lucro',
   '/app/clientes': 'clientes',
   '/app/produtos': 'produtos',
   '/app/fornecedores': 'fornecedores',

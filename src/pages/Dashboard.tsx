@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { canAccessPage } from '@/lib/permissions'
+import { supabase } from '@/lib/supabase/client'
 import { VendasService } from '@/services/vendas'
 import { ClientesService } from '@/services/clientes'
 import { ProdutosService } from '@/services/produtos'
@@ -82,6 +83,18 @@ export default function DashboardPage() {
     setError(null)
 
     try {
+      let resolvedVendedorId: string | null = null
+      if (usuario?.perfil === 'vendedor') {
+        const { data: vendedorData } = await supabase
+          .from('vendedores')
+          .select('id')
+          .eq('empresa_id', empresaId)
+          .eq('usuario_id', usuario.id)
+          .maybeSingle()
+
+        resolvedVendedorId = vendedorData?.id || '00000000-0000-0000-0000-000000000000'
+      }
+
       const [
         faturamentoRes,
         vendasCountRes,
@@ -90,12 +103,12 @@ export default function DashboardPage() {
         estoqueBaixoRes,
         vendasRecentesRes,
       ] = await Promise.all([
-        VendasService.getFaturamentoMensal(empresaId),
-        VendasService.getCountMensal(empresaId),
+        VendasService.getFaturamentoMensal(empresaId, resolvedVendedorId),
+        VendasService.getCountMensal(empresaId, resolvedVendedorId),
         ClientesService.countAtivos(empresaId),
         ProdutosService.countAtivos(empresaId),
         EstoqueService.listEstoqueBaixo(empresaId),
-        VendasService.getRecentes(empresaId),
+        VendasService.getRecentes(empresaId, resolvedVendedorId),
       ])
 
       // Verifica se houve erro em alguma das chamadas
@@ -131,7 +144,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [empresaId])
+  }, [empresaId, usuario?.perfil, usuario?.id])
 
   useEffect(() => {
     loadDashboardData()

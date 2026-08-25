@@ -159,40 +159,56 @@ export const VendasService = {
     return query.order('nome', { ascending: true })
   },
 
-  async getFaturamentoMensal(empresaId: string) {
+  async getFaturamentoMensal(empresaId: string, vendedorId?: string | null) {
     const inicioMes = new Date()
     inicioMes.setDate(1)
     inicioMes.setHours(0, 0, 0, 0)
 
-    return supabase
+    let query = supabase
       .from('vendas')
       .select('total')
       .eq('empresa_id', empresaId)
       .eq('status', 'finalizada')
       .gte('created_at', inicioMes.toISOString())
+
+    if (vendedorId) {
+      query = query.eq('vendedor_id', vendedorId)
+    }
+
+    return query
   },
 
-  async getCountMensal(empresaId: string) {
+  async getCountMensal(empresaId: string, vendedorId?: string | null) {
     const inicioMes = new Date()
     inicioMes.setDate(1)
     inicioMes.setHours(0, 0, 0, 0)
 
-    return supabase
+    let query = supabase
       .from('vendas')
       .select('id', { count: 'exact', head: true })
       .eq('empresa_id', empresaId)
       .eq('status', 'finalizada')
       .gte('created_at', inicioMes.toISOString())
+
+    if (vendedorId) {
+      query = query.eq('vendedor_id', vendedorId)
+    }
+
+    return query
   },
 
-  async getRecentes(empresaId: string) {
-    return supabase
+  async getRecentes(empresaId: string, vendedorId?: string | null) {
+    let query = supabase
       .from('vendas')
       .select('id, numero, total, forma_pagamento, status, created_at, clientes(nome)')
       .eq('empresa_id', empresaId)
       .eq('status', 'finalizada')
-      .order('created_at', { ascending: false })
-      .limit(5)
+
+    if (vendedorId) {
+      query = query.eq('vendedor_id', vendedorId)
+    }
+
+    return query.order('created_at', { ascending: false }).limit(5)
   },
 
   async getById(empresaId: string, id: string) {

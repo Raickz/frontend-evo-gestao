@@ -1154,10 +1154,7 @@ export default function VendasPage() {
                       </SelectItem>
                       {vendedoresFiltrados.map((vend) => (
                         <SelectItem key={vend.id} value={vend.id} className="text-xs">
-                          {vend.nome}{' '}
-                          {vend.percentual_comissao > 0
-                            ? `(${vend.percentual_comissao}% comissão)`
-                            : ''}
+                          {vend.nome}
                         </SelectItem>
                       ))}
                     </SelectContent>

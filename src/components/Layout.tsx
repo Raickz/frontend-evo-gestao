@@ -24,6 +24,7 @@ import {
   ChevronLeft,
   Layers,
   Briefcase,
+  TrendingUp,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useEmpresa } from '@/hooks/use-empresa'
@@ -58,6 +59,7 @@ const ALL_NAV_SECTIONS: NavSection[] = [
     items: [
       { title: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard, page: 'dashboard' },
       { title: 'Relatórios', href: '/app/relatorios', icon: BarChart3, page: 'relatorios' },
+      { title: 'Lucro', href: '/app/relatorio-lucro', icon: TrendingUp, page: 'relatorio_lucro' },
     ],
   },
   {

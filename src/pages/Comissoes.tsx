@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useEmpresa } from '@/hooks/use-empresa'
+import { useAuth } from '@/hooks/use-auth'
+import { supabase } from '@/lib/supabase/client'
 import { ComissoesService, Comissao, IndicadoresComissoes } from '@/services/comissoes'
 import {
   Percent,
@@ -38,6 +40,11 @@ const PAGE_SIZE = 20
 
 export default function ComissoesPage() {
   const { empresaId } = useEmpresa()
+  const { usuario } = useAuth()
+
+  const isVendedor = usuario?.perfil === 'vendedor'
+  const [resolvedVendedorId, setResolvedVendedorId] = useState<string | null>(null)
+  const [resolvedVendedorNome, setResolvedVendedorNome] = useState<string | null>(null)
 
   // Estados de dados
   const [comissoes, setComissoes] = useState<Comissao[]>([])
@@ -91,6 +98,29 @@ export default function ComissoesPage() {
     }
   }
 
+  // Resolução de vendedor_id se perfil for vendedor
+  useEffect(() => {
+    if (!empresaId || !usuario) return
+
+    if (isVendedor) {
+      supabase
+        .from('vendedores')
+        .select('id, nome')
+        .eq('empresa_id', empresaId)
+        .eq('usuario_id', usuario.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          const vId = data?.id || '00000000-0000-0000-0000-000000000000'
+          setResolvedVendedorId(vId)
+          setResolvedVendedorNome(data?.nome || usuario.nome || 'Meu Usuário')
+          setVendedorFilter(vId)
+        })
+    } else {
+      setResolvedVendedorId(null)
+      setResolvedVendedorNome(null)
+    }
+  }, [empresaId, usuario, isVendedor])
+
   // Carrega lista de vendedores para o select dropdown
   const loadVendedores = useCallback(async () => {
     if (!empresaId) return
@@ -105,9 +135,15 @@ export default function ComissoesPage() {
   // Carrega Indicadores (KPIs do topo)
   const loadIndicadores = useCallback(async () => {
     if (!empresaId) return
+    if (isVendedor && resolvedVendedorId === null) return
+
     setLoadingKpis(true)
     try {
-      const { data, error: err } = await ComissoesService.getIndicadores(empresaId)
+      const vIdForIndicadores = isVendedor ? resolvedVendedorId : undefined
+      const { data, error: err } = await ComissoesService.getIndicadores(
+        empresaId,
+        vIdForIndicadores,
+      )
       if (err) throw err
       if (data) {
         setIndicadores(data)
@@ -117,14 +153,18 @@ export default function ComissoesPage() {
     } finally {
       setLoadingKpis(false)
     }
-  }, [empresaId])
+  }, [empresaId, isVendedor, resolvedVendedorId])
 
   // Carrega comissões filtradas e paginadas
   const fetchComissoes = useCallback(async () => {
     if (!empresaId) return
+    if (isVendedor && resolvedVendedorId === null) return
+
     setLoading(true)
     setError(null)
     try {
+      const effectiveVendedorFilter = isVendedor ? resolvedVendedorId : vendedorFilter
+
       const {
         data,
         count,
@@ -132,7 +172,7 @@ export default function ComissoesPage() {
       } = await ComissoesService.listFiltered(empresaId, {
         termo: search,
         status: statusFilter,
-        vendedorId: vendedorFilter,
+        vendedorId: effectiveVendedorFilter || undefined,
         dataInicio: dataInicio || undefined,
         dataFim: dataFim || undefined,
         page: currentPage,
@@ -147,7 +187,17 @@ export default function ComissoesPage() {
     } finally {
       setLoading(false)
     }
-  }, [empresaId, search, statusFilter, vendedorFilter, dataInicio, dataFim, currentPage])
+  }, [
+    empresaId,
+    search,
+    statusFilter,
+    vendedorFilter,
+    dataInicio,
+    dataFim,
+    currentPage,
+    isVendedor,
+    resolvedVendedorId,
+  ])
 
   // Debounce para busca textual
   useEffect(() => {
@@ -168,7 +218,7 @@ export default function ComissoesPage() {
   const handleClearFilters = () => {
     setSearch('')
     setStatusFilter('todos')
-    setVendedorFilter('todos')
+    setVendedorFilter(isVendedor && resolvedVendedorId ? resolvedVendedorId : 'todos')
     setDataInicio('')
     setDataFim('')
     setCurrentPage(1)
@@ -177,7 +227,7 @@ export default function ComissoesPage() {
   const hasActiveFilters = Boolean(
     search.trim() ||
     statusFilter !== 'todos' ||
-    vendedorFilter !== 'todos' ||
+    (!isVendedor && vendedorFilter !== 'todos') ||
     dataInicio ||
     dataFim,
   )
@@ -302,24 +352,35 @@ export default function ComissoesPage() {
           <div className="space-y-1 lg:col-span-1">
             <Label className="text-[11px] font-semibold text-slate-600">Vendedor</Label>
             <Select
-              value={vendedorFilter}
+              value={isVendedor ? resolvedVendedorId || 'vendedor_atual' : vendedorFilter}
               onValueChange={(val) => {
-                setVendedorFilter(val)
-                setCurrentPage(1)
+                if (!isVendedor) {
+                  setVendedorFilter(val)
+                  setCurrentPage(1)
+                }
               }}
+              disabled={isVendedor}
             >
-              <SelectTrigger className="h-8 text-xs bg-slate-50">
+              <SelectTrigger className="h-8 text-xs bg-slate-50 disabled:opacity-80 disabled:cursor-not-allowed">
                 <SelectValue placeholder="Todos os vendedores" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="todos" className="text-xs">
-                  Todos os Vendedores
-                </SelectItem>
-                {vendedoresList.map((v) => (
-                  <SelectItem key={v.id} value={v.id} className="text-xs">
-                    {v.nome}
+                {isVendedor ? (
+                  <SelectItem value={resolvedVendedorId || 'vendedor_atual'} className="text-xs">
+                    {resolvedVendedorNome || 'Meu Usuário'}
                   </SelectItem>
-                ))}
+                ) : (
+                  <>
+                    <SelectItem value="todos" className="text-xs">
+                      Todos os Vendedores
+                    </SelectItem>
+                    {vendedoresList.map((v) => (
+                      <SelectItem key={v.id} value={v.id} className="text-xs">
+                        {v.nome}
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
               </SelectContent>
             </Select>
           </div>

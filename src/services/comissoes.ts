@@ -126,11 +126,20 @@ export const ComissoesService = {
    * 3. Comissões pagas (soma de valor_comissao onde status = 'pago')
    * 4. Total de vendas comissionadas (count de todos os registros de comissões)
    */
-  async getIndicadores(empresaId: string): Promise<{ data: IndicadoresComissoes; error: any }> {
-    const { data, error } = await supabase
+  async getIndicadores(
+    empresaId: string,
+    vendedorId?: string | null,
+  ): Promise<{ data: IndicadoresComissoes; error: any }> {
+    let query = supabase
       .from('comissoes')
       .select('valor_comissao, status')
       .eq('empresa_id', empresaId)
+
+    if (vendedorId) {
+      query = query.eq('vendedor_id', vendedorId)
+    }
+
+    const { data, error } = await query
 
     if (error) {
       return {
