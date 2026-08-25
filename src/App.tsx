@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import '@/styles/print.css'
 import { Toaster } from '@/components/ui/toaster'
@@ -6,9 +7,11 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { AuthProvider } from '@/hooks/use-auth'
 import { EmpresaProvider } from '@/hooks/use-empresa'
 import { ProtectedRoute, RoleRouteGuard } from '@/components/ProtectedRoute'
+import { Building2, Loader2 } from 'lucide-react'
 import Layout from '@/components/Layout'
 
 // Pages
+import SetupPage from '@/pages/Setup'
 import AuthPage from '@/pages/Auth'
 import DashboardPage from '@/pages/Dashboard'
 import ClientesPage from '@/pages/Clientes'
@@ -25,6 +28,68 @@ import ConfiguracoesPage from '@/pages/Configuracoes'
 import RelatoriosPage from '@/pages/Relatorios'
 import NotFound from '@/pages/NotFound'
 
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string
+
+function BootstrapRedirect() {
+  const [bootstrapped, setBootstrapped] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function checkBootstrap() {
+      try {
+        const response = await fetch(`${supabaseUrl}/functions/v1/bootstrap-install`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(supabaseAnonKey ? { apikey: supabaseAnonKey } : {}),
+          },
+        })
+
+        if (!response.ok) {
+          // Em caso de erro HTTP na checagem, assume bootstrapped para não travar rota protegida / auth
+          if (isMounted) setBootstrapped(true)
+          return
+        }
+
+        const data = await response.json()
+        if (isMounted) {
+          setBootstrapped(Boolean(data?.bootstrapped))
+        }
+      } catch {
+        if (isMounted) {
+          setBootstrapped(true)
+        }
+      }
+    }
+
+    checkBootstrap()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  if (bootstrapped === null) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center bg-[#0E1B2C] p-4">
+        <div className="inline-flex h-14 w-14 rounded-2xl bg-gradient-to-br from-teal-500 to-teal-700 items-center justify-center shadow-xl shadow-teal-950/60 border border-teal-400/20 mb-4 animate-pulse">
+          <Building2 className="w-8 h-8 text-white" />
+        </div>
+        <Loader2 className="w-8 h-8 animate-spin text-teal-400 mb-2" />
+        <p className="text-slate-400 text-sm font-medium">Carregando EVO Gestão...</p>
+      </div>
+    )
+  }
+
+  if (bootstrapped === false) {
+    return <Navigate to="/setup" replace />
+  }
+
+  return <Navigate to="/app/dashboard" replace />
+}
+
 const App = () => (
   <BrowserRouter>
     <AuthProvider>
@@ -33,8 +98,11 @@ const App = () => (
           <Toaster />
           <Sonner position="bottom-right" />
           <Routes>
-            {/* Root redirect to app or auth */}
-            <Route path="/" element={<Navigate to="/app/dashboard" replace />} />
+            {/* Root redirect com verificação de bootstrap */}
+            <Route path="/" element={<BootstrapRedirect />} />
+
+            {/* Setup público */}
+            <Route path="/setup" element={<SetupPage />} />
 
             {/* Auth screen */}
             <Route path="/auth" element={<AuthPage />} />
