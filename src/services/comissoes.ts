@@ -69,11 +69,11 @@ export const ComissoesService = {
     // Filtro por período
     if (options.dataInicio) {
       // Início do dia
-      query = query.gte('created_at', `${options.dataInicio}T00:00:00`)
+      query = query.gte('created_at', new Date(`${options.dataInicio}T00:00:00`).toISOString())
     }
     if (options.dataFim) {
       // Final do dia
-      query = query.lte('created_at', `${options.dataFim}T23:59:59.999Z`)
+      query = query.lte('created_at', new Date(`${options.dataFim}T23:59:59.999`).toISOString())
     }
 
     query = query.order('created_at', { ascending: false }).range(from, to)
@@ -109,10 +109,10 @@ export const ComissoesService = {
     }
 
     if (options.dataInicio) {
-      query = query.gte('created_at', `${options.dataInicio}T00:00:00`)
+      query = query.gte('created_at', new Date(`${options.dataInicio}T00:00:00`).toISOString())
     }
     if (options.dataFim) {
-      query = query.lte('created_at', `${options.dataFim}T23:59:59.999Z`)
+      query = query.lte('created_at', new Date(`${options.dataFim}T23:59:59.999`).toISOString())
     }
 
     const { count, error } = await query

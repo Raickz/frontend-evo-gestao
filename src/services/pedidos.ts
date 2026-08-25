@@ -112,11 +112,11 @@ export const PedidosService = {
     }
 
     if (dataInicio) {
-      query = query.gte('created_at', `${dataInicio}T00:00:00.000Z`)
+      query = query.gte('created_at', new Date(`${dataInicio}T00:00:00`).toISOString())
     }
 
     if (dataFim) {
-      query = query.lte('created_at', `${dataFim}T23:59:59.999Z`)
+      query = query.lte('created_at', new Date(`${dataFim}T23:59:59.999`).toISOString())
     }
 
     if (search && search.trim()) {
@@ -151,11 +151,11 @@ export const PedidosService = {
     }
 
     if (dataInicio) {
-      query = query.gte('created_at', `${dataInicio}T00:00:00.000Z`)
+      query = query.gte('created_at', new Date(`${dataInicio}T00:00:00`).toISOString())
     }
 
     if (dataFim) {
-      query = query.lte('created_at', `${dataFim}T23:59:59.999Z`)
+      query = query.lte('created_at', new Date(`${dataFim}T23:59:59.999`).toISOString())
     }
 
     if (search && search.trim()) {
