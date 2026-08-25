@@ -21,6 +21,12 @@ import {
   Boxes,
   ArrowRight,
   RefreshCw,
+  ClipboardCheck,
+  Circle,
+  Rocket,
+  ChevronDown,
+  ChevronUp,
+  EyeOff,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { canAccessPage } from '@/lib/permissions'
@@ -29,6 +35,16 @@ import { VendasService } from '@/services/vendas'
 import { ClientesService } from '@/services/clientes'
 import { ProdutosService } from '@/services/produtos'
 import { EstoqueService } from '@/services/estoque'
+
+interface OnboardingProgress {
+  empresaNome: string | null
+  empresaLogoUrl: string | null
+  usuariosCount: number
+  vendedoresCount: number
+  clientesCount: number
+  produtosCount: number
+  estoqueCount: number
+}
 
 interface VendaRecente {
   id: string
@@ -76,6 +92,78 @@ export default function DashboardPage() {
     vendasRecentes: [],
     estoqueBaixoItens: [],
   })
+
+  const perfilLogado = (usuario?.perfil || '').toLowerCase()
+  const isMasterOrAdmin = perfilLogado === 'master' || perfilLogado === 'admin'
+
+  const [onboardingData, setOnboardingData] = useState<OnboardingProgress | null>(null)
+  const [loadingOnboarding, setLoadingOnboarding] = useState(true)
+  const [checklistDismissed, setChecklistDismissed] = useState(false)
+
+  // Recuperar estado dismissível de checklist completo do localStorage
+  useEffect(() => {
+    if (empresaId) {
+      const stored = localStorage.getItem(`evo_onboarding_dismissed_${empresaId}`)
+      if (stored === 'true') {
+        setChecklistDismissed(true)
+      }
+    }
+  }, [empresaId])
+
+  const loadOnboardingProgress = useCallback(async () => {
+    if (!empresaId || !isMasterOrAdmin) {
+      setLoadingOnboarding(false)
+      return
+    }
+
+    try {
+      const [empresaRes, usuariosRes, vendedoresRes, clientesRes, produtosRes, estoquesRes] =
+        await Promise.all([
+          supabase.from('empresas').select('nome,logo_url').eq('id', empresaId).single(),
+          supabase
+            .from('usuarios')
+            .select('id', { count: 'exact', head: true })
+            .eq('empresa_id', empresaId)
+            .eq('ativo', true),
+          supabase
+            .from('vendedores')
+            .select('id', { count: 'exact', head: true })
+            .eq('empresa_id', empresaId)
+            .eq('ativo', true),
+          supabase
+            .from('clientes')
+            .select('id', { count: 'exact', head: true })
+            .eq('empresa_id', empresaId)
+            .eq('ativo', true),
+          supabase
+            .from('produtos')
+            .select('id', { count: 'exact', head: true })
+            .eq('empresa_id', empresaId)
+            .eq('ativo', true),
+          supabase
+            .from('estoques')
+            .select('id', { count: 'exact', head: true })
+            .eq('empresa_id', empresaId)
+            .gt('quantidade', 0),
+        ])
+
+      setOnboardingData({
+        empresaNome: empresaRes.data?.nome || null,
+        empresaLogoUrl: empresaRes.data?.logo_url || null,
+        usuariosCount: usuariosRes.count ?? 0,
+        vendedoresCount: vendedoresRes.count ?? 0,
+        clientesCount: clientesRes.count ?? 0,
+        produtosCount: produtosRes.count ?? 0,
+        estoqueCount: estoquesRes.count ?? 0,
+      })
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar onboarding progress:', err)
+      }
+    } finally {
+      setLoadingOnboarding(false)
+    }
+  }, [empresaId, isMasterOrAdmin])
 
   const loadDashboardData = useCallback(async () => {
     if (!empresaId) return
@@ -150,7 +238,71 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadDashboardData()
-  }, [loadDashboardData])
+    loadOnboardingProgress()
+  }, [loadDashboardData, loadOnboardingProgress])
+
+  const handleDismissChecklist = () => {
+    if (empresaId) {
+      localStorage.setItem(`evo_onboarding_dismissed_${empresaId}`, 'true')
+    }
+    setChecklistDismissed(true)
+  }
+
+  const checklistItems = [
+    {
+      key: 'dados_empresa',
+      label: 'Dados da empresa preenchidos',
+      done: !!onboardingData?.empresaNome,
+      link: '/app/configuracoes',
+      actionText: 'Configurar Empresa',
+    },
+    {
+      key: 'logo',
+      label: 'Logo cadastrada',
+      done: !!onboardingData?.empresaLogoUrl,
+      link: '/app/configuracoes',
+      actionText: 'Enviar Logo',
+    },
+    {
+      key: 'usuarios',
+      label: 'Primeiro usuário criado',
+      done: (onboardingData?.usuariosCount ?? 0) > 0,
+      link: '/app/configuracoes',
+      actionText: 'Criar Usuário',
+    },
+    {
+      key: 'vendedores',
+      label: 'Primeiro vendedor cadastrado',
+      done: (onboardingData?.vendedoresCount ?? 0) > 0,
+      link: '/app/vendedores',
+      actionText: 'Cadastrar Vendedor',
+    },
+    {
+      key: 'clientes',
+      label: 'Primeiro cliente cadastrado',
+      done: (onboardingData?.clientesCount ?? 0) > 0,
+      link: '/app/clientes',
+      actionText: 'Cadastrar Cliente',
+    },
+    {
+      key: 'produtos',
+      label: 'Primeiro produto cadastrado',
+      done: (onboardingData?.produtosCount ?? 0) > 0,
+      link: '/app/produtos',
+      actionText: 'Cadastrar Produto',
+    },
+    {
+      key: 'estoque',
+      label: 'Estoque inicial cadastrado',
+      done: (onboardingData?.estoqueCount ?? 0) > 0,
+      link: '/app/estoque',
+      actionText: 'Lançar Estoque',
+    },
+  ]
+
+  const completedCount = checklistItems.filter((i) => i.done).length
+  const isComplete = completedCount === 7
+  const showFirstAccessBanner = isMasterOrAdmin && completedCount < 4
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
@@ -195,7 +347,10 @@ export default function DashboardPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => loadDashboardData()}
+              onClick={() => {
+                loadDashboardData()
+                loadOnboardingProgress()
+              }}
               disabled={loading}
               className="text-slate-700 hover:bg-slate-50"
             >
@@ -213,6 +368,37 @@ export default function DashboardPage() {
           </div>
         }
       />
+
+      {/* PARTE 5: Banner de Primeiro Acesso (< 4 itens concluídos para Master/Admin) */}
+      {showFirstAccessBanner && (
+        <div className="rounded-xl border border-teal-200 bg-teal-50/60 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-start gap-3.5">
+            <div className="h-10 w-10 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <Rocket className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm sm:text-base font-bold text-teal-950">
+                Vamos preparar sua empresa para o EVO Gestão 🚀
+              </h3>
+              <p className="text-xs sm:text-sm text-teal-800/80 mt-0.5">
+                Complete as etapas abaixo para liberar todo o potencial da sua distribuidora.
+              </p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            onClick={() => {
+              document
+                .getElementById('onboarding-checklist')
+                ?.scrollIntoView({ behavior: 'smooth' })
+            }}
+            className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold shrink-0 shadow-xs h-9 px-4"
+          >
+            Ver Configuração Inicial
+            <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+          </Button>
+        </div>
+      )}
 
       {error ? (
         <ErrorState
@@ -325,6 +511,119 @@ export default function DashboardPage() {
               </>
             )}
           </div>
+
+          {/* PARTE 4: Checklist de Configuração Inicial (apenas Master/Admin) */}
+          {isMasterOrAdmin && (!isComplete || !checklistDismissed) && (
+            <div id="onboarding-checklist">
+              <Card
+                className={`rounded-xl border shadow-xs transition-colors ${
+                  isComplete ? 'border-emerald-200 bg-emerald-50/20' : 'border-teal-300 bg-white'
+                }`}
+              >
+                <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${
+                        isComplete ? 'bg-emerald-100 text-emerald-700' : 'bg-teal-100 text-teal-700'
+                      }`}
+                    >
+                      {isComplete ? (
+                        <CheckCircle2 className="w-5 h-5" />
+                      ) : (
+                        <ClipboardCheck className="w-5 h-5" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-sm sm:text-base font-bold text-slate-900">
+                          Configuração Inicial
+                        </CardTitle>
+                        {isComplete && (
+                          <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-100 font-semibold text-[11px]">
+                            Empresa configurada com sucesso 🎉
+                          </Badge>
+                        )}
+                      </div>
+                      <CardDescription className="text-xs text-slate-500 mt-0.5">
+                        {loadingOnboarding
+                          ? 'Calculando progresso da empresa...'
+                          : `${completedCount} de 7 concluídos`}
+                      </CardDescription>
+                    </div>
+                  </div>
+
+                  {isComplete && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleDismissChecklist}
+                      className="text-xs text-slate-500 hover:text-slate-800 h-8 flex items-center gap-1.5"
+                    >
+                      <EyeOff className="w-3.5 h-3.5" />
+                      Ocultar
+                    </Button>
+                  )}
+                </CardHeader>
+
+                <CardContent className="pt-4">
+                  {/* Barra de Progresso visual */}
+                  <div className="mb-4">
+                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                      <div
+                        className={`h-2 rounded-full transition-all duration-500 ${
+                          isComplete ? 'bg-emerald-500' : 'bg-teal-600'
+                        }`}
+                        style={{ width: `${Math.round((completedCount / 7) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Grid de Itens do Checklist */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+                    {checklistItems.map((item) => {
+                      return (
+                        <div
+                          key={item.key}
+                          className={`flex items-center justify-between p-2.5 rounded-lg border text-xs transition-colors ${
+                            item.done
+                              ? 'bg-emerald-50/40 border-emerald-100 text-slate-700'
+                              : 'bg-slate-50/60 border-slate-200 text-slate-600 hover:border-teal-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 min-w-0 pr-2">
+                            {item.done ? (
+                              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            ) : (
+                              <Circle className="w-4 h-4 text-slate-400 shrink-0" />
+                            )}
+                            <span
+                              className={`truncate ${
+                                item.done ? 'font-medium text-slate-800' : 'text-slate-600'
+                              }`}
+                            >
+                              {item.label}
+                            </span>
+                          </div>
+
+                          {!isComplete && !item.done && item.link && (
+                            <Link to={item.link} className="shrink-0">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 px-2 text-[11px] text-teal-700 hover:text-teal-800 hover:bg-teal-50 font-medium"
+                              >
+                                {item.actionText}
+                              </Button>
+                            </Link>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Seções "Vendas Recentes" e "Estoque Baixo" (lado a lado no lg) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

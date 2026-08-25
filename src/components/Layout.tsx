@@ -163,9 +163,24 @@ export default function Layout() {
         {/* Brand / Company Header */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800/80">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center text-white font-bold shadow-md shadow-teal-950/40 shrink-0">
-              <Building2 className="w-5 h-5 text-white" />
-            </div>
+            {empresa?.logo_url ? (
+              <div className="h-10 w-10 rounded-xl object-contain bg-white/10 flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                <img
+                  src={empresa.logo_url}
+                  alt={empresaNome}
+                  className="h-full w-full object-contain rounded-lg"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    // Fallback visual caso falhe
+                    ;(e.currentTarget as HTMLElement).style.display = 'none'
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center text-white font-bold shadow-md shadow-teal-950/40 shrink-0">
+                <Building2 className="w-5 h-5 text-white" />
+              </div>
+            )}
             {!collapsed && (
               <div className="flex flex-col truncate">
                 <span className="text-sm font-bold text-white tracking-tight truncate">

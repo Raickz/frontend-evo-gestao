@@ -24,6 +24,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useEmpresa } from '@/hooks/use-empresa'
 import { useAuth } from '@/hooks/use-auth'
+import { supabase } from '@/lib/supabase/client'
 import { ConfiguracoesService, Usuario as UsuarioType } from '@/services/configuracoes'
 import { formatPerfilBadge } from '@/lib/permissions'
 import { toast } from 'sonner'
@@ -46,6 +47,8 @@ import {
   UserCheck,
   Lock,
   HelpCircle,
+  Upload,
+  Trash2,
 } from 'lucide-react'
 
 const PAGE_SIZE = 20
@@ -142,16 +145,154 @@ export default function ConfiguracoesPage() {
   }
 
   // =========================================================================
-  // ABA 2: APARÊNCIA (Logo URL manual)
+  // ABA 2: APARÊNCIA (Logo Upload & URL manual)
   // =========================================================================
   const [logoUrlInput, setLogoUrlInput] = useState('')
   const [savingLogo, setSavingLogo] = useState(false)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [removingLogo, setRemovingLogo] = useState(false)
+  const [selectedLogoFile, setSelectedLogoFile] = useState<File | null>(null)
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null)
 
   useEffect(() => {
     if (empresa?.logo_url) {
       setLogoUrlInput(empresa.logo_url)
+    } else {
+      setLogoUrlInput('')
     }
   }, [empresa?.logo_url])
+
+  // Limpa preview local quando empresa mudar ou ao desmontar
+  useEffect(() => {
+    return () => {
+      if (localPreviewUrl) {
+        URL.revokeObjectURL(localPreviewUrl)
+      }
+    }
+  }, [localPreviewUrl])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validar tipo
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Formato de arquivo inválido. Apenas JPG, PNG e WebP são permitidos.')
+      e.target.value = ''
+      return
+    }
+
+    // Validar tamanho (5MB)
+    const maxSize = 5 * 1024 * 1024
+    if (file.size > maxSize) {
+      toast.error('O arquivo da logo excede o tamanho máximo permitido de 5 MB.')
+      e.target.value = ''
+      return
+    }
+
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl)
+    }
+
+    setSelectedLogoFile(file)
+    setLocalPreviewUrl(URL.createObjectURL(file))
+  }
+
+  const handleUploadLogo = async () => {
+    if (!empresaId) return
+    if (!isMasterOrAdmin) {
+      toast.error('Você não tem permissão para alterar a logo.')
+      return
+    }
+    if (!selectedLogoFile) {
+      toast.error('Selecione uma imagem para enviar.')
+      return
+    }
+
+    setUploadingLogo(true)
+    try {
+      const ext = selectedLogoFile.name.split('.').pop()?.toLowerCase() || 'png'
+      const filePath = `${empresaId}/logo.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('logos')
+        .upload(filePath, selectedLogoFile, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      const { data: publicData } = supabase.storage.from('logos').getPublicUrl(filePath)
+      // Adicionar timestamp de cache busting para a URL da imagem pública
+      const publicUrl = `${publicData.publicUrl}?t=${Date.now()}`
+
+      const { error: updateError } = await ConfiguracoesService.updateEmpresa(empresaId, {
+        logo_url: publicUrl,
+      })
+      if (updateError) throw updateError
+
+      toast.success('Logo atualizada com sucesso!')
+      setSelectedLogoFile(null)
+      if (localPreviewUrl) {
+        URL.revokeObjectURL(localPreviewUrl)
+        setLocalPreviewUrl(null)
+      }
+      await refreshEmpresa()
+    } catch (err: any) {
+      if (import.meta.env.DEV) {
+        console.error('Erro ao fazer upload da logo:', err)
+      }
+      toast.error(err.message || 'Falha ao fazer upload da logo.')
+    } finally {
+      setUploadingLogo(false)
+    }
+  }
+
+  const handleRemoverLogo = async () => {
+    if (!empresaId) return
+    if (!isMasterOrAdmin) {
+      toast.error('Você não tem permissão para remover a logo.')
+      return
+    }
+
+    setRemovingLogo(true)
+    try {
+      // Tentar remover arquivos do storage se for URL do storage
+      if (empresa?.logo_url && empresa.logo_url.includes('/logos/')) {
+        try {
+          const urlObj = new URL(empresa.logo_url)
+          const pathParts = urlObj.pathname.split('/logos/')
+          if (pathParts.length > 1) {
+            const rawPath = pathParts[1]
+            await supabase.storage.from('logos').remove([decodeURIComponent(rawPath)])
+          }
+        } catch {
+          // Ignora erro de parsing e segue para limpar na tabela
+        }
+      }
+
+      const { error: updateError } = await ConfiguracoesService.updateEmpresa(empresaId, {
+        logo_url: null,
+      })
+      if (updateError) throw updateError
+
+      if (localPreviewUrl) {
+        URL.revokeObjectURL(localPreviewUrl)
+        setLocalPreviewUrl(null)
+      }
+      setSelectedLogoFile(null)
+      setLogoUrlInput('')
+
+      toast.success('Logo removida com sucesso.')
+      await refreshEmpresa()
+    } catch (err: any) {
+      if (import.meta.env.DEV) {
+        console.error('Erro ao remover logo:', err)
+      }
+      toast.error(err.message || 'Falha ao remover logo.')
+    } finally {
+      setRemovingLogo(false)
+    }
+  }
 
   const handleSalvarLogoUrl = async () => {
     if (!empresaId) return
@@ -162,11 +303,17 @@ export default function ConfiguracoesPage() {
 
     setSavingLogo(true)
     try {
+      const val = logoUrlInput.trim()
       const { error } = await ConfiguracoesService.updateEmpresa(empresaId, {
-        logo_url: logoUrlInput.trim() || undefined,
+        logo_url: val || null,
       })
       if (error) throw error
       toast.success('URL da logo atualizada com sucesso.')
+      if (localPreviewUrl) {
+        URL.revokeObjectURL(localPreviewUrl)
+        setLocalPreviewUrl(null)
+      }
+      setSelectedLogoFile(null)
       await refreshEmpresa()
     } catch (err: any) {
       if (import.meta.env.DEV) {
@@ -676,15 +823,25 @@ export default function ConfiguracoesPage() {
                 <CardContent className="pt-5 space-y-5">
                   {/* Preview da Logo */}
                   <div>
-                    <Label className="text-xs font-semibold text-slate-700 block mb-2">
-                      Preview da Logo
-                    </Label>
-                    <div className="w-full h-36 rounded-xl border border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center p-4">
-                      {empresa?.logo_url ? (
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-xs font-semibold text-slate-700 block">
+                        Preview da Logo
+                      </Label>
+                      {selectedLogoFile && (
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] bg-teal-50 text-teal-700 border-teal-200"
+                        >
+                          Novo arquivo selecionado
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="w-full h-40 rounded-xl border border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center p-4 overflow-hidden relative group">
+                      {localPreviewUrl || empresa?.logo_url ? (
                         <img
-                          src={empresa.logo_url}
+                          src={localPreviewUrl || empresa?.logo_url || ''}
                           alt="Logo da Empresa"
-                          className="max-h-28 max-w-full object-contain rounded"
+                          className="h-full w-full object-contain rounded"
                           referrerPolicy="no-referrer"
                           onError={(e) => {
                             ;(e.currentTarget as HTMLElement).style.display = 'none'
@@ -692,20 +849,104 @@ export default function ConfiguracoesPage() {
                         />
                       ) : (
                         <div className="flex flex-col items-center gap-2 text-slate-400">
-                          <Building2 className="w-8 h-8 text-slate-300" />
+                          <Building2 className="w-10 h-10 text-slate-300" />
                           <span className="text-xs font-medium">Nenhuma logo cadastrada</span>
+                          <span className="text-[11px] text-slate-400">
+                            JPG, PNG ou WebP até 5 MB
+                          </span>
                         </div>
                       )}
                     </div>
                   </div>
 
+                  {/* Upload direto de arquivo */}
+                  <div className="space-y-3 pt-1 border-t border-slate-100">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-semibold text-slate-700">
+                        Upload de Logo (Supabase Storage)
+                      </Label>
+                      <span className="text-[11px] text-slate-400">Máx. 5 MB</span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <input
+                        type="file"
+                        id="logo-file-input"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        disabled={!isMasterOrAdmin || uploadingLogo || removingLogo}
+                        onChange={handleFileChange}
+                      />
+                      <label htmlFor="logo-file-input">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          asChild
+                          disabled={!isMasterOrAdmin || uploadingLogo || removingLogo}
+                          className="text-xs h-9 cursor-pointer border-slate-200 hover:bg-slate-50"
+                        >
+                          <span>
+                            <Upload className="w-3.5 h-3.5 mr-1.5 text-slate-600" />
+                            {selectedLogoFile ? 'Trocar Arquivo' : 'Selecionar Arquivo'}
+                          </span>
+                        </Button>
+                      </label>
+
+                      {selectedLogoFile && (
+                        <Button
+                          type="button"
+                          onClick={handleUploadLogo}
+                          disabled={!isMasterOrAdmin || uploadingLogo || removingLogo}
+                          className="bg-teal-700 hover:bg-teal-800 text-white text-xs h-9 font-medium shadow-xs"
+                        >
+                          {uploadingLogo ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                              Enviando...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="w-3.5 h-3.5 mr-1.5" />
+                              Confirmar Envio
+                            </>
+                          )}
+                        </Button>
+                      )}
+
+                      {(empresa?.logo_url || selectedLogoFile) && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleRemoverLogo}
+                          disabled={!isMasterOrAdmin || uploadingLogo || removingLogo}
+                          className="text-xs h-9 border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                        >
+                          {removingLogo ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                          ) : (
+                            <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                          )}
+                          Remover Logo
+                        </Button>
+                      )}
+                    </div>
+
+                    {selectedLogoFile && (
+                      <p className="text-[11px] text-slate-500 truncate">
+                        Selecionado:{' '}
+                        <span className="font-mono text-slate-700">{selectedLogoFile.name}</span> (
+                        {(selectedLogoFile.size / 1024).toFixed(1)} KB)
+                      </p>
+                    )}
+                  </div>
+
                   {/* Input de URL manual */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
                     <Label
                       htmlFor="logo-url-input"
                       className="text-xs font-semibold text-slate-700"
                     >
-                      URL da Logo (Link Externo)
+                      Ou informe a URL da Logo (Link Externo)
                     </Label>
                     <div className="flex gap-2">
                       <Input
@@ -714,13 +955,13 @@ export default function ConfiguracoesPage() {
                         value={logoUrlInput}
                         onChange={(e) => setLogoUrlInput(e.target.value)}
                         placeholder="https://exemplo.com/logo.png"
-                        disabled={!isMasterOrAdmin || savingLogo}
+                        disabled={!isMasterOrAdmin || savingLogo || uploadingLogo || removingLogo}
                         className="text-xs h-9 bg-white border-slate-200"
                       />
                       <Button
                         type="button"
                         onClick={handleSalvarLogoUrl}
-                        disabled={!isMasterOrAdmin || savingLogo}
+                        disabled={!isMasterOrAdmin || savingLogo || uploadingLogo || removingLogo}
                         className="bg-teal-700 hover:bg-teal-800 text-white text-xs h-9 shrink-0 font-medium"
                       >
                         {savingLogo ? (
@@ -730,31 +971,6 @@ export default function ConfiguracoesPage() {
                         )}
                       </Button>
                     </div>
-                  </div>
-
-                  {/* Botão Alterar Logo (Disabled com Tooltip) */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-xs text-slate-500">Upload direto de arquivo:</span>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span tabIndex={0}>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            disabled
-                            className="text-xs h-8 cursor-not-allowed opacity-60"
-                          >
-                            Alterar Logo
-                          </Button>
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="text-xs">
-                          Funcionalidade disponível em breve. O upload de logo requer configuração
-                          do Storage.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
                   </div>
                 </CardContent>
               </Card>
