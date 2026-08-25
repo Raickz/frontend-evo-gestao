@@ -126,8 +126,8 @@ export const RelatoriosService = {
    * - Contas a Pagar em aberto: status != 'pago' AND status != 'cancelado' (saldo atual)
    */
   async getResumoGeral(empresaId: string, periodo: PeriodoFiltro): Promise<ResumoGeral> {
-    const inicioTs = `${periodo.inicio}T00:00:00.000Z`
-    const fimTs = `${periodo.fim}T23:59:59.999Z`
+    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
+    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
 
     const [vendasRes, comprasRes, recRes, pagRes] = await Promise.all([
       supabase
@@ -193,8 +193,8 @@ export const RelatoriosService = {
    * 2. getVendasPorDia
    */
   async getVendasPorDia(empresaId: string, periodo: PeriodoFiltro): Promise<VendaPorDia[]> {
-    const inicioTs = `${periodo.inicio}T00:00:00.000Z`
-    const fimTs = `${periodo.fim}T23:59:59.999Z`
+    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
+    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
 
     const { data } = await supabase
       .from('vendas')
@@ -235,8 +235,8 @@ export const RelatoriosService = {
     periodo: PeriodoFiltro,
     ordem: 'quantidade' | 'faturamento' = 'faturamento',
   ): Promise<ProdutoRanking[]> {
-    const inicioTs = `${periodo.inicio}T00:00:00.000Z`
-    const fimTs = `${periodo.fim}T23:59:59.999Z`
+    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
+    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
 
     const { data } = await supabase
       .from('itens_venda')
@@ -303,8 +303,8 @@ export const RelatoriosService = {
     empresaId: string,
     periodo: PeriodoFiltro,
   ): Promise<VendedorDesempenho[]> {
-    const inicioTs = `${periodo.inicio}T00:00:00.000Z`
-    const fimTs = `${periodo.fim}T23:59:59.999Z`
+    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
+    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
 
     const [vendasRes, comissoesRes] = await Promise.all([
       supabase
@@ -381,8 +381,8 @@ export const RelatoriosService = {
     empresaId: string,
     periodo: PeriodoFiltro,
   ): Promise<FormaPagamentoResumo[]> {
-    const inicioTs = `${periodo.inicio}T00:00:00.000Z`
-    const fimTs = `${periodo.fim}T23:59:59.999Z`
+    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
+    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
 
     const { data } = await supabase
       .from('vendas')
@@ -425,8 +425,8 @@ export const RelatoriosService = {
     novosNoPeriodo: number
     topCliente: string | null
   }> {
-    const inicioTs = `${periodo.inicio}T00:00:00.000Z`
-    const fimTs = `${periodo.fim}T23:59:59.999Z`
+    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
+    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
 
     const [vendasRes, novosClientesRes] = await Promise.all([
       supabase
@@ -683,8 +683,8 @@ export const RelatoriosService = {
     empresaId: string,
     periodo: PeriodoFiltro,
   ): Promise<MovimentacaoResumo> {
-    const inicioTs = `${periodo.inicio}T00:00:00.000Z`
-    const fimTs = `${periodo.fim}T23:59:59.999Z`
+    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
+    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
 
     const { data } = await supabase
       .from('movimentacoes_estoque')
@@ -788,8 +788,8 @@ export const RelatoriosService = {
     empresaId: string,
     periodo: PeriodoFiltro,
   ): Promise<FluxoFinanceiroItem[]> {
-    const inicioTs = `${periodo.inicio}T00:00:00.000Z`
-    const fimTs = `${periodo.fim}T23:59:59.999Z`
+    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
+    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
 
     const [recRes, pagRes] = await Promise.all([
       supabase
@@ -844,8 +844,8 @@ export const RelatoriosService = {
     empresaId: string,
     periodo: PeriodoFiltro,
   ): Promise<PedidosIndicadores> {
-    const inicioTs = `${periodo.inicio}T00:00:00.000Z`
-    const fimTs = `${periodo.fim}T23:59:59.999Z`
+    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
+    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
 
     const [pedidosRes, vendasConvertidasRes] = await Promise.all([
       supabase

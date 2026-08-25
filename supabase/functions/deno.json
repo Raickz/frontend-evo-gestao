@@ -1,6 +1,6 @@
 {
   "_versions": {
-    "admin-create-user": 3,
-    "bootstrap-install": 2
+    "admin-create-user": 4,
+    "bootstrap-install": 3
   }
 }
