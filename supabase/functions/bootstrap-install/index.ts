@@ -228,6 +228,36 @@ Deno.serve(async (req: Request) => {
       )
     }
 
+    // Limpeza preventiva: se o email já existe em auth.users mas não em public.usuarios,
+    // é um órfão de tentativa anterior. Remove para permitir nova tentativa.
+    try {
+      const { data: existingAuthData } = await supabaseAdmin.auth.admin.listUsers()
+      const existingAuthUser = existingAuthData?.users?.find(
+        (u) => u.email?.toLowerCase() === admin_email,
+      )
+
+      if (existingAuthUser) {
+        const { data: usuarioRecord } = await supabaseAdmin
+          .from('usuarios')
+          .select('id')
+          .eq('auth_user_id', existingAuthUser.id)
+          .maybeSingle()
+
+        if (!usuarioRecord) {
+          console.warn(
+            'bootstrap-install: Removendo usuário órfão em auth.users antes do bootstrap',
+            {
+              id: existingAuthUser.id,
+              email: admin_email,
+            },
+          )
+          await supabaseAdmin.auth.admin.deleteUser(existingAuthUser.id)
+        }
+      }
+    } catch (cleanupErr) {
+      console.error('bootstrap-install: Erro na limpeza preventiva de usuário órfão', cleanupErr)
+    }
+
     // 3. Criar empresa em public.empresas
     const { data: empresaCriada, error: empresaError } = await supabaseAdmin
       .from('empresas')
@@ -268,6 +298,26 @@ Deno.serve(async (req: Request) => {
     )
 
     if (createAuthError || !authCreated?.user) {
+      console.error('bootstrap-install: createUser falhou', {
+        hasError: !!createAuthError,
+        errorMessage: createAuthError?.message?.substring(0, 200),
+        hasUser: !!authCreated?.user,
+      })
+
+      // Tentar limpar possível usuário criado parcialmente
+      try {
+        const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
+        const leakedUser = existingUsers?.users?.find((u) => u.email?.toLowerCase() === admin_email)
+        if (leakedUser) {
+          await supabaseAdmin.auth.admin.deleteUser(leakedUser.id)
+        }
+      } catch (leakCleanupErr) {
+        console.error(
+          'bootstrap-install: Falha ao deletar usuário criado parcialmente',
+          leakCleanupErr,
+        )
+      }
+
       // Rollback: Remover empresa criada
       if (createdEmpresaId) {
         try {
@@ -312,12 +362,26 @@ Deno.serve(async (req: Request) => {
       .single()
 
     if (insertUsuarioError || !usuarioInserido) {
-      // Rollback: Deletar auth user e empresa criada
+      console.error('bootstrap-install: insert em public.usuarios falhou', {
+        hasError: !!insertUsuarioError,
+        errorMessage: insertUsuarioError?.message?.substring(0, 200),
+      })
+
+      // Rollback: Deletar auth user e empresa criada com retry simples
       if (createdAuthUserId) {
         try {
-          await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId)
+          const { error: delErr } = await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId)
+          if (delErr) {
+            await new Promise((resolve) => setTimeout(resolve, 500))
+            await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId)
+          }
         } catch {
-          // Rollback silencioso
+          try {
+            await new Promise((resolve) => setTimeout(resolve, 500))
+            await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId)
+          } catch {
+            // Rollback silencioso
+          }
         }
       }
       if (createdEmpresaId) {
@@ -365,13 +429,24 @@ Deno.serve(async (req: Request) => {
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       },
     )
-  } catch {
+  } catch (uncaughtErr) {
+    console.error('bootstrap-install: Erro não tratado durante bootstrap', uncaughtErr)
+
     // Rollback de segurança em caso de exceção imprevista
     if (createdAuthUserId) {
       try {
-        await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId)
+        const { error: delErr } = await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId)
+        if (delErr) {
+          await new Promise((resolve) => setTimeout(resolve, 500))
+          await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId)
+        }
       } catch {
-        // Ignorar
+        try {
+          await new Promise((resolve) => setTimeout(resolve, 500))
+          await supabaseAdmin.auth.admin.deleteUser(createdAuthUserId)
+        } catch {
+          // Ignorar
+        }
       }
     }
     if (createdEmpresaId) {
