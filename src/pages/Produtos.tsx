@@ -471,7 +471,9 @@ export default function ProdutosPage() {
               )
             }
           } catch (uploadError: any) {
-            console.error('Erro no upload pós criação:', uploadError)
+            if (import.meta.env.DEV) {
+              console.error('Erro no upload pós criação:', uploadError)
+            }
           }
         }
 

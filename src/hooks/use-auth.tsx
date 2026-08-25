@@ -68,7 +68,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null)
       setSession(null)
     } catch (e) {
-      console.error('Erro ao resolver usuario/empresa autenticada:', e)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao resolver usuario/empresa autenticada:', e)
+      }
       try {
         await supabase.auth.signOut()
       } catch {

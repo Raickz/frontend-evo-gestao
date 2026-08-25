@@ -132,7 +132,9 @@ export default function ConfiguracoesPage() {
       toast.success('Dados da empresa atualizados com sucesso.')
       await refreshEmpresa()
     } catch (err: any) {
-      console.error('Erro ao atualizar empresa:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao atualizar empresa:', err)
+      }
       toast.error(err.message || 'Falha ao atualizar dados da empresa.')
     } finally {
       setSavingEmpresa(false)
@@ -167,7 +169,9 @@ export default function ConfiguracoesPage() {
       toast.success('URL da logo atualizada com sucesso.')
       await refreshEmpresa()
     } catch (err: any) {
-      console.error('Erro ao salvar URL da logo:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao salvar URL da logo:', err)
+      }
       toast.error(err.message || 'Falha ao atualizar logo.')
     } finally {
       setSavingLogo(false)
@@ -226,7 +230,9 @@ export default function ConfiguracoesPage() {
       setUsuarios((listRes.data as UsuarioType[]) || [])
       setTotalUsuarios(countRes.count || 0)
     } catch (err: any) {
-      console.error('Erro ao carregar usuários:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar usuários:', err)
+      }
       setErrorUsuarios(err.message || 'Falha ao carregar lista de usuários.')
     } finally {
       setLoadingUsuarios(false)
@@ -336,7 +342,9 @@ export default function ConfiguracoesPage() {
       setDialogToggleUser(null)
       loadUsuarios()
     } catch (err: any) {
-      console.error('Erro ao alterar status do usuário:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao alterar status do usuário:', err)
+      }
       toast.error(err.message || 'Falha ao alterar status do usuário.')
     } finally {
       setSubmittingToggle(false)
@@ -394,7 +402,9 @@ export default function ConfiguracoesPage() {
       setDialogPerfilUser(null)
       loadUsuarios()
     } catch (err: any) {
-      console.error('Erro ao alterar perfil:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao alterar perfil:', err)
+      }
       toast.error(err.message || 'Falha ao alterar perfil do usuário.')
     } finally {
       setSubmittingPerfil(false)

@@ -253,7 +253,9 @@ export default function RelatoriosPage() {
       setFluxoFinanceiro(fluxo)
       setPedidosIndicadores(pedidos)
     } catch (err: any) {
-      console.error('Erro ao carregar relatórios:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar relatórios:', err)
+      }
       setError(err?.message || 'Falha ao carregar relatórios gerenciais.')
     } finally {
       setLoading(false)
@@ -268,7 +270,9 @@ export default function RelatoriosPage() {
       const itens = await RelatoriosService.getEstoqueItens(empresaId, estoqueFiltroStatus)
       setEstoqueItens(itens)
     } catch (err) {
-      console.error('Erro ao carregar itens de estoque:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar itens de estoque:', err)
+      }
     } finally {
       setLoadingEstoqueItens(false)
     }

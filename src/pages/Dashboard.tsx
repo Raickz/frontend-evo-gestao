@@ -137,7 +137,9 @@ export default function DashboardPage() {
         estoqueBaixoItens: estoqueBaixoList,
       })
     } catch (err: any) {
-      console.error('Erro ao carregar dados do dashboard:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar dados do dashboard:', err)
+      }
       setError(
         err?.message || 'Falha ao buscar dados do Supabase. Verifique sua conexão e permissões.',
       )

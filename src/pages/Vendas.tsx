@@ -193,7 +193,9 @@ export default function VendasPage() {
       setVendas(dataRes.data || [])
       setTotalVendas(countRes.count || 0)
     } catch (e: any) {
-      console.error('Erro ao carregar vendas:', e)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar vendas:', e)
+      }
       setErrorList(e.message || 'Falha ao carregar o histórico de vendas.')
     } finally {
       setLoadingList(false)
@@ -224,7 +226,9 @@ export default function VendasPage() {
       if (error) throw error
       setProdutosDisponiveis((data as unknown as ProdutoOption[]) || [])
     } catch (e: any) {
-      console.error('Erro ao carregar produtos:', e)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar produtos:', e)
+      }
     } finally {
       setLoadingProdutos(false)
     }
@@ -237,7 +241,9 @@ export default function VendasPage() {
       if (error) throw error
       setClientes((data as unknown as ClienteOption[]) || [])
     } catch (e: any) {
-      console.error('Erro ao carregar clientes:', e)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar clientes:', e)
+      }
     }
   }
 
@@ -248,7 +254,9 @@ export default function VendasPage() {
       if (error) throw error
       setVendedores((data as unknown as VendedorOption[]) || [])
     } catch (e: any) {
-      console.error('Erro ao carregar vendedores:', e)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar vendedores:', e)
+      }
     }
   }
 
@@ -379,7 +387,9 @@ export default function VendasPage() {
             vendaFinal.pedidos = pedData
           }
         } catch (pedErr) {
-          console.error('Erro ao buscar dados do pedido vinculado:', pedErr)
+          if (import.meta.env.DEV) {
+            console.error('Erro ao buscar dados do pedido vinculado:', pedErr)
+          }
         }
       }
 
@@ -400,7 +410,9 @@ export default function VendasPage() {
             contas = crData
           }
         } catch (crErr) {
-          console.error('Erro ao buscar contas a receber vinculadas:', crErr)
+          if (import.meta.env.DEV) {
+            console.error('Erro ao buscar contas a receber vinculadas:', crErr)
+          }
         }
       }
 
@@ -408,7 +420,9 @@ export default function VendasPage() {
       setContasReceberVenda(contas)
       setPrintVendaAberto(true)
     } catch (err: any) {
-      console.error('Erro ao preparar impressão de venda:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao preparar impressão de venda:', err)
+      }
       toast.error(err.message || 'Falha ao carregar dados da venda para impressão.')
     } finally {
       setLoadingPrint(false)
@@ -496,7 +510,9 @@ export default function VendasPage() {
         throw new Error('Não foi possível confirmar a finalização da venda.')
       }
     } catch (err: any) {
-      console.error('Erro ao finalizar venda na RPC:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao finalizar venda na RPC:', err)
+      }
       let msgAmigavel = err.message || 'Falha ao finalizar venda.'
 
       if (msgAmigavel.includes('Estoque insuficiente')) {

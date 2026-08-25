@@ -167,7 +167,9 @@ export default function PedidosPage() {
             faturadosIds,
           )
           if (vendasErr) {
-            console.error('Erro ao buscar vendas relacionadas:', vendasErr)
+            if (import.meta.env.DEV) {
+              console.error('Erro ao buscar vendas relacionadas:', vendasErr)
+            }
           } else if (vendasData) {
             const map: Record<string, any> = {}
             vendasData.forEach((v: any) => {
@@ -178,13 +180,17 @@ export default function PedidosPage() {
             setVendasMap(map)
           }
         } catch (vErr) {
-          console.error('Erro ao processar vendas relacionadas:', vErr)
+          if (import.meta.env.DEV) {
+            console.error('Erro ao processar vendas relacionadas:', vErr)
+          }
         }
       } else {
         setVendasMap({})
       }
     } catch (e: any) {
-      console.error('Erro ao buscar pedidos:', e)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao buscar pedidos:', e)
+      }
       setError(e.message || 'Falha ao buscar pedidos')
     } finally {
       setLoading(false)
@@ -222,7 +228,9 @@ export default function PedidosPage() {
       if (err) throw err
       setClientes((data as unknown as ClienteOption[]) || [])
     } catch (e) {
-      console.error('Erro ao carregar clientes:', e)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar clientes:', e)
+      }
     }
   }
 
@@ -233,7 +241,9 @@ export default function PedidosPage() {
       if (err) throw err
       setVendedores((data as unknown as VendedorOption[]) || [])
     } catch (e) {
-      console.error('Erro ao carregar vendedores:', e)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar vendedores:', e)
+      }
     }
   }
 
@@ -245,7 +255,9 @@ export default function PedidosPage() {
       if (err) throw err
       setProdutos((data as unknown as ProdutoOption[]) || [])
     } catch (e) {
-      console.error('Erro ao carregar produtos:', e)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar produtos:', e)
+      }
     } finally {
       setLoadingProdutos(false)
     }
@@ -424,7 +436,9 @@ export default function PedidosPage() {
       setModalNovoAberto(false)
       loadPedidos()
     } catch (err: any) {
-      console.error('Erro ao submeter pedido:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao submeter pedido:', err)
+      }
       toast.error(err.message || 'Falha ao criar o pedido.')
     } finally {
       setSubmetendoNovo(false)
@@ -456,7 +470,9 @@ export default function PedidosPage() {
       setPedidoDetalhe(detalhesRes.data)
       setVendaRelacionada(vendaRes.data || null)
     } catch (e: any) {
-      console.error('Erro ao carregar detalhes do pedido:', e)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar detalhes do pedido:', e)
+      }
       toast.error('Falha ao carregar os detalhes do pedido.')
       setModalDetalhesAberto(false)
     } finally {
@@ -511,7 +527,9 @@ export default function PedidosPage() {
       setModalEdicaoAberto(false)
       loadPedidos()
     } catch (err: any) {
-      console.error('Erro ao atualizar pedido:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao atualizar pedido:', err)
+      }
       toast.error(err.message || 'Falha ao salvar alterações do pedido.')
     } finally {
       setSalvandoEdicao(false)
@@ -653,7 +671,9 @@ export default function PedidosPage() {
       // Recarregar pedidos mantendo filtros atuais
       loadPedidos()
     } catch (err: any) {
-      console.error('Erro na conversão em venda:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro na conversão em venda:', err)
+      }
       const msg = err.message || err.details || 'Erro ao converter pedido em venda.'
       toast.error(msg)
       setModalConfirmacaoAberto(false)

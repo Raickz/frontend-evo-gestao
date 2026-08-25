@@ -114,7 +114,9 @@ export default function ComprasPage() {
         }
       }
     } catch (e: any) {
-      console.error('Erro ao carregar detalhes da compra:', e)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar detalhes da compra:', e)
+      }
       toast.error('Falha ao carregar detalhes da compra.')
       setModalDetalhesAberta(false)
     } finally {
@@ -131,7 +133,9 @@ export default function ComprasPage() {
       setCompraDetalhe(data)
       setPrintCompraAberto(true)
     } catch (e: any) {
-      console.error('Erro ao preparar impressão de compra:', e)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao preparar impressão de compra:', e)
+      }
       toast.error(e.message || 'Falha ao carregar dados da compra para impressão.')
     }
   }
@@ -213,7 +217,9 @@ export default function ComprasPage() {
       setCompras(listRes.data || [])
       setTotalComprasCount(countRes.count || 0)
     } catch (e: any) {
-      console.error('Erro ao listar compras:', e)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao listar compras:', e)
+      }
       setErrorList(e.message || 'Falha ao carregar compras.')
     } finally {
       setLoadingList(false)
@@ -434,7 +440,9 @@ export default function ComprasPage() {
       loadIndicadores()
       loadCompras()
     } catch (err: any) {
-      console.error('Erro ao salvar compra:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao salvar compra:', err)
+      }
       toast.error(err.message || 'Falha ao registrar compra.')
     } finally {
       setSubmittingNova(false)
@@ -636,7 +644,9 @@ export default function ComprasPage() {
       loadIndicadores()
       loadCompras()
     } catch (err: any) {
-      console.error('Erro ao atualizar compra:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao atualizar compra:', err)
+      }
       toast.error(err.message || 'Falha ao atualizar compra.')
     } finally {
       setSubmittingEditar(false)
@@ -692,7 +702,9 @@ export default function ComprasPage() {
       loadIndicadores()
       loadCompras()
     } catch (err: any) {
-      console.error('Erro ao confirmar compra:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao confirmar compra:', err)
+      }
       toast.error(err.message || 'Falha ao confirmar compra.')
     } finally {
       setSubmittingConfirmar(false)

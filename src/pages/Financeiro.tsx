@@ -148,7 +148,9 @@ export default function FinanceiroPage() {
       setIndicadoresReceber(indRec)
       setIndicadoresPagar(indPag)
     } catch (err) {
-      console.error('Erro ao carregar indicadores financeiros:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar indicadores financeiros:', err)
+      }
     }
   }, [empresaId])
 
@@ -192,7 +194,9 @@ export default function FinanceiroPage() {
         setTotalContasPagar(countRes.count || 0)
       }
     } catch (e: any) {
-      console.error('Erro ao buscar lançamentos financeiros:', e)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao buscar lançamentos financeiros:', e)
+      }
       setError(e.message || 'Falha ao buscar dados financeiros.')
     } finally {
       setLoading(false)
@@ -344,7 +348,9 @@ export default function FinanceiroPage() {
       loadLista()
       loadIndicadores()
     } catch (err: any) {
-      console.error('Erro ao registrar recebimento:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao registrar recebimento:', err)
+      }
       toast.error(err.message || 'Erro inesperado ao registrar recebimento.')
     } finally {
       setSubmittingRecebimento(false)
@@ -410,7 +416,9 @@ export default function FinanceiroPage() {
       loadLista()
       loadIndicadores()
     } catch (err: any) {
-      console.error('Erro ao registrar pagamento:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao registrar pagamento:', err)
+      }
       toast.error(err.message || 'Erro inesperado ao registrar pagamento.')
     } finally {
       setSubmittingPagamento(false)

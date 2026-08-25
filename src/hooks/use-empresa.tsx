@@ -48,7 +48,9 @@ export const EmpresaProvider = ({ children }: { children: ReactNode }) => {
         setEmpresa(null)
       }
     } catch (err) {
-      console.error('Erro ao carregar dados da empresa:', err)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar dados da empresa:', err)
+      }
       setEmpresa(null)
     } finally {
       setLoading(false)
