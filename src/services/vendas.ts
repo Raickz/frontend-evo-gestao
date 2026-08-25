@@ -15,6 +15,7 @@ export interface ListVendasFilters {
   formaPagamento?: string
   dataInicio?: string
   dataFim?: string
+  vendedorId?: string | null
   pagina?: number
   limite?: number
 }
@@ -29,12 +30,25 @@ export const VendasService = {
   },
 
   async listFiltered(empresaId: string, options: ListVendasFilters = {}) {
-    const { search, status, formaPagamento, dataInicio, dataFim, pagina = 1, limite = 20 } = options
+    const {
+      search,
+      status,
+      formaPagamento,
+      dataInicio,
+      dataFim,
+      vendedorId,
+      pagina = 1,
+      limite = 20,
+    } = options
 
     let query = supabase
       .from('vendas')
       .select('*, clientes(nome, documento), vendedores(nome)')
       .eq('empresa_id', empresaId)
+
+    if (vendedorId) {
+      query = query.eq('vendedor_id', vendedorId)
+    }
 
     if (status && status !== 'todos') {
       query = query.eq('status', status)
@@ -74,12 +88,16 @@ export const VendasService = {
   },
 
   async countFiltered(empresaId: string, options: ListVendasFilters = {}) {
-    const { search, status, formaPagamento, dataInicio, dataFim } = options
+    const { search, status, formaPagamento, dataInicio, dataFim, vendedorId } = options
 
     let query = supabase
       .from('vendas')
       .select('id', { count: 'exact', head: true })
       .eq('empresa_id', empresaId)
+
+    if (vendedorId) {
+      query = query.eq('vendedor_id', vendedorId)
+    }
 
     if (status && status !== 'todos') {
       query = query.eq('status', status)

@@ -207,10 +207,13 @@ export default function ConfiguracoesPage() {
     setLoadingUsuarios(true)
     setErrorUsuarios(null)
     try {
+      const excludeMasters = perfilLogado === 'admin'
+
       const filterOpts = {
         search: debouncedSearchUsuario,
         perfil: perfilFilter,
         status: statusFilter,
+        excludeMasters,
         page,
         pageSize: PAGE_SIZE,
       }
@@ -221,6 +224,7 @@ export default function ConfiguracoesPage() {
           search: debouncedSearchUsuario,
           perfil: perfilFilter,
           status: statusFilter,
+          excludeMasters,
         }),
       ])
 
@@ -237,7 +241,7 @@ export default function ConfiguracoesPage() {
     } finally {
       setLoadingUsuarios(false)
     }
-  }, [empresaId, debouncedSearchUsuario, perfilFilter, statusFilter, page])
+  }, [empresaId, debouncedSearchUsuario, perfilFilter, statusFilter, page, perfilLogado])
 
   useEffect(() => {
     loadUsuarios()
@@ -867,9 +871,11 @@ export default function ConfiguracoesPage() {
                           <SelectItem value="todos" className="text-xs">
                             Todos os perfis
                           </SelectItem>
-                          <SelectItem value="master" className="text-xs">
-                            Master
-                          </SelectItem>
+                          {perfilLogado !== 'admin' && (
+                            <SelectItem value="master" className="text-xs">
+                              Master
+                            </SelectItem>
+                          )}
                           <SelectItem value="admin" className="text-xs">
                             Administrador
                           </SelectItem>

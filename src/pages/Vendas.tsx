@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dialog'
 import { Card, CardContent } from '@/components/ui/card'
 import { useEmpresa } from '@/hooks/use-empresa'
+import { useAuth } from '@/hooks/use-auth'
 import { VendasService, type FinalizarVendaPayloadItem } from '@/services/vendas'
 import {
   ShoppingCart,
@@ -85,6 +86,32 @@ interface ProdutoOption {
 
 export default function VendasPage() {
   const { empresaId, empresa } = useEmpresa()
+  const { usuario } = useAuth()
+
+  // Resolução do vendedor_id quando perfil for 'vendedor'
+  const [vendedorId, setVendedorId] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function resolveVendedor() {
+      if (!empresaId || usuario?.perfil !== 'vendedor') {
+        setVendedorId(null)
+        return
+      }
+      const { data } = await supabase
+        .from('vendedores')
+        .select('id')
+        .eq('empresa_id', empresaId)
+        .eq('usuario_id', usuario.id)
+        .eq('ativo', true)
+        .maybeSingle()
+      if (data) {
+        setVendedorId(data.id)
+      } else {
+        setVendedorId('00000000-0000-0000-0000-000000000000')
+      }
+    }
+    resolveVendedor()
+  }, [empresaId, usuario])
 
   // Modo de visualização: 'listagem' ou 'nova'
   const [modo, setModo] = useState<'listagem' | 'nova'>('listagem')
@@ -180,6 +207,7 @@ export default function VendasPage() {
         dataFim: filtroDataFim,
         pagina,
         limite: limitePorPagina,
+        vendedorId,
       }
 
       const [dataRes, countRes] = await Promise.all([
@@ -215,6 +243,7 @@ export default function VendasPage() {
     filtroDataInicio,
     filtroDataFim,
     pagina,
+    vendedorId,
   ])
 
   // Carregar dados de suporte para nova venda (produtos, clientes, vendedores)

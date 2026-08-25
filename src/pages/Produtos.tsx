@@ -31,6 +31,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { useEmpresa } from '@/hooks/use-empresa'
+import { useAuth } from '@/hooks/use-auth'
 import { supabase } from '@/lib/supabase/client'
 import { ProdutosService, Produto, Categoria, Fornecedor } from '@/services/produtos'
 import { toast } from 'sonner'
@@ -103,6 +104,8 @@ const PAGE_SIZE = 20
 
 export default function ProdutosPage() {
   const { empresaId } = useEmpresa()
+  const { usuario } = useAuth()
+  const podeGerenciarProdutos = usuario?.perfil === 'master' || usuario?.perfil === 'admin'
 
   // State
   const [produtos, setProdutos] = useState<ProdutoComRelacoes[]>([])
@@ -519,13 +522,15 @@ export default function ProdutosPage() {
         description="Gestão de itens, tabela de preços, estoque mínimo e categorias."
         badge={`${produtos.length} Cadastrados`}
         actions={
-          <Button
-            onClick={handleOpenCreate}
-            className="bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Novo Produto
-          </Button>
+          podeGerenciarProdutos ? (
+            <Button
+              onClick={handleOpenCreate}
+              className="bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              Novo Produto
+            </Button>
+          ) : undefined
         }
       />
 
@@ -609,9 +614,15 @@ export default function ProdutosPage() {
               : 'Cadastre os produtos que sua distribuidora comercializa para controlar saldo e vendas.'
           }
           actionLabel={
-            search || statusFilter !== 'todos' ? undefined : 'Cadastrar Primeiro Produto'
+            search || statusFilter !== 'todos' || !podeGerenciarProdutos
+              ? undefined
+              : 'Cadastrar Primeiro Produto'
           }
-          onAction={search || statusFilter !== 'todos' ? undefined : handleOpenCreate}
+          onAction={
+            search || statusFilter !== 'todos' || !podeGerenciarProdutos
+              ? undefined
+              : handleOpenCreate
+          }
         />
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
@@ -724,34 +735,38 @@ export default function ProdutosPage() {
                         </Badge>
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenEdit(produto)}
-                            className="h-8 w-8 p-0 text-slate-600 hover:text-teal-700 hover:bg-teal-50"
-                            title="Editar produto"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setConfirmToggleProduto(produto)}
-                            className={`h-8 w-8 p-0 ${
-                              produto.ativo
-                                ? 'text-red-600 hover:text-red-700 hover:bg-red-50'
-                                : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50'
-                            }`}
-                            title={produto.ativo ? 'Inativar produto' : 'Ativar produto'}
-                          >
-                            {produto.ativo ? (
-                              <PowerOff className="w-3.5 h-3.5" />
-                            ) : (
-                              <Power className="w-3.5 h-3.5" />
-                            )}
-                          </Button>
-                        </div>
+                        {podeGerenciarProdutos ? (
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleOpenEdit(produto)}
+                              className="h-8 w-8 p-0 text-slate-600 hover:text-teal-700 hover:bg-teal-50"
+                              title="Editar produto"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setConfirmToggleProduto(produto)}
+                              className={`h-8 w-8 p-0 ${
+                                produto.ativo
+                                  ? 'text-red-600 hover:text-red-700 hover:bg-red-50'
+                                  : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50'
+                              }`}
+                              title={produto.ativo ? 'Inativar produto' : 'Ativar produto'}
+                            >
+                              {produto.ativo ? (
+                                <PowerOff className="w-3.5 h-3.5" />
+                              ) : (
+                                <Power className="w-3.5 h-3.5" />
+                              )}
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 text-[11px]">-</span>
+                        )}
                       </td>
                     </tr>
                   )

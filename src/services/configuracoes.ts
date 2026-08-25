@@ -10,6 +10,7 @@ export interface ListUsuariosOptions {
   search?: string
   perfil?: string
   status?: 'todos' | 'ativo' | 'inativo'
+  excludeMasters?: boolean
   page?: number
   pageSize?: number
 }
@@ -18,6 +19,7 @@ export interface CountUsuariosOptions {
   search?: string
   perfil?: string
   status?: 'todos' | 'ativo' | 'inativo'
+  excludeMasters?: boolean
 }
 
 export interface UpdateEmpresaData {
@@ -59,6 +61,10 @@ export const ConfiguracoesService = {
   async listUsuariosEmpresa(empresaId: string, options?: ListUsuariosOptions) {
     let query = supabase.from('usuarios').select('*').eq('empresa_id', empresaId)
 
+    if (options?.excludeMasters) {
+      query = query.neq('perfil', 'master')
+    }
+
     if (options?.search && options.search.trim() !== '') {
       const term = `%${options.search.trim()}%`
       query = query.or(`nome.ilike.${term},email.ilike.${term}`)
@@ -88,6 +94,10 @@ export const ConfiguracoesService = {
       .from('usuarios')
       .select('*', { count: 'exact', head: true })
       .eq('empresa_id', empresaId)
+
+    if (options?.excludeMasters) {
+      query = query.neq('perfil', 'master')
+    }
 
     if (options?.search && options.search.trim() !== '') {
       const term = `%${options.search.trim()}%`

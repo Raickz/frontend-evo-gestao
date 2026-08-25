@@ -23,7 +23,7 @@ export type AppPage =
  * ADMIN: Dashboard, Relatórios, Relatório de Lucro, Clientes, Produtos, Fornecedores, Compras, Estoque, Vendas, Pedidos, Financeiro, Vendedores, Comissões, Configurações
  * GERENTE: Dashboard, Relatórios, Clientes, Produtos, Fornecedores, Compras, Estoque, Vendas, Pedidos, Financeiro, Vendedores, Comissões
  * VENDEDOR: Dashboard, Clientes, Produtos, Vendas, Pedidos, Comissões
- * OPERADOR: Dashboard, Relatórios, Clientes, Fornecedores, Produtos, Compras, Estoque, Vendas, Pedidos
+ * OPERADOR: Produtos, Estoque
  */
 export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
   master: [
@@ -72,17 +72,7 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'vendedores',
     'comissoes',
   ],
-  operador: [
-    'dashboard',
-    'relatorios',
-    'clientes',
-    'fornecedores',
-    'produtos',
-    'compras',
-    'estoque',
-    'vendas',
-    'pedidos',
-  ],
+  operador: ['produtos', 'estoque'],
   vendedor: ['dashboard', 'clientes', 'produtos', 'vendas', 'pedidos', 'comissoes'],
 }
 
