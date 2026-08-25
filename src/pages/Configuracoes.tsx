@@ -1523,8 +1523,7 @@ export default function ConfiguracoesPage() {
                             </Badge>
                           </td>
                           <td className="py-3 px-4 text-slate-700">
-                            Operações de vendas, compras, cadastro de parceiros e movimentação de
-                            estoque.
+                            Acesso restrito a produtos (visualização) e movimentação de estoque.
                           </td>
                         </tr>
                         <tr>
