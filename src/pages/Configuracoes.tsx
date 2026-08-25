@@ -961,7 +961,8 @@ export default function ConfiguracoesPage() {
                             const isTargetMaster = usrPerfil === 'master'
                             const podeEditarPerfil =
                               isMasterOrAdmin && !isSelf && (isMaster || !isTargetMaster)
-                            const podeToggleStatus = isMasterOrAdmin && !isSelf
+                            const podeToggleStatus =
+                              isMasterOrAdmin && !isSelf && (isMaster || !isTargetMaster)
 
                             return (
                               <tr key={usr.id} className="hover:bg-slate-50/70 transition-colors">
