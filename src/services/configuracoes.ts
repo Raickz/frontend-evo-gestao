@@ -116,15 +116,17 @@ export const ConfiguracoesService = {
   },
 
   async toggleUsuarioAtivo(usuarioId: string, ativo: boolean) {
-    return supabase
-      .from('usuarios')
-      .update({
-        ativo,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', usuarioId)
-      .select()
-      .single()
+    const { data, error } = await supabase.rpc(
+      'alterar_status_usuario' as any,
+      {
+        p_usuario_id: usuarioId,
+        p_ativo: ativo,
+      } as any,
+    )
+    if (error) {
+      return { data: null, error: { message: error.message } }
+    }
+    return { data: data as any, error: null }
   },
 
   async updateUsuarioPerfil(usuarioId: string, perfil: string) {

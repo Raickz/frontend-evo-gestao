@@ -82,14 +82,18 @@ export const ProdutosService = {
       .order('nome', { ascending: true })
   },
 
-  async toggleAtivo(empresaId: string, id: string, ativo: boolean) {
-    return supabase
-      .from('produtos')
-      .update({ ativo })
-      .eq('empresa_id', empresaId)
-      .eq('id', id)
-      .select()
-      .single()
+  async toggleAtivo(_empresaId: string, id: string, ativo: boolean) {
+    const { data, error } = await supabase.rpc(
+      'alterar_status_produto' as any,
+      {
+        p_produto_id: id,
+        p_ativo: ativo,
+      } as any,
+    )
+    if (error) {
+      return { data: null, error: { message: error.message } }
+    }
+    return { data: data as any, error: null }
   },
 
   async listCategorias(empresaId: string) {

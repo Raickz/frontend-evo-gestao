@@ -171,16 +171,20 @@ export const VendedoresService = {
   },
 
   /**
-   * Alterna o status ativo/inativo do vendedor (exclusão lógica)
+   * Alterna o status ativo/inativo do vendedor (exclusão lógica) via RPC com validação atômica de limites
    */
-  async toggleAtivo(empresaId: string, id: string, ativo: boolean) {
-    return supabase
-      .from('vendedores')
-      .update({ ativo })
-      .eq('empresa_id', empresaId)
-      .eq('id', id)
-      .select('*, usuarios(id, nome, email)')
-      .single()
+  async toggleAtivo(_empresaId: string, id: string, ativo: boolean) {
+    const { data, error } = await supabase.rpc(
+      'alterar_status_vendedor' as any,
+      {
+        p_vendedor_id: id,
+        p_ativo: ativo,
+      } as any,
+    )
+    if (error) {
+      return { data: null, error: { message: error.message } }
+    }
+    return { data: data as any, error: null }
   },
 
   /**
