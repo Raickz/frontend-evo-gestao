@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Building2,
   ArrowRight,
@@ -35,6 +35,8 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string
 
 export default function SetupPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const paramPlano = searchParams.get('plano')
 
   const [checkingBootstrap, setCheckingBootstrap] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -51,7 +53,7 @@ export default function SetupPage() {
   const [planos, setPlanos] = useState<Plano[]>([])
   const [loadingPlanos, setLoadingPlanos] = useState(true)
   const [errorPlanos, setErrorPlanos] = useState<string | null>(null)
-  const [selectedPlanoSlug, setSelectedPlanoSlug] = useState<string>('profissional')
+  const [selectedPlanoSlug, setSelectedPlanoSlug] = useState<string>(paramPlano || 'profissional')
 
   // Seção 3 — Administrador Principal
   const [adminNome, setAdminNome] = useState('')
@@ -66,12 +68,17 @@ export default function SetupPage() {
       if (error) throw error
       if (data && data.length > 0) {
         setPlanos(data)
-        // Se ainda não selecionou ou se o atual não existe, seleciona o recomendado ou o primeiro
-        const hasProfissional = data.some((p) => p.slug === 'profissional')
-        if (hasProfissional) {
-          setSelectedPlanoSlug('profissional')
-        } else if (data[0]?.slug) {
-          setSelectedPlanoSlug(data[0].slug)
+        // Se o plano da URL existe na lista, prioriza ele
+        if (paramPlano && data.some((p) => p.slug === paramPlano)) {
+          setSelectedPlanoSlug(paramPlano)
+        } else {
+          // Se ainda não selecionou ou se o atual não existe, seleciona o recomendado ou o primeiro
+          const hasProfissional = data.some((p) => p.slug === 'profissional')
+          if (hasProfissional) {
+            setSelectedPlanoSlug('profissional')
+          } else if (data[0]?.slug) {
+            setSelectedPlanoSlug(data[0].slug)
+          }
         }
       } else {
         setErrorPlanos('Nenhum plano disponível encontrado.')

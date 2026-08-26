@@ -11,6 +11,7 @@ import { Building2, Loader2 } from 'lucide-react'
 import Layout from '@/components/Layout'
 
 // Pages
+import PlanosPage from '@/pages/Planos'
 import SetupPage from '@/pages/Setup'
 import AuthPage from '@/pages/Auth'
 import DashboardPage from '@/pages/Dashboard'
@@ -101,6 +102,9 @@ const App = () => (
           <Routes>
             {/* Root redirect com verificação de bootstrap */}
             <Route path="/" element={<BootstrapRedirect />} />
+
+            {/* Página pública de Planos */}
+            <Route path="/planos" element={<PlanosPage />} />
 
             {/* Setup público */}
             <Route path="/setup" element={<SetupPage />} />
