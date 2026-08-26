@@ -139,42 +139,38 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // Verificar limite de usuários do plano da empresa
-    const { data: assinaturaData, error: assinaturaErr } = await supabaseAdmin
-      .from('assinaturas')
-      .select('status, planos(limite_usuarios)')
-      .eq('empresa_id', empresaId)
-      .in('status', ['trial', 'ativa'])
-      .maybeSingle()
+    // Validar limite de usuários do plano atomicamente via RPC
+    const { data: validacaoLimite, error: limiteErr } = await supabaseAdmin.rpc(
+      'validar_limite_usuarios',
+      { p_empresa_id: empresaId },
+    )
 
-    if (!assinaturaErr && assinaturaData) {
-      const planoInfo = assinaturaData.planos as { limite_usuarios: number | null } | null
-      const limiteUsuarios = planoInfo?.limite_usuarios
+    if (limiteErr) {
+      return new Response(
+        JSON.stringify({
+          sucesso: false,
+          erro: limiteErr.message || 'Erro ao validar limites do plano.',
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        },
+      )
+    }
 
-      if (limiteUsuarios !== null && limiteUsuarios !== undefined) {
-        const { count: usuariosAtivosCount, error: countErr } = await supabaseAdmin
-          .from('usuarios')
-          .select('id', { count: 'exact', head: true })
-          .eq('empresa_id', empresaId)
-          .eq('ativo', true)
-
-        if (
-          !countErr &&
-          typeof usuariosAtivosCount === 'number' &&
-          usuariosAtivosCount >= limiteUsuarios
-        ) {
-          return new Response(
-            JSON.stringify({
-              sucesso: false,
-              erro: 'Limite de usuários do plano atingido. Faça upgrade do seu plano para adicionar novos usuários.',
-            }),
-            {
-              status: 400,
-              headers: { 'Content-Type': 'application/json', ...corsHeaders },
-            },
-          )
-        }
-      }
+    if (validacaoLimite && validacaoLimite.permitido === false) {
+      return new Response(
+        JSON.stringify({
+          sucesso: false,
+          erro:
+            validacaoLimite.erro ||
+            'Limite de usuários do plano atingido. Faça upgrade do seu plano para adicionar novos usuários.',
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        },
+      )
     }
 
     // Extrair e validar o payload

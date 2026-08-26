@@ -31,43 +31,47 @@ export const ClientesService = {
       .single()
   },
 
-  async create(empresaId: string, data: Omit<ClienteInsert, 'empresa_id'>) {
-    // Validar limite de clientes do plano antes do insert
-    const { data: assinaturaData } = await supabase
-      .from('assinaturas')
-      .select('status, planos(limite_clientes)')
-      .eq('empresa_id', empresaId)
-      .in('status', ['trial', 'ativa'])
-      .maybeSingle()
+  async create(_empresaId: string, data: Omit<ClienteInsert, 'empresa_id'>) {
+    const { data: rpcData, error: rpcError } = await supabase.rpc(
+      'criar_cliente' as any,
+      {
+        p_nome: data.nome,
+        p_documento: data.documento || null,
+        p_telefone: data.telefone || null,
+        p_whatsapp: data.whatsapp || null,
+        p_email: data.email || null,
+        p_cep: data.cep || null,
+        p_estado: data.estado || null,
+        p_cidade: data.cidade || null,
+        p_endereco: data.endereco || null,
+        p_numero: data.numero || null,
+        p_bairro: data.bairro || null,
+        p_limite_credito: data.limite_credito || 0,
+        p_observacoes: data.observacoes || null,
+        p_vendedor_id: data.vendedor_id || null,
+      } as any,
+    )
 
-    if (assinaturaData) {
-      const planoInfo = assinaturaData.planos as { limite_clientes: number | null } | null
-      const limiteClientes = planoInfo?.limite_clientes
-
-      if (limiteClientes !== null && limiteClientes !== undefined) {
-        const { count: clientesAtivosCount } = await supabase
-          .from('clientes')
-          .select('id', { count: 'exact', head: true })
-          .eq('empresa_id', empresaId)
-          .eq('ativo', true)
-
-        if (typeof clientesAtivosCount === 'number' && clientesAtivosCount >= limiteClientes) {
-          return {
-            data: null,
-            error: {
-              message:
-                'Limite de clientes do plano atingido. Faça upgrade do seu plano para adicionar novos clientes.',
-            },
-          }
-        }
-      }
+    if (rpcError) {
+      return { data: null, error: { message: rpcError.message } }
     }
 
-    return supabase
+    const res = rpcData as { sucesso?: boolean; cliente_id?: string; nome?: string } | null
+    if (!res || !res.sucesso || !res.cliente_id) {
+      return { data: null, error: { message: 'Falha ao cadastrar cliente.' } }
+    }
+
+    const { data: clienteData, error: fetchError } = await supabase
       .from('clientes')
-      .insert({ ...data, empresa_id: empresaId })
-      .select()
+      .select('*, vendedores(nome)')
+      .eq('id', res.cliente_id)
       .single()
+
+    if (fetchError) {
+      return { data: null, error: { message: fetchError.message } }
+    }
+
+    return { data: clienteData as Cliente, error: null }
   },
 
   async update(empresaId: string, id: string, data: ClienteUpdate) {

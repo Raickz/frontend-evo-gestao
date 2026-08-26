@@ -122,48 +122,39 @@ export const VendedoresService = {
   },
 
   /**
-   * Criação de novo vendedor associado à empresa
+   * Criação de novo vendedor via RPC `criar_vendedor` com validação atômica de limites.
    */
-  async create(empresaId: string, data: Omit<TablesInsert<'vendedores'>, 'empresa_id'>) {
-    // Validar limite de vendedores do plano antes do insert
-    const { data: assinaturaData } = await supabase
-      .from('assinaturas')
-      .select('status, planos(limite_vendedores)')
-      .eq('empresa_id', empresaId)
-      .in('status', ['trial', 'ativa'])
-      .maybeSingle()
+  async create(_empresaId: string, data: Omit<TablesInsert<'vendedores'>, 'empresa_id'>) {
+    const { data: rpcData, error: rpcError } = await supabase.rpc(
+      'criar_vendedor' as any,
+      {
+        p_usuario_id: data.usuario_id || null,
+        p_nome: data.nome,
+        p_percentual_comissao: data.percentual_comissao || 0,
+      } as any,
+    )
 
-    if (assinaturaData) {
-      const planoInfo = assinaturaData.planos as { limite_vendedores: number | null } | null
-      const limiteVendedores = planoInfo?.limite_vendedores
-
-      if (limiteVendedores !== null && limiteVendedores !== undefined) {
-        const { count: vendedoresAtivosCount } = await supabase
-          .from('vendedores')
-          .select('id', { count: 'exact', head: true })
-          .eq('empresa_id', empresaId)
-          .eq('ativo', true)
-
-        if (
-          typeof vendedoresAtivosCount === 'number' &&
-          vendedoresAtivosCount >= limiteVendedores
-        ) {
-          return {
-            data: null,
-            error: {
-              message:
-                'Limite de vendedores do plano atingido. Faça upgrade do seu plano para adicionar novos vendedores.',
-            },
-          }
-        }
-      }
+    if (rpcError) {
+      return { data: null, error: { message: rpcError.message } }
     }
 
-    return supabase
+    const res = rpcData as { sucesso?: boolean; vendedor_id?: string; nome?: string } | null
+    if (!res || !res.sucesso || !res.vendedor_id) {
+      return { data: null, error: { message: 'Falha ao cadastrar vendedor.' } }
+    }
+
+    // Buscar o registro do vendedor completo com dados do usuário vinculado para retorno padrão
+    const { data: vendedorData, error: fetchError } = await supabase
       .from('vendedores')
-      .insert({ ...data, empresa_id: empresaId })
       .select('*, usuarios(id, nome, email)')
+      .eq('id', res.vendedor_id)
       .single()
+
+    if (fetchError) {
+      return { data: null, error: { message: fetchError.message } }
+    }
+
+    return { data: vendedorData as Vendedor, error: null }
   },
 
   /**
