@@ -1,7 +1,7 @@
 {
   "_versions": {
-    "admin-create-user": 35,
-    "bootstrap-install": 34,
-    "seed-demo": 1
+    "admin-create-user": 36,
+    "bootstrap-install": 35,
+    "seed-demo": 2
   }
 }
