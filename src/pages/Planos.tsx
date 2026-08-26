@@ -418,6 +418,108 @@ export default function PlanosPage() {
               )
             })}
           </div>
+
+          {/* TABELA COMPARATIVA DE LIMITES */}
+          <div className="mt-20">
+            <div className="text-center max-w-2xl mx-auto mb-8">
+              <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                Comparativo de Limites Operacionais
+              </h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-400">
+                Veja detalhadamente a capacidade de cada versão para escalar sua distribuidora.
+              </p>
+            </div>
+
+            {(() => {
+              const planoBasico = planos.find((p) => p.slug === 'basico')
+              const planoProfissional = planos.find((p) => p.slug === 'profissional')
+              const planoEmpresarial = planos.find((p) => p.slug === 'empresarial')
+
+              const formatLim = (val: number | null | undefined) =>
+                val === null || val === undefined ? 'Ilimitado' : val.toLocaleString('pt-BR')
+
+              const linhas = [
+                {
+                  recurso: 'Usuários no Sistema',
+                  basico: formatLim(planoBasico?.limite_usuarios),
+                  profissional: formatLim(planoProfissional?.limite_usuarios),
+                  empresarial: formatLim(planoEmpresarial?.limite_usuarios),
+                },
+                {
+                  recurso: 'Vendedores',
+                  basico: formatLim(planoBasico?.limite_vendedores),
+                  profissional: formatLim(planoProfissional?.limite_vendedores),
+                  empresarial: formatLim(planoEmpresarial?.limite_vendedores),
+                },
+                {
+                  recurso: 'Produtos Ativos',
+                  basico: formatLim(planoBasico?.limite_produtos),
+                  profissional: formatLim(planoProfissional?.limite_produtos),
+                  empresarial: formatLim(planoEmpresarial?.limite_produtos),
+                },
+                {
+                  recurso: 'Clientes Cadastrados',
+                  basico: formatLim(planoBasico?.limite_clientes),
+                  profissional: formatLim(planoProfissional?.limite_clientes),
+                  empresarial: formatLim(planoEmpresarial?.limite_clientes),
+                },
+                {
+                  recurso: 'Vendas por Mês',
+                  basico: formatLim(planoBasico?.limite_vendas_mes),
+                  profissional: formatLim(planoProfissional?.limite_vendas_mes),
+                  empresarial: formatLim(planoEmpresarial?.limite_vendas_mes),
+                },
+                {
+                  recurso: 'Preço Mensal',
+                  basico: formatPrice(planoBasico?.valor_mensal),
+                  profissional: formatPrice(planoProfissional?.valor_mensal),
+                  empresarial: formatPrice(planoEmpresarial?.valor_mensal),
+                  isPrice: true,
+                },
+              ]
+
+              return (
+                <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/90 shadow-2xl">
+                  <table className="w-full text-left text-sm border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-800 bg-slate-950/70">
+                        <th className="py-4 px-6 font-bold text-white text-xs uppercase tracking-wider w-1/4">
+                          Recurso
+                        </th>
+                        <th className="py-4 px-6 font-bold text-slate-300 text-center text-xs uppercase tracking-wider w-1/4">
+                          Básico
+                        </th>
+                        <th className="py-4 px-6 font-extrabold text-teal-400 text-center text-xs uppercase tracking-wider w-1/4 bg-teal-950/40 border-x border-teal-500/30">
+                          Profissional (Mais Popular)
+                        </th>
+                        <th className="py-4 px-6 font-bold text-slate-300 text-center text-xs uppercase tracking-wider w-1/4">
+                          Empresarial
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/60">
+                      {linhas.map((row, rIdx) => (
+                        <tr key={rIdx} className="hover:bg-slate-800/30 transition-colors">
+                          <td className="py-3.5 px-6 text-slate-300 font-medium text-xs sm:text-sm">
+                            {row.recurso}
+                          </td>
+                          <td className="py-3.5 px-6 text-slate-400 text-center text-xs sm:text-sm">
+                            {row.basico}
+                          </td>
+                          <td className="py-3.5 px-6 text-center text-xs sm:text-sm font-semibold text-white bg-teal-950/20 border-x border-teal-500/20">
+                            {row.profissional}
+                          </td>
+                          <td className="py-3.5 px-6 text-slate-400 text-center text-xs sm:text-sm">
+                            {row.empresarial}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )
+            })()}
+          </div>
         </div>
       </section>
 

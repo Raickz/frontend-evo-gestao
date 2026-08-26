@@ -572,6 +572,8 @@ export default function DashboardPage() {
             }
 
             if (status === 'ativa') {
+              const dataCobranca = assinatura.proxima_cobranca || assinatura.vencimento
+
               return (
                 <Card className="rounded-xl border border-slate-200 bg-white shadow-xs p-3.5 sm:p-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -594,6 +596,12 @@ export default function DashboardPage() {
                         <p className="text-xs text-slate-500 mt-0.5">
                           Sua assinatura está regular e todas as funcionalidades estão disponíveis.
                         </p>
+                        {dataCobranca && (
+                          <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium">
+                            <Clock className="w-3.5 h-3.5 text-slate-400 inline" />
+                            Próxima cobrança: {formatDate(dataCobranca)}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -612,7 +620,48 @@ export default function DashboardPage() {
               )
             }
 
-            // Outros status: pendente, atrasada
+            // Alerta especial de inadimplência (status === 'atrasada')
+            if (status === 'atrasada') {
+              return (
+                <Card className="rounded-xl border border-amber-300 bg-amber-50/70 shadow-xs p-3.5 sm:p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                        <AlertTriangle className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-amber-950">
+                            Plano {planoNome}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className="text-[11px] font-semibold bg-amber-100 text-amber-800 border-amber-300 py-0.5 px-2"
+                          >
+                            Fatura em atraso
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-amber-900 mt-0.5 font-medium">
+                          Sua fatura está em atraso. Regularize para evitar o bloqueio do sistema.
+                        </p>
+                      </div>
+                    </div>
+
+                    <Link to="/app/configuracoes" className="shrink-0 self-end sm:self-auto">
+                      <Button
+                        size="sm"
+                        className="h-8 text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold flex items-center gap-1 shadow-xs"
+                      >
+                        Ver Assinatura
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Button>
+                    </Link>
+                  </div>
+                </Card>
+              )
+            }
+
+            // Outros status: pendente, etc.
             const statusConfigMap: Record<
               string,
               { label: string; badge: string; icon: any; iconStyle: string }
@@ -622,12 +671,6 @@ export default function DashboardPage() {
                 badge: 'bg-yellow-50 text-yellow-800 border-yellow-200',
                 icon: Clock,
                 iconStyle: 'bg-yellow-50 text-yellow-700',
-              },
-              atrasada: {
-                label: 'Fatura em atraso',
-                badge: 'bg-orange-50 text-orange-800 border-orange-200',
-                icon: AlertTriangle,
-                iconStyle: 'bg-orange-50 text-orange-700',
               },
             }
 

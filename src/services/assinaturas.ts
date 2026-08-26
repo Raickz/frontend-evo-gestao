@@ -136,4 +136,78 @@ export const AssinaturasService = {
       return { data: [], error: err }
     }
   },
+
+  /**
+   * Altera o plano da empresa via RPC alterar_plano
+   */
+  async alterarPlano(planoSlug: string): Promise<{
+    data: { success: boolean; message?: string; error?: string; novo_plano?: string } | null
+    error: any
+  }> {
+    try {
+      const { data, error } = await (supabase.rpc as any)('alterar_plano', {
+        p_novo_plano_slug: planoSlug,
+      })
+      if (error) throw error
+
+      const res = data as any
+      if (res && res.success === false) {
+        return { data: res, error: new Error(res.error || 'Não foi possível alterar o plano.') }
+      }
+
+      return { data: res, error: null }
+    } catch (err: any) {
+      return { data: null, error: err }
+    }
+  },
+
+  /**
+   * Cancela a assinatura da empresa via RPC cancelar_assinatura
+   */
+  async cancelarAssinatura(): Promise<{
+    data: { success: boolean; message?: string; error?: string } | null
+    error: any
+  }> {
+    try {
+      const { data, error } = await (supabase.rpc as any)('cancelar_assinatura')
+      if (error) throw error
+
+      const res = data as any
+      if (res && res.success === false) {
+        return {
+          data: res,
+          error: new Error(res.error || 'Não foi possível cancelar a assinatura.'),
+        }
+      }
+
+      return { data: res, error: null }
+    } catch (err: any) {
+      return { data: null, error: err }
+    }
+  },
+
+  /**
+   * Reativa a assinatura da empresa via RPC reativar_assinatura
+   */
+  async reativarAssinatura(): Promise<{
+    data: { success: boolean; message?: string; error?: string } | null
+    error: any
+  }> {
+    try {
+      const { data, error } = await (supabase.rpc as any)('reativar_assinatura')
+      if (error) throw error
+
+      const res = data as any
+      if (res && res.success === false) {
+        return {
+          data: res,
+          error: new Error(res.error || 'Não foi possível reativar a assinatura.'),
+        }
+      }
+
+      return { data: res, error: null }
+    } catch (err: any) {
+      return { data: null, error: err }
+    }
+  },
 }

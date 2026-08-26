@@ -54,8 +54,14 @@ import {
   Check,
   Calendar,
   Sparkles,
+  AlertTriangle,
 } from 'lucide-react'
-import { AssinaturasService, AssinaturaComPlano, AssinaturaStatus } from '@/services/assinaturas'
+import {
+  AssinaturasService,
+  AssinaturaComPlano,
+  AssinaturaStatus,
+  Plano,
+} from '@/services/assinaturas'
 
 const PAGE_SIZE = 20
 
@@ -73,7 +79,19 @@ export default function ConfiguracoesPage() {
   const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
   const [loadingAssinatura, setLoadingAssinatura] = useState(true)
   const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
+
+  // Estados dos novos modais e ações de assinatura
+  const [planosDisponiveis, setPlanosDisponiveis] = useState<Plano[]>([])
+  const [loadingPlanos, setLoadingPlanos] = useState(false)
+  const [modalAlterarPlanoOpen, setModalAlterarPlanoOpen] = useState(false)
+  const [planoSelecionadoSlug, setPlanoSelecionadoSlug] = useState<string>('')
+  const [savingAlterarPlano, setSavingAlterarPlano] = useState(false)
+
+  const [modalCancelarOpen, setModalCancelarOpen] = useState(false)
+  const [savingCancelar, setSavingCancelar] = useState(false)
+
+  const [modalReativarOpen, setModalReativarOpen] = useState(false)
+  const [savingReativar, setSavingReativar] = useState(false)
 
   // Contagens de uso atual para a aba Plano & Assinatura
   const [limitesUso, setLimitesUso] = useState<{
@@ -154,6 +172,96 @@ export default function ConfiguracoesPage() {
       setLoadingAssinatura(false)
     }
   }, [empresaId, isMasterOrAdmin, refreshStatus])
+
+  const loadPlanosDisponiveis = useCallback(async () => {
+    setLoadingPlanos(true)
+    try {
+      const { data: planosData, error: planosErr } = await AssinaturasService.listPlanos()
+      if (planosErr) throw planosErr
+      setPlanosDisponiveis(planosData || [])
+    } catch (err: any) {
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar lista de planos:', err)
+      }
+    } finally {
+      setLoadingPlanos(false)
+    }
+  }, [])
+
+  const handleOpenAlterarPlano = async () => {
+    await loadPlanosDisponiveis()
+    if (assinatura?.planos?.slug) {
+      setPlanoSelecionadoSlug(assinatura.planos.slug)
+    }
+    setModalAlterarPlanoOpen(true)
+  }
+
+  const handleConfirmAlterarPlano = async () => {
+    if (!planoSelecionadoSlug) {
+      toast.error('Selecione um plano.')
+      return
+    }
+
+    setSavingAlterarPlano(true)
+    try {
+      const { data: res, error: rpcErr } =
+        await AssinaturasService.alterarPlano(planoSelecionadoSlug)
+      if (rpcErr) {
+        toast.error(rpcErr.message || 'Erro ao alterar plano.')
+        return
+      }
+
+      const nomeNovo =
+        res?.novo_plano ||
+        planosDisponiveis.find((p) => p.slug === planoSelecionadoSlug)?.nome ||
+        planoSelecionadoSlug
+      toast.success(`Plano alterado para ${nomeNovo}!`)
+      setModalAlterarPlanoOpen(false)
+      await loadAssinatura()
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao alterar plano.')
+    } finally {
+      setSavingAlterarPlano(false)
+    }
+  }
+
+  const handleConfirmCancelarAssinatura = async () => {
+    setSavingCancelar(true)
+    try {
+      const { error: rpcErr } = await AssinaturasService.cancelarAssinatura()
+      if (rpcErr) {
+        toast.error(rpcErr.message || 'Erro ao cancelar assinatura.')
+        return
+      }
+
+      toast.success('Assinatura cancelada. Seus dados estão preservados.')
+      setModalCancelarOpen(false)
+      await loadAssinatura()
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao cancelar assinatura.')
+    } finally {
+      setSavingCancelar(false)
+    }
+  }
+
+  const handleConfirmReativarAssinatura = async () => {
+    setSavingReativar(true)
+    try {
+      const { error: rpcErr } = await AssinaturasService.reativarAssinatura()
+      if (rpcErr) {
+        toast.error(rpcErr.message || 'Erro ao reativar assinatura.')
+        return
+      }
+
+      toast.success('Assinatura reativada com sucesso!')
+      setModalReativarOpen(false)
+      await loadAssinatura()
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao reativar assinatura.')
+    } finally {
+      setSavingReativar(false)
+    }
+  }
 
   useEffect(() => {
     if (isMasterOrAdmin) {
@@ -1551,11 +1659,11 @@ export default function ConfiguracoesPage() {
                     </div>
                   </div>
                   <Button
-                    onClick={() => setModalRegularizarOpen(true)}
+                    onClick={handleOpenAlterarPlano}
                     className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shrink-0 shadow-xs h-9 px-4 flex items-center gap-1.5"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
-                    Regularizar Assinatura
+                    Alterar Plano
                   </Button>
                 </div>
               )}
@@ -1694,22 +1802,49 @@ export default function ConfiguracoesPage() {
                           )}
                         </div>
 
-                        {/* Aviso informativo de leitura e Botão Regularizar */}
+                        {/* Barra de Ações: Alterar Plano | Cancelar Assinatura | Reativar Assinatura */}
                         <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                          <div className="flex items-center gap-2.5 text-slate-600">
-                            <HelpCircle className="w-4 h-4 shrink-0 text-teal-600" />
-                            <span>
-                              As assinaturas e limites operacionais são gerenciados pelo suporte EVO
-                              Gestão.
-                            </span>
+                          <div className="flex items-center gap-2 text-slate-600">
+                            <CreditCard className="w-4 h-4 shrink-0 text-teal-600" />
+                            <span>Gerencie o plano e status da assinatura da sua empresa.</span>
                           </div>
-                          <Button
-                            onClick={() => setModalRegularizarOpen(true)}
-                            className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold h-8 px-3.5 shrink-0 flex items-center gap-1.5"
-                          >
-                            <Sparkles className="w-3.5 h-3.5" />
-                            Regularizar Assinatura
-                          </Button>
+                          <div className="flex flex-wrap items-center gap-2">
+                            {/* Alterar Plano - Sempre visível para Master/Admin */}
+                            <Button
+                              type="button"
+                              onClick={handleOpenAlterarPlano}
+                              className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold h-8 px-3.5 shadow-xs flex items-center gap-1.5"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                              Alterar Plano
+                            </Button>
+
+                            {/* Cancelar Assinatura - Visível se status NÃO for cancelada */}
+                            {assinatura.status !== 'cancelada' && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setModalCancelarOpen(true)}
+                                className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-semibold h-8 px-3"
+                              >
+                                <XCircle className="w-3.5 h-3.5 mr-1" />
+                                Cancelar Assinatura
+                              </Button>
+                            )}
+
+                            {/* Reativar Assinatura - Visível APENAS se status for cancelada ou bloqueada */}
+                            {(assinatura.status === 'cancelada' ||
+                              assinatura.status === 'bloqueada') && (
+                              <Button
+                                type="button"
+                                onClick={() => setModalReativarOpen(true)}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-8 px-3.5 shadow-xs flex items-center gap-1.5"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                Reativar Assinatura
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -2414,48 +2549,435 @@ export default function ConfiguracoesPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Modal Informativo de Regularização / Contratação */}
-        <Dialog open={modalRegularizarOpen} onOpenChange={setModalRegularizarOpen}>
-          <DialogContent className="max-w-md">
+        {/* =========================================================================
+            MODAL: ALTERAR PLANO
+            ========================================================================= */}
+        <Dialog
+          open={modalAlterarPlanoOpen}
+          onOpenChange={(open) => {
+            if (!open && !savingAlterarPlano) setModalAlterarPlanoOpen(false)
+          }}
+        >
+          <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <div className="h-10 w-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center mb-2">
-                <Sparkles className="w-5 h-5" />
+              <div className="flex items-center gap-2 text-teal-800">
+                <Sparkles className="w-5 h-5 text-teal-600" />
+                <DialogTitle className="text-lg font-bold text-slate-900">
+                  Alterar Plano
+                </DialogTitle>
               </div>
-              <DialogTitle className="text-base font-bold text-slate-900">
-                Planos e Assinaturas EVO Gestão
-              </DialogTitle>
-              <DialogDescription className="text-xs text-slate-500">
-                A contratação de planos estará disponível em breve. Entre em contato com o suporte
-                EVO Gestão para regularizar sua assinatura.
+              <DialogDescription className="text-xs text-slate-600 pt-1 leading-relaxed">
+                Escolha o novo plano para sua empresa. O downgrade só será permitido se seu uso
+                atual estiver dentro dos limites do novo plano.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="py-3 text-xs space-y-3">
-              <div className="p-3.5 rounded-xl border border-teal-100 bg-teal-50/50 space-y-2">
-                <p className="font-semibold text-teal-900">
-                  Deseja ativar ou migrar seu plano comercial?
-                </p>
-                <p className="text-slate-600">
-                  Nossos consultores estão prontos para ajudar sua distribuidora a desbloquear todos
-                  os recursos e limites adequados à sua operação.
-                </p>
+            {loadingPlanos ? (
+              <div className="py-12 flex flex-col items-center justify-center gap-2">
+                <Loader2 className="w-7 h-7 animate-spin text-teal-700" />
+                <span className="text-xs text-slate-500">Carregando planos disponíveis...</span>
               </div>
-              <div className="p-3 rounded-lg border border-slate-100 bg-slate-50 flex items-center justify-between">
-                <span className="text-slate-500 font-medium">Canal de Atendimento:</span>
-                <span className="font-mono font-semibold text-slate-900">
-                  suporte@evogestao.com.br
-                </span>
+            ) : (
+              <div className="py-3 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {planosDisponiveis.map((plano) => {
+                    const isCurrent =
+                      assinatura?.planos?.slug === plano.slug || assinatura?.plano_id === plano.id
+                    const isSelected = planoSelecionadoSlug === plano.slug
+
+                    // Verificar se o uso atual excede algum limite do plano
+                    const excedeUsuarios =
+                      plano.limite_usuarios !== null && limitesUso.usuarios > plano.limite_usuarios
+                    const excedeVendedores =
+                      plano.limite_vendedores !== null &&
+                      limitesUso.vendedores > plano.limite_vendedores
+                    const excedeProdutos =
+                      plano.limite_produtos !== null && limitesUso.produtos > plano.limite_produtos
+                    const excedeClientes =
+                      plano.limite_clientes !== null && limitesUso.clientes > plano.limite_clientes
+                    const excedeVendas =
+                      plano.limite_vendas_mes !== null &&
+                      limitesUso.vendasMes > plano.limite_vendas_mes
+
+                    const hasAnyExceed =
+                      excedeUsuarios ||
+                      excedeVendedores ||
+                      excedeProdutos ||
+                      excedeClientes ||
+                      excedeVendas
+
+                    return (
+                      <div
+                        key={plano.id}
+                        onClick={() => {
+                          if (!savingAlterarPlano) {
+                            setPlanoSelecionadoSlug(plano.slug || '')
+                          }
+                        }}
+                        className={`rounded-xl border p-4 cursor-pointer transition-all flex flex-col justify-between relative ${
+                          isSelected
+                            ? 'border-teal-600 ring-2 ring-teal-600/20 bg-teal-50/30'
+                            : 'border-slate-200 bg-white hover:border-slate-300'
+                        }`}
+                      >
+                        {/* Badges de topo */}
+                        <div className="flex items-center justify-between mb-2">
+                          {isCurrent ? (
+                            <Badge className="bg-teal-100 text-teal-800 border-teal-300 text-[10px] font-bold">
+                              Plano Atual
+                            </Badge>
+                          ) : (
+                            <span />
+                          )}
+
+                          {plano.slug === 'profissional' && (
+                            <Badge className="bg-amber-100 text-amber-800 border-amber-300 text-[10px] font-bold">
+                              Recomendado
+                            </Badge>
+                          )}
+                        </div>
+
+                        <div>
+                          <h4 className="text-base font-bold text-slate-900">{plano.nome}</h4>
+                          {plano.descricao && (
+                            <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">
+                              {plano.descricao}
+                            </p>
+                          )}
+
+                          <div className="mt-3 pt-3 border-t border-slate-100">
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-2xl font-extrabold text-slate-900">
+                                {formatCurrency(Number(plano.valor_mensal || 0))}
+                              </span>
+                              <span className="text-xs text-slate-500">/mês</span>
+                            </div>
+                          </div>
+
+                          {/* Lista de Limites */}
+                          <div className="mt-4 space-y-2 text-xs">
+                            <div className="flex items-center justify-between">
+                              <span className="text-slate-500">Usuários:</span>
+                              {excedeUsuarios ? (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="font-bold text-rose-600 flex items-center gap-1 cursor-help">
+                                      {plano.limite_usuarios}
+                                      <AlertTriangle className="w-3 h-3 text-rose-500" />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="text-xs">
+                                      Você excede este limite ({limitesUso.usuarios} em uso)
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              ) : (
+                                <span className="font-semibold text-slate-800">
+                                  {plano.limite_usuarios ?? 'Ilimitado'}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <span className="text-slate-500">Vendedores:</span>
+                              {excedeVendedores ? (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="font-bold text-rose-600 flex items-center gap-1 cursor-help">
+                                      {plano.limite_vendedores}
+                                      <AlertTriangle className="w-3 h-3 text-rose-500" />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="text-xs">
+                                      Você excede este limite ({limitesUso.vendedores} em uso)
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              ) : (
+                                <span className="font-semibold text-slate-800">
+                                  {plano.limite_vendedores ?? 'Ilimitado'}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <span className="text-slate-500">Produtos:</span>
+                              {excedeProdutos ? (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="font-bold text-rose-600 flex items-center gap-1 cursor-help">
+                                      {plano.limite_produtos}
+                                      <AlertTriangle className="w-3 h-3 text-rose-500" />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="text-xs">
+                                      Você excede este limite ({limitesUso.produtos} em uso)
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              ) : (
+                                <span className="font-semibold text-slate-800">
+                                  {plano.limite_produtos ?? 'Ilimitado'}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <span className="text-slate-500">Clientes:</span>
+                              {excedeClientes ? (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="font-bold text-rose-600 flex items-center gap-1 cursor-help">
+                                      {plano.limite_clientes}
+                                      <AlertTriangle className="w-3 h-3 text-rose-500" />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="text-xs">
+                                      Você excede este limite ({limitesUso.clientes} em uso)
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              ) : (
+                                <span className="font-semibold text-slate-800">
+                                  {plano.limite_clientes ?? 'Ilimitado'}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <span className="text-slate-500">Vendas/mês:</span>
+                              {excedeVendas ? (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="font-bold text-rose-600 flex items-center gap-1 cursor-help">
+                                      {plano.limite_vendas_mes}
+                                      <AlertTriangle className="w-3 h-3 text-rose-500" />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="text-xs">
+                                      Você excede este limite ({limitesUso.vendasMes} em uso)
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              ) : (
+                                <span className="font-semibold text-slate-800">
+                                  {plano.limite_vendas_mes ?? 'Ilimitado'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {hasAnyExceed && !isCurrent && (
+                            <div className="mt-3 p-2 rounded bg-rose-50 border border-rose-200 text-[11px] text-rose-700 font-medium">
+                              Seu uso atual excede os limites deste plano.
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t border-slate-100">
+                          <Button
+                            type="button"
+                            variant={isSelected ? 'default' : 'outline'}
+                            size="sm"
+                            disabled={isCurrent}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setPlanoSelecionadoSlug(plano.slug || '')
+                            }}
+                            className={`w-full text-xs font-semibold h-8 ${
+                              isSelected
+                                ? 'bg-teal-700 hover:bg-teal-800 text-white'
+                                : 'text-slate-700'
+                            }`}
+                          >
+                            {isCurrent ? 'Plano Atual' : isSelected ? 'Selecionado' : 'Selecionar'}
+                          </Button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            <DialogFooter className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-2">
+              <span className="text-xs text-slate-500">
+                {planoSelecionadoSlug &&
+                  `Plano selecionado: ${
+                    planosDisponiveis.find((p) => p.slug === planoSelecionadoSlug)?.nome ||
+                    planoSelecionadoSlug
+                  }`}
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  type="button"
+                  disabled={savingAlterarPlano}
+                  onClick={() => setModalAlterarPlanoOpen(false)}
+                  className="text-xs"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  disabled={
+                    savingAlterarPlano ||
+                    !planoSelecionadoSlug ||
+                    planoSelecionadoSlug === assinatura?.planos?.slug
+                  }
+                  onClick={handleConfirmAlterarPlano}
+                  className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs"
+                >
+                  {savingAlterarPlano ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Alterando Plano...
+                    </>
+                  ) : (
+                    'Confirmar Alteração'
+                  )}
+                </Button>
+              </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* =========================================================================
+            MODAL: CANCELAR ASSINATURA
+            ========================================================================= */}
+        <Dialog
+          open={modalCancelarOpen}
+          onOpenChange={(open) => {
+            if (!open && !savingCancelar) setModalCancelarOpen(false)
+          }}
+        >
+          <DialogContent className="max-w-md w-full">
+            <DialogHeader>
+              <div className="flex items-center gap-2 text-rose-700">
+                <AlertTriangle className="w-5 h-5 text-rose-600" />
+                <DialogTitle className="text-base font-bold text-slate-900">
+                  Tem certeza que deseja cancelar sua assinatura?
+                </DialogTitle>
+              </div>
+              <DialogDescription className="text-xs text-slate-600 pt-1 leading-relaxed">
+                Seus dados serão preservados, mas o acesso será bloqueado. Você pode reativar a
+                assinatura a qualquer momento.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-2 text-xs space-y-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-900 space-y-1">
+                <p className="font-bold">O que acontece ao cancelar?</p>
+                <ul className="list-disc list-inside space-y-0.5 text-rose-800">
+                  <li>
+                    O status da assinatura mudará para <strong>cancelada</strong>.
+                  </li>
+                  <li>O painel entrará em modo somente leitura para novos cadastros e vendas.</li>
+                  <li>
+                    Todas as suas informações financeiras, clientes e produtos permanecerão
+                    intactos.
+                  </li>
+                </ul>
               </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="pt-2 flex gap-2">
               <Button
                 variant="outline"
-                size="sm"
-                onClick={() => setModalRegularizarOpen(false)}
+                type="button"
+                disabled={savingCancelar}
+                onClick={() => setModalCancelarOpen(false)}
                 className="text-xs"
               >
-                Entendi, fechar
+                Voltar
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={savingCancelar}
+                onClick={handleConfirmCancelarAssinatura}
+                className="text-xs font-bold flex items-center gap-1.5"
+              >
+                {savingCancelar ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Cancelando...
+                  </>
+                ) : (
+                  'Confirmar Cancelamento'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* =========================================================================
+            MODAL: REATIVAR ASSINATURA
+            ========================================================================= */}
+        <Dialog
+          open={modalReativarOpen}
+          onOpenChange={(open) => {
+            if (!open && !savingReativar) setModalReativarOpen(false)
+          }}
+        >
+          <DialogContent className="max-w-md w-full">
+            <DialogHeader>
+              <div className="flex items-center gap-2 text-emerald-700">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <DialogTitle className="text-base font-bold text-slate-900">
+                  Reativar Assinatura
+                </DialogTitle>
+              </div>
+              <DialogDescription className="text-xs text-slate-600 pt-1 leading-relaxed">
+                Ao reativar, sua assinatura voltará ao status ativo com renovação para os próximos
+                30 dias, liberando todas as operações do sistema.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-2 text-xs space-y-2">
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900">
+                <p className="font-semibold">
+                  Plano a ser reativado: {assinatura?.planos?.nome || 'Atual'}
+                </p>
+                <p className="text-emerald-800 mt-1">
+                  Valor mensal:{' '}
+                  {formatCurrency(
+                    Number(assinatura?.valor || assinatura?.planos?.valor_mensal || 0),
+                  )}{' '}
+                  /mês
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter className="pt-2 flex gap-2">
+              <Button
+                variant="outline"
+                type="button"
+                disabled={savingReativar}
+                onClick={() => setModalReativarOpen(false)}
+                className="text-xs"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={savingReativar}
+                onClick={handleConfirmReativarAssinatura}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs"
+              >
+                {savingReativar ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Reativando...
+                  </>
+                ) : (
+                  'Confirmar Reativação'
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
