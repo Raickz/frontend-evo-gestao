@@ -556,16 +556,28 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <Link to="/app/configuracoes" className="shrink-0 self-end sm:self-auto">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 text-xs text-teal-700 hover:text-teal-800 hover:bg-teal-50 font-medium flex items-center gap-1"
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                      <Link
+                        to={`/checkout?plano=${statusAssinatura?.plano_slug || 'profissional'}`}
                       >
-                        Ver assinatura
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Button>
-                    </Link>
+                        <Button
+                          size="sm"
+                          className="h-8 text-xs bg-teal-700 hover:bg-teal-800 text-white font-semibold flex items-center gap-1 shadow-xs"
+                        >
+                          Ativar assinatura
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Button>
+                      </Link>
+                      <Link to="/app/configuracoes">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-xs text-slate-600 hover:text-slate-900"
+                        >
+                          Ver detalhes
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 </Card>
               )
@@ -647,15 +659,28 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <Link to="/app/configuracoes" className="shrink-0 self-end sm:self-auto">
-                      <Button
-                        size="sm"
-                        className="h-8 text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold flex items-center gap-1 shadow-xs"
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                      <Link
+                        to={`/checkout?plano=${statusAssinatura?.plano_slug || 'profissional'}`}
                       >
-                        Ver Assinatura
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Button>
-                    </Link>
+                        <Button
+                          size="sm"
+                          className="h-8 text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold flex items-center gap-1 shadow-xs"
+                        >
+                          Pagar Agora
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Button>
+                      </Link>
+                      <Link to="/app/configuracoes">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 text-xs text-amber-900 hover:text-amber-950"
+                        >
+                          Ver assinatura
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 </Card>
               )

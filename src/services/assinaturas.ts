@@ -38,21 +38,26 @@ export interface AssinaturaComPlano {
   proxima_cobranca: string | null
   cancelada_em: string | null
   status: AssinaturaStatus
+  gateway?: string | null
+  gateway_subscription_id?: string | null
+  ultimo_pagamento_id?: string | null
+  metodo_pagamento?: string | null
   created_at: string
   updated_at: string
   planos?: Plano | null
 }
 
 export interface StatusAssinatura {
-  status: string
+  status: 'ativa' | 'trial' | 'pendente' | 'atrasada' | 'cancelada' | 'bloqueada' | 'sem_assinatura'
   plano_nome: string | null
   plano_slug: string | null
   fim_periodo_teste: string | null
   dias_restantes: number
   acesso_permitido: boolean
   motivo_bloqueio: string | null
+  metodo_pagamento?: string | null
+  gateway?: string | null
 }
-
 export const AssinaturasService = {
   /**
    * Obtém o status consolidado da assinatura da empresa via RPC centralizada get_status_assinatura()
@@ -89,6 +94,10 @@ export const AssinaturasService = {
           proxima_cobranca,
           cancelada_em,
           status,
+          gateway,
+          gateway_subscription_id,
+          ultimo_pagamento_id,
+          metodo_pagamento,
           created_at,
           updated_at,
           planos (

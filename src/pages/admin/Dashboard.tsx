@@ -13,6 +13,8 @@ import {
   ArrowUpRight,
   RefreshCw,
   Sparkles,
+  Receipt,
+  ArrowRight,
 } from 'lucide-react'
 import { AdminService, AdminDashboardData } from '@/services/admin'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -163,28 +165,6 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Trials Próximos do Vencimento */}
-        <Card
-          className={`bg-slate-900/90 border-slate-800 shadow-sm text-slate-100 ${
-            (data?.trials_proximos_vencimento ?? 0) > 0 ? 'border-orange-500/40' : ''
-          }`}
-        >
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-xs font-medium text-orange-400 uppercase tracking-wider">
-              Trials a Vencer (7d)
-            </CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400">
-              <AlertTriangle className="w-4 h-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-black text-orange-400">
-              {loading ? '-' : (data?.trials_proximos_vencimento ?? 0)}
-            </div>
-            <p className="text-xs text-slate-400 mt-1">Oportunidades de conversão</p>
-          </CardContent>
-        </Card>
-
         {/* MRR Consolidado */}
         <Card className="bg-gradient-to-br from-slate-900 via-slate-900 to-sky-950/60 border-sky-500/30 shadow-md text-slate-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -202,62 +182,168 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-slate-400 mt-1">Receita recorrente mensal contratada</p>
           </CardContent>
         </Card>
+      </div>
 
-        {/* Assinaturas Ativas */}
-        <Card className="bg-slate-900/90 border-slate-800 shadow-sm text-slate-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-xs font-medium text-emerald-400 uppercase tracking-wider">
-              Assinaturas Ativas
-            </CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-black text-emerald-400">
-              {loading ? '-' : (data?.assinaturas_ativas ?? 0)}
-            </div>
-            <p className="text-xs text-slate-400 mt-1">Planos pagos ativos</p>
-          </CardContent>
-        </Card>
+      {/* Seção Financeira & Cobranças (Build 4 - Mercado Pago) */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between pb-1">
+          <div className="flex items-center gap-2">
+            <Receipt className="w-4 h-4 text-teal-400" />
+            <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+              Cobranças & Receita Real (Mercado Pago)
+            </h3>
+          </div>
+          <Link
+            to="/admin/transacoes"
+            className="text-xs text-sky-400 hover:text-sky-300 font-medium flex items-center gap-1"
+          >
+            Ver extrato completo de transações
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
 
-        {/* Assinaturas Atrasadas / Canceladas */}
-        <Card className="bg-slate-900/90 border-slate-800 shadow-sm text-slate-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-xs font-medium text-rose-400 uppercase tracking-wider">
-              Atrasadas / Canceladas
-            </CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400">
-              <XCircle className="w-4 h-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-black text-rose-400">
-              {loading
-                ? '-'
-                : `${data?.assinaturas_atrasadas ?? 0} / ${data?.assinaturas_canceladas ?? 0}`}
-            </div>
-            <p className="text-xs text-slate-400 mt-1">Inadimplência ou cancelamento</p>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Receita Total */}
+          <Card className="bg-slate-900/90 border-slate-800 shadow-sm text-slate-100">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-xs font-medium text-emerald-400 uppercase tracking-wider">
+                Receita Total
+              </CardTitle>
+              <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-black text-emerald-400">
+                {loading ? '-' : formatCurrency(data?.receita_total ?? 0)}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                {data?.transacoes_aprovadas ?? 0} pagamentos aprovados
+              </p>
+            </CardContent>
+          </Card>
 
-        {/* Total de Usuários Ativos */}
-        <Card className="bg-slate-900/90 border-slate-800 shadow-sm text-slate-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-xs font-medium text-indigo-400 uppercase tracking-wider">
-              Total de Usuários
-            </CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400">
-              <Users className="w-4 h-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-black text-indigo-400">
-              {loading ? '-' : (data?.total_usuarios ?? 0)}
-            </div>
-            <p className="text-xs text-slate-400 mt-1">Usuários ativos nas empresas</p>
-          </CardContent>
-        </Card>
+          {/* Receita do Mês */}
+          <Card className="bg-slate-900/90 border-slate-800 shadow-sm text-slate-100">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-xs font-medium text-teal-400 uppercase tracking-wider">
+                Receita do Mês
+              </CardTitle>
+              <div className="h-8 w-8 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-400">
+                <CircleDollarSign className="w-4 h-4" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-black text-teal-300">
+                {loading ? '-' : formatCurrency(data?.receita_mes ?? 0)}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">Mês atual liquidado</p>
+            </CardContent>
+          </Card>
+
+          {/* Pendentes */}
+          <Card className="bg-slate-900/90 border-slate-800 shadow-sm text-slate-100">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-xs font-medium text-amber-400 uppercase tracking-wider">
+                Pendentes
+              </CardTitle>
+              <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400">
+                <Clock className="w-4 h-4" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-black text-amber-400">
+                {loading ? '-' : (data?.transacoes_pendentes ?? 0)}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">Aguardando confirmação</p>
+            </CardContent>
+          </Card>
+
+          {/* Recusados */}
+          <Card className="bg-slate-900/90 border-slate-800 shadow-sm text-slate-100">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-xs font-medium text-rose-400 uppercase tracking-wider">
+                Recusados no Mês
+              </CardTitle>
+              <div className="h-8 w-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400">
+                <AlertTriangle className="w-4 h-4" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-black text-rose-400">
+                {loading ? '-' : (data?.transacoes_recusadas ?? 0)}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">Falhas de cobrança</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tabela de Últimas 10 Transações */}
+        {data?.ultimas_transacoes && data.ultimas_transacoes.length > 0 && (
+          <Card className="bg-slate-900/90 border-slate-800 shadow-sm text-slate-100 mt-4 overflow-hidden">
+            <CardHeader className="pb-3 border-b border-slate-800 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-sm font-bold text-white">
+                  Últimas Transações Recebidas
+                </CardTitle>
+                <p className="text-xs text-slate-400">Pagamentos mais recentes via Mercado Pago</p>
+              </div>
+              <Link to="/admin/transacoes">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-sky-400 hover:text-sky-300"
+                >
+                  Ver todas →
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent className="p-0 overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-slate-800 bg-slate-950/40 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
+                    <th className="py-2.5 px-4">Empresa</th>
+                    <th className="py-2.5 px-4">Plano</th>
+                    <th className="py-2.5 px-4">Valor</th>
+                    <th className="py-2.5 px-4">Método</th>
+                    <th className="py-2.5 px-4">Status</th>
+                    <th className="py-2.5 px-4 text-right">Data</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/40">
+                  {data.ultimas_transacoes.map((tx) => (
+                    <tr key={tx.id} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="py-2.5 px-4 font-medium text-white">{tx.empresa_nome}</td>
+                      <td className="py-2.5 px-4 text-slate-300">{tx.plano_nome}</td>
+                      <td className="py-2.5 px-4 font-bold text-white">
+                        {formatCurrency(tx.valor)}
+                      </td>
+                      <td className="py-2.5 px-4 capitalize text-slate-300">
+                        {tx.metodo_pagamento || 'PIX'}
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <Badge
+                          className={`text-[10px] font-semibold ${
+                            tx.status === 'aprovado'
+                              ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                              : tx.status === 'recusado'
+                                ? 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                                : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                          }`}
+                        >
+                          {tx.status}
+                        </Badge>
+                      </td>
+                      <td className="py-2.5 px-4 text-slate-400 text-right text-[11px]">
+                        {new Date(tx.created_at).toLocaleDateString('pt-BR')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Seção de Distribuição por Plano */}

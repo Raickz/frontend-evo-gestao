@@ -8,16 +8,35 @@ export interface AdminDashboardData {
   assinaturas_ativas: number
   assinaturas_atrasadas: number
   assinaturas_canceladas: number
-  distribuicao_por_plano: Array<{
+  total_usuarios: number
+  mrr: number
+  distribuicao_por_plano: {
     plano_id: string
     plano_nome: string
     slug: string
     quantidade: number
-  }>
-  total_usuarios: number
-  mrr: number
+  }[]
+  receita_total?: number
+  receita_mes?: number
+  transacoes_aprovadas?: number
+  transacoes_pendentes?: number
+  transacoes_recusadas?: number
+  ultimas_transacoes?: {
+    id: string
+    empresa_id: string
+    empresa_nome: string
+    empresa_nome_fantasia?: string
+    plano_id: string
+    plano_nome: string
+    plano_slug: string
+    valor: number
+    gateway: string
+    gateway_id?: string
+    metodo_pagamento?: string
+    status: string
+    created_at: string
+  }[]
 }
-
 export interface AdminEmpresaItem {
   id: string
   nome: string

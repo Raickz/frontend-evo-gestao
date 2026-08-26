@@ -5,6 +5,7 @@ import {
   Building2,
   Layers,
   Clock,
+  Receipt,
   LogOut,
   Menu,
   X,
@@ -37,6 +38,7 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { title: 'Dashboard', href: '/admin/dashboard', icon: BarChart3 },
   { title: 'Empresas', href: '/admin/empresas', icon: Building2 },
   { title: 'Planos', href: '/admin/planos', icon: Layers },
+  { title: 'Transações', href: '/admin/transacoes', icon: Receipt },
   { title: 'Histórico', href: '/admin/historico', icon: Clock },
 ]
 

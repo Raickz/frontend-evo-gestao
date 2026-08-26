@@ -17,9 +17,12 @@ import AdminDashboardPage from '@/pages/admin/Dashboard'
 import AdminEmpresasPage from '@/pages/admin/Empresas'
 import AdminPlanosPage from '@/pages/admin/Planos'
 import AdminHistoricoPage from '@/pages/admin/Historico'
+import AdminTransacoesPage from '@/pages/admin/Transacoes'
 
 // Pages
 import PlanosPage from '@/pages/Planos'
+import CheckoutPage from '@/pages/Checkout'
+import CheckoutSucessoPage from '@/pages/CheckoutSucesso'
 import SetupPage from '@/pages/Setup'
 import AuthPage from '@/pages/Auth'
 import DashboardPage from '@/pages/Dashboard'
@@ -113,6 +116,8 @@ const App = () => (
 
             {/* Página pública de Planos */}
             <Route path="/planos" element={<PlanosPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/checkout/sucesso" element={<CheckoutSucessoPage />} />
 
             {/* Setup público */}
             <Route path="/setup" element={<SetupPage />} />
@@ -133,9 +138,9 @@ const App = () => (
               <Route path="dashboard" element={<AdminDashboardPage />} />
               <Route path="empresas" element={<AdminEmpresasPage />} />
               <Route path="planos" element={<AdminPlanosPage />} />
+              <Route path="transacoes" element={<AdminTransacoesPage />} />
               <Route path="historico" element={<AdminHistoricoPage />} />
             </Route>
-
             {/* Protected App Shell */}
             <Route
               path="/app"

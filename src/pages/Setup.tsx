@@ -217,14 +217,17 @@ export default function SetupPage() {
         return
       }
 
-      // Sucesso
+      // Sucesso: Redireciona para o login com redirect para checkout do plano escolhido
       toast({
         title: 'Sucesso!',
-        description: 'Empresa configurada com sucesso! Faça login para continuar.',
+        description:
+          'Empresa configurada com sucesso! Faça login para ativar seu período de teste.',
         className: 'bg-emerald-700 text-white border-emerald-600',
       })
 
-      navigate('/auth', { replace: true })
+      navigate(`/auth?redirect=/checkout?plano=${selectedPlanoSlug || 'profissional'}`, {
+        replace: true,
+      })
     } catch {
       setErrorMessage('Não foi possível configurar o sistema. Verifique sua conexão.')
     } finally {

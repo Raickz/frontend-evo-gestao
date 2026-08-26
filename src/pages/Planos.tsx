@@ -27,9 +27,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { useAuth } from '@/hooks/use-auth'
 import { AssinaturasService, Plano } from '@/services/assinaturas'
 
 export default function PlanosPage() {
+  const { user } = useAuth()
   const [planos, setPlanos] = useState<Plano[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -234,7 +236,9 @@ export default function PlanosPage() {
               {planos.map((plano) => {
                 const isRecomendado = plano.slug === 'profissional'
                 const diasTeste = plano.periodo_teste_dias ?? 14
-                const linkSetup = plano.slug ? `/setup?plano=${plano.slug}` : '/setup'
+                const linkDestino = user
+                  ? `/checkout?plano=${plano.slug || 'profissional'}`
+                  : `/checkout?plano=${plano.slug || 'profissional'}`
 
                 let recursosList: string[] = []
                 if (Array.isArray(plano.recursos)) {
@@ -365,7 +369,7 @@ export default function PlanosPage() {
                             : 'bg-teal-600 hover:bg-teal-500 text-white shadow-teal-950/40'
                         }`}
                       >
-                        <Link to={linkSetup} className="flex items-center justify-center gap-2">
+                        <Link to={linkDestino} className="flex items-center justify-center gap-2">
                           <span>Começar agora</span>
                           <ArrowRight className="w-4 h-4" />
                         </Link>

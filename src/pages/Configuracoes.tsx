@@ -55,6 +55,9 @@ import {
   Calendar,
   Sparkles,
   AlertTriangle,
+  QrCode,
+  ArrowRight,
+  Receipt,
 } from 'lucide-react'
 import {
   AssinaturasService,
@@ -62,6 +65,8 @@ import {
   AssinaturaStatus,
   Plano,
 } from '@/services/assinaturas'
+import { PagamentosService, Transacao } from '@/services/pagamentos'
+import { Link } from 'react-router-dom'
 
 const PAGE_SIZE = 20
 
@@ -77,6 +82,7 @@ export default function ConfiguracoesPage() {
   // ABA PLANO E ASSINATURA (apenas Master / Admin)
   // =========================================================================
   const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
+  const [minhasTransacoes, setMinhasTransacoes] = useState<Transacao[]>([])
   const [loadingAssinatura, setLoadingAssinatura] = useState(true)
   const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
 
@@ -121,41 +127,50 @@ export default function ConfiguracoesPage() {
       inicioMes.setDate(1)
       inicioMes.setHours(0, 0, 0, 0)
 
-      const [assinaturaRes, usuariosRes, vendedoresRes, produtosRes, clientesRes, vendasMesRes] =
-        await Promise.all([
-          AssinaturasService.getByEmpresaId(empresaId),
-          supabase
-            .from('usuarios')
-            .select('id', { count: 'exact', head: true })
-            .eq('empresa_id', empresaId)
-            .eq('ativo', true),
-          supabase
-            .from('vendedores')
-            .select('id', { count: 'exact', head: true })
-            .eq('empresa_id', empresaId)
-            .eq('ativo', true),
-          supabase
-            .from('produtos')
-            .select('id', { count: 'exact', head: true })
-            .eq('empresa_id', empresaId)
-            .eq('ativo', true),
-          supabase
-            .from('clientes')
-            .select('id', { count: 'exact', head: true })
-            .eq('empresa_id', empresaId)
-            .eq('ativo', true),
-          supabase
-            .from('vendas')
-            .select('id', { count: 'exact', head: true })
-            .eq('empresa_id', empresaId)
-            .eq('status', 'finalizada')
-            .gte('created_at', inicioMes.toISOString()),
-          refreshStatus(),
-        ])
+      const [
+        assinaturaRes,
+        usuariosRes,
+        vendedoresRes,
+        produtosRes,
+        clientesRes,
+        vendasMesRes,
+        transacoesRes,
+      ] = await Promise.all([
+        AssinaturasService.getByEmpresaId(empresaId),
+        supabase
+          .from('usuarios')
+          .select('id', { count: 'exact', head: true })
+          .eq('empresa_id', empresaId)
+          .eq('ativo', true),
+        supabase
+          .from('vendedores')
+          .select('id', { count: 'exact', head: true })
+          .eq('empresa_id', empresaId)
+          .eq('ativo', true),
+        supabase
+          .from('produtos')
+          .select('id', { count: 'exact', head: true })
+          .eq('empresa_id', empresaId)
+          .eq('ativo', true),
+        supabase
+          .from('clientes')
+          .select('id', { count: 'exact', head: true })
+          .eq('empresa_id', empresaId)
+          .eq('ativo', true),
+        supabase
+          .from('vendas')
+          .select('id', { count: 'exact', head: true })
+          .eq('empresa_id', empresaId)
+          .eq('status', 'finalizada')
+          .gte('created_at', inicioMes.toISOString()),
+        PagamentosService.listMinhasTransacoes(),
+      ])
+
+      await refreshStatus()
 
       if (assinaturaRes.error) throw assinaturaRes.error
       setAssinatura(assinaturaRes.data)
-
+      setMinhasTransacoes(transacoesRes.data || [])
       setLimitesUso({
         usuarios: usuariosRes.count ?? 0,
         vendedores: vendedoresRes.count ?? 0,
@@ -1740,8 +1755,8 @@ export default function ConfiguracoesPage() {
                           </div>
                         </div>
 
-                        {/* Grade de Datas e Prazos */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        {/* Grade de Datas e Informações de Pagamento */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                           <div className="p-3.5 rounded-lg border border-slate-100 bg-slate-50/70 space-y-1">
                             <span className="text-slate-500 font-medium flex items-center gap-1.5">
                               <Calendar className="w-3.5 h-3.5 text-slate-400" />
@@ -1800,6 +1815,23 @@ export default function ConfiguracoesPage() {
                               </p>
                             </div>
                           )}
+
+                          <div className="p-3.5 rounded-lg border border-slate-100 bg-slate-50/70 space-y-1">
+                            <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                              <CreditCard className="w-3.5 h-3.5 text-slate-400" />
+                              Método de Pagamento
+                            </span>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              {assinatura.metodo_pagamento?.toLowerCase().includes('pix') ? (
+                                <QrCode className="w-4 h-4 text-teal-600" />
+                              ) : (
+                                <CreditCard className="w-4 h-4 text-blue-600" />
+                              )}
+                              <span className="text-sm font-semibold text-slate-800 capitalize">
+                                {assinatura.metodo_pagamento || 'Mercado Pago (PIX / Cartão)'}
+                              </span>
+                            </div>
+                          </div>
                         </div>
 
                         {/* Barra de Ações: Alterar Plano | Cancelar Assinatura | Reativar Assinatura */}
@@ -1809,6 +1841,23 @@ export default function ConfiguracoesPage() {
                             <span>Gerencie o plano e status da assinatura da sua empresa.</span>
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
+                            {/* Botão Pagar Agora se pendente, atrasada ou trial */}
+                            {(assinatura.status === 'pendente' ||
+                              assinatura.status === 'atrasada' ||
+                              assinatura.status === 'trial') && (
+                              <Link
+                                to={`/checkout?plano=${assinatura.planos?.slug || 'profissional'}`}
+                              >
+                                <Button
+                                  type="button"
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-8 px-3.5 shadow-xs flex items-center gap-1.5"
+                                >
+                                  <CreditCard className="w-3.5 h-3.5" />
+                                  Pagar Agora
+                                </Button>
+                              </Link>
+                            )}
+
                             {/* Alterar Plano - Sempre visível para Master/Admin */}
                             <Button
                               type="button"
@@ -1892,6 +1941,113 @@ export default function ConfiguracoesPage() {
                             </ul>
                           )
                         })()}
+                      </CardContent>
+                    </Card>
+
+                    {/* Card Histórico de Pagamentos (Build 4) */}
+                    <Card className="border border-slate-200 bg-white shadow-xs lg:col-span-3">
+                      <CardHeader className="border-b border-slate-100 pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-teal-700">
+                            <Receipt className="w-5 h-5" />
+                            <div>
+                              <CardTitle className="text-base font-bold text-slate-900">
+                                Histórico de Cobranças e Pagamentos
+                              </CardTitle>
+                              <CardDescription className="text-xs text-slate-500 mt-0.5">
+                                Faturas processadas e comprovantes de transação do Mercado Pago
+                              </CardDescription>
+                            </div>
+                          </div>
+                          {(assinatura.status === 'pendente' ||
+                            assinatura.status === 'atrasada' ||
+                            assinatura.status === 'trial') && (
+                            <Link
+                              to={`/checkout?plano=${assinatura.planos?.slug || 'profissional'}`}
+                            >
+                              <Button
+                                size="sm"
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-8 px-3 shadow-xs flex items-center gap-1.5"
+                              >
+                                <CreditCard className="w-3.5 h-3.5" />
+                                Pagar Agora
+                              </Button>
+                            </Link>
+                          )}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-0">
+                        {minhasTransacoes.length === 0 ? (
+                          <div className="p-8 text-center text-slate-500 text-xs">
+                            <Receipt className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                            <p>Nenhuma transação registrada até o momento.</p>
+                            <p className="text-slate-400 text-[11px] mt-0.5">
+                              Os pagamentos realizados aparecerão automaticamente aqui após a
+                              confirmação.
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs border-collapse">
+                              <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                                <tr>
+                                  <th className="py-3 px-4">Plano</th>
+                                  <th className="py-3 px-4">Valor</th>
+                                  <th className="py-3 px-4">Método</th>
+                                  <th className="py-3 px-4">Status</th>
+                                  <th className="py-3 px-4">ID Transação</th>
+                                  <th className="py-3 px-4 text-right">Data</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {minhasTransacoes.map((tx) => (
+                                  <tr
+                                    key={tx.id}
+                                    className="hover:bg-slate-50/70 transition-colors"
+                                  >
+                                    <td className="py-3 px-4 font-semibold text-slate-800">
+                                      {tx.plano_nome || tx.plano_slug || 'Assinatura Mensal'}
+                                    </td>
+                                    <td className="py-3 px-4 font-bold text-slate-900">
+                                      {formatCurrency(tx.valor)}
+                                    </td>
+                                    <td className="py-3 px-4">
+                                      <div className="flex items-center gap-1.5 capitalize text-slate-700">
+                                        {tx.metodo_pagamento?.toLowerCase().includes('pix') ? (
+                                          <QrCode className="w-3.5 h-3.5 text-teal-600" />
+                                        ) : (
+                                          <CreditCard className="w-3.5 h-3.5 text-blue-600" />
+                                        )}
+                                        <span>{tx.metodo_pagamento || 'Mercado Pago'}</span>
+                                      </div>
+                                    </td>
+                                    <td className="py-3 px-4">
+                                      {tx.status === 'aprovado' ? (
+                                        <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] font-semibold">
+                                          <Check className="w-3 h-3 mr-1" /> Aprovado
+                                        </Badge>
+                                      ) : tx.status === 'recusado' ? (
+                                        <Badge className="bg-rose-50 text-rose-700 border-rose-200 text-[10px] font-semibold">
+                                          Recusado
+                                        </Badge>
+                                      ) : (
+                                        <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] font-semibold">
+                                          <Clock className="w-3 h-3 mr-1" /> Pendente
+                                        </Badge>
+                                      )}
+                                    </td>
+                                    <td className="py-3 px-4 font-mono text-slate-500 text-[11px]">
+                                      {tx.gateway_id || tx.id.slice(0, 8)}
+                                    </td>
+                                    <td className="py-3 px-4 text-slate-600 text-right text-[11px]">
+                                      {formatDate(tx.created_at)}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
 
