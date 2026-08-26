@@ -1,6 +1,6 @@
 {
   "_versions": {
-    "admin-create-user": 30,
-    "bootstrap-install": 29
+    "admin-create-user": 32,
+    "bootstrap-install": 31
   }
 }

@@ -57,219 +57,10 @@ import {
 } from 'lucide-react'
 import { AssinaturasService, AssinaturaComPlano, AssinaturaStatus } from '@/services/assinaturas'
 
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)=========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{=========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)=========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{=========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-    usuarios: number
-    vendedores: number
-    produtos: number
-    clientes: number
-    vendasMes: number
-  }>({
-    usuarios: 0,
-    vendedores: 0,
-    produtos: 0,
-    clientes: 0,
-    vendasMes: 0,
-  })
-=======
-export default function ConfiguracoesPage() {
-  const { empresaId, empresa, refreshEmpresa } = useEmpresa()
-  const { user, usuario: usuarioLogado } = useAuth()
-
-  const perfilLogado = (usuarioLogado?.perfil || '').toLowerCase()
-  const isMasterOrAdmin = perfilLogado === 'master' || perfilLogado === 'admin'
-  const isMaster = perfilLogado === 'master'
-
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-    usuarios: number
-    vendedores: number
-    produtos: number
-    clientes: number
-    vendasMes: number
-  }>({
-    usuarios: 0,
-    vendedores: 0,
-    produtos: 0,
-    clientes: 0,
-    vendasMes: 0,
-  })
-=======
 const PAGE_SIZE = 20
 
 export default function ConfiguracoesPage() {
-  const { empresaId, empresa, refreshEmpresa } = useEmpresa()
+  const { empresaId, empresa, refreshEmpresa, statusAssinatura, refreshStatus } = useEmpresa()
   const { user, usuario: usuarioLogado } = useAuth()
 
   const perfilLogado = (usuarioLogado?.perfil || '').toLowerCase()
@@ -279,578 +70,10 @@ export default function ConfiguracoesPage() {
   // =========================================================================
   // ABA PLANO E ASSINATURA (apenas Master / Admin)
   // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
   const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
   const [loadingAssinatura, setLoadingAssinatura] = useState(true)
   const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
   const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-    usuarios: number
-    vendedores: number
-    produtos: number
-    clientes: number
-    vendasMes: number
-  }>({
-    usuarios: 0,
-    vendedores: 0,
-    produtos: 0,
-    clientes: 0,
-    vendasMes: 0,
-  })=========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)=========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{=========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)=========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{=========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-    usuarios: number
-    vendedores: number
-    produtos: number
-    clientes: number
-    vendasMes: number
-  }>({
-    usuarios: 0,
-    vendedores: 0,
-    produtos: 0,
-    clientes: 0,
-    vendasMes: 0,
-  })
-=======
-export default function ConfiguracoesPage() {
-  const { empresaId, empresa, refreshEmpresa } = useEmpresa()
-  const { user, usuario: usuarioLogado } = useAuth()
-
-  const perfilLogado = (usuarioLogado?.perfil || '').toLowerCase()
-  const isMasterOrAdmin = perfilLogado === 'master' || perfilLogado === 'admin'
-  const isMaster = perfilLogado === 'master'
-
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-    usuarios: number
-    vendedores: number
-    produtos: number
-    clientes: number
-    vendasMes: number
-  }>({
-    usuarios: 0,
-    vendedores: 0,
-    produtos: 0,
-    clientes: 0,
-    vendasMes: 0,
-  })
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)=========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{=========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)=========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{=========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-    usuarios: number
-    vendedores: number
-    produtos: number
-    clientes: number
-    vendasMes: number
-  }>({
-    usuarios: 0,
-    vendedores: 0,
-    produtos: 0,
-    clientes: 0,
-    vendasMes: 0,
-  })=========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)=========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{=========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)=========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-  const [limitesUso, setLimitesUso] = useState<{=========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-
-  // Contagens de uso atual para a aba Plano & Assinatura
-=======
-  // =========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const { statusAssinatura, loadingStatus: loadingStatusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
-  const [modalRegularizarOpen, setModalRegularizarOpen] = useState(false)
-
-  // Contagens de uso atual para a aba Plano & Assinatura=========================================================================
-  // ABA PLANO E ASSINATURA (apenas Master / Admin)
-  // =========================================================================
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-  const [errorAssinatura, setErrorAssinatura] = useState<string | null>(null)
 
   // Contagens de uso atual para a aba Plano & Assinatura
   const [limitesUso, setLimitesUso] = useState<{
@@ -930,7 +153,7 @@ export default function ConfiguracoesPage() {
     } finally {
       setLoadingAssinatura(false)
     }
-  }, [empresaId, isMasterOrAdmin])
+  }, [empresaId, isMasterOrAdmin, refreshStatus])
 
   useEffect(() => {
     if (isMasterOrAdmin) {
@@ -2476,7 +1699,8 @@ export default function ConfiguracoesPage() {
                           <div className="flex items-center gap-2.5 text-slate-600">
                             <HelpCircle className="w-4 h-4 shrink-0 text-teal-600" />
                             <span>
-                              As assinaturas e limites operacionais são gerenciados pelo suporte EVO Gestão.
+                              As assinaturas e limites operacionais são gerenciados pelo suporte EVO
+                              Gestão.
                             </span>
                           </div>
                           <Button
@@ -2487,6 +1711,52 @@ export default function ConfiguracoesPage() {
                             Regularizar Assinatura
                           </Button>
                         </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Card de Recursos Inclusos do Plano */}
+                    <Card className="border border-slate-200 bg-white shadow-xs">
+                      <CardHeader className="border-b border-slate-100 pb-3">
+                        <div className="flex items-center gap-2 text-teal-700">
+                          <Sparkles className="w-5 h-5" />
+                          <CardTitle className="text-base font-bold text-slate-900">
+                            Recursos do Plano
+                          </CardTitle>
+                        </div>
+                        <CardDescription className="text-xs text-slate-500">
+                          Benefícios disponíveis no plano {assinatura.planos?.nome || ''}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="pt-4 space-y-3">
+                        {(() => {
+                          const recursos = Array.isArray(assinatura.planos?.recursos)
+                            ? (assinatura.planos.recursos as string[])
+                            : []
+
+                          if (recursos.length === 0) {
+                            return (
+                              <p className="text-xs text-slate-400 italic">
+                                Nenhum recurso detalhado para este plano.
+                              </p>
+                            )
+                          }
+
+                          return (
+                            <ul className="space-y-2.5">
+                              {recursos.map((rec, idx) => (
+                                <li
+                                  key={idx}
+                                  className="flex items-start gap-2.5 text-xs text-slate-700"
+                                >
+                                  <div className="h-4 w-4 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
+                                    <Check className="w-3 h-3" />
+                                  </div>
+                                  <span className="leading-snug">{rec}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )
+                        })()}
                       </CardContent>
                     </Card>
 
@@ -2639,52 +1909,6 @@ export default function ConfiguracoesPage() {
                             )
                           })}
                         </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Card de Recursos Inclusos do Plano */}
-                    <Card className="border border-slate-200 bg-white shadow-xs">
-                      <CardHeader className="border-b border-slate-100 pb-3">
-                        <div className="flex items-center gap-2 text-teal-700">
-                          <Sparkles className="w-5 h-5" />
-                          <CardTitle className="text-base font-bold text-slate-900">
-                            Recursos do Plano
-                          </CardTitle>
-                        </div>
-                        <CardDescription className="text-xs text-slate-500">
-                          Benefícios disponíveis no plano {assinatura.planos?.nome || ''}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-4 space-y-3">
-                        {(() => {
-                          const recursos = Array.isArray(assinatura.planos?.recursos)
-                            ? (assinatura.planos.recursos as string[])
-                            : []
-
-                          if (recursos.length === 0) {
-                            return (
-                              <p className="text-xs text-slate-400 italic">
-                                Nenhum recurso detalhado para este plano.
-                              </p>
-                            )
-                          }
-
-                          return (
-                            <ul className="space-y-2.5">
-                              {recursos.map((rec, idx) => (
-                                <li
-                                  key={idx}
-                                  className="flex items-start gap-2.5 text-xs text-slate-700"
-                                >
-                                  <div className="h-4 w-4 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
-                                    <Check className="w-3 h-3" />
-                                  </div>
-                                  <span className="leading-snug">{rec}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          )
-                        })()}
                       </CardContent>
                     </Card>
                   </div>
@@ -3201,7 +2425,8 @@ export default function ConfiguracoesPage() {
                 Planos e Assinaturas EVO Gestão
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-500">
-                A contratação de planos estará disponível em breve. Entre em contato com o suporte EVO Gestão para regularizar sua assinatura.
+                A contratação de planos estará disponível em breve. Entre em contato com o suporte
+                EVO Gestão para regularizar sua assinatura.
               </DialogDescription>
             </DialogHeader>
 
@@ -3211,12 +2436,15 @@ export default function ConfiguracoesPage() {
                   Deseja ativar ou migrar seu plano comercial?
                 </p>
                 <p className="text-slate-600">
-                  Nossos consultores estão prontos para ajudar sua distribuidora a desbloquear todos os recursos e limites adequados à sua operação.
+                  Nossos consultores estão prontos para ajudar sua distribuidora a desbloquear todos
+                  os recursos e limites adequados à sua operação.
                 </p>
               </div>
               <div className="p-3 rounded-lg border border-slate-100 bg-slate-50 flex items-center justify-between">
                 <span className="text-slate-500 font-medium">Canal de Atendimento:</span>
-                <span className="font-mono font-semibold text-slate-900">suporte@evogestao.com.br</span>
+                <span className="font-mono font-semibold text-slate-900">
+                  suporte@evogestao.com.br
+                </span>
               </div>
             </div>
 

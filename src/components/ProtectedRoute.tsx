@@ -10,10 +10,10 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading, sessionChecked } = useAuth()
+  const { user, loading } = useAuth()
   const { loading: loadingEmpresa } = useEmpresa()
 
-  if (loading || !sessionChecked || loadingEmpresa) {
+  if (loading || loadingEmpresa) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0E1B2C]">
         <div className="flex flex-col items-center gap-4">
@@ -52,3 +52,5 @@ export function PageAccessGuard({ children, page }: PageAccessGuardProps) {
 
   return <>{children}</>
 }
+
+export const RoleRouteGuard = PageAccessGuard

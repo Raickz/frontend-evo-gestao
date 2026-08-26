@@ -32,6 +32,7 @@ import {
 import { useAuth } from '@/hooks/use-auth'
 import { useEmpresa } from '@/hooks/use-empresa'
 import { formatPerfilBadge, canAccessPage, AppPage } from '@/lib/permissions'
+import AssinaturaBloqueadaPage from '@/pages/AssinaturaBloqueada'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -422,7 +423,11 @@ export default function Layout() {
 
         {/* Page Main Content with smooth fade */}
         <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl w-full mx-auto animate-fade-in-up">
-          <Outlet />
+          {trialExpiradoOuBloqueado ? (
+            <AssinaturaBloqueadaPage onVerPlanos={() => setModalSuporteOpen(true)} />
+          ) : (
+            <Outlet />
+          )}
         </main>
       </div>
 
