@@ -1,4 +1,4 @@
-export type UserRole = 'master' | 'admin' | 'gerente' | 'vendedor' | 'operador'
+export type UserRole = 'master' | 'admin' | 'gerente' | 'vendedor' | 'operador' | 'platform_admin'
 
 export type AppPage =
   | 'dashboard'
@@ -26,6 +26,22 @@ export type AppPage =
  * OPERADOR: Produtos, Estoque
  */
 export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
+  platform_admin: [
+    'dashboard',
+    'relatorios',
+    'relatorio_lucro',
+    'clientes',
+    'produtos',
+    'fornecedores',
+    'compras',
+    'estoque',
+    'vendas',
+    'pedidos',
+    'financeiro',
+    'vendedores',
+    'comissoes',
+    'configuracoes',
+  ],
   master: [
     'dashboard',
     'relatorios',
@@ -103,7 +119,9 @@ export const PATH_TO_PAGE_MAP: Record<string, AppPage> = {
 export function normalizeRole(perfil: string | null | undefined): UserRole | null {
   if (!perfil) return null
   const normalized = perfil.toLowerCase().trim()
-  if (['master', 'admin', 'gerente', 'vendedor', 'operador'].includes(normalized)) {
+  if (
+    ['master', 'admin', 'gerente', 'vendedor', 'operador', 'platform_admin'].includes(normalized)
+  ) {
     return normalized as UserRole
   }
   return null
@@ -115,7 +133,7 @@ export function normalizeRole(perfil: string | null | undefined): UserRole | nul
 export function canAccessPage(perfil: string | null | undefined, page: AppPage | string): boolean {
   const role = normalizeRole(perfil)
   if (!role) return false
-  if (role === 'master') return true
+  if (role === 'master' || role === 'platform_admin') return true
 
   const targetPage: AppPage | undefined =
     (PATH_TO_PAGE_MAP[page] as AppPage) ||
@@ -142,6 +160,8 @@ export function getAllowedPages(perfil?: string | null): readonly AppPage[] {
 export function formatPerfilBadge(perfil?: string | null): { label: string; color: string } {
   const role = normalizeRole(perfil)
   switch (role) {
+    case 'platform_admin':
+      return { label: 'Plataforma', color: 'bg-sky-100 text-sky-700 border-sky-200' }
     case 'master':
       return { label: 'Master', color: 'bg-purple-100 text-purple-700 border-purple-200' }
     case 'admin':

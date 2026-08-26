@@ -58,7 +58,7 @@ export function EmpresaProvider({ children }: { children: ReactNode }) {
   }, [usuario?.empresa_id])
 
   const fetchEmpresa = useCallback(async () => {
-    if (!usuario?.empresa_id) {
+    if (!usuario || !usuario.empresa_id) {
       setEmpresa(null)
       setStatusAssinatura(null)
       setLoading(false)

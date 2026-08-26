@@ -3,7 +3,14 @@ import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase/client'
 import type { Tables } from '@/lib/supabase/types'
 
-export type UsuarioPerfil = 'master' | 'admin' | 'gerente' | 'vendedor' | 'operador' | string
+export type UsuarioPerfil =
+  | 'master'
+  | 'admin'
+  | 'gerente'
+  | 'vendedor'
+  | 'operador'
+  | 'platform_admin'
+  | string
 
 export interface Usuario extends Tables<'usuarios'> {}
 
@@ -53,10 +60,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return
         }
 
+        if (usuarioData.perfil === 'platform_admin') {
+          setEmpresaId(null)
+          return
+        }
+
         // Fallback para get_my_empresa_id() caso empresa_id não venha preenchido
         const { data: rpcEmpresaId, error: rpcErr } = await supabase.rpc('get_my_empresa_id')
         if (!rpcErr && rpcEmpresaId) {
           setEmpresaId(rpcEmpresaId)
+          return
+        } else {
+          setEmpresaId(null)
           return
         }
       }

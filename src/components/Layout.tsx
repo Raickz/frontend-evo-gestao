@@ -225,6 +225,28 @@ export default function Layout() {
 
         {/* Navigation Links */}
         <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6 custom-scrollbar">
+          {/* Link de Retorno ao Painel Admin para platform_admin */}
+          {usuario?.perfil === 'platform_admin' && (
+            <div className="space-y-1">
+              {!collapsed ? (
+                <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-sky-400 mb-2">
+                  Plataforma
+                </p>
+              ) : (
+                <div className="h-px bg-slate-800 my-2 mx-1" />
+              )}
+              <Link
+                to="/admin/dashboard"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all bg-sky-950/70 text-sky-400 border border-sky-800/60 hover:bg-sky-900/50 hover:text-sky-300"
+                title={collapsed ? 'Painel Admin' : undefined}
+              >
+                <ShieldCheck className="w-5 h-5 shrink-0 text-sky-400" />
+                {!collapsed && <span className="truncate">Painel Admin</span>}
+              </Link>
+            </div>
+          )}
+
           {visibleNavSections.map((section) => (
             <div key={section.title} className="space-y-1">
               {!collapsed ? (
@@ -399,6 +421,18 @@ export default function Layout() {
                     </div>
                   </div>
                 </DropdownMenuLabel>
+                {usuario?.perfil === 'platform_admin' && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => navigate('/admin/dashboard')}
+                      className="text-sky-600 font-semibold cursor-pointer"
+                    >
+                      <ShieldCheck className="w-4 h-4 mr-2" />
+                      Painel da Plataforma
+                    </DropdownMenuItem>
+                  </>
+                )}
                 {canAccessSettings && (
                   <>
                     <DropdownMenuSeparator />

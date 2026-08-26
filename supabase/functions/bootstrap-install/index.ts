@@ -477,6 +477,23 @@ Deno.serve(async (req: Request) => {
       status: 'trial',
     })
 
+    if (!insertAssinaturaError) {
+      // Registrar criação e início do trial no log_assinaturas
+      try {
+        await supabaseAdmin.from('log_assinaturas').insert({
+          empresa_id: createdEmpresaId,
+          plano_anterior_id: null,
+          plano_novo_id: planoEscolhido.id,
+          valor_anterior: null,
+          valor_novo: planoEscolhido.valor_mensal,
+          tipo: 'trial_inicio',
+          usuario_responsavel_id: usuarioInserido.id,
+        })
+      } catch (logErr) {
+        console.warn('bootstrap-install: Falha ao gravar log_assinaturas', logErr)
+      }
+    }
+
     if (insertAssinaturaError) {
       console.error('bootstrap-install: Criação de assinatura falhou', insertAssinaturaError)
 

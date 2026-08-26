@@ -9,6 +9,14 @@ import { EmpresaProvider } from '@/hooks/use-empresa'
 import { ProtectedRoute, RoleRouteGuard } from '@/components/ProtectedRoute'
 import { Building2, Loader2 } from 'lucide-react'
 import Layout from '@/components/Layout'
+import AdminLayout from '@/components/AdminLayout'
+import { AdminProtectedRoute } from '@/components/AdminProtectedRoute'
+
+// Admin Pages
+import AdminDashboardPage from '@/pages/admin/Dashboard'
+import AdminEmpresasPage from '@/pages/admin/Empresas'
+import AdminPlanosPage from '@/pages/admin/Planos'
+import AdminHistoricoPage from '@/pages/admin/Historico'
 
 // Pages
 import PlanosPage from '@/pages/Planos'
@@ -111,6 +119,22 @@ const App = () => (
 
             {/* Auth screen */}
             <Route path="/auth" element={<AuthPage />} />
+
+            {/* Rotas Administrativas da Plataforma (Platform Admin) */}
+            <Route
+              path="/admin"
+              element={
+                <AdminProtectedRoute>
+                  <AdminLayout />
+                </AdminProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboardPage />} />
+              <Route path="empresas" element={<AdminEmpresasPage />} />
+              <Route path="planos" element={<AdminPlanosPage />} />
+              <Route path="historico" element={<AdminHistoricoPage />} />
+            </Route>
 
             {/* Protected App Shell */}
             <Route
