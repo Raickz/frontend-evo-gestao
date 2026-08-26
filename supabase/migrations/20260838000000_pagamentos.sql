@@ -316,21 +316,33 @@ begin
     where status in ('ativa', 'trial', 'pendente', 'atrasada');
 
     -- Distribuição por plano
+    with contagem as (
+        select
+            p.id,
+            p.nome,
+            p.slug,
+            p.ordem,
+            count(a.id) as quantidade
+        from public.planos p
+        left join public.assinaturas a
+            on a.plano_id = p.id
+            and a.status in ('ativa', 'trial')
+        group by p.id, p.nome, p.slug, p.ordem
+    )
     select coalesce(
         jsonb_agg(
             jsonb_build_object(
-                'plano_id', p.id,
-                'plano_nome', p.nome,
-                'slug', p.slug,
-                'quantidade', count(a.id)
+                'plano_id', c.id,
+                'plano_nome', c.nome,
+                'slug', c.slug,
+                'quantidade', c.quantidade
             )
+            order by c.ordem asc
         ),
         '[]'::jsonb
-    ) into v_distribuicao
-    from public.planos p
-    left join public.assinaturas a on a.plano_id = p.id and a.status in ('ativa', 'trial')
-    group by p.id, p.nome, p.slug, p.ordem
-    order by p.ordem asc;
+    )
+    into v_distribuicao
+    from contagem c;
 
     -- Métricas Financeiras
     v_inicio_mes := date_trunc('month', now());
