@@ -105,6 +105,7 @@ export default function DashboardPage() {
   const [checklistDismissed, setChecklistDismissed] = useState(false)
 
   // Assinatura do usuário / empresa
+  const { statusAssinatura, loadingStatus: loadingAssinaturaStatus, refreshStatus } = useEmpresa()
   const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
   const [loadingAssinatura, setLoadingAssinatura] = useState(true)
 
@@ -132,6 +133,7 @@ export default function DashboardPage() {
     try {
       const { data: assData } = await AssinaturasService.getByEmpresaId(empresaId)
       setAssinatura(assData)
+      await refreshStatus()
     } catch (err) {
       if (import.meta.env.DEV) {
         console.error('Erro ao carregar assinatura no Dashboard:', err)
@@ -139,7 +141,7 @@ export default function DashboardPage() {
     } finally {
       setLoadingAssinatura(false)
     }
-  }, [empresaId, isMasterOrAdmin])
+  }, [empresaId, isMasterOrAdmin, refreshStatus])
 
   // Recuperar estado dismissível de checklist completo do localStorage
   useEffect(() => {
@@ -449,34 +451,78 @@ export default function DashboardPage() {
       />
 
       {/* Card de Status da Assinatura & Uso do Plano (Apenas Master/Admin) */}
-      {isMasterOrAdmin && !loadingAssinatura && assinatura && (
+      {isMasterOrAdmin && !loadingAssinatura && (
         <div className="space-y-4">
           {(() => {
-            const planoNome = assinatura.planos?.nome || 'Profissional'
-            const status = assinatura.status
+            const planoNome =
+              statusAssinatura?.plano_nome || assinatura?.planos?.nome || 'Profissional'
+            const status = statusAssinatura?.status || assinatura?.status || 'trial'
+            const acessoPermitido = statusAssinatura ? statusAssinatura.acesso_permitido : true
+
+            // Caso especial: Bloqueio (Trial expirado, cancelada, bloqueada, ou sem assinatura)
+            if (!acessoPermitido) {
+              const isTrial = status === 'trial'
+              return (
+                <Card className="rounded-xl border border-rose-200 bg-rose-50/40 shadow-xs p-4 sm:p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-start sm:items-center gap-3.5">
+                      <div className="h-10 w-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+                        <ShieldAlert className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-sm font-bold text-slate-900">
+                            Plano {planoNome}
+                          </span>
+                          <span className="text-slate-400 text-xs">·</span>
+                          <Badge
+                            variant="outline"
+                            className="text-[11px] font-bold py-0.5 px-2 bg-rose-100 text-rose-800 border-rose-300"
+                          >
+                            {isTrial ? 'Expirado' : 'Assinatura Inativa'}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-rose-900/90 font-medium mt-1">
+                          {isTrial
+                            ? 'Seu período de teste terminou. O sistema está em modo somente leitura (todos os dados estão preservados).'
+                            : statusAssinatura?.motivo_bloqueio ||
+                              'Sua assinatura requer regularização.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Link to="/app/configuracoes" className="shrink-0 self-end sm:self-auto">
+                      <Button
+                        size="sm"
+                        className="h-8 text-xs bg-rose-600 hover:bg-rose-700 text-white font-bold flex items-center gap-1.5 shadow-xs"
+                      >
+                        Regularizar Assinatura
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Button>
+                    </Link>
+                  </div>
+                </Card>
+              )
+            }
 
             if (status === 'trial') {
-              const diasRestantes = calcularDiasRestantesTrial(assinatura.fim_periodo_teste)
-              const isVencido = diasRestantes <= 0
-              const isUrgente = diasRestantes <= 5 && !isVencido
+              const diasRestantes =
+                statusAssinatura?.dias_restantes !== undefined
+                  ? statusAssinatura.dias_restantes
+                  : calcularDiasRestantesTrial(assinatura?.fim_periodo_teste)
+              const isUrgente = diasRestantes <= 5
 
-              const badgeColor = isVencido
-                ? 'bg-rose-100 text-rose-800 border-rose-200'
-                : isUrgente
-                  ? 'bg-amber-100 text-amber-800 border-amber-300'
-                  : 'bg-teal-100 text-teal-800 border-teal-200'
+              const badgeColor = isUrgente
+                ? 'bg-amber-100 text-amber-800 border-amber-300'
+                : 'bg-teal-100 text-teal-800 border-teal-200'
 
-              const borderColor = isVencido
-                ? 'border-rose-200 bg-rose-50/20'
-                : isUrgente
-                  ? 'border-amber-200 bg-amber-50/20'
-                  : 'border-slate-200 bg-white'
+              const borderColor = isUrgente
+                ? 'border-amber-200 bg-amber-50/20'
+                : 'border-slate-200 bg-white'
 
-              const iconColor = isVencido
-                ? 'bg-rose-100 text-rose-700'
-                : isUrgente
-                  ? 'bg-amber-100 text-amber-700'
-                  : 'bg-teal-50 text-teal-700'
+              const iconColor = isUrgente
+                ? 'bg-amber-100 text-amber-700'
+                : 'bg-teal-50 text-teal-700'
 
               return (
                 <Card className={`rounded-xl border ${borderColor} shadow-xs p-3.5 sm:p-4`}>
@@ -500,11 +546,7 @@ export default function DashboardPage() {
                             variant="outline"
                             className={`text-[11px] font-semibold py-0.5 px-2 ${badgeColor}`}
                           >
-                            {isVencido
-                              ? 'Teste expirado'
-                              : diasRestantes === 1
-                                ? 'Resta 1 dia'
-                                : `Restam ${diasRestantes} dias`}
+                            {diasRestantes === 1 ? 'Resta 1 dia' : `Restam ${diasRestantes} dias`}
                           </Badge>
                         </div>
                         <p className="text-xs text-slate-500 mt-0.5">
@@ -570,7 +612,7 @@ export default function DashboardPage() {
               )
             }
 
-            // Outros status: pendente, atrasada, cancelada, bloqueada
+            // Outros status: pendente, atrasada
             const statusConfigMap: Record<
               string,
               { label: string; badge: string; icon: any; iconStyle: string }
@@ -586,18 +628,6 @@ export default function DashboardPage() {
                 badge: 'bg-orange-50 text-orange-800 border-orange-200',
                 icon: AlertTriangle,
                 iconStyle: 'bg-orange-50 text-orange-700',
-              },
-              cancelada: {
-                label: 'Assinatura cancelada',
-                badge: 'bg-rose-50 text-rose-800 border-rose-200',
-                icon: ShieldAlert,
-                iconStyle: 'bg-rose-50 text-rose-700',
-              },
-              bloqueada: {
-                label: 'Acesso bloqueado',
-                badge: 'bg-slate-100 text-slate-800 border-slate-300',
-                icon: ShieldAlert,
-                iconStyle: 'bg-slate-100 text-slate-700',
               },
             }
 

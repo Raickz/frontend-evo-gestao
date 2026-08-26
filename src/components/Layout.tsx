@@ -25,6 +25,9 @@ import {
   Layers,
   Briefcase,
   TrendingUp,
+  AlertTriangle,
+  Clock,
+  Sparkles,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useEmpresa } from '@/hooks/use-empresa'
@@ -39,6 +42,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { PhoneCall } from 'lucide-react'
 
 interface NavItem {
   title: string
@@ -133,6 +145,9 @@ export default function Layout() {
     return 'EVO Gestão'
   }
 
+  const { statusAssinatura, loadingStatus, acessoPermitido } = useEmpresa()
+  const [modalSuporteOpen, setModalSuporteOpen] = useState(false)
+
   const userInitials = usuario?.nome
     ? usuario.nome
         .split(' ')
@@ -143,6 +158,8 @@ export default function Layout() {
     : 'EV'
 
   const empresaNome = empresa?.nome_fantasia || empresa?.nome || 'EVO Gestão'
+
+  const trialExpiradoOuBloqueado = !loadingStatus && statusAssinatura && !acessoPermitido
 
   return (
     <div className="flex min-h-screen bg-[#F5F7FB] text-[#0F172A] font-sans antialiased">
@@ -294,6 +311,30 @@ export default function Layout() {
           collapsed ? 'lg:pl-[76px]' : 'lg:pl-[260px]'
         }`}
       >
+        {/* Banner de Aviso de Assinatura / Trial Expirado no Topo */}
+        {trialExpiradoOuBloqueado && (
+          <div className="bg-gradient-to-r from-rose-600 via-rose-500 to-amber-600 text-white px-4 py-2.5 text-xs font-medium shadow-sm flex items-center justify-between gap-3 sticky top-0 z-40">
+            <div className="flex items-center gap-2 min-w-0">
+              <Clock className="w-4 h-4 shrink-0 text-white animate-pulse" />
+              <span className="truncate">
+                <strong className="font-bold">Modo Somente Leitura:</strong> Seu período de teste
+                terminou. Seus dados estão salvos, mas ações de cadastro e escrita estão bloqueadas.
+              </span>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => setModalSuporteOpen(true)}
+                className="h-7 px-2.5 text-[11px] bg-white text-rose-700 hover:bg-rose-50 font-bold shadow-xs flex items-center gap-1"
+              >
+                <Sparkles className="w-3 h-3 text-amber-500" />
+                Regularizar Assinatura
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Top Header */}
         <header className="sticky top-0 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-3">
@@ -384,6 +425,63 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Modal Informativo Global de Suporte EVO Gestão */}
+      <Dialog open={modalSuporteOpen} onOpenChange={setModalSuporteOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="h-10 w-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center mb-2">
+              <PhoneCall className="w-5 h-5" />
+            </div>
+            <DialogTitle className="text-base font-bold text-slate-900">
+              Contratação de Planos EVO Gestão
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              A contratação de planos estará disponível em breve. Entre em contato com o suporte EVO
+              Gestão para regularizar sua assinatura.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-3 text-xs space-y-3">
+            <div className="p-3.5 rounded-xl border border-teal-100 bg-teal-50/50 space-y-1.5">
+              <p className="font-semibold text-teal-900">
+                Fale com nossa equipe comercial e de suporte
+              </p>
+              <p className="text-slate-600">
+                Regularize sua conta para reabilitar imediatamente as funções de cadastro de
+                produtos, clientes, emissão de vendas e movimentações.
+              </p>
+            </div>
+            <div className="p-3 rounded-lg border border-slate-100 bg-slate-50 flex items-center justify-between">
+              <span className="text-slate-500 font-medium">E-mail:</span>
+              <span className="font-mono font-semibold text-slate-900">
+                suporte@evogestao.com.br
+              </span>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setModalSuporteOpen(false)}
+              className="text-xs"
+            >
+              Fechar
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                setModalSuporteOpen(false)
+                navigate('/app/configuracoes')
+              }}
+              className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold"
+            >
+              Ver Detalhes do Plano
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

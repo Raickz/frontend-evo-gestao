@@ -43,7 +43,28 @@ export interface AssinaturaComPlano {
   planos?: Plano | null
 }
 
+export interface StatusAssinatura {
+  status: string
+  plano_nome: string | null
+  plano_slug: string | null
+  fim_periodo_teste: string | null
+  dias_restantes: number
+  acesso_permitido: boolean
+  motivo_bloqueio: string | null
+}
+
 export const AssinaturasService = {
+  /**
+   * Obtém o status consolidado da assinatura da empresa via RPC centralizada get_status_assinatura()
+   */
+  async getStatus(): Promise<{ data: StatusAssinatura | null; error: any }> {
+    const { data, error } = await supabase.rpc('get_status_assinatura')
+    if (error) {
+      return { data: null, error }
+    }
+    return { data: data as unknown as StatusAssinatura, error: null }
+  },
+
   /**
    * Obtém a assinatura da empresa logada com dados do plano vinculado
    */

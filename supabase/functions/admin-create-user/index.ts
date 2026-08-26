@@ -87,6 +87,30 @@ Deno.serve(async (req: Request) => {
       },
     })
 
+    // Validar status da assinatura da empresa
+    const { data: statusAssinatura, error: statusAssError } =
+      await supabaseUser.rpc('get_status_assinatura')
+
+    if (
+      statusAssError ||
+      !statusAssinatura ||
+      (statusAssinatura as any).acesso_permitido !== true
+    ) {
+      const motivo =
+        (statusAssinatura as any)?.motivo_bloqueio ||
+        'Seu período de teste terminou. Para continuar utilizando o EVO Gestão, acesse a página de planos e escolha uma assinatura.'
+      return new Response(
+        JSON.stringify({
+          sucesso: false,
+          erro: motivo,
+        }),
+        {
+          status: 403,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        },
+      )
+    }
+
     // Consultar perfil e empresa_id do usuário que está chamando
     const { data: usuarioCaller, error: callerFetchError } = await supabaseAdmin
       .from('usuarios')

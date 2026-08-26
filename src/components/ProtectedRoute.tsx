@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
+import { useEmpresa } from '@/hooks/use-empresa'
 import { Building2, Loader2 } from 'lucide-react'
 import { canAccessPage, AppPage } from '@/lib/permissions'
 
@@ -9,53 +10,39 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, usuario, loading } = useAuth()
+  const { user, loading, sessionChecked } = useAuth()
+  const { loading: loadingEmpresa } = useEmpresa()
 
-  if (loading) {
+  if (loading || !sessionChecked || loadingEmpresa) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0E1B2C] text-white">
-        <div className="flex flex-col items-center space-y-4 animate-fade-in">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center shadow-lg shadow-teal-900/50">
-            <Building2 className="w-8 h-8 text-white" />
+      <div className="min-h-screen flex items-center justify-center bg-[#0E1B2C]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center text-white font-bold shadow-lg shadow-teal-950/50">
+            <Building2 className="w-6 h-6 animate-pulse" />
           </div>
-          <div className="text-center">
-            <h1 className="text-xl font-bold tracking-tight text-white">EVO Gestão</h1>
-            <p className="text-xs text-teal-400 font-medium">
-              Gestão Comercial para Distribuidoras
-            </p>
-          </div>
-          <div className="flex items-center gap-2 pt-4 text-xs text-slate-400">
+          <div className="flex items-center gap-2 text-slate-400 text-sm">
             <Loader2 className="w-4 h-4 animate-spin text-teal-400" />
-            <span>Verificando autenticação e empresa...</span>
+            <span>Carregando dados da distribuidora...</span>
           </div>
         </div>
       </div>
     )
   }
 
-  // Se não estiver logado, ou se user existir mas usuario for nulo (não encontrado em public.usuarios ou inativo)
-  if (!user || !usuario || usuario.ativo === false) {
+  if (!user) {
     return <Navigate to="/auth" replace />
   }
 
   return <>{children}</>
 }
 
-interface RoleRouteGuardProps {
-  page: AppPage
+interface PageAccessGuardProps {
   children: ReactNode
+  page: AppPage
 }
 
-/**
- * Guarda de rota baseado na matriz explícita de permissões do usuário.
- * Se o perfil não tiver acesso à página solicitada, redireciona para o Dashboard.
- */
-export function RoleRouteGuard({ page, children }: RoleRouteGuardProps) {
-  const { usuario, loading } = useAuth()
-
-  if (loading) {
-    return null
-  }
+export function PageAccessGuard({ children, page }: PageAccessGuardProps) {
+  const { usuario } = useAuth()
 
   const allowed = canAccessPage(usuario?.perfil, page)
 
