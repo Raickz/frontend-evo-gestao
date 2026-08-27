@@ -875,13 +875,13 @@ export default function ConfiguracoesPage() {
         <Tabs defaultValue="empresa" className="space-y-6">
           {/* Navegação de Abas */}
           <TabsList
-            className={`bg-slate-100 p-1 border border-slate-200 grid ${
+            className={`bg-slate-100/80 dark:bg-[#0A1328]/80 p-1 border border-slate-200/80 dark:border-[#1A294A] rounded-2xl grid ${
               isMasterOrAdmin ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-2 sm:grid-cols-4'
             } w-full sm:w-auto h-auto gap-1`}
           >
             <TabsTrigger
               value="empresa"
-              className="flex items-center gap-2 text-xs font-semibold py-2 data-[state=active]:bg-white data-[state=active]:text-teal-800 data-[state=active]:shadow-xs"
+              className="flex items-center gap-2 text-xs font-semibold py-2 rounded-xl data-[state=active]:bg-[#0066FF] data-[state=active]:text-white data-[state=active]:shadow-xs"
             >
               <Building2 className="w-4 h-4" />
               <span>Empresa</span>
@@ -889,7 +889,7 @@ export default function ConfiguracoesPage() {
 
             <TabsTrigger
               value="aparencia"
-              className="flex items-center gap-2 text-xs font-semibold py-2 data-[state=active]:bg-white data-[state=active]:text-teal-800 data-[state=active]:shadow-xs"
+              className="flex items-center gap-2 text-xs font-semibold py-2 rounded-xl data-[state=active]:bg-[#0066FF] data-[state=active]:text-white data-[state=active]:shadow-xs"
             >
               <Palette className="w-4 h-4" />
               <span>Aparência</span>
@@ -897,7 +897,7 @@ export default function ConfiguracoesPage() {
 
             <TabsTrigger
               value="usuarios"
-              className="flex items-center gap-2 text-xs font-semibold py-2 data-[state=active]:bg-white data-[state=active]:text-teal-800 data-[state=active]:shadow-xs"
+              className="flex items-center gap-2 text-xs font-semibold py-2 rounded-xl data-[state=active]:bg-[#0066FF] data-[state=active]:text-white data-[state=active]:shadow-xs"
             >
               <Users className="w-4 h-4" />
               <span>Usuários</span>
@@ -906,7 +906,7 @@ export default function ConfiguracoesPage() {
             {isMasterOrAdmin && (
               <TabsTrigger
                 value="plano"
-                className="flex items-center gap-2 text-xs font-semibold py-2 data-[state=active]:bg-white data-[state=active]:text-teal-800 data-[state=active]:shadow-xs"
+                className="flex items-center gap-2 text-xs font-semibold py-2 rounded-xl data-[state=active]:bg-[#0066FF] data-[state=active]:text-white data-[state=active]:shadow-xs"
               >
                 <CreditCard className="w-4 h-4" />
                 <span>Plano & Assinatura</span>
@@ -915,7 +915,7 @@ export default function ConfiguracoesPage() {
 
             <TabsTrigger
               value="seguranca"
-              className="flex items-center gap-2 text-xs font-semibold py-2 data-[state=active]:bg-white data-[state=active]:text-teal-800 data-[state=active]:shadow-xs"
+              className="flex items-center gap-2 text-xs font-semibold py-2 rounded-xl data-[state=active]:bg-[#0066FF] data-[state=active]:text-white data-[state=active]:shadow-xs"
             >
               <Shield className="w-4 h-4" />
               <span>Segurança</span>
@@ -1062,7 +1062,7 @@ export default function ConfiguracoesPage() {
                       <Button
                         type="submit"
                         disabled={savingEmpresa}
-                        className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold flex items-center gap-2 shadow-xs h-9 px-4"
+                        className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-semibold flex items-center gap-2 shadow-xs h-9 px-4 rounded-xl"
                       >
                         {savingEmpresa ? (
                           <>

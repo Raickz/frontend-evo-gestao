@@ -833,7 +833,7 @@ export default function ComprasPage() {
           podeCriar && (
             <Button
               onClick={abrirModalNovaCompra}
-              className="bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-sm font-medium text-xs h-9"
+              className="bg-[#0066FF] hover:bg-[#0052CC] text-white flex items-center gap-1.5 shadow-sm font-medium text-xs h-9 rounded-xl"
             >
               <Plus className="w-4 h-4" /> Nova Compra
             </Button>
@@ -848,7 +848,7 @@ export default function ComprasPage() {
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={`kpi-skeleton-${i}`}
-                className="p-4 rounded-xl border border-slate-200 bg-white space-y-2 shadow-xs"
+                className="glass-card p-4 rounded-2xl border border-slate-200/80 dark:border-[#1A294A] space-y-2"
               >
                 <div className="flex justify-between items-center">
                   <Skeleton className="h-3.5 w-24" />
@@ -875,41 +875,45 @@ export default function ComprasPage() {
               icon={DollarSign}
             />
 
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 shadow-xs">
+            <div className="glass-card rounded-2xl border border-emerald-500/30 bg-emerald-50/5 p-5 transition-all duration-200">
               <div className="flex items-center justify-between pb-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                   Confirmadas
                 </span>
-                <div className="h-8 w-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                <div className="h-9 w-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                   <CheckCircle2 className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-2xl font-bold tracking-tight text-emerald-900 tabular-nums">
+              <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white tabular-nums mt-1">
                 {indicadores.comprasConfirmadas}
               </div>
-              <p className="text-xs text-emerald-600 mt-1">Estoque atualizado</p>
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
+                Estoque atualizado
+              </p>
             </div>
 
-            <div className="rounded-xl border border-amber-200 bg-amber-50/40 p-4 shadow-xs">
+            <div className="glass-card rounded-2xl border border-amber-500/30 bg-amber-50/5 p-5 transition-all duration-200">
               <div className="flex items-center justify-between pb-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-amber-700">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
                   Pendentes
                 </span>
-                <div className="h-8 w-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
+                <div className="h-9 w-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                   <Clock className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-2xl font-bold tracking-tight text-amber-900 tabular-nums">
+              <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white tabular-nums mt-1">
                 {indicadores.comprasPendentes}
               </div>
-              <p className="text-xs text-amber-600 mt-1">Aguardando confirmação</p>
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                Aguardando confirmação
+              </p>
             </div>
           </>
         )}
       </div>
 
       {/* 3. Filtros */}
-      <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-3">
+      <div className="glass-card p-4 rounded-2xl border border-slate-200/80 dark:border-[#1A294A] space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-center">
           {/* Busca textual */}
           <div className="lg:col-span-2 relative">
@@ -918,13 +922,13 @@ export default function ComprasPage() {
               placeholder="Buscar por fornecedor, nº da compra ou obs..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-slate-50 border-slate-200 text-xs h-9"
+              className="pl-9 bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] text-xs h-9 rounded-xl"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -940,7 +944,7 @@ export default function ComprasPage() {
                 setPage(1)
               }}
             >
-              <SelectTrigger className="text-xs h-9 bg-slate-50 border-slate-200">
+              <SelectTrigger className="text-xs h-9 bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] rounded-xl">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -969,7 +973,7 @@ export default function ComprasPage() {
                 setDataInicio(e.target.value)
                 setPage(1)
               }}
-              className="text-xs h-9 bg-slate-50 border-slate-200"
+              className="text-xs h-9 bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] rounded-xl"
               title="Data inicial"
             />
           </div>
@@ -983,7 +987,7 @@ export default function ComprasPage() {
                 setDataFim(e.target.value)
                 setPage(1)
               }}
-              className="text-xs h-9 bg-slate-50 border-slate-200"
+              className="text-xs h-9 bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] rounded-xl"
               title="Data final"
             />
           </div>
@@ -995,7 +999,7 @@ export default function ComprasPage() {
               variant="ghost"
               size="sm"
               onClick={limparFiltros}
-              className="text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1.5 h-7"
+              className="text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 h-7 rounded-lg"
             >
               <X className="w-3 h-3" />
               Limpar filtros
@@ -1022,10 +1026,10 @@ export default function ComprasPage() {
           onAction={temFiltroAtivo ? limparFiltros : podeCriar ? abrirModalNovaCompra : undefined}
         />
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
+        <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+              <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 <tr>
                   <th className="py-3.5 px-4">Nº Compra</th>
                   <th className="py-3.5 px-4">Fornecedor</th>
@@ -1036,7 +1040,7 @@ export default function ComprasPage() {
                   <th className="py-3.5 px-4 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                 {compras.map((compra) => {
                   const isRascunho = compra.status === 'rascunho'
                   const formaPagtoLabel =
@@ -1045,46 +1049,48 @@ export default function ComprasPage() {
                   return (
                     <tr
                       key={compra.id}
-                      className="hover:bg-slate-50/70 transition-colors cursor-pointer"
+                      className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors cursor-pointer"
                       onClick={() => abrirDetalhes(compra.id)}
                     >
-                      <td className="py-3 px-4 font-mono font-bold text-slate-900">
+                      <td className="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white">
                         #{compra.numero}
                       </td>
 
-                      <td className="py-3 px-4 font-semibold text-slate-900">
+                      <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
                         {compra.fornecedores?.nome || (
-                          <span className="text-slate-400 font-normal italic">
+                          <span className="text-slate-400 dark:text-slate-500 font-normal italic">
                             Fornecedor não identificado
                           </span>
                         )}
                       </td>
 
-                      <td className="py-3 px-4 text-slate-500 whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                         {formatDate(compra.data_compra || compra.created_at)}
                       </td>
 
-                      <td className="py-3 px-4 font-bold text-slate-900 tabular-nums text-right text-sm">
+                      <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white tabular-nums text-right text-sm">
                         {formatCurrency(compra.total || 0)}
                       </td>
 
-                      <td className="py-3 px-4 text-center">{getStatusBadge(compra.status)}</td>
+                      <td className="py-3.5 px-4 text-center">{getStatusBadge(compra.status)}</td>
 
-                      <td className="py-3 px-4 text-xs">
-                        <div className="font-medium text-slate-800">{formaPagtoLabel}</div>
+                      <td className="py-3.5 px-4 text-xs">
+                        <div className="font-medium text-slate-800 dark:text-slate-200">
+                          {formaPagtoLabel}
+                        </div>
                         {compra.forma_pagamento === 'a_prazo' && compra.vencimento && (
-                          <div className="text-[10px] text-slate-500">
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400">
                             Venc: {formatDate(compra.vencimento)}
                           </div>
                         )}
                         {compra.forma_pagamento === 'pago' && compra.valor_pago > 0 && (
-                          <div className="text-[10px] text-emerald-600 font-medium">
+                          <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
                             Pago: {formatCurrency(compra.valor_pago)}
                           </div>
                         )}
                       </td>
 
-                      <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                      <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1.5">
                           {/* Ações por status */}
                           {isRascunho && podeCriar && (
@@ -1093,10 +1099,10 @@ export default function ComprasPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => abrirModalConfirmar(compra)}
-                                className="h-8 text-[11px] px-2.5 border-teal-600 text-teal-700 hover:bg-teal-50 hover:text-teal-800 font-medium flex items-center gap-1"
+                                className="h-8 text-[11px] px-2.5 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 font-medium flex items-center gap-1 rounded-xl"
                                 title="Confirmar Compra e atualizar estoque"
                               >
-                                <CheckCircle2 className="w-3.5 h-3.5 text-teal-600" />
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                                 Confirmar
                               </Button>
 
@@ -1104,7 +1110,7 @@ export default function ComprasPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => abrirModalEditar(compra.id)}
-                                className="h-8 text-[11px] px-2 text-slate-700 hover:text-teal-700"
+                                className="h-8 text-[11px] px-2 text-slate-700 dark:text-slate-300 hover:text-[#0066FF] rounded-xl border-slate-200 dark:border-[#1A294A]"
                                 title="Editar Rascunho"
                               >
                                 <Edit className="w-3.5 h-3.5" />
@@ -1114,7 +1120,7 @@ export default function ComprasPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => abrirModalCancelar(compra)}
-                                className="h-8 text-[11px] px-2 text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                                className="h-8 text-[11px] px-2 text-rose-600 border-rose-500/30 hover:bg-rose-500/10 rounded-xl"
                                 title="Cancelar Compra"
                               >
                                 <XCircle className="w-3.5 h-3.5" />
@@ -1127,7 +1133,7 @@ export default function ComprasPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => abrirDetalhes(compra.id)}
-                            className="h-8 w-8 p-0 text-slate-500 hover:text-slate-900"
+                            className="h-8 w-8 p-0 text-slate-500 hover:text-[#0066FF] hover:bg-[#0066FF]/10 rounded-lg"
                             title="Visualizar Detalhes"
                           >
                             <Eye className="w-4 h-4" />
@@ -1138,7 +1144,7 @@ export default function ComprasPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => abrirImpressaoCompra(compra.id)}
-                            className="h-8 w-8 p-0 text-slate-500 hover:text-teal-700"
+                            className="h-8 w-8 p-0 text-slate-500 hover:text-[#0066FF] hover:bg-[#0066FF]/10 rounded-lg"
                             title="Imprimir Ordem de Compra"
                           >
                             <Printer className="w-4 h-4" />
@@ -1153,17 +1159,21 @@ export default function ComprasPage() {
           </div>
 
           {/* Paginação */}
-          <div className="py-3 px-4 bg-slate-50/70 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
+          <div className="py-3 px-4 bg-slate-50/50 dark:bg-[#0A1328]/50 border-t border-slate-200/80 dark:border-[#1A294A] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 dark:text-[#C0C6CF]">
             <div>
               Mostrando{' '}
-              <span className="font-semibold text-slate-900">
+              <span className="font-semibold text-slate-900 dark:text-white">
                 {Math.min((page - 1) * PAGE_SIZE + 1, totalComprasCount)}
               </span>{' '}
               a{' '}
-              <span className="font-semibold text-slate-900">
+              <span className="font-semibold text-slate-900 dark:text-white">
                 {Math.min(page * PAGE_SIZE, totalComprasCount)}
               </span>{' '}
-              de <span className="font-semibold text-slate-900">{totalComprasCount}</span> compras
+              de{' '}
+              <span className="font-semibold text-slate-900 dark:text-white">
+                {totalComprasCount}
+              </span>{' '}
+              compras
             </div>
 
             <div className="flex items-center gap-1.5">
@@ -1172,11 +1182,12 @@ export default function ComprasPage() {
                 size="sm"
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="h-8 w-8 p-0"
+                className="h-8 px-2.5 text-xs rounded-xl border-slate-200 dark:border-[#1A294A]"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Anterior
               </Button>
-              <span className="text-xs px-2 font-medium">
+              <span className="text-xs px-2 font-medium text-slate-700 dark:text-slate-300">
                 Página {page} de {totalPaginas}
               </span>
               <Button
@@ -1184,9 +1195,10 @@ export default function ComprasPage() {
                 size="sm"
                 disabled={page >= totalPaginas}
                 onClick={() => setPage((p) => Math.min(totalPaginas, p + 1))}
-                className="h-8 w-8 p-0"
+                className="h-8 px-2.5 text-xs rounded-xl border-slate-200 dark:border-[#1A294A]"
               >
-                <ChevronRight className="w-4 h-4" />
+                Próxima
+                <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
           </div>

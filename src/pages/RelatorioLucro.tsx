@@ -247,105 +247,111 @@ export default function RelatorioLucroPage() {
       )}
 
       {/* Barra de Filtros */}
-      <Card className="border-slate-200 shadow-sm">
-        <CardHeader className="pb-3 pt-4 px-4 sm:px-6">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2 text-slate-800">
-            <Filter className="h-4 w-4 text-slate-500" />
+      <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 space-y-4">
+        <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60 dark:border-[#1A294A]">
+          <Filter className="h-4 w-4 text-[#0066FF]" />
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             Filtros do Relatório
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-4 pb-4 sm:px-6 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* Seletor de Período Predefinido */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-slate-600">Período</Label>
-              <Select
-                value={periodoTipo}
-                onValueChange={(val) => handlePeriodoChange(val as PeriodoPredefinido)}
-              >
-                <SelectTrigger className="h-9 text-xs bg-slate-50">
-                  <SelectValue placeholder="Selecione o período" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="hoje" className="text-xs">
-                    Hoje
-                  </SelectItem>
-                  <SelectItem value="7dias" className="text-xs">
-                    Últimos 7 dias
-                  </SelectItem>
-                  <SelectItem value="mes_atual" className="text-xs">
-                    Este mês
-                  </SelectItem>
-                  <SelectItem value="mes_anterior" className="text-xs">
-                    Mês anterior
-                  </SelectItem>
-                  <SelectItem value="30dias" className="text-xs">
-                    Últimos 30 dias
-                  </SelectItem>
-                  <SelectItem value="ano_atual" className="text-xs">
-                    Este ano
-                  </SelectItem>
-                  <SelectItem value="personalizado" className="text-xs">
-                    Personalizado
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Seletor de Período Predefinido */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+              Período
+            </Label>
+            <Select
+              value={periodoTipo}
+              onValueChange={(val) => handlePeriodoChange(val as PeriodoPredefinido)}
+            >
+              <SelectTrigger className="h-9 text-xs bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] rounded-xl">
+                <SelectValue placeholder="Selecione o período" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="hoje" className="text-xs">
+                  Hoje
+                </SelectItem>
+                <SelectItem value="7dias" className="text-xs">
+                  Últimos 7 dias
+                </SelectItem>
+                <SelectItem value="mes_atual" className="text-xs">
+                  Este mês
+                </SelectItem>
+                <SelectItem value="mes_anterior" className="text-xs">
+                  Mês anterior
+                </SelectItem>
+                <SelectItem value="30dias" className="text-xs">
+                  Últimos 30 dias
+                </SelectItem>
+                <SelectItem value="ano_atual" className="text-xs">
+                  Este ano
+                </SelectItem>
+                <SelectItem value="personalizado" className="text-xs">
+                  Personalizado
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-            {/* Data Inicial */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-slate-600">Data Inicial</Label>
-              <div className="relative">
-                <Input
-                  type="date"
-                  className="h-9 text-xs bg-slate-50"
-                  value={dataInicio}
-                  onChange={(e) => {
-                    setDataInicio(e.target.value)
-                    setPeriodoTipo('personalizado')
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Data Final */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-slate-600">Data Final</Label>
-              <div className="relative">
-                <Input
-                  type="date"
-                  className="h-9 text-xs bg-slate-50"
-                  value={dataFim}
-                  onChange={(e) => {
-                    setDataFim(e.target.value)
-                    setPeriodoTipo('personalizado')
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Vendedor */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-slate-600">Vendedor</Label>
-              <Select value={vendedorFilter} onValueChange={(val) => setVendedorFilter(val)}>
-                <SelectTrigger className="h-9 text-xs bg-slate-50">
-                  <SelectValue placeholder="Todos os vendedores" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos" className="text-xs">
-                    Todos os vendedores
-                  </SelectItem>
-                  {vendedoresList.map((vend) => (
-                    <SelectItem key={vend.id} value={vend.id} className="text-xs">
-                      {vend.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {/* Data Inicial */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+              Data Inicial
+            </Label>
+            <div className="relative">
+              <Input
+                type="date"
+                className="h-9 text-xs bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] rounded-xl"
+                value={dataInicio}
+                onChange={(e) => {
+                  setDataInicio(e.target.value)
+                  setPeriodoTipo('personalizado')
+                }}
+              />
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Data Final */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+              Data Final
+            </Label>
+            <div className="relative">
+              <Input
+                type="date"
+                className="h-9 text-xs bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] rounded-xl"
+                value={dataFim}
+                onChange={(e) => {
+                  setDataFim(e.target.value)
+                  setPeriodoTipo('personalizado')
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Vendedor */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+              Vendedor
+            </Label>
+            <Select value={vendedorFilter} onValueChange={(val) => setVendedorFilter(val)}>
+              <SelectTrigger className="h-9 text-xs bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] rounded-xl">
+                <SelectValue placeholder="Todos os vendedores" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos" className="text-xs">
+                  Todos os vendedores
+                </SelectItem>
+                {vendedoresList.map((vend) => (
+                  <SelectItem key={vend.id} value={vend.id} className="text-xs">
+                    {vend.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
 
       {/* Estados de Erro */}
       {error && (
@@ -369,32 +375,38 @@ export default function RelatorioLucroPage() {
             icon={ShoppingCart}
           />
 
-          <Card className="rounded-xl border border-slate-200 bg-white shadow-xs hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 transition-all">
+            <div className="flex flex-row items-center justify-between pb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
                 Lucro Bruto
-              </CardTitle>
+              </span>
               <div
-                className={`h-8 w-8 rounded-lg flex items-center justify-center ${
-                  lucroPositivo ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
+                className={`h-9 w-9 rounded-xl flex items-center justify-center ${
+                  lucroPositivo
+                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                    : 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
                 }`}
               >
                 <TrendingUp className="w-4 h-4" />
               </div>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div>
               <div
-                className={`text-2xl font-bold tracking-tight tabular-nums ${
-                  loading ? 'text-slate-400' : lucroPositivo ? 'text-emerald-600' : 'text-red-600'
+                className={`text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums mt-1 ${
+                  loading
+                    ? 'text-slate-400'
+                    : lucroPositivo
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-rose-600 dark:text-rose-400'
                 }`}
               >
                 {loading ? 'Carregando...' : formatCurrency(resumo.lucroBruto)}
               </div>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
                 {lucroPositivo ? 'Faturamento - Custo' : 'Resultado negativo'}
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           <MetricCard
             title="Margem de Lucro"
@@ -421,23 +433,23 @@ export default function RelatorioLucroPage() {
 
       {/* Tabela "Lucro por Vendedor" (Exibida quando filtro é "Todos os vendedores") */}
       {!error && vendedorFilter === 'todos' && (
-        <Card className="border-slate-200 shadow-sm">
-          <CardHeader className="pb-3 pt-5 px-6 border-b border-slate-100 flex flex-row items-center justify-between">
+        <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
+          <div className="pb-3 pt-5 px-6 border-b border-slate-200/80 dark:border-[#1A294A] flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-base font-semibold text-slate-900">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 Lucro por Vendedor
-              </CardTitle>
-              <p className="text-xs text-slate-500 mt-0.5">
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Desempenho e rentabilidade individual de cada vendedor ordenado por maior lucro.
               </p>
             </div>
             {porVendedor.length > 0 && !loading && (
-              <Badge variant="secondary" className="font-normal text-xs">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] border border-[#0066FF]/20">
                 {porVendedor.length} {porVendedor.length === 1 ? 'vendedor' : 'vendedores'}
-              </Badge>
+              </span>
             )}
-          </CardHeader>
-          <CardContent className="p-0">
+          </div>
+          <div>
             {loading ? (
               <div className="p-6">
                 <TableSkeleton rows={4} cols={6} />
@@ -454,52 +466,57 @@ export default function RelatorioLucroPage() {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-slate-50/70 hover:bg-slate-50/70">
-                      <TableHead className="font-semibold text-slate-700 text-xs">
+                    <TableRow className="bg-slate-50/80 dark:bg-[#0A1328]/80 hover:bg-slate-50/80 border-b border-slate-200/80 dark:border-[#1A294A]">
+                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-xs">
                         Vendedor
                       </TableHead>
-                      <TableHead className="text-center font-semibold text-slate-700 text-xs">
+                      <TableHead className="text-center font-semibold text-slate-700 dark:text-slate-300 text-xs">
                         Vendas
                       </TableHead>
-                      <TableHead className="text-right font-semibold text-slate-700 text-xs">
+                      <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 text-xs">
                         Faturamento
                       </TableHead>
-                      <TableHead className="text-right font-semibold text-slate-700 text-xs">
+                      <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 text-xs">
                         Custo
                       </TableHead>
-                      <TableHead className="text-right font-semibold text-slate-700 text-xs">
+                      <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 text-xs">
                         Lucro
                       </TableHead>
-                      <TableHead className="text-right font-semibold text-slate-700 text-xs">
+                      <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 text-xs">
                         Margem
                       </TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
+                  <TableBody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                     {porVendedor.map((item) => {
                       const lucroVendedorPositivo = item.lucro >= 0
                       return (
-                        <TableRow key={item.vendedorId} className="hover:bg-slate-50/50">
-                          <TableCell className="font-medium text-slate-900 text-xs">
+                        <TableRow
+                          key={item.vendedorId}
+                          className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03]"
+                        >
+                          <TableCell className="font-medium text-slate-900 dark:text-white text-xs">
                             {item.nome}
                           </TableCell>
-                          <TableCell className="text-center text-xs text-slate-600">
+                          <TableCell className="text-center text-xs text-slate-600 dark:text-slate-400">
                             {item.numeroVendas}
                           </TableCell>
-                          <TableCell className="text-right font-medium text-slate-800 text-xs">
+                          <TableCell className="text-right font-medium text-slate-800 dark:text-slate-200 text-xs">
                             {formatCurrency(item.faturamento)}
                           </TableCell>
-                          <TableCell className="text-right text-slate-600 text-xs">
+                          <TableCell className="text-right text-slate-600 dark:text-slate-400 text-xs">
                             {formatCurrency(item.custo)}
                           </TableCell>
                           <TableCell
                             className={`text-right font-semibold text-xs ${
-                              lucroVendedorPositivo ? 'text-emerald-600' : 'text-red-600'
+                              lucroVendedorPositivo
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : 'text-rose-600 dark:text-rose-400'
                             }`}
                           >
                             {formatCurrency(item.lucro)}
                           </TableCell>
-                          <TableCell className="text-right font-medium text-xs text-slate-700">
+                          <TableCell className="text-right font-medium text-xs text-slate-700 dark:text-slate-300">
                             {item.margem.toFixed(1)}%
                           </TableCell>
                         </TableRow>
@@ -509,8 +526,8 @@ export default function RelatorioLucroPage() {
                 </Table>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   )

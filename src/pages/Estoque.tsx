@@ -439,7 +439,7 @@ export default function EstoquePage() {
         actions={
           <Button
             onClick={handleOpenModalEntrada}
-            className="bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-sm font-medium text-xs h-9"
+            className="bg-[#0066FF] hover:bg-[#0052CC] text-white flex items-center gap-1.5 shadow-sm font-medium text-xs h-9 rounded-xl"
           >
             <Plus className="w-4 h-4" /> Nova Entrada
           </Button>
@@ -453,7 +453,7 @@ export default function EstoquePage() {
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={`kpi-skeleton-${i}`}
-                className="p-4 rounded-xl border border-slate-200 bg-white space-y-2 shadow-xs"
+                className="glass-card p-4 rounded-2xl border border-slate-200/80 dark:border-[#1A294A] space-y-2"
               >
                 <div className="flex justify-between items-center">
                   <Skeleton className="h-3.5 w-24" />
@@ -472,68 +472,74 @@ export default function EstoquePage() {
               subtitle="Itens ativos cadastrados"
               icon={Boxes}
             />
-            <div className="rounded-xl border border-red-200 bg-red-50/40 p-4 shadow-xs">
+            <div className="glass-card rounded-2xl border border-rose-500/30 bg-rose-500/5 p-5 transition-all duration-200">
               <div className="flex items-center justify-between pb-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-red-700">
+                <span className="text-xs font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400">
                   Zerados
                 </span>
-                <div className="h-8 w-8 rounded-lg bg-red-100 text-red-700 flex items-center justify-center">
+                <div className="h-9 w-9 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center">
                   <AlertTriangle className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-2xl font-bold tracking-tight text-red-900 tabular-nums">
+              <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white tabular-nums mt-1">
                 {indicadores.zerados}
               </div>
-              <p className="text-xs text-red-600 mt-1">Saldo zero no momento</p>
+              <p className="text-xs text-rose-600 dark:text-rose-400 mt-1 font-medium">
+                Saldo zero no momento
+              </p>
             </div>
 
-            <div className="rounded-xl border border-amber-200 bg-amber-50/40 p-4 shadow-xs">
+            <div className="glass-card rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5 transition-all duration-200">
               <div className="flex items-center justify-between pb-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-amber-700">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
                   Abaixo do Mínimo
                 </span>
-                <div className="h-8 w-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
+                <div className="h-9 w-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                   <AlertCircle className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-2xl font-bold tracking-tight text-amber-900 tabular-nums">
+              <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white tabular-nums mt-1">
                 {indicadores.abaixoMinimo}
               </div>
-              <p className="text-xs text-amber-600 mt-1">Abaixo do estoque seguro</p>
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                Abaixo do estoque seguro
+              </p>
             </div>
 
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 shadow-xs">
+            <div className="glass-card rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5 transition-all duration-200">
               <div className="flex items-center justify-between pb-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                   Normal
                 </span>
-                <div className="h-8 w-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                <div className="h-9 w-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                   <CheckCircle className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-2xl font-bold tracking-tight text-emerald-900 tabular-nums">
+              <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white tabular-nums mt-1">
                 {indicadores.normal}
               </div>
-              <p className="text-xs text-emerald-600 mt-1">Estoque acima do mínimo</p>
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
+                Estoque acima do mínimo
+              </p>
             </div>
           </>
         )}
       </div>
 
       {/* 2b. Tab Switcher */}
-      <div className="flex gap-2 border-b border-slate-200">
+      <div className="flex gap-2 border-b border-slate-200/80 dark:border-[#1A294A]">
         <button
           type="button"
           onClick={() => setActiveTab('saldos')}
           className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all flex items-center gap-2 ${
             activeTab === 'saldos'
-              ? 'border-teal-600 text-teal-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'border-[#0066FF] text-[#0066FF] dark:text-[#3B82F6]'
+              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
           }`}
         >
           <Boxes className="w-4 h-4" />
           Saldos em Estoque
-          <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
+          <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-[#1A294A] text-slate-700 dark:text-slate-300">
             {totalSaldosCount}
           </span>
         </button>
@@ -542,13 +548,13 @@ export default function EstoquePage() {
           onClick={() => setActiveTab('movimentacoes')}
           className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all flex items-center gap-2 ${
             activeTab === 'movimentacoes'
-              ? 'border-teal-600 text-teal-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'border-[#0066FF] text-[#0066FF] dark:text-[#3B82F6]'
+              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
           }`}
         >
           <History className="w-4 h-4" />
           Histórico de Movimentações
-          <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700">
+          <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-[#1A294A] text-slate-700 dark:text-slate-300">
             {totalMovCount}
           </span>
         </button>
@@ -558,20 +564,20 @@ export default function EstoquePage() {
       {activeTab === 'saldos' && (
         <div className="space-y-4">
           {/* Barra de busca e filtros */}
-          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
+          <div className="glass-card flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between p-4 rounded-2xl border border-slate-200/80 dark:border-[#1A294A]">
             <div className="relative flex-1 max-w-md">
               <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
               <Input
                 placeholder="Buscar por nome ou código..."
                 value={searchSaldo}
                 onChange={(e) => setSearchSaldo(e.target.value)}
-                className="pl-9 h-10 bg-slate-50 border-slate-200 text-xs"
+                className="pl-9 h-10 bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] text-xs rounded-xl"
               />
               {searchSaldo && (
                 <button
                   type="button"
                   onClick={() => setSearchSaldo('')}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-white"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -586,14 +592,14 @@ export default function EstoquePage() {
                   setPageSaldo(1)
                 }}
               >
-                <SelectTrigger className="h-10 text-xs bg-slate-50 border-slate-200">
+                <SelectTrigger className="h-10 text-xs bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] rounded-xl">
                   <SelectValue placeholder="Filtrar por status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos" className="text-xs">
                     Todos os Status
                   </SelectItem>
-                  <SelectItem value="zerados" className="text-xs text-red-600 font-medium">
+                  <SelectItem value="zerados" className="text-xs text-rose-600 font-medium">
                     Zerados
                   </SelectItem>
                   <SelectItem value="abaixo_minimo" className="text-xs text-amber-600 font-medium">
@@ -635,10 +641,10 @@ export default function EstoquePage() {
               }
             />
           ) : (
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
+            <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-600">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                  <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <tr>
                       <th className="py-3.5 px-4">Produto</th>
                       <th className="py-3.5 px-4">Unidade</th>
@@ -647,7 +653,7 @@ export default function EstoquePage() {
                       <th className="py-3.5 px-4">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                     {saldos.map((item) => {
                       const prod = item.produtos
                       const qtd = Number(item.quantidade) || 0
@@ -659,57 +665,51 @@ export default function EstoquePage() {
                       const isNormal = qtd > min
 
                       return (
-                        <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
-                          <td className="py-3 px-4">
-                            <div className="font-semibold text-slate-900">
+                        <tr
+                          key={item.id}
+                          className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
+                        >
+                          <td className="py-3.5 px-4">
+                            <div className="font-semibold text-slate-900 dark:text-white">
                               {prod?.nome || 'Produto sem nome'}
                             </div>
                             <div className="flex items-center gap-2 mt-0.5">
                               {prod?.codigo && (
-                                <span className="font-mono text-[10px] text-slate-400">
+                                <span className="font-mono text-[10px] text-slate-400 dark:text-slate-500">
                                   #{prod.codigo}
                                 </span>
                               )}
                               {prod?.categorias?.nome && (
-                                <span className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded">
+                                <span className="text-[10px] text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-[#1A294A] px-1.5 py-0.5 rounded-md">
                                   {prod.categorias.nome}
                                 </span>
                               )}
                             </div>
                           </td>
-                          <td className="py-3 px-4 font-mono font-medium text-slate-700">
+                          <td className="py-3.5 px-4 font-mono font-medium text-slate-700 dark:text-slate-300">
                             {unidade}
                           </td>
-                          <td className="py-3 px-4 font-mono text-slate-600 tabular-nums">
+                          <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-slate-300 tabular-nums">
                             {min} {unidade}
                           </td>
-                          <td className="py-3 px-4 font-bold text-slate-900 tabular-nums text-sm">
+                          <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white tabular-nums text-sm">
                             {qtd} {unidade}
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-3.5 px-4">
                             {isZerado && (
-                              <Badge
-                                variant="outline"
-                                className="bg-red-50 text-red-700 border-red-200 font-semibold"
-                              >
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/25">
                                 Zerado
-                              </Badge>
+                              </span>
                             )}
                             {isAbaixoMinimo && (
-                              <Badge
-                                variant="outline"
-                                className="bg-amber-50 text-amber-700 border-amber-200 font-semibold"
-                              >
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/25">
                                 Abaixo do mín.
-                              </Badge>
+                              </span>
                             )}
                             {isNormal && (
-                              <Badge
-                                variant="outline"
-                                className="bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold"
-                              >
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
                                 Normal
-                              </Badge>
+                              </span>
                             )}
                           </td>
                         </tr>
@@ -720,17 +720,21 @@ export default function EstoquePage() {
               </div>
 
               {/* Paginação Saldos */}
-              <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-600 gap-3">
+              <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-slate-200/80 dark:border-[#1A294A] bg-slate-50/50 dark:bg-[#0A1328]/50 text-xs text-slate-600 dark:text-[#C0C6CF] gap-3">
                 <div>
                   Mostrando{' '}
-                  <span className="font-semibold text-slate-900">
+                  <span className="font-semibold text-slate-900 dark:text-white">
                     {Math.min(totalSaldosCount, (pageSaldo - 1) * PAGE_SIZE + 1)}
                   </span>{' '}
                   a{' '}
-                  <span className="font-semibold text-slate-900">
+                  <span className="font-semibold text-slate-900 dark:text-white">
                     {Math.min(totalSaldosCount, pageSaldo * PAGE_SIZE)}
                   </span>{' '}
-                  de <span className="font-semibold text-slate-900">{totalSaldosCount}</span> itens
+                  de{' '}
+                  <span className="font-semibold text-slate-900 dark:text-white">
+                    {totalSaldosCount}
+                  </span>{' '}
+                  itens
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Button
@@ -738,12 +742,12 @@ export default function EstoquePage() {
                     size="sm"
                     onClick={() => setPageSaldo((p) => Math.max(1, p - 1))}
                     disabled={pageSaldo === 1}
-                    className="h-8 px-2.5 text-xs"
+                    className="h-8 px-2.5 text-xs rounded-xl border-slate-200 dark:border-[#1A294A]"
                   >
                     <ChevronLeft className="w-3.5 h-3.5 mr-1" />
                     Anterior
                   </Button>
-                  <span className="px-2 text-xs font-medium text-slate-700">
+                  <span className="px-2 text-xs font-medium text-slate-700 dark:text-slate-300">
                     Página {pageSaldo} de {totalPagesSaldo}
                   </span>
                   <Button
@@ -751,7 +755,7 @@ export default function EstoquePage() {
                     size="sm"
                     onClick={() => setPageSaldo((p) => Math.min(totalPagesSaldo, p + 1))}
                     disabled={pageSaldo >= totalPagesSaldo}
-                    className="h-8 px-2.5 text-xs"
+                    className="h-8 px-2.5 text-xs rounded-xl border-slate-200 dark:border-[#1A294A]"
                   >
                     Próxima
                     <ChevronRight className="w-3.5 h-3.5 ml-1" />
@@ -767,20 +771,20 @@ export default function EstoquePage() {
       {activeTab === 'movimentacoes' && (
         <div className="space-y-4">
           {/* Filtros de movimentações */}
-          <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
+          <div className="glass-card flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between p-4 rounded-2xl border border-slate-200/80 dark:border-[#1A294A]">
             <div className="relative flex-1">
               <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
               <Input
                 placeholder="Buscar produto..."
                 value={searchMov}
                 onChange={(e) => setSearchMov(e.target.value)}
-                className="pl-9 h-10 bg-slate-50 border-slate-200 text-xs"
+                className="pl-9 h-10 bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] text-xs rounded-xl"
               />
               {searchMov && (
                 <button
                   type="button"
                   onClick={() => setSearchMov('')}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-white"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -796,7 +800,7 @@ export default function EstoquePage() {
                     setPageMov(1)
                   }}
                 >
-                  <SelectTrigger className="h-10 text-xs bg-slate-50 border-slate-200">
+                  <SelectTrigger className="h-10 text-xs bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] rounded-xl">
                     <SelectValue placeholder="Tipo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -822,7 +826,7 @@ export default function EstoquePage() {
                     setPageMov(1)
                   }}
                 >
-                  <SelectTrigger className="h-10 text-xs bg-slate-50 border-slate-200">
+                  <SelectTrigger className="h-10 text-xs bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] rounded-xl">
                     <SelectValue placeholder="Fornecedor" />
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
@@ -847,7 +851,7 @@ export default function EstoquePage() {
                       setDataInicioMov(e.target.value)
                       setPageMov(1)
                     }}
-                    className="h-10 text-xs bg-slate-50 border-slate-200"
+                    className="h-10 text-xs bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] rounded-xl"
                     placeholder="Data inicial"
                     title="Data inicial"
                   />
@@ -861,7 +865,7 @@ export default function EstoquePage() {
                       setDataFimMov(e.target.value)
                       setPageMov(1)
                     }}
-                    className="h-10 text-xs bg-slate-50 border-slate-200"
+                    className="h-10 text-xs bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] rounded-xl"
                     placeholder="Data final"
                     title="Data final"
                   />
@@ -878,7 +882,7 @@ export default function EstoquePage() {
                     setFornecedorFilterMov('todos')
                     setPageMov(1)
                   }}
-                  className="h-10 text-xs text-slate-500 hover:text-slate-800"
+                  className="h-10 text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-xl"
                   title="Limpar filtros adicionais"
                 >
                   Limpar
@@ -933,10 +937,10 @@ export default function EstoquePage() {
               }
             />
           ) : (
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
+            <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-600">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                  <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <tr>
                       <th className="py-3.5 px-4">Data / Hora</th>
                       <th className="py-3.5 px-4">Tipo</th>
@@ -947,7 +951,7 @@ export default function EstoquePage() {
                       <th className="py-3.5 px-4">Usuário</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                     {movimentacoes.map((mov) => {
                       const isEntrada = mov.tipo === 'entrada'
                       const dataFormatada = mov.created_at
@@ -956,55 +960,59 @@ export default function EstoquePage() {
                       const nomeFornecedor = mov.fornecedores?.nome || '-'
 
                       return (
-                        <tr key={mov.id} className="hover:bg-slate-50/70 transition-colors">
-                          <td className="py-3 px-4 text-slate-500 flex items-center gap-1.5 whitespace-nowrap">
-                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                        <tr
+                          key={mov.id}
+                          className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
+                        >
+                          <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 flex items-center gap-1.5 whitespace-nowrap">
+                            <Calendar className="w-3.5 h-3.5 text-[#0066FF]" />
                             {dataFormatada}
                           </td>
-                          <td className="py-3 px-4 whitespace-nowrap">
-                            <Badge
-                              variant="outline"
-                              className={`flex items-center gap-1 w-fit font-semibold ${
+                          <td className="py-3.5 px-4 whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
                                 isEntrada
-                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                  : 'bg-amber-50 text-amber-700 border-amber-200'
+                                  ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
+                                  : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/25'
                               }`}
                             >
                               {isEntrada ? (
-                                <ArrowDownRight className="w-3.5 h-3.5 text-emerald-600" />
+                                <ArrowDownRight className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                               ) : (
-                                <ArrowUpRight className="w-3.5 h-3.5 text-amber-600" />
+                                <ArrowUpRight className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                               )}
                               <span className="capitalize">{mov.tipo}</span>
-                            </Badge>
+                            </span>
                           </td>
-                          <td className="py-3 px-4">
-                            <span className="font-semibold text-slate-900">
+                          <td className="py-3.5 px-4">
+                            <span className="font-semibold text-slate-900 dark:text-white">
                               {mov.produtos?.nome || 'Produto'}
                             </span>
                             {mov.produtos?.codigo && (
-                              <span className="ml-2 font-mono text-[10px] text-slate-400">
+                              <span className="ml-2 font-mono text-[10px] text-slate-400 dark:text-slate-500">
                                 #{mov.produtos.codigo}
                               </span>
                             )}
                           </td>
-                          <td className="py-3 px-4 font-medium text-slate-700 whitespace-nowrap">
+                          <td className="py-3.5 px-4 font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">
                             {nomeFornecedor}
                           </td>
                           <td
-                            className={`py-3 px-4 font-bold tabular-nums text-xs whitespace-nowrap ${
-                              isEntrada ? 'text-emerald-700' : 'text-amber-700'
+                            className={`py-3.5 px-4 font-bold tabular-nums text-xs whitespace-nowrap ${
+                              isEntrada
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : 'text-amber-600 dark:text-amber-400'
                             }`}
                           >
                             {isEntrada ? `+${mov.quantidade}` : `-${mov.quantidade}`}
                           </td>
                           <td
-                            className="py-3 px-4 text-slate-600 max-w-xs truncate"
+                            className="py-3.5 px-4 text-slate-600 dark:text-slate-400 max-w-xs truncate"
                             title={mov.motivo || ''}
                           >
                             {mov.motivo || '-'}
                           </td>
-                          <td className="py-3 px-4 text-slate-500 whitespace-nowrap">
+                          <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                             {mov.usuarios?.nome || '-'}
                           </td>
                         </tr>
@@ -1015,17 +1023,21 @@ export default function EstoquePage() {
               </div>
 
               {/* Paginação Movimentações */}
-              <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-600 gap-3">
+              <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-slate-200/80 dark:border-[#1A294A] bg-slate-50/50 dark:bg-[#0A1328]/50 text-xs text-slate-600 dark:text-[#C0C6CF] gap-3">
                 <div>
                   Mostrando{' '}
-                  <span className="font-semibold text-slate-900">
+                  <span className="font-semibold text-slate-900 dark:text-white">
                     {Math.min(totalMovCount, (pageMov - 1) * PAGE_SIZE + 1)}
                   </span>{' '}
                   a{' '}
-                  <span className="font-semibold text-slate-900">
+                  <span className="font-semibold text-slate-900 dark:text-white">
                     {Math.min(totalMovCount, pageMov * PAGE_SIZE)}
                   </span>{' '}
-                  de <span className="font-semibold text-slate-900">{totalMovCount}</span> registros
+                  de{' '}
+                  <span className="font-semibold text-slate-900 dark:text-white">
+                    {totalMovCount}
+                  </span>{' '}
+                  registros
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Button
@@ -1033,12 +1045,12 @@ export default function EstoquePage() {
                     size="sm"
                     onClick={() => setPageMov((p) => Math.max(1, p - 1))}
                     disabled={pageMov === 1}
-                    className="h-8 px-2.5 text-xs"
+                    className="h-8 px-2.5 text-xs rounded-xl border-slate-200 dark:border-[#1A294A]"
                   >
                     <ChevronLeft className="w-3.5 h-3.5 mr-1" />
                     Anterior
                   </Button>
-                  <span className="px-2 text-xs font-medium text-slate-700">
+                  <span className="px-2 text-xs font-medium text-slate-700 dark:text-slate-300">
                     Página {pageMov} de {totalPagesMov}
                   </span>
                   <Button
@@ -1046,7 +1058,7 @@ export default function EstoquePage() {
                     size="sm"
                     onClick={() => setPageMov((p) => Math.min(totalPagesMov, p + 1))}
                     disabled={pageMov >= totalPagesMov}
-                    className="h-8 px-2.5 text-xs"
+                    className="h-8 px-2.5 text-xs rounded-xl border-slate-200 dark:border-[#1A294A]"
                   >
                     Próxima
                     <ChevronRight className="w-3.5 h-3.5 ml-1" />

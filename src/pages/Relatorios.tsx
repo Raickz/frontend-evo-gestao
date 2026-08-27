@@ -388,122 +388,152 @@ export default function RelatoriosPage() {
       />
 
       {/* 2. Barra de Filtro de Período */}
-      <Card className="rounded-xl border border-slate-200 bg-white shadow-xs">
-        <CardContent className="p-4 space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="w-4 h-4 text-teal-700" />
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                Período de Análise
-              </span>
-            </div>
-            <div className="text-xs font-medium text-slate-500">
-              Intervalo selecionado:{' '}
-              <span className="font-semibold text-slate-800">
-                {formatDate(periodo.inicio)} até {formatDate(periodo.fim)}
-              </span>
-            </div>
+      <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/60 dark:border-[#1A294A] pb-3">
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="w-4 h-4 text-[#0066FF]" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+              Período de Análise
+            </span>
+          </div>
+          <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            Intervalo selecionado:{' '}
+            <span className="font-semibold text-slate-800 dark:text-slate-200">
+              {formatDate(periodo.inicio)} até {formatDate(periodo.fim)}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Button
+              type="button"
+              variant={preset === 'hoje' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleSelectPreset('hoje')}
+              className={`text-xs h-8 rounded-xl ${
+                preset === 'hoje'
+                  ? 'bg-[#0066FF] hover:bg-[#0052CC] text-white font-semibold'
+                  : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-[#1A294A]'
+              }`}
+            >
+              Hoje
+            </Button>
+            <Button
+              type="button"
+              variant={preset === '7dias' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleSelectPreset('7dias')}
+              className={`text-xs h-8 rounded-xl ${
+                preset === '7dias'
+                  ? 'bg-[#0066FF] hover:bg-[#0052CC] text-white font-semibold'
+                  : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-[#1A294A]'
+              }`}
+            >
+              7 dias
+            </Button>
+            <Button
+              type="button"
+              variant={preset === 'mes_atual' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleSelectPreset('mes_atual')}
+              className={`text-xs h-8 rounded-xl ${
+                preset === 'mes_atual'
+                  ? 'bg-[#0066FF] hover:bg-[#0052CC] text-white font-semibold'
+                  : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-[#1A294A]'
+              }`}
+            >
+              Este mês
+            </Button>
+            <Button
+              type="button"
+              variant={preset === 'mes_anterior' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleSelectPreset('mes_anterior')}
+              className={`text-xs h-8 rounded-xl ${
+                preset === 'mes_anterior'
+                  ? 'bg-[#0066FF] hover:bg-[#0052CC] text-white font-semibold'
+                  : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-[#1A294A]'
+              }`}
+            >
+              Mês anterior
+            </Button>
+            <Button
+              type="button"
+              variant={preset === '30dias' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleSelectPreset('30dias')}
+              className={`text-xs h-8 rounded-xl ${
+                preset === '30dias'
+                  ? 'bg-[#0066FF] hover:bg-[#0052CC] text-white font-semibold'
+                  : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-[#1A294A]'
+              }`}
+            >
+              30 dias
+            </Button>
+            <Button
+              type="button"
+              variant={preset === 'ano_atual' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleSelectPreset('ano_atual')}
+              className={`text-xs h-8 rounded-xl ${
+                preset === 'ano_atual'
+                  ? 'bg-[#0066FF] hover:bg-[#0052CC] text-white font-semibold'
+                  : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-[#1A294A]'
+              }`}
+            >
+              Este ano
+            </Button>
+            <Button
+              type="button"
+              variant={preset === 'personalizado' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleSelectPreset('personalizado')}
+              className={`text-xs h-8 rounded-xl ${
+                preset === 'personalizado'
+                  ? 'bg-[#0066FF] hover:bg-[#0052CC] text-white font-semibold'
+                  : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-[#1A294A]'
+              }`}
+            >
+              Personalizado
+            </Button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <Button
-                type="button"
-                variant={preset === 'hoje' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleSelectPreset('hoje')}
-                className={`text-xs h-8 ${preset === 'hoje' ? 'bg-teal-700 hover:bg-teal-800 text-white font-semibold' : 'text-slate-600'}`}
-              >
-                Hoje
-              </Button>
-              <Button
-                type="button"
-                variant={preset === '7dias' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleSelectPreset('7dias')}
-                className={`text-xs h-8 ${preset === '7dias' ? 'bg-teal-700 hover:bg-teal-800 text-white font-semibold' : 'text-slate-600'}`}
-              >
-                7 dias
-              </Button>
-              <Button
-                type="button"
-                variant={preset === 'mes_atual' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleSelectPreset('mes_atual')}
-                className={`text-xs h-8 ${preset === 'mes_atual' ? 'bg-teal-700 hover:bg-teal-800 text-white font-semibold' : 'text-slate-600'}`}
-              >
-                Este mês
-              </Button>
-              <Button
-                type="button"
-                variant={preset === 'mes_anterior' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleSelectPreset('mes_anterior')}
-                className={`text-xs h-8 ${preset === 'mes_anterior' ? 'bg-teal-700 hover:bg-teal-800 text-white font-semibold' : 'text-slate-600'}`}
-              >
-                Mês anterior
-              </Button>
-              <Button
-                type="button"
-                variant={preset === '30dias' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleSelectPreset('30dias')}
-                className={`text-xs h-8 ${preset === '30dias' ? 'bg-teal-700 hover:bg-teal-800 text-white font-semibold' : 'text-slate-600'}`}
-              >
-                30 dias
-              </Button>
-              <Button
-                type="button"
-                variant={preset === 'ano_atual' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleSelectPreset('ano_atual')}
-                className={`text-xs h-8 ${preset === 'ano_atual' ? 'bg-teal-700 hover:bg-teal-800 text-white font-semibold' : 'text-slate-600'}`}
-              >
-                Este ano
-              </Button>
-              <Button
-                type="button"
-                variant={preset === 'personalizado' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleSelectPreset('personalizado')}
-                className={`text-xs h-8 ${preset === 'personalizado' ? 'bg-teal-700 hover:bg-teal-800 text-white font-semibold' : 'text-slate-600'}`}
-              >
-                Personalizado
-              </Button>
-            </div>
-
-            {preset === 'personalizado' && (
-              <div className="flex items-center gap-2 ml-auto w-full sm:w-auto pt-2 sm:pt-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] text-slate-500 font-medium">De:</span>
-                  <Input
-                    type="date"
-                    value={customInicio}
-                    onChange={(e) => setCustomInicio(e.target.value)}
-                    className="h-8 text-xs bg-slate-50 border-slate-200 w-36"
-                  />
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] text-slate-500 font-medium">Até:</span>
-                  <Input
-                    type="date"
-                    value={customFim}
-                    onChange={(e) => setCustomFim(e.target.value)}
-                    className="h-8 text-xs bg-slate-50 border-slate-200 w-36"
-                  />
-                </div>
-                <Button
-                  size="sm"
-                  onClick={handleApplyCustom}
-                  className="bg-teal-700 hover:bg-teal-800 text-white text-xs h-8 px-3"
-                >
-                  Filtrar
-                </Button>
+          {preset === 'personalizado' && (
+            <div className="flex items-center gap-2 ml-auto w-full sm:w-auto pt-2 sm:pt-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                  De:
+                </span>
+                <Input
+                  type="date"
+                  value={customInicio}
+                  onChange={(e) => setCustomInicio(e.target.value)}
+                  className="h-8 text-xs bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] w-36 rounded-xl"
+                />
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                  Até:
+                </span>
+                <Input
+                  type="date"
+                  value={customFim}
+                  onChange={(e) => setCustomFim(e.target.value)}
+                  className="h-8 text-xs bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] w-36 rounded-xl"
+                />
+              </div>
+              <Button
+                size="sm"
+                onClick={handleApplyCustom}
+                className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs h-8 px-3 rounded-xl"
+              >
+                Filtrar
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Erro global */}
       {error && <ErrorState message={error} onRetry={carregarDados} />}
@@ -531,115 +561,125 @@ export default function RelatoriosPage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
             {/* 1. Faturamento */}
-            <div className="rounded-xl border border-emerald-200 bg-white p-3.5 shadow-xs hover:border-emerald-300 transition-colors">
+            <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 transition-all">
               <div className="flex items-center justify-between pb-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
                   Faturamento
                 </span>
-                <div className="h-7 w-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <div className="h-7 w-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                   <DollarSign className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-lg font-black tracking-tight text-slate-900 tabular-nums">
+              <div className="text-lg font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
                 {formatCurrency(resumoGeral?.faturamento)}
               </div>
-              <p className="text-[10px] text-slate-500 mt-0.5">Vendas finalizadas</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Vendas finalizadas
+              </p>
             </div>
 
             {/* 2. Nº Vendas */}
-            <div className="rounded-xl border border-blue-200 bg-white p-3.5 shadow-xs hover:border-blue-300 transition-colors">
+            <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 transition-all">
               <div className="flex items-center justify-between pb-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
                   Nº de Vendas
                 </span>
-                <div className="h-7 w-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                <div className="h-7 w-7 rounded-lg bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] flex items-center justify-center">
                   <ShoppingCart className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-lg font-black tracking-tight text-slate-900 tabular-nums">
+              <div className="text-lg font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
                 {resumoGeral?.numeroVendas ?? 0}
               </div>
-              <p className="text-[10px] text-slate-500 mt-0.5">Pedidos fechados</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Pedidos fechados
+              </p>
             </div>
 
             {/* 3. Ticket Médio */}
-            <div className="rounded-xl border border-purple-200 bg-white p-3.5 shadow-xs hover:border-purple-300 transition-colors">
+            <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 transition-all">
               <div className="flex items-center justify-between pb-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
                   Ticket Médio
                 </span>
-                <div className="h-7 w-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+                <div className="h-7 w-7 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
                   <Receipt className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-lg font-black tracking-tight text-slate-900 tabular-nums">
+              <div className="text-lg font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
                 {formatCurrency(resumoGeral?.ticketMedio)}
               </div>
-              <p className="text-[10px] text-slate-500 mt-0.5">Por venda</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Por venda</p>
             </div>
 
             {/* 4. Compras */}
-            <div className="rounded-xl border border-orange-200 bg-white p-3.5 shadow-xs hover:border-orange-300 transition-colors">
+            <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 transition-all">
               <div className="flex items-center justify-between pb-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
                   Nº Compras
                 </span>
-                <div className="h-7 w-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
+                <div className="h-7 w-7 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center">
                   <Package className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-lg font-black tracking-tight text-slate-900 tabular-nums">
+              <div className="text-lg font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
                 {resumoGeral?.totalCompras ?? 0}
               </div>
-              <p className="text-[10px] text-slate-500 mt-0.5">Ordens de compra</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Ordens de compra
+              </p>
             </div>
 
             {/* 5. Valor Compras */}
-            <div className="rounded-xl border border-pink-200 bg-white p-3.5 shadow-xs hover:border-pink-300 transition-colors">
+            <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 transition-all">
               <div className="flex items-center justify-between pb-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
                   Valor Comprado
                 </span>
-                <div className="h-7 w-7 rounded-lg bg-pink-50 text-pink-600 flex items-center justify-center">
+                <div className="h-7 w-7 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 flex items-center justify-center">
                   <TrendingDown className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-lg font-black tracking-tight text-slate-900 tabular-nums">
+              <div className="text-lg font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
                 {formatCurrency(resumoGeral?.valorCompras)}
               </div>
-              <p className="text-[10px] text-slate-500 mt-0.5">Total gasto</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Total gasto</p>
             </div>
 
             {/* 6. Receber Aberto */}
-            <div className="rounded-xl border border-red-200 bg-white p-3.5 shadow-xs hover:border-red-300 transition-colors">
+            <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 transition-all">
               <div className="flex items-center justify-between pb-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
                   Receber Aberto
                 </span>
-                <div className="h-7 w-7 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                <div className="h-7 w-7 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
                   <ArrowUpCircle className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-lg font-black tracking-tight text-red-700 tabular-nums">
+              <div className="text-lg font-black tracking-tight text-rose-600 dark:text-rose-400 tabular-nums">
                 {formatCurrency(resumoGeral?.contasReceberAberto)}
               </div>
-              <p className="text-[10px] text-slate-500 mt-0.5">Saldo pendente atual</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Saldo pendente atual
+              </p>
             </div>
 
             {/* 7. Pagar Aberto */}
-            <div className="rounded-xl border border-amber-200 bg-white p-3.5 shadow-xs hover:border-amber-300 transition-colors">
+            <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 transition-all">
               <div className="flex items-center justify-between pb-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
                   Pagar Aberto
                 </span>
-                <div className="h-7 w-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                <div className="h-7 w-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                   <ArrowDownCircle className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-lg font-black tracking-tight text-amber-700 tabular-nums">
+              <div className="text-lg font-black tracking-tight text-amber-600 dark:text-amber-400 tabular-nums">
                 {formatCurrency(resumoGeral?.contasPagarAberto)}
               </div>
-              <p className="text-[10px] text-slate-500 mt-0.5">Compromissos atuais</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Compromissos atuais
+              </p>
             </div>
           </div>
         )}
