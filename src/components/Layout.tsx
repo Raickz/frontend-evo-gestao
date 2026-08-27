@@ -9,7 +9,6 @@ import {
   Package,
   Truck,
   Boxes,
-  UserCheck,
   CircleDollarSign,
   Percent,
   Settings,
@@ -17,7 +16,6 @@ import {
   Menu,
   X,
   ChevronRight,
-  Building2,
   Bell,
   Search,
   ShieldCheck,
@@ -25,12 +23,17 @@ import {
   Layers,
   Briefcase,
   TrendingUp,
-  AlertTriangle,
   Clock,
   Sparkles,
+  Sun,
+  Moon,
+  HelpCircle,
+  CreditCard,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useEmpresa } from '@/hooks/use-empresa'
+import { useTheme } from '@/hooks/use-theme'
+import { EvoHexagonLogo } from '@/components/common/EvoLogo'
 import { formatPerfilBadge, canAccessPage, AppPage } from '@/lib/permissions'
 import AssinaturaBloqueadaPage from '@/pages/AssinaturaBloqueada'
 import { Button } from '@/components/ui/button'
@@ -111,6 +114,7 @@ const ALL_NAV_SECTIONS: NavSection[] = [
 export default function Layout() {
   const { user, usuario, logout } = useAuth()
   const { empresa } = useEmpresa()
+  const { theme, toggleTheme } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
@@ -158,90 +162,87 @@ export default function Layout() {
         .toUpperCase()
     : 'EV'
 
-  const empresaNome = empresa?.nome_fantasia || empresa?.nome || 'EVO Gestão'
+  const empresaNome = empresa?.nome_fantasia || empresa?.nome || 'Minha Empresa'
+  const planoNome = statusAssinatura?.plano_nome || 'Profissional'
 
   const trialExpiradoOuBloqueado = !loadingStatus && statusAssinatura && !acessoPermitido
 
   return (
-    <div className="flex min-h-screen bg-[#F5F7FB] text-[#0F172A] font-sans antialiased">
+    <div className="flex min-h-screen bg-[#F5F7FB] dark:bg-[#070D1C] text-slate-900 dark:text-slate-100 font-sans antialiased transition-colors duration-300">
       {/* Mobile Drawer Backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar: SOLID Navy #0A1328 (Rule 2: NO glassmorphism, no blur, no transparency, solid & crisp) */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col bg-[#0E1B2C] text-slate-300 border-r border-slate-800 transition-all duration-300 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col bg-[#0A1328] text-[#C0C6CF] border-r border-[#152342] transition-all duration-300 select-none ${
           collapsed ? 'w-[76px]' : 'w-[260px]'
         } ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
-        {/* Brand / Company Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800/80">
-          <div className="flex items-center gap-3 overflow-hidden">
-            {empresa?.logo_url ? (
-              <div className="h-10 w-10 rounded-xl object-contain bg-white/10 flex items-center justify-center p-1 shrink-0 overflow-hidden">
-                <img
-                  src={empresa.logo_url}
-                  alt={empresaNome}
-                  className="h-full w-full object-contain rounded-lg"
-                  referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    // Fallback visual caso falhe
-                    ;(e.currentTarget as HTMLElement).style.display = 'none'
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center text-white font-bold shadow-md shadow-teal-950/40 shrink-0">
-                <Building2 className="w-5 h-5 text-white" />
-              </div>
-            )}
+        {/* Brand Header with EVO Hexagon Logo */}
+        <div className="h-16 flex items-center justify-between px-4 border-b border-[#152342] bg-[#081022]">
+          <Link
+            to="/app/dashboard"
+            className="flex items-center gap-2.5 overflow-hidden group focus:outline-none"
+            onClick={() => setMobileOpen(false)}
+          >
+            <EvoHexagonLogo size={32} />
             {!collapsed && (
-              <div className="flex flex-col truncate">
-                <span className="text-sm font-bold text-white tracking-tight truncate">
+              <div className="flex flex-col truncate leading-none">
+                <div className="flex items-center gap-1">
+                  <span className="text-[15px] font-black tracking-tight text-white">EVO</span>
+                  <span className="text-[15px] font-bold tracking-tight text-[#0066FF]">
+                    Gestão
+                  </span>
+                </div>
+                <span className="text-[10px] text-[#6E7785] font-medium tracking-wide uppercase truncate mt-0.5">
                   {empresaNome}
                 </span>
-                <span className="text-[11px] text-teal-400 font-medium">EVO Gestão Comercial</span>
               </div>
             )}
-          </div>
+          </Link>
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="hidden lg:flex h-7 w-7 rounded-lg bg-slate-800/80 text-slate-400 hover:text-white items-center justify-center transition-colors"
+            className="hidden lg:flex h-7 w-7 rounded-lg bg-[#111F38] text-[#C0C6CF] hover:text-white hover:bg-[#0066FF]/20 border border-[#1E2F52] items-center justify-center transition-colors cursor-pointer"
             title={collapsed ? 'Expandir menu' : 'Recolher menu'}
           >
-            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            {collapsed ? (
+              <ChevronRight className="w-3.5 h-3.5" />
+            ) : (
+              <ChevronLeft className="w-3.5 h-3.5" />
+            )}
           </button>
           <button
             onClick={() => setMobileOpen(false)}
-            className="lg:hidden h-8 w-8 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center"
+            className="lg:hidden h-8 w-8 rounded-lg bg-[#111F38] text-[#C0C6CF] flex items-center justify-center cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Navigation Links */}
-        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6 custom-scrollbar">
-          {/* Link de Retorno ao Painel Admin para platform_admin */}
+        {/* Navigation Links with Blue EVO selection highlight */}
+        <div className="flex-1 overflow-y-auto py-3 px-2.5 space-y-5 custom-scrollbar">
+          {/* Link Platform Admin */}
           {usuario?.perfil === 'platform_admin' && (
             <div className="space-y-1">
               {!collapsed ? (
-                <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-sky-400 mb-2">
+                <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#0066FF] mb-1.5">
                   Plataforma
                 </p>
               ) : (
-                <div className="h-px bg-slate-800 my-2 mx-1" />
+                <div className="h-px bg-[#152342] my-2 mx-1" />
               )}
               <Link
                 to="/admin/dashboard"
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all bg-sky-950/70 text-sky-400 border border-sky-800/60 hover:bg-sky-900/50 hover:text-sky-300"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-bold transition-all bg-[#0066FF]/15 text-[#3385FF] border border-[#0066FF]/30 hover:bg-[#0066FF]/25 hover:text-white"
                 title={collapsed ? 'Painel Admin' : undefined}
               >
-                <ShieldCheck className="w-5 h-5 shrink-0 text-sky-400" />
+                <ShieldCheck className="w-4 h-4 shrink-0 text-[#0066FF]" />
                 {!collapsed && <span className="truncate">Painel Admin</span>}
               </Link>
             </div>
@@ -250,11 +251,11 @@ export default function Layout() {
           {visibleNavSections.map((section) => (
             <div key={section.title} className="space-y-1">
               {!collapsed ? (
-                <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400/80 mb-2">
+                <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#6E7785] mb-1">
                   {section.title}
                 </p>
               ) : (
-                <div className="h-px bg-slate-800 my-2 mx-1" />
+                <div className="h-px bg-[#152342] my-2 mx-1" />
               )}
               {section.items.map((item) => {
                 const isActive = location.pathname.startsWith(item.href)
@@ -264,19 +265,19 @@ export default function Layout() {
                     key={item.href}
                     to={item.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group relative ${
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all group relative ${
                       isActive
-                        ? 'bg-teal-600/20 text-teal-400 shadow-sm border border-teal-500/30'
-                        : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'
+                        ? 'bg-[#0066FF] text-white shadow-md shadow-[#0066FF]/25 font-semibold'
+                        : 'text-[#C0C6CF] hover:bg-[#111F38] hover:text-white'
                     }`}
                     title={collapsed ? item.title : undefined}
                   >
                     {isActive && (
-                      <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-teal-400 rounded-r-full" />
+                      <span className="absolute left-0 top-1 bottom-1 w-1 bg-white rounded-r-full" />
                     )}
                     <Icon
-                      className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-105 ${
-                        isActive ? 'text-teal-400' : 'text-slate-400 group-hover:text-slate-200'
+                      className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-105 ${
+                        isActive ? 'text-white' : 'text-[#6E7785] group-hover:text-[#C0C6CF]'
                       }`}
                     />
                     {!collapsed && <span className="truncate">{item.title}</span>}
@@ -287,41 +288,67 @@ export default function Layout() {
           ))}
         </div>
 
-        {/* User Card / Footer */}
-        <div className="p-3 border-t border-slate-800/80 bg-[#0B1522]">
+        {/* Bottom Sidebar Footer: Current Plan, User Info & Support (Requirement #3) */}
+        <div className="p-2.5 border-t border-[#152342] bg-[#081022] space-y-2">
           {!collapsed ? (
-            <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-slate-800/40 border border-slate-700/40">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <Avatar className="h-9 w-9 border border-teal-500/30 bg-teal-900/50 text-teal-200">
-                  <AvatarFallback className="bg-teal-800 text-xs font-bold text-white">
-                    {userInitials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="truncate">
-                  <p className="text-xs font-semibold text-white truncate">
-                    {usuario?.nome || user?.email?.split('@')[0] || 'Usuário'}
-                  </p>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-teal-950/80 text-teal-300 font-medium border border-teal-800/40">
-                    {roleInfo.label}
-                  </span>
+            <>
+              {/* Plan Badge + Support Quick Link */}
+              <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-[#0E1A33] border border-[#1A2C50] text-[11px]">
+                <div className="flex items-center gap-1.5 truncate">
+                  <CreditCard className="w-3.5 h-3.5 text-[#0066FF] shrink-0" />
+                  <span className="text-[#C0C6CF] truncate font-medium">Plano {planoNome}</span>
                 </div>
+                <button
+                  onClick={() => setModalSuporteOpen(true)}
+                  className="flex items-center gap-1 text-[10px] text-[#0066FF] hover:text-[#3385FF] font-semibold transition-colors shrink-0"
+                  title="Suporte EVO"
+                >
+                  <HelpCircle className="w-3 h-3" />
+                  Suporte
+                </button>
               </div>
+
+              {/* Logged User Info */}
+              <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-[#0E1A33]/70 border border-[#1A2C50]/60">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Avatar className="h-7 w-7 border border-[#0066FF]/40 bg-[#0066FF]/20 text-[#3385FF]">
+                    <AvatarFallback className="bg-[#0066FF] text-[10px] font-bold text-white">
+                      {userInitials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="truncate leading-tight">
+                    <p className="text-[11px] font-semibold text-white truncate">
+                      {usuario?.nome || user?.email?.split('@')[0] || 'Master Demo'}
+                    </p>
+                    <span className="text-[9px] text-[#6E7785] uppercase tracking-wider">
+                      {roleInfo.label}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-1 text-[#6E7785] hover:text-red-400 rounded-md hover:bg-red-500/10 transition-colors cursor-pointer"
+                  title="Sair do EVO Gestão"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-2 py-1">
+              <button
+                onClick={() => setModalSuporteOpen(true)}
+                className="p-1.5 text-[#6E7785] hover:text-[#0066FF] rounded-lg hover:bg-[#111F38] transition-colors"
+                title="Suporte EVO"
+              >
+                <HelpCircle className="w-4 h-4" />
+              </button>
               <button
                 onClick={handleLogout}
-                className="p-1.5 text-slate-400 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
+                className="p-1.5 text-[#6E7785] hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
                 title="Sair do sistema"
               >
                 <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex justify-center">
-              <button
-                onClick={handleLogout}
-                className="p-2 text-slate-400 hover:text-red-400 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
-                title="Sair do sistema"
-              >
-                <LogOut className="w-5 h-5" />
               </button>
             </div>
           )}
@@ -358,64 +385,91 @@ export default function Layout() {
           </div>
         )}
 
-        {/* Top Header */}
-        <header className="sticky top-0 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between shadow-xs">
+        {/* Header Superior Global (Light / Dark responsive) */}
+        <header className="sticky top-0 z-30 h-16 bg-white/80 dark:bg-[#0A1328]/85 backdrop-blur-md border-b border-slate-200/80 dark:border-[#152342] px-4 sm:px-6 flex items-center justify-between shadow-xs transition-colors duration-200">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100"
+              className="lg:hidden p-2 rounded-lg text-slate-600 dark:text-[#C0C6CF] hover:bg-slate-100 dark:hover:bg-[#111F38]"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-600 font-medium hidden sm:inline">
+              <span className="text-xs text-slate-500 dark:text-[#6E7785] font-medium hidden sm:inline">
                 EVO Gestão
               </span>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-400 hidden sm:inline" />
-              <h1 className="text-base font-bold text-slate-900">{currentRouteName()}</h1>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-[#6E7785] hidden sm:inline" />
+              <h1 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                {currentRouteName()}
+              </h1>
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-100/80 border border-slate-200 rounded-lg text-xs text-slate-600">
-              <Search className="w-3.5 h-3.5 text-slate-600" />
-              <span>Buscar registros (em breve)</span>
+            {/* Global Search Bar mockup */}
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-[#0E1A33] border border-slate-200 dark:border-[#1A2C50] rounded-lg text-xs text-slate-500 dark:text-[#C0C6CF]">
+              <Search className="w-3.5 h-3.5 text-slate-400 dark:text-[#6E7785]" />
+              <span>Buscar vendas, clientes ou produtos...</span>
             </div>
 
+            {/* Theme Toggle Button (Requirement #4, #15, #16) */}
             <Button
               variant="ghost"
               size="icon"
-              className="relative text-slate-600 hover:text-slate-900 rounded-lg h-9 w-9"
+              onClick={toggleTheme}
+              className="h-9 w-9 rounded-lg text-slate-600 dark:text-[#C0C6CF] hover:text-[#0066FF] dark:hover:text-[#3385FF] hover:bg-slate-100 dark:hover:bg-[#111F38]"
+              title={theme === 'dark' ? 'Alternar para Modo Claro' : 'Alternar para Modo Escuro'}
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-amber-400 transition-transform rotate-0 hover:rotate-90" />
+              ) : (
+                <Moon className="w-4 h-4 text-slate-700 transition-transform -rotate-12 hover:rotate-0" />
+              )}
+            </Button>
+
+            {/* Notifications Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative text-slate-600 dark:text-[#C0C6CF] hover:text-slate-900 dark:hover:text-white rounded-lg h-9 w-9 hover:bg-slate-100 dark:hover:bg-[#111F38]"
               title="Notificações"
             >
               <Bell className="w-4 h-4" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-amber-500 rounded-full" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-[#0066FF] rounded-full ring-2 ring-white dark:ring-[#0A1328]" />
             </Button>
 
+            {/* User Dropdown Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-600">
-                  <Avatar className="h-8 w-8 bg-teal-700 text-white font-bold text-xs">
-                    <AvatarFallback className="bg-teal-700 text-white">
+                <button className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-[#111F38] transition-colors focus:outline-none focus:ring-2 focus:ring-[#0066FF]">
+                  <Avatar className="h-8 w-8 bg-[#0066FF] text-white font-bold text-xs shadow-xs">
+                    <AvatarFallback className="bg-[#0066FF] text-white">
                       {userInitials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="text-left hidden sm:block">
-                    <p className="text-xs font-bold text-slate-900 leading-tight">
-                      {usuario?.nome || 'Usuário'}
+                    <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                      {usuario?.nome || 'Master Demo'}
                     </p>
-                    <p className="text-[10px] text-slate-600 font-medium">{roleInfo.label}</p>
+                    <p className="text-[10px] text-slate-500 dark:text-[#6E7785] font-medium">
+                      {roleInfo.label}
+                    </p>
                   </div>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent
+                align="end"
+                className="w-56 dark:bg-[#0A1328] dark:border-[#152342]"
+              >
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-semibold text-slate-900">
-                      {usuario?.nome || 'Usuário EVO'}
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                      {usuario?.nome || 'Master Demo'}
                     </p>
-                    <p className="text-xs text-slate-600 truncate">{user?.email}</p>
-                    <div className="pt-1 flex items-center gap-1 text-[11px] text-teal-700 font-medium">
+                    <p className="text-xs text-slate-500 dark:text-[#6E7785] truncate">
+                      {user?.email}
+                    </p>
+                    <div className="pt-1 flex items-center gap-1 text-[11px] text-[#0066FF] font-medium">
                       <ShieldCheck className="w-3.5 h-3.5" />
                       <span>{empresaNome}</span>
                     </div>
@@ -423,7 +477,7 @@ export default function Layout() {
                 </DropdownMenuLabel>
                 {usuario?.perfil === 'platform_admin' && (
                   <>
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator className="dark:bg-[#152342]" />
                     <DropdownMenuItem
                       onClick={() => navigate('/admin/dashboard')}
                       className="text-sky-600 font-semibold cursor-pointer"
@@ -435,17 +489,20 @@ export default function Layout() {
                 )}
                 {canAccessSettings && (
                   <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate('/app/configuracoes')}>
+                    <DropdownMenuSeparator className="dark:bg-[#152342]" />
+                    <DropdownMenuItem
+                      onClick={() => navigate('/app/configuracoes')}
+                      className="cursor-pointer dark:hover:bg-[#111F38]"
+                    >
                       <Settings className="w-4 h-4 mr-2" />
                       Configurações da Empresa
                     </DropdownMenuItem>
                   </>
                 )}
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="dark:bg-[#152342]" />
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className="text-red-600 font-medium cursor-pointer"
+                  className="text-red-600 font-medium cursor-pointer dark:hover:bg-[#111F38]"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Sair do EVO Gestão

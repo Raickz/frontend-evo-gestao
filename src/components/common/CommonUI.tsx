@@ -1,5 +1,4 @@
 import React, { ReactNode } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertCircle, RefreshCw, Layers } from 'lucide-react'
@@ -13,17 +12,21 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, badge, actions }: PageHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200/80 mb-6">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200/70 dark:border-[#152342] mb-6">
       <div>
         <div className="flex items-center gap-2.5">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
+          <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+            {title}
+          </h1>
           {badge && (
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-100 text-teal-800 border border-teal-200">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3385FF] border border-[#0066FF]/25">
               {badge}
             </span>
           )}
         </div>
-        {description && <p className="text-sm text-slate-600 mt-1">{description}</p>}
+        {description && (
+          <p className="text-sm text-slate-500 dark:text-[#C0C6CF] mt-1">{description}</p>
+        )}
       </div>
       {actions && <div className="flex items-center gap-2.5 flex-wrap">{actions}</div>}
     </div>
@@ -46,14 +49,17 @@ export function EmptyState({
   onAction,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center p-12 text-center rounded-xl border border-dashed border-slate-300 bg-white shadow-xs">
-      <div className="h-14 w-14 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center mb-4">
-        <Icon className="w-7 h-7" />
+    <div className="flex flex-col items-center justify-center p-10 text-center rounded-2xl border border-dashed border-slate-300 dark:border-[#1F3158] bg-white/50 dark:bg-[#0C172E]/50 backdrop-blur-md shadow-xs">
+      <div className="h-12 w-12 rounded-2xl bg-[#0066FF]/10 text-[#0066FF] flex items-center justify-center mb-3">
+        <Icon className="w-6 h-6" />
       </div>
-      <h3 className="text-base font-bold text-slate-900 mb-1">{title}</h3>
-      <p className="text-sm text-slate-600 max-w-sm mb-6">{description}</p>
+      <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">{title}</h3>
+      <p className="text-xs text-slate-500 dark:text-[#C0C6CF] max-w-sm mb-5">{description}</p>
       {actionLabel && onAction && (
-        <Button onClick={onAction} className="bg-teal-700 hover:bg-teal-800 text-white">
+        <Button
+          onClick={onAction}
+          className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs h-8"
+        >
           {actionLabel}
         </Button>
       )}
@@ -73,16 +79,16 @@ export function ErrorState({
   onRetry,
 }: ErrorStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center p-8 text-center rounded-xl border border-red-200 bg-red-50/50">
+    <div className="flex flex-col items-center justify-center p-8 text-center rounded-2xl border border-red-200 dark:border-red-900/40 bg-red-50/50 dark:bg-red-950/20 backdrop-blur-md">
       <AlertCircle className="w-8 h-8 text-red-500 mb-2" />
-      <h3 className="text-sm font-bold text-red-900 mb-1">{title}</h3>
-      <p className="text-xs text-red-700 max-w-md mb-4">{message}</p>
+      <h3 className="text-sm font-bold text-red-900 dark:text-red-300 mb-1">{title}</h3>
+      <p className="text-xs text-red-700 dark:text-red-400 max-w-md mb-4">{message}</p>
       {onRetry && (
         <Button
           variant="outline"
           size="sm"
           onClick={onRetry}
-          className="border-red-300 text-red-700 hover:bg-red-100 flex items-center gap-1.5"
+          className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/30 flex items-center gap-1.5 text-xs"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           Tentar novamente
@@ -94,16 +100,16 @@ export function ErrorState({
 
 export function TableSkeleton({ rows = 5, cols = 4 }: { rows?: number; cols?: number }) {
   return (
-    <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-200">
-      <div className="flex gap-4 border-b border-slate-100 pb-3">
+    <div className="space-y-3 bg-white/60 dark:bg-[#0D1933]/60 p-4 rounded-xl border border-slate-200/80 dark:border-[#18284B] backdrop-blur-md">
+      <div className="flex gap-4 border-b border-slate-100 dark:border-[#18284B] pb-3">
         {Array.from({ length: cols }).map((_, i) => (
-          <Skeleton key={`head-${i}`} className="h-4 flex-1" />
+          <Skeleton key={`head-${i}`} className="h-4 flex-1 dark:bg-slate-800" />
         ))}
       </div>
       {Array.from({ length: rows }).map((_, r) => (
         <div key={`row-${r}`} className="flex gap-4 py-2">
           {Array.from({ length: cols }).map((_, c) => (
-            <Skeleton key={`cell-${r}-${c}`} className="h-4 flex-1" />
+            <Skeleton key={`cell-${r}-${c}`} className="h-4 flex-1 dark:bg-slate-800/60" />
           ))}
         </div>
       ))}
@@ -125,24 +131,28 @@ export function MetricCard({
   trend?: string
 }) {
   return (
-    <Card className="rounded-xl border border-slate-200 bg-white shadow-xs hover:shadow-md transition-shadow">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+    <div className="glass-card glass-card-hover rounded-2xl p-4 flex flex-col justify-between space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
           {title}
-        </CardTitle>
-        <div className="h-8 w-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center">
+        </span>
+        <div className="h-8 w-8 rounded-xl bg-[#0066FF]/10 dark:bg-[#0066FF]/20 text-[#0066FF] dark:text-[#3385FF] flex items-center justify-center">
           <Icon className="w-4 h-4" />
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold tracking-tight text-slate-900 tabular-nums">{value}</div>
+      </div>
+      <div>
+        <div className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white tabular-nums">
+          {value}
+        </div>
         {(subtitle || trend) && (
-          <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-            {trend && <span className="font-medium text-emerald-600">{trend}</span>}
+          <p className="text-xs text-slate-500 dark:text-[#6E7785] mt-1 flex items-center gap-1">
+            {trend && (
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">{trend}</span>
+            )}
             {subtitle && <span>{subtitle}</span>}
           </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

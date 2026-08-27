@@ -9,50 +9,92 @@
   :root {
     --font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-    /* Background & surfaces */
-    --background: 220 33% 97%; /* #F5F7FB */
-    --foreground: 222.2 84% 4.9%; /* #0F172A */
+    /* Background & surfaces - Light Mode EVO */
+    --background: 220 33% 98%; /* Clean crisp surface */
+    --foreground: 222 47% 11%; /* #0A1328 deep navy */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Primary: Deep Teal #0F766E */
-    --primary: 175 77% 26%;
+    /* Primary: Official EVO Blue #0066FF */
+    --primary: 216 100% 50%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary */
-    --secondary: 214.3 31.8% 91.4%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary / Neutral */
+    --secondary: 217 16% 94%;
+    --secondary-foreground: 222 47% 11%;
 
     /* Muted */
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%; /* #475569 */
+    --muted: 216 20% 95%;
+    --muted-foreground: 218 10% 48%; /* #6E7785 */
 
-    /* Accent Amber #F59E0B */
-    --accent: 38 92% 50%;
-    --accent-foreground: 24 9.8% 10%;
+    /* Accent */
+    --accent: 216 100% 50%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%; /* #E2E8F0 */
-    --input: 214.3 31.8% 91.4%;
-    --ring: 175 77% 26%;
+    --border: 218 16% 90%;
+    --input: 218 16% 90%;
+    --ring: 216 100% 50%;
 
     --radius: 0.75rem;
 
-    /* Sidebar Dark Petrol #0E1B2C */
-    --sidebar-background: 214 51% 11%;
-    --sidebar-foreground: 215 20% 65%; /* #94A3B8 */
-    --sidebar-primary: 175 77% 26%;
+    /* Sidebar Solid Navy #0A1328 (Never glassmorphism) */
+    --sidebar-background: 222 60% 10%; /* #0A1328 */
+    --sidebar-foreground: 217 12% 78%; /* #C0C6CF */
+    --sidebar-primary: 216 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 18%;
-    --sidebar-ring: 175 77% 35%;
+    --sidebar-accent: 222 45% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 222 40% 16%;
+    --sidebar-ring: 216 100% 50%;
+  }
+
+  .dark {
+    /* Background & surfaces - Dark Mode EVO Deep Navy #070D1C / #0A1328 */
+    --background: 224 64% 6%; /* #060B18 ultra-deep navy */
+    --foreground: 210 40% 98%;
+
+    --card: 224 55% 9%; /* dark card base with glass layers */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 224 55% 9%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Primary: Official EVO Blue #0066FF */
+    --primary: 216 100% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 223 35% 14%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 223 35% 14%;
+    --muted-foreground: 217 12% 70%;
+
+    --accent: 216 100% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 223 30% 18%;
+    --input: 223 30% 18%;
+    --ring: 216 100% 50%;
+
+    /* Sidebar remains solid dark navy */
+    --sidebar-background: 222 60% 8%;
+    --sidebar-foreground: 217 12% 78%;
+    --sidebar-primary: 216 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 45% 14%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 222 35% 14%;
+    --sidebar-ring: 216 100% 50%;
   }
 
   * {
@@ -89,5 +131,59 @@
 
   .animate-fade-in-up {
     animation: fade-in-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Glassmorphism utility classes for EVO Gestão cards and panels */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow:
+      0 4px 20px -2px rgba(10, 19, 40, 0.04),
+      0 2px 6px -1px rgba(10, 19, 40, 0.02);
+  }
+
+  .dark .glass-card {
+    background: rgba(14, 25, 48, 0.65);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(192, 198, 207, 0.12);
+    box-shadow:
+      0 8px 30px -4px rgba(0, 0, 0, 0.35),
+      0 2px 8px -1px rgba(0, 102, 255, 0.05);
+  }
+
+  .glass-card-hover {
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glass-card-hover:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0, 102, 255, 0.3);
+    box-shadow:
+      0 10px 25px -3px rgba(0, 102, 255, 0.08),
+      0 4px 10px -2px rgba(10, 19, 40, 0.04);
+  }
+
+  .dark .glass-card-hover:hover {
+    border-color: rgba(0, 102, 255, 0.45);
+    box-shadow:
+      0 12px 32px -4px rgba(0, 0, 0, 0.5),
+      0 0 20px 0 rgba(0, 102, 255, 0.15);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(110, 119, 133, 0.3);
+    border-radius: 9999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(110, 119, 133, 0.5);
   }
 }

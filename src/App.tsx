@@ -6,6 +6,7 @@ import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AuthProvider } from '@/hooks/use-auth'
 import { EmpresaProvider } from '@/hooks/use-empresa'
+import { ThemeProvider } from '@/hooks/use-theme'
 import { ProtectedRoute, RoleRouteGuard } from '@/components/ProtectedRoute'
 import { Building2, Loader2 } from 'lucide-react'
 import Layout from '@/components/Layout'
@@ -107,171 +108,172 @@ const App = () => (
   <BrowserRouter>
     <AuthProvider>
       <EmpresaProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner position="bottom-right" />
-          <Routes>
-            {/* Root redirect com verificação de bootstrap */}
-            <Route path="/" element={<BootstrapRedirect />} />
+        <ThemeProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner position="bottom-right" />
+            <Routes>
+              {/* Root redirect com verificação de bootstrap */}
+              <Route path="/" element={<BootstrapRedirect />} />
 
-            {/* Página pública de Planos */}
-            <Route path="/planos" element={<PlanosPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/checkout/sucesso" element={<CheckoutSucessoPage />} />
+              {/* Página pública de Planos */}
+              <Route path="/planos" element={<PlanosPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/checkout/sucesso" element={<CheckoutSucessoPage />} />
 
-            {/* Setup público */}
-            <Route path="/setup" element={<SetupPage />} />
+              {/* Setup público */}
+              <Route path="/setup" element={<SetupPage />} />
 
-            {/* Auth screen */}
-            <Route path="/auth" element={<AuthPage />} />
+              {/* Auth screen */}
+              <Route path="/auth" element={<AuthPage />} />
 
-            {/* Rotas Administrativas da Plataforma (Platform Admin) */}
-            <Route
-              path="/admin"
-              element={
-                <AdminProtectedRoute>
-                  <AdminLayout />
-                </AdminProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="/admin/dashboard" replace />} />
-              <Route path="dashboard" element={<AdminDashboardPage />} />
-              <Route path="empresas" element={<AdminEmpresasPage />} />
-              <Route path="planos" element={<AdminPlanosPage />} />
-              <Route path="transacoes" element={<AdminTransacoesPage />} />
-              <Route path="historico" element={<AdminHistoricoPage />} />
-            </Route>
-            {/* Protected App Shell */}
-            <Route
-              path="/app"
-              element={
-                <ProtectedRoute>
-                  <Layout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="/app/dashboard" replace />} />
+              {/* Rotas Administrativas da Plataforma (Platform Admin) */}
               <Route
-                path="dashboard"
+                path="/admin"
                 element={
-                  <RoleRouteGuard page="dashboard">
-                    <DashboardPage />
-                  </RoleRouteGuard>
+                  <AdminProtectedRoute>
+                    <AdminLayout />
+                  </AdminProtectedRoute>
                 }
-              />
+              >
+                <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                <Route path="dashboard" element={<AdminDashboardPage />} />
+                <Route path="empresas" element={<AdminEmpresasPage />} />
+                <Route path="planos" element={<AdminPlanosPage />} />
+                <Route path="transacoes" element={<AdminTransacoesPage />} />
+                <Route path="historico" element={<AdminHistoricoPage />} />
+              </Route>
+              {/* Protected App Shell */}
               <Route
-                path="relatorios"
+                path="/app"
                 element={
-                  <RoleRouteGuard page="relatorios">
-                    <RelatoriosPage />
-                  </RoleRouteGuard>
+                  <ProtectedRoute>
+                    <Layout />
+                  </ProtectedRoute>
                 }
-              />
-              <Route
-                path="relatorio-lucro"
-                element={
-                  <RoleRouteGuard page="relatorio_lucro">
-                    <RelatorioLucroPage />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="clientes"
-                element={
-                  <RoleRouteGuard page="clientes">
-                    <ClientesPage />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="produtos"
-                element={
-                  <RoleRouteGuard page="produtos">
-                    <ProdutosPage />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="fornecedores"
-                element={
-                  <RoleRouteGuard page="fornecedores">
-                    <FornecedoresPage />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="compras"
-                element={
-                  <RoleRouteGuard page="compras">
-                    <ComprasPage />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="estoque"
-                element={
-                  <RoleRouteGuard page="estoque">
-                    <EstoquePage />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="vendas"
-                element={
-                  <RoleRouteGuard page="vendas">
-                    <VendasPage />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="pedidos"
-                element={
-                  <RoleRouteGuard page="pedidos">
-                    <PedidosPage />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="financeiro"
-                element={
-                  <RoleRouteGuard page="financeiro">
-                    <FinanceiroPage />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="vendedores"
-                element={
-                  <RoleRouteGuard page="vendedores">
-                    <VendedoresPage />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="comissoes"
-                element={
-                  <RoleRouteGuard page="comissoes">
-                    <ComissoesPage />
-                  </RoleRouteGuard>
-                }
-              />
-              <Route
-                path="configuracoes"
-                element={
-                  <RoleRouteGuard page="configuracoes">
-                    <ConfiguracoesPage />
-                  </RoleRouteGuard>
-                }
-              />
-            </Route>
+              >
+                <Route index element={<Navigate to="/app/dashboard" replace />} />
+                <Route
+                  path="dashboard"
+                  element={
+                    <RoleRouteGuard page="dashboard">
+                      <DashboardPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="relatorios"
+                  element={
+                    <RoleRouteGuard page="relatorios">
+                      <RelatoriosPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="relatorio-lucro"
+                  element={
+                    <RoleRouteGuard page="relatorio_lucro">
+                      <RelatorioLucroPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="clientes"
+                  element={
+                    <RoleRouteGuard page="clientes">
+                      <ClientesPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="produtos"
+                  element={
+                    <RoleRouteGuard page="produtos">
+                      <ProdutosPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="fornecedores"
+                  element={
+                    <RoleRouteGuard page="fornecedores">
+                      <FornecedoresPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="compras"
+                  element={
+                    <RoleRouteGuard page="compras">
+                      <ComprasPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="estoque"
+                  element={
+                    <RoleRouteGuard page="estoque">
+                      <EstoquePage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="vendas"
+                  element={
+                    <RoleRouteGuard page="vendas">
+                      <VendasPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="pedidos"
+                  element={
+                    <RoleRouteGuard page="pedidos">
+                      <PedidosPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="financeiro"
+                  element={
+                    <RoleRouteGuard page="financeiro">
+                      <FinanceiroPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="vendedores"
+                  element={
+                    <RoleRouteGuard page="vendedores">
+                      <VendedoresPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="comissoes"
+                  element={
+                    <RoleRouteGuard page="comissoes">
+                      <ComissoesPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="configuracoes"
+                  element={
+                    <RoleRouteGuard page="configuracoes">
+                      <ConfiguracoesPage />
+                    </RoleRouteGuard>
+                  }
+                />
+              </Route>
 
-            {/* 404 Route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </TooltipProvider>
+              {/* 404 Route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </TooltipProvider>
+        </ThemeProvider>
       </EmpresaProvider>
     </AuthProvider>
   </BrowserRouter>
 )
-
 export default App
