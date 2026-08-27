@@ -63,7 +63,48 @@ export const PagamentosService = {
       )
 
       if (error) {
-        throw error
+        let extractedMessage: string | null = null
+
+        try {
+          const ctx = (error as any)?.context
+          const body = ctx?.body !== undefined ? ctx.body : ctx
+
+          let rawText: string | null = null
+          let parsedData: any = null
+
+          if (body && (body instanceof ReadableStream || typeof body?.getReader === 'function')) {
+            rawText = await new Response(body).text()
+          } else if (ctx && typeof ctx.text === 'function') {
+            rawText = await ctx.text()
+          } else if (typeof body === 'string') {
+            rawText = body
+          } else if (body && typeof body === 'object') {
+            parsedData = body
+          }
+
+          if (rawText) {
+            try {
+              parsedData = JSON.parse(rawText)
+            } catch {
+              extractedMessage = rawText
+            }
+          }
+
+          if (parsedData && typeof parsedData === 'object') {
+            if (typeof parsedData.error === 'string' && parsedData.error.trim()) {
+              extractedMessage = parsedData.error.trim()
+            } else if (typeof parsedData.message === 'string' && parsedData.message.trim()) {
+              extractedMessage = parsedData.message.trim()
+            } else if (parsedData.error && typeof parsedData.error.message === 'string') {
+              extractedMessage = parsedData.error.message.trim()
+            }
+          }
+        } catch {
+          // Silencioso para permitir fallback seguro
+        }
+
+        const finalMessage = extractedMessage || error.message || 'Falha ao iniciar pagamento'
+        throw new Error(finalMessage)
       }
 
       if (data?.error) {
