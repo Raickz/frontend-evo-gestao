@@ -52,39 +52,25 @@ export const PagamentosService = {
     empresaId?: string,
   ): Promise<{ data: CheckoutPreferenceResponse | null; error: Error | null }> {
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
+      const { data, error } = await supabase.functions.invoke<CheckoutPreferenceResponse>(
+        'mp-checkout',
+        {
+          body: {
+            plano_slug: planoSlug,
+            empresa_id: empresaId,
+          },
+        },
+      )
 
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string
-
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      }
-      if (supabaseAnonKey) {
-        headers['apikey'] = supabaseAnonKey
-      }
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`
+      if (error) {
+        throw error
       }
 
-      const response = await fetch(`${supabaseUrl}/functions/v1/mp-checkout`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          plano_slug: planoSlug,
-          empresa_id: empresaId,
-        }),
-      })
-
-      const data = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw new Error(data?.error || 'Erro ao gerar checkout com Mercado Pago.')
+      if (data?.error) {
+        throw new Error(data.error)
       }
 
-      return { data, error: null }
+      return { data: data ?? null, error: null }
     } catch (err: any) {
       console.error('PagamentosService.criarCheckout:', err)
       return { data: null, error: err instanceof Error ? err : new Error(String(err)) }
