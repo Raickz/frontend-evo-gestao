@@ -776,7 +776,9 @@ export default function VendasPage() {
             {/* Segunda linha de filtros: Datas */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-slate-100 dark:border-[#1A294A]">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">De:</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                  De:
+                </span>
                 <Input
                   type="date"
                   value={filtroDataInicio}
@@ -788,7 +790,9 @@ export default function VendasPage() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">Até:</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                  Até:
+                </span>
                 <Input
                   type="date"
                   value={filtroDataFim}
@@ -879,7 +883,9 @@ export default function VendasPage() {
                           )}
                         </td>
                         <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400">
-                          {venda.vendedores?.nome || <span className="text-slate-400 dark:text-slate-500">-</span>}
+                          {venda.vendedores?.nome || (
+                            <span className="text-slate-400 dark:text-slate-500">-</span>
+                          )}
                         </td>
                         <td className="py-3.5 px-4">
                           {getFormaPagamentoBadge(venda.forma_pagamento)}
@@ -916,7 +922,11 @@ export default function VendasPage() {
                   <span className="font-semibold text-slate-900 dark:text-white">
                     {Math.min(pagina * limitePorPagina, totalVendas)}
                   </span>{' '}
-                  de <span className="font-semibold text-slate-900 dark:text-white">{totalVendas}</span> vendas
+                  de{' '}
+                  <span className="font-semibold text-slate-900 dark:text-white">
+                    {totalVendas}
+                  </span>{' '}
+                  vendas
                 </div>
 
                 <div className="flex items-center gap-1.5">
@@ -961,7 +971,9 @@ export default function VendasPage() {
               <div className="p-4 border-b border-slate-200/80 dark:border-[#1A294A] bg-slate-50/80 dark:bg-[#0A1328]/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <Package className="w-5 h-5 text-[#0066FF] dark:text-[#3B82F6]" />
-                  <h3 className="font-bold text-slate-900 dark:text-white text-sm">Catálogo de Produtos</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-white text-sm">
+                    Catálogo de Produtos
+                  </h3>
                 </div>
                 <div className="w-full sm:w-64 relative">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -974,7 +986,7 @@ export default function VendasPage() {
                 </div>
               </div>
 
-              <CardContent className="p-4">
+              <div className="p-4">
                 {loadingProdutos ? (
                   <div className="space-y-3 py-6">
                     <TableSkeleton rows={4} cols={3} />
@@ -1111,7 +1123,9 @@ export default function VendasPage() {
               <div className="p-4 border-b border-slate-200/80 dark:border-[#1A294A] bg-slate-50/80 dark:bg-[#0A1328]/80 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <ShoppingCart className="w-5 h-5 text-[#0066FF] dark:text-[#3B82F6]" />
-                  <h3 className="font-bold text-slate-900 dark:text-white text-sm">Resumo da Venda</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-white text-sm">
+                    Resumo da Venda
+                  </h3>
                 </div>
                 {carrinho.length > 0 && (
                   <button
