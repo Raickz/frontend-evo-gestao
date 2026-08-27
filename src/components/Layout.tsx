@@ -348,7 +348,7 @@ export default function Layout() {
               <Button
                 size="sm"
                 variant="secondary"
-                onClick={() => setModalSuporteOpen(true)}
+                onClick={() => navigate('/planos')}
                 className="h-7 px-2.5 text-[11px] bg-white text-rose-700 hover:bg-rose-50 font-bold shadow-xs flex items-center gap-1"
               >
                 <Sparkles className="w-3 h-3 text-amber-500" />
@@ -458,7 +458,7 @@ export default function Layout() {
         {/* Page Main Content with smooth fade */}
         <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl w-full mx-auto animate-fade-in-up">
           {trialExpiradoOuBloqueado ? (
-            <AssinaturaBloqueadaPage onVerPlanos={() => setModalSuporteOpen(true)} />
+            <AssinaturaBloqueadaPage onVerPlanos={() => navigate('/planos')} />
           ) : (
             <Outlet />
           )}

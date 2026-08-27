@@ -49,8 +49,7 @@ export default function AssinaturaBloqueadaPage({ onVerPlanos }: AssinaturaBloqu
     if (onVerPlanos) {
       onVerPlanos()
     } else {
-      // Abre o modal informativo com suporte
-      setModalSuporteOpen(true)
+      navigate('/planos')
     }
   }
 
