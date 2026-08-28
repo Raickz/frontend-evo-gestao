@@ -39,6 +39,7 @@ import { useEmpresa } from '@/hooks/use-empresa'
 import {
   PageHeader,
   MetricCard,
+  AnimatedNumber,
   TableSkeleton,
   ErrorState,
   EmptyState,
