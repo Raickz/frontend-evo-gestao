@@ -512,11 +512,10 @@ export default function Layout() {
 
           <div className="py-3 text-xs space-y-3">
             <div className="p-3.5 rounded-xl border border-sky-100 bg-sky-50/50 space-y-1.5">
-              <p className="font-semibold text-sky-900">
-                Atendimento ao Cliente
-              </p>
+              <p className="font-semibold text-sky-900">Atendimento ao Cliente</p>
               <p className="text-slate-600">
-                Estamos disponíveis para auxiliar no uso das ferramentas, configurações da sua empresa e dúvidas operacionais.
+                Estamos disponíveis para auxiliar no uso das ferramentas, configurações da sua
+                empresa e dúvidas operacionais.
               </p>
             </div>
             <div className="p-3 rounded-lg border border-slate-100 bg-slate-50 flex items-center justify-between">

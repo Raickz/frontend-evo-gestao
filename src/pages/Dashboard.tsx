@@ -28,6 +28,8 @@ import {
   Percent,
   FileSpreadsheet,
   Zap,
+  Calendar,
+  Sparkles,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { canAccessPage } from '@/lib/permissions'
