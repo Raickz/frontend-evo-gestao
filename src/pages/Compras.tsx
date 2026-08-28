@@ -1780,58 +1780,60 @@ export default function ComprasPage() {
           if (!submittingConfirmar) setModalConfirmarAberta(open)
         }}
       >
-        <DialogContent className="max-w-md w-full">
-          <DialogHeader>
-            <div className="flex items-center gap-2 text-teal-800">
-              <CheckCircle2 className="w-5 h-5 text-teal-600" />
-              <DialogTitle className="text-base font-bold text-slate-900">
+        <DialogContent className="max-w-md w-full border border-slate-200/80 dark:border-[#1A294A] bg-white dark:bg-[#0A1328] shadow-2xl rounded-2xl">
+          <DialogHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
+            <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
+              <CheckCircle2 className="w-5 h-5 text-[#0066FF] dark:text-[#3B82F6]" />
+              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
                 Confirmar Compra #{compraParaConfirmar?.numero}
               </DialogTitle>
             </div>
-            <DialogDescription className="text-xs text-slate-600 pt-1">
+            <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF] pt-1">
               Revise o resumo antes de oficializar a entrada no estoque.
             </DialogDescription>
           </DialogHeader>
 
           {compraParaConfirmar && (
             <div className="space-y-3 py-2 text-xs">
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1.5">
-                <div className="flex justify-between text-slate-700">
-                  <span className="text-slate-500">Fornecedor:</span>
-                  <span className="font-semibold text-slate-900">
+              <div className="p-3.5 bg-slate-50 dark:bg-[#071126] rounded-xl border border-slate-200/80 dark:border-[#1A294A] space-y-2">
+                <div className="flex justify-between text-slate-700 dark:text-slate-300">
+                  <span className="text-slate-500 dark:text-[#C0C6CF]/70">Fornecedor:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">
                     {compraParaConfirmar.fornecedores?.nome || 'Fornecedor'}
                   </span>
                 </div>
-                <div className="flex justify-between text-slate-700">
-                  <span className="text-slate-500">Itens na Compra:</span>
-                  <span className="font-medium text-slate-900">
+                <div className="flex justify-between text-slate-700 dark:text-slate-300">
+                  <span className="text-slate-500 dark:text-[#C0C6CF]/70">Itens na Compra:</span>
+                  <span className="font-medium text-slate-900 dark:text-white">
                     {compraParaConfirmar.itens_compra?.length ?? 'Itens inclusos'}
                   </span>
                 </div>
-                <div className="flex justify-between text-slate-700">
-                  <span className="text-slate-500">Forma de Pagamento:</span>
-                  <span className="font-medium text-slate-900">
+                <div className="flex justify-between text-slate-700 dark:text-slate-300">
+                  <span className="text-slate-500 dark:text-[#C0C6CF]/70">Forma de Pagamento:</span>
+                  <span className="font-medium text-slate-900 dark:text-white">
                     {compraParaConfirmar.forma_pagamento === 'pago' ? 'À Vista / Pago' : 'A Prazo'}
                   </span>
                 </div>
                 {compraParaConfirmar.forma_pagamento === 'a_prazo' && (
-                  <div className="flex justify-between text-slate-700">
-                    <span className="text-slate-500">Vencimento da Conta:</span>
-                    <span className="font-medium text-slate-900">
+                  <div className="flex justify-between text-slate-700 dark:text-slate-300">
+                    <span className="text-slate-500 dark:text-[#C0C6CF]/70">
+                      Vencimento da Conta:
+                    </span>
+                    <span className="font-medium text-slate-900 dark:text-white">
                       {formatDate(compraParaConfirmar.vencimento)}
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between text-slate-700 pt-1 border-t border-slate-200 font-bold">
-                  <span>Total a Pagar:</span>
-                  <span className="text-teal-700 font-black text-sm">
+                <div className="flex justify-between text-slate-700 dark:text-slate-300 pt-1.5 border-t border-slate-200/80 dark:border-[#1A294A] font-bold">
+                  <span className="text-slate-900 dark:text-white">Total a Pagar:</span>
+                  <span className="text-[#0066FF] dark:text-[#3B82F6] font-black text-sm tabular-nums">
                     {formatCurrency(compraParaConfirmar.total || 0)}
                   </span>
                 </div>
               </div>
 
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2.5 text-amber-900 text-xs">
-                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2.5 text-amber-800 dark:text-amber-300 text-xs">
+                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <p className="leading-relaxed">
                   Após confirmar, o estoque será atualizado, as movimentações serão registradas e
                   uma conta a pagar poderá ser criada automaticamente.
@@ -1840,13 +1842,13 @@ export default function ComprasPage() {
             </div>
           )}
 
-          <DialogFooter className="pt-2 flex flex-col sm:flex-row gap-2">
+          <DialogFooter className="pt-3 border-t border-slate-100 dark:border-[#1A294A] flex flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               type="button"
               disabled={submittingConfirmar}
               onClick={() => setModalConfirmarAberta(false)}
-              className="text-xs"
+              className="text-xs h-9 rounded-xl border-slate-200 dark:border-[#1A294A]"
             >
               Voltar
             </Button>
@@ -1854,7 +1856,7 @@ export default function ComprasPage() {
               type="button"
               disabled={submittingConfirmar}
               onClick={handleExecutarConfirmacao}
-              className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-2 shadow-xs"
+              className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold flex items-center gap-2 rounded-xl shadow-xs"
             >
               {submittingConfirmar ? (
                 <>
@@ -1873,18 +1875,18 @@ export default function ComprasPage() {
           DIALOG 4: DETALHES DA COMPRA
           ========================================================================= */}
       <Dialog open={modalDetalhesAberta} onOpenChange={setModalDetalhesAberta}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border border-slate-200/80 dark:border-[#1A294A] bg-white dark:bg-[#0A1328] shadow-2xl rounded-2xl">
+          <DialogHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-teal-700" />
-                <DialogTitle className="text-base font-bold text-slate-900">
+                <FileText className="w-5 h-5 text-[#0066FF] dark:text-[#3B82F6]" />
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
                   Compra #{compraDetalhe?.numero}
                 </DialogTitle>
               </div>
               {compraDetalhe?.status && getStatusBadge(compraDetalhe.status)}
             </div>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF] pt-1">
               Registrada em {formatDate(compraDetalhe?.data_compra || compraDetalhe?.created_at)}
             </DialogDescription>
           </DialogHeader>
@@ -1894,38 +1896,42 @@ export default function ComprasPage() {
               Carregando detalhes da compra...
             </div>
           ) : compraDetalhe ? (
-            <div className="space-y-4 text-xs">
+            <div className="space-y-4 text-xs py-2">
               {/* Fornecedor & Pagamento */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50 dark:bg-[#071126] rounded-xl border border-slate-200/80 dark:border-[#1A294A]">
                 <div>
-                  <span className="text-[11px] font-semibold text-slate-500 uppercase block mb-1">
+                  <span className="text-[11px] font-semibold text-slate-500 dark:text-[#C0C6CF]/70 uppercase block mb-1">
                     Fornecedor
                   </span>
-                  <p className="font-bold text-slate-900 text-sm">
+                  <p className="font-bold text-slate-900 dark:text-white text-sm">
                     {compraDetalhe.fornecedores?.nome || 'Fornecedor'}
                   </p>
                   {compraDetalhe.fornecedores?.documento && (
-                    <p className="text-slate-600">Doc: {compraDetalhe.fornecedores.documento}</p>
+                    <p className="text-slate-600 dark:text-slate-400">
+                      Doc: {compraDetalhe.fornecedores.documento}
+                    </p>
                   )}
                   {compraDetalhe.fornecedores?.telefone && (
-                    <p className="text-slate-600">Tel: {compraDetalhe.fornecedores.telefone}</p>
+                    <p className="text-slate-600 dark:text-slate-400">
+                      Tel: {compraDetalhe.fornecedores.telefone}
+                    </p>
                   )}
                 </div>
 
                 <div>
-                  <span className="text-[11px] font-semibold text-slate-500 uppercase block mb-1">
+                  <span className="text-[11px] font-semibold text-slate-500 dark:text-[#C0C6CF]/70 uppercase block mb-1">
                     Condições de Pagamento
                   </span>
-                  <p className="font-bold text-slate-900 text-sm">
+                  <p className="font-bold text-slate-900 dark:text-white text-sm">
                     {compraDetalhe.forma_pagamento === 'pago' ? 'À Vista (Pago)' : 'A Prazo'}
                   </p>
                   {compraDetalhe.vencimento && (
-                    <p className="text-slate-600">
+                    <p className="text-slate-600 dark:text-slate-400">
                       Vencimento: {formatDate(compraDetalhe.vencimento)}
                     </p>
                   )}
                   {compraDetalhe.valor_pago > 0 && (
-                    <p className="text-emerald-700 font-semibold">
+                    <p className="text-emerald-600 dark:text-emerald-400 font-semibold tabular-nums">
                       Valor Pago: {formatCurrency(compraDetalhe.valor_pago)}
                     </p>
                   )}
@@ -1934,10 +1940,12 @@ export default function ComprasPage() {
 
               {/* Tabela de Itens */}
               <div className="space-y-2">
-                <span className="font-bold text-slate-900 block">Itens da Compra</span>
-                <div className="border border-slate-200 rounded-lg overflow-hidden">
+                <span className="font-bold text-slate-900 dark:text-white block">
+                  Itens da Compra
+                </span>
+                <div className="border border-slate-200/80 dark:border-[#1A294A] rounded-xl overflow-hidden">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-50 text-[11px] font-bold uppercase text-slate-500 border-b border-slate-200">
+                    <thead className="bg-slate-50/80 dark:bg-[#071126] text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400 border-b border-slate-200/80 dark:border-[#1A294A]">
                       <tr>
                         <th className="py-2.5 px-3">Produto</th>
                         <th className="py-2.5 px-3 text-center">Qtd</th>
@@ -1945,7 +1953,7 @@ export default function ComprasPage() {
                         <th className="py-2.5 px-3 text-right">Subtotal</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                       {!compraDetalhe.itens_compra || compraDetalhe.itens_compra.length === 0 ? (
                         <tr>
                           <td colSpan={4} className="py-4 text-center text-slate-400 italic">
@@ -1954,9 +1962,12 @@ export default function ComprasPage() {
                         </tr>
                       ) : (
                         compraDetalhe.itens_compra.map((item: any) => (
-                          <tr key={item.id}>
+                          <tr
+                            key={item.id}
+                            className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02]"
+                          >
                             <td className="py-2.5 px-3">
-                              <p className="font-semibold text-slate-900">
+                              <p className="font-semibold text-slate-900 dark:text-white">
                                 {item.produtos?.nome || 'Produto'}
                               </p>
                               {item.produtos?.codigo && (
@@ -1965,13 +1976,13 @@ export default function ComprasPage() {
                                 </span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-center font-semibold">
+                            <td className="py-2.5 px-3 text-center font-semibold text-slate-800 dark:text-slate-200">
                               {item.quantidade} {item.produtos?.unidade || 'UN'}
                             </td>
-                            <td className="py-2.5 px-3 text-right tabular-nums">
+                            <td className="py-2.5 px-3 text-right tabular-nums text-slate-700 dark:text-slate-300">
                               {formatCurrency(item.preco_unitario)}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-bold text-slate-900 tabular-nums">
+                            <td className="py-2.5 px-3 text-right font-bold text-slate-900 dark:text-white tabular-nums">
                               {formatCurrency(item.subtotal)}
                             </td>
                           </tr>
@@ -1984,9 +1995,9 @@ export default function ComprasPage() {
 
               {/* Total */}
               <div className="flex justify-end pt-1">
-                <div className="w-64 p-3 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center text-slate-900 font-bold">
-                  <span>Total da Compra:</span>
-                  <span className="text-teal-700 font-black text-base">
+                <div className="w-64 p-3 bg-slate-50 dark:bg-[#071126] rounded-xl border border-slate-200/80 dark:border-[#1A294A] flex justify-between items-center text-slate-900 dark:text-white font-bold">
+                  <span className="text-xs">Total da Compra:</span>
+                  <span className="text-[#0066FF] dark:text-[#3B82F6] font-black text-base tabular-nums">
                     {formatCurrency(compraDetalhe.total || 0)}
                   </span>
                 </div>
@@ -1994,22 +2005,22 @@ export default function ComprasPage() {
 
               {/* Conta a Pagar Gerada */}
               {contaPagarDetalhe && (
-                <div className="p-3 bg-teal-50/50 border border-teal-200 rounded-lg space-y-1">
+                <div className="p-3.5 bg-[#0066FF]/10 border border-[#0066FF]/20 rounded-xl space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-teal-900 flex items-center gap-1.5">
-                      <CreditCard className="w-4 h-4 text-teal-700" />
+                    <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 text-xs">
+                      <CreditCard className="w-4 h-4 text-[#0066FF] dark:text-[#3B82F6]" />
                       Conta a Pagar Vinculada
                     </span>
                     <Badge
                       variant="outline"
-                      className="bg-white border-teal-300 text-teal-800 text-[10px]"
+                      className="bg-white dark:bg-[#0A1328] border-[#0066FF]/30 text-[#0066FF] dark:text-[#3B82F6] text-[10px] font-semibold"
                     >
                       {contaPagarDetalhe.status?.toUpperCase() || 'PENDENTE'}
                     </Badge>
                   </div>
-                  <div className="flex justify-between text-slate-600 pt-1">
+                  <div className="flex justify-between text-slate-600 dark:text-slate-300 pt-1 text-xs">
                     <span>Vencimento: {formatDate(contaPagarDetalhe.vencimento)}</span>
-                    <span className="font-bold text-teal-800">
+                    <span className="font-bold text-[#0066FF] dark:text-[#3B82F6] tabular-nums">
                       {formatCurrency(contaPagarDetalhe.valor)}
                     </span>
                   </div>
@@ -2018,29 +2029,33 @@ export default function ComprasPage() {
 
               {/* Observações */}
               {compraDetalhe.observacoes && (
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                  <span className="font-semibold text-slate-700 block mb-1">Observações:</span>
-                  <p className="text-slate-600 whitespace-pre-wrap">{compraDetalhe.observacoes}</p>
+                <div className="p-3 bg-slate-50 dark:bg-[#071126] rounded-xl border border-slate-200/80 dark:border-[#1A294A]">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    Observações:
+                  </span>
+                  <p className="text-slate-600 dark:text-slate-400 whitespace-pre-wrap">
+                    {compraDetalhe.observacoes}
+                  </p>
                 </div>
               )}
             </div>
           ) : null}
 
-          <DialogFooter className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-2">
+          <DialogFooter className="pt-3 border-t border-slate-100 dark:border-[#1A294A] flex flex-col sm:flex-row justify-between items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setPrintCompraAberto(true)}
-              className="text-xs border-slate-300 text-slate-700 hover:bg-slate-50 flex items-center gap-1.5"
+              className="text-xs border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#1A294A] flex items-center gap-1.5 rounded-xl h-9"
             >
-              <Printer className="w-3.5 h-3.5 text-teal-700" />
+              <Printer className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
               Imprimir Compra
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setModalDetalhesAberta(false)}
-              className="text-xs"
+              className="text-xs h-9 rounded-xl border-slate-200 dark:border-[#1A294A]"
             >
               Fechar
             </Button>
@@ -2057,26 +2072,26 @@ export default function ComprasPage() {
           if (!submittingCancelar) setModalCancelarAberta(open)
         }}
       >
-        <DialogContent className="max-w-md w-full">
-          <DialogHeader>
-            <div className="flex items-center gap-2 text-rose-700">
+        <DialogContent className="max-w-md w-full border border-slate-200/80 dark:border-[#1A294A] bg-white dark:bg-[#0A1328] shadow-2xl rounded-2xl">
+          <DialogHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
+            <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
               <XCircle className="w-5 h-5" />
-              <DialogTitle className="text-base font-bold text-slate-900">
+              <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
                 Cancelar Compra #{compraParaCancelar?.numero}
               </DialogTitle>
             </div>
-            <DialogDescription className="text-xs text-slate-600 pt-1 leading-relaxed">
+            <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF] pt-1 leading-relaxed">
               Deseja realmente cancelar este rascunho de compra? Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
 
-          <DialogFooter className="pt-2 flex flex-col sm:flex-row gap-2">
+          <DialogFooter className="pt-3 border-t border-slate-100 dark:border-[#1A294A] flex flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               type="button"
               disabled={submittingCancelar}
               onClick={() => setModalCancelarAberta(false)}
-              className="text-xs"
+              className="text-xs h-9 rounded-xl border-slate-200 dark:border-[#1A294A]"
             >
               Voltar
             </Button>
@@ -2084,7 +2099,7 @@ export default function ComprasPage() {
               type="button"
               disabled={submittingCancelar}
               onClick={handleExecutarCancelamento}
-              className="bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold"
+              className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold h-9 rounded-xl shadow-xs"
             >
               {submittingCancelar ? 'Cancelando...' : 'Confirmar Cancelamento'}
             </Button>
