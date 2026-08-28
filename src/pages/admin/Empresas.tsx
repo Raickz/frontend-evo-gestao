@@ -5,6 +5,7 @@ import {
   Filter,
   ShieldCheck,
   ShieldAlert,
+  Edit,
   Edit3,
   Lock,
   Unlock,
@@ -18,7 +19,10 @@ import {
   XCircle,
   RefreshCw,
   Info,
+  Plus,
 } from 'lucide-react'
+import { NovaEmpresaWizardModal } from '@/components/admin/NovaEmpresaWizardModal'
+import { EditarEmpresaModal } from '@/components/admin/EditarEmpresaModal'
 import { AdminService, AdminEmpresaItem, AdminPlanoItem } from '@/services/admin'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -57,6 +61,10 @@ export default function AdminEmpresasPage() {
   const [statusFilter, setStatusFilter] = useState('todos')
 
   // Modais de Ação
+  const [wizardOpen, setWizardOpen] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [selectedEmpresaParaEditar, setSelectedEmpresaParaEditar] =
+    useState<AdminEmpresaItem | null>(null)
   const [detalhesEmpresa, setDetalhesEmpresa] = useState<AdminEmpresaItem | null>(null)
   const [alterarPlanoEmpresa, setAlterarPlanoEmpresa] = useState<AdminEmpresaItem | null>(null)
   const [selectedNovoPlano, setSelectedNovoPlano] = useState<string>('')
@@ -252,16 +260,26 @@ export default function AdminEmpresasPage() {
           </p>
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={loadData}
-          disabled={loading}
-          className="bg-slate-900 border-slate-700 hover:bg-slate-800 text-slate-200"
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin text-sky-400' : ''}`} />
-          Atualizar Tabela
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadData}
+            disabled={loading}
+            className="bg-slate-900 border-slate-700 hover:bg-slate-800 text-slate-200"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin text-sky-400' : ''}`} />
+            Atualizar Tabela
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={() => setWizardOpen(true)}
+            className="bg-sky-600 hover:bg-sky-500 text-white font-semibold shadow-lg shadow-sky-950/40"
+          >
+            <Plus className="w-4 h-4 mr-1.5" />+ Nova Empresa
+          </Button>
+        </div>
       </div>
 
       {/* Barra de Busca e Filtros */}
@@ -411,10 +429,21 @@ export default function AdminEmpresasPage() {
                               <DropdownMenuSeparator className="bg-slate-800" />
 
                               <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedEmpresaParaEditar(emp)
+                                  setEditModalOpen(true)
+                                }}
+                                className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 text-sky-400 font-medium"
+                              >
+                                <Edit className="w-4 h-4 mr-2 text-sky-400" />
+                                Gerenciar / Editar
+                              </DropdownMenuItem>
+
+                              <DropdownMenuItem
                                 onClick={() => setDetalhesEmpresa(emp)}
                                 className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 text-slate-200"
                               >
-                                <Info className="w-4 h-4 mr-2 text-sky-400" />
+                                <Info className="w-4 h-4 mr-2 text-slate-400" />
                                 Ver Detalhes
                               </DropdownMenuItem>
 
@@ -460,6 +489,27 @@ export default function AdminEmpresasPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* MODAL WIZARD: CADASTRO MANUAL DE EMPRESA */}
+      <NovaEmpresaWizardModal
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        planos={planos}
+        onSuccess={() => {
+          loadData()
+        }}
+      />
+
+      {/* MODAL: EDITAR / GERENCIAR EMPRESA POR ABAS */}
+      <EditarEmpresaModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        empresa={selectedEmpresaParaEditar}
+        planos={planos}
+        onSuccess={() => {
+          loadData()
+        }}
+      />
 
       {/* MODAL 1: DETALHES COMPLETOS DA EMPRESA */}
       <Dialog open={!!detalhesEmpresa} onOpenChange={() => setDetalhesEmpresa(null)}>

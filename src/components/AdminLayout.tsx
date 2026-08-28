@@ -3,9 +3,10 @@ import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
 import {
   BarChart3,
   Building2,
+  CreditCard,
   Layers,
-  Clock,
   Receipt,
+  Clock,
   LogOut,
   Menu,
   X,
@@ -37,6 +38,7 @@ interface AdminNavItem {
 const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { title: 'Dashboard', href: '/admin/dashboard', icon: BarChart3 },
   { title: 'Empresas', href: '/admin/empresas', icon: Building2 },
+  { title: 'Assinaturas', href: '/admin/assinaturas', icon: CreditCard },
   { title: 'Planos', href: '/admin/planos', icon: Layers },
   { title: 'Transações', href: '/admin/transacoes', icon: Receipt },
   { title: 'Histórico', href: '/admin/historico', icon: Clock },

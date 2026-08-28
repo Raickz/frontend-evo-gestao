@@ -184,6 +184,75 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
+      {/* Alertas Administrativos & Notificações de Vencimento */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Assinaturas em Atraso */}
+        <Link to="/admin/assinaturas?filtro=atrasada" className="block">
+          <Card className="bg-slate-900/90 border-slate-800 hover:border-rose-500/50 transition-all cursor-pointer h-full">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-slate-400">Assinaturas em Atraso</p>
+                <p className="text-base font-bold text-rose-400 mt-0.5">Ver Inadimplentes</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-slate-500" />
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Vencendo em 7 dias */}
+        <Link to="/admin/assinaturas?filtro=vencendo" className="block">
+          <Card className="bg-slate-900/90 border-slate-800 hover:border-amber-500/50 transition-all cursor-pointer h-full">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-slate-400">Vencendo em 7 dias</p>
+                <p className="text-base font-bold text-amber-400 mt-0.5">Ver Vencimentos</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-slate-500" />
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Testes Terminando */}
+        <Link to="/admin/assinaturas?filtro=trial" className="block">
+          <Card className="bg-slate-900/90 border-slate-800 hover:border-sky-500/50 transition-all cursor-pointer h-full">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center shrink-0">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-slate-400">Testes (Trial) Ativos</p>
+                <p className="text-base font-bold text-sky-400 mt-0.5">
+                  {data?.empresas_trial ?? 0} empresas
+                </p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-slate-500" />
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Suspensas / Canceladas */}
+        <Link to="/admin/assinaturas?filtro=suspensa" className="block">
+          <Card className="bg-slate-900/90 border-slate-800 hover:border-indigo-500/50 transition-all cursor-pointer h-full">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-slate-400">Controle Central</p>
+                <p className="text-base font-bold text-indigo-400 mt-0.5">Assinaturas</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-slate-500" />
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+
       {/* Seção Financeira & Cobranças (Build 4 - Mercado Pago) */}
       <div className="space-y-3">
         <div className="flex items-center justify-between pb-1">

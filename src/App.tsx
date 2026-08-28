@@ -16,6 +16,7 @@ import { AdminProtectedRoute } from '@/components/AdminProtectedRoute'
 // Admin Pages
 import AdminDashboardPage from '@/pages/admin/Dashboard'
 import AdminEmpresasPage from '@/pages/admin/Empresas'
+import AdminAssinaturasPage from '@/pages/admin/Assinaturas'
 import AdminPlanosPage from '@/pages/admin/Planos'
 import AdminHistoricoPage from '@/pages/admin/Historico'
 import AdminTransacoesPage from '@/pages/admin/Transacoes'
@@ -139,6 +140,7 @@ const App = () => (
                 <Route index element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="dashboard" element={<AdminDashboardPage />} />
                 <Route path="empresas" element={<AdminEmpresasPage />} />
+                <Route path="assinaturas" element={<AdminAssinaturasPage />} />
                 <Route path="planos" element={<AdminPlanosPage />} />
                 <Route path="transacoes" element={<AdminTransacoesPage />} />
                 <Route path="historico" element={<AdminHistoricoPage />} />

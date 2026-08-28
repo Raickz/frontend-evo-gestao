@@ -87,30 +87,6 @@ Deno.serve(async (req: Request) => {
       },
     })
 
-    // Validar status da assinatura da empresa
-    const { data: statusAssinatura, error: statusAssError } =
-      await supabaseUser.rpc('get_status_assinatura')
-
-    if (
-      statusAssError ||
-      !statusAssinatura ||
-      (statusAssinatura as any).acesso_permitido !== true
-    ) {
-      const motivo =
-        (statusAssinatura as any)?.motivo_bloqueio ||
-        'Seu período de teste terminou. Para continuar utilizando o EVO Gestão, acesse a página de planos e escolha uma assinatura.'
-      return new Response(
-        JSON.stringify({
-          sucesso: false,
-          erro: motivo,
-        }),
-        {
-          status: 403,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        },
-      )
-    }
-
     // Consultar perfil e empresa_id do usuário que está chamando
     const { data: usuarioCaller, error: callerFetchError } = await supabaseAdmin
       .from('usuarios')
@@ -136,11 +112,13 @@ Deno.serve(async (req: Request) => {
     }
 
     const callerPerfil = (usuarioCaller.perfil || '').toLowerCase().trim()
-    if (callerPerfil !== 'master' && callerPerfil !== 'admin') {
+    const isPlatformAdmin = callerPerfil === 'platform_admin'
+
+    if (!isPlatformAdmin && callerPerfil !== 'master' && callerPerfil !== 'admin') {
       return new Response(
         JSON.stringify({
           sucesso: false,
-          erro: 'Apenas usuários Master ou Administrador têm permissão para criar usuários.',
+          erro: 'Apenas usuários Master, Administrador ou Platform Admin têm permissão para criar usuários.',
         }),
         {
           status: 403,
@@ -149,18 +127,30 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    const empresaId = usuarioCaller.empresa_id
-    if (!empresaId) {
-      return new Response(
-        JSON.stringify({
-          sucesso: false,
-          erro: 'Empresa do usuário não identificada.',
-        }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        },
-      )
+    // Se NÃO for platform_admin, valida status de assinatura da empresa
+    if (!isPlatformAdmin) {
+      const { data: statusAssinatura, error: statusAssError } =
+        await supabaseUserClient.rpc('get_status_assinatura')
+
+      if (
+        statusAssError ||
+        !statusAssinatura ||
+        (statusAssinatura as any).acesso_permitido !== true
+      ) {
+        const motivo =
+          (statusAssinatura as any)?.motivo_bloqueio ||
+          'Seu período de teste terminou. Para continuar utilizando o EVO Gestão, acesse a página de planos e escolha uma assinatura.'
+        return new Response(
+          JSON.stringify({
+            sucesso: false,
+            erro: motivo,
+          }),
+          {
+            status: 403,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders },
+          },
+        )
+      }
     }
 
     // Validar limite de usuários do plano atomicamente via RPC
@@ -211,10 +201,66 @@ Deno.serve(async (req: Request) => {
       )
     }
 
+    // Determinar target empresaId: se for platform_admin, pode passar empresa_id explicitamente no payload
+    let empresaId = usuarioCaller.empresa_id
+    if (isPlatformAdmin && body?.empresa_id) {
+      empresaId = body.empresa_id
+    }
+
+    if (!empresaId) {
+      return new Response(
+        JSON.stringify({
+          sucesso: false,
+          erro: 'Empresa de destino do usuário não informada.',
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        },
+      )
+    }
+
+    // Se NÃO for platform_admin, validar limites do plano da empresa
+    if (!isPlatformAdmin) {
+      const { data: validacaoLimite, error: limiteErr } = await supabaseAdmin.rpc(
+        'validar_limite_usuarios',
+        { p_empresa_id: empresaId },
+      )
+
+      if (limiteErr) {
+        return new Response(
+          JSON.stringify({
+            sucesso: false,
+            erro: limiteErr.message || 'Erro ao validar limites do plano.',
+          }),
+          {
+            status: 400,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders },
+          },
+        )
+      }
+
+      if (validacaoLimite && validacaoLimite.permitido === false) {
+        return new Response(
+          JSON.stringify({
+            sucesso: false,
+            erro:
+              validacaoLimite.erro ||
+              'Limite de usuários do plano atingido. Faça upgrade do seu plano para adicionar novos usuários.',
+          }),
+          {
+            status: 400,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders },
+          },
+        )
+      }
+    }
+
     const nome = typeof body?.nome === 'string' ? body.nome.trim() : ''
     const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
     const perfil = typeof body?.perfil === 'string' ? body.perfil.trim().toLowerCase() : ''
     const senha = typeof body?.senha === 'string' ? body.senha : ''
+    const telefone = typeof body?.telefone === 'string' ? body.telefone.trim() : null
 
     if (!nome) {
       return new Response(JSON.stringify({ sucesso: false, erro: 'Nome é obrigatório.' }), {
@@ -310,6 +356,7 @@ Deno.serve(async (req: Request) => {
         empresa_id: empresaId,
         nome,
         email,
+        telefone,
         perfil,
         ativo: true,
       })

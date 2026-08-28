@@ -42,8 +42,25 @@ export interface AdminEmpresaItem {
   nome: string
   nome_fantasia: string | null
   cnpj: string | null
+  inscricao_estadual?: string | null
+  inscricao_municipal?: string | null
   email: string | null
   telefone: string | null
+  whatsapp?: string | null
+  cep?: string | null
+  estado?: string | null
+  cidade?: string | null
+  bairro?: string | null
+  endereco?: string | null
+  numero?: string | null
+  complemento?: string | null
+  observacoes?: string | null
+  responsavel_nome?: string | null
+  responsavel_cpf?: string | null
+  responsavel_email?: string | null
+  responsavel_telefone?: string | null
+  responsavel_whatsapp?: string | null
+  responsavel_cargo?: string | null
   status: string
   created_at: string
   plano_id: string | null
@@ -55,6 +72,117 @@ export interface AdminEmpresaItem {
   vencimento: string | null
   fim_periodo_teste: string | null
   total_usuarios: number
+}
+
+export interface AdminAssinaturaItem {
+  id: string
+  empresa_id: string
+  empresa_nome: string
+  empresa_nome_fantasia: string | null
+  empresa_cnpj: string | null
+  empresa_email: string | null
+  empresa_telefone: string | null
+  empresa_status: string
+  plano_id: string | null
+  plano_nome: string
+  plano_slug: string | null
+  limite_usuarios: number | null
+  limite_vendedores: number | null
+  limite_clientes: number | null
+  limite_produtos: number | null
+  recursos: any
+  status: string
+  valor: number
+  valor_contratado?: number | null
+  desconto?: number | null
+  periodicidade?: string | null
+  data_contratacao?: string | null
+  inicio: string
+  vencimento: string | null
+  fim_periodo_teste: string | null
+  proxima_cobranca: string | null
+  cancelada_em: string | null
+  gateway: string | null
+  metodo_pagamento: string | null
+  observacoes_comerciais?: string | null
+  motivo_suspensao?: string | null
+  observacao_suspensao?: string | null
+  motivo_cancelamento?: string | null
+  observacao_cancelamento?: string | null
+  created_at: string
+  updated_at: string
+  ultimo_pagamento?: {
+    id: string
+    valor: number
+    data: string
+    metodo: string | null
+    gateway: string
+    status: string
+  } | null
+  total_usuarios_ativos: number
+}
+
+export interface AdminAssinaturasKPIs {
+  total_assinaturas: number
+  ativas: number
+  em_teste: number
+  vencendo_breve: number
+  em_atraso: number
+  suspensas: number
+  canceladas: number
+  mrr_atual: number
+  mrr_anterior: number
+}
+
+export interface CadastroManualEmpresaInput {
+  empresa: {
+    nome: string
+    nome_fantasia?: string
+    cnpj: string
+    inscricao_estadual?: string
+    inscricao_municipal?: string
+    email: string
+    telefone?: string
+    whatsapp?: string
+    cep?: string
+    estado?: string
+    cidade?: string
+    bairro?: string
+    endereco?: string
+    numero?: string
+    complemento?: string
+    status?: string
+    observacoes?: string
+  }
+  responsavel: {
+    nome: string
+    cpf?: string
+    email: string
+    telefone?: string
+    whatsapp?: string
+    cargo?: string
+  }
+  master: {
+    nome: string
+    email: string
+    telefone?: string
+    senha: string
+    enviar_convite?: boolean
+  }
+  plano_slug: string
+  contratacao: {
+    data_contratacao: string
+    data_inicio: string
+    fim_periodo_teste?: string | null
+    proximo_vencimento: string
+    valor_contratado: number
+    desconto: number
+    valor_final: number
+    forma_pagamento: string
+    periodicidade: string
+    status_assinatura: string
+    observacoes_comerciais?: string
+  }
 }
 
 export interface AdminPlanoItem {
@@ -324,6 +452,222 @@ export const AdminService = {
       const { data, error } = await (supabase.rpc as any)('listar_historico_admin')
       if (error) throw error
       return { data: (data as unknown as AdminHistoricoItem[]) || [], error: null }
+    } catch (err: any) {
+      return { data: [], error: err }
+    }
+  },
+
+  /**
+   * Lista usuários vinculados a uma empresa específica
+   */
+  async listarUsuarios(empresaId: string): Promise<{ data: AdminUsuarioItem[]; error: any }> {
+    try {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('id, empresa_id, auth_user_id, nome, email, telefone, perfil, ativo, created_at')
+        .eq('empresa_id', empresaId)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return { data: (data as unknown as AdminUsuarioItem[]) || [], error: null }
+    } catch (err: any) {
+      return { data: [], error: err }
+    }
+  },
+
+  /**
+   * Criação manual completa e transacional de Empresa + Assinatura + Master
+   */
+  async criarEmpresaManual(
+    input: CadastroManualEmpresaInput,
+  ): Promise<{
+    data: { success: boolean; empresa_id?: string; message?: string } | null
+    error: any
+  }> {
+    try {
+      // 1. Chamar RPC transacional para criar Empresa + Assinatura + Logs
+      const { data: rpcRes, error: rpcErr } = await (supabase.rpc as any)(
+        'criar_empresa_manual_admin',
+        {
+          p_empresa: input.empresa,
+          p_responsavel: input.responsavel,
+          p_master: {
+            nome: input.master.nome,
+            email: input.master.email,
+            senha: input.master.senha,
+          },
+          p_plano_slug: input.plano_slug,
+          p_contratacao: input.contratacao,
+        },
+      )
+
+      if (rpcErr) throw rpcErr
+      const res = rpcRes as any
+      if (res && res.success === false) {
+        throw new Error(res.error || 'Falha ao registrar empresa.')
+      }
+
+      const empresaId = res.empresa_id
+
+      // 2. Chamar Edge Function admin-create-user para criar o usuário Master isolado
+      const { data: sessionData } = await supabase.auth.getSession()
+      const token = sessionData?.session?.access_token
+
+      const funcRes = await supabase.functions.invoke('admin-create-user', {
+        body: {
+          nome: input.master.nome,
+          email: input.master.email,
+          senha: input.master.senha,
+          telefone: input.master.telefone || input.empresa.telefone || '',
+          perfil: 'master',
+          empresa_id: empresaId,
+        },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
+
+      if (funcRes.error || (funcRes.data && funcRes.data.sucesso === false)) {
+        // Se a criação do auth user falhar, fazer rollback manual deletando a empresa recém-criada
+        try {
+          await supabase.from('empresas').delete().eq('id', empresaId)
+        } catch {
+          // Rollback attempt
+        }
+        const errorMsg =
+          funcRes.data?.erro ||
+          funcRes.error?.message ||
+          'Falha ao gerar credenciais de acesso do usuário Master.'
+        throw new Error(errorMsg)
+      }
+
+      return {
+        data: {
+          success: true,
+          empresa_id: empresaId,
+          message: 'Empresa e usuário Master criados com sucesso!',
+        },
+        error: null,
+      }
+    } catch (err: any) {
+      return { data: null, error: err }
+    }
+  },
+
+  /**
+   * Edição dos dados cadastrais da empresa
+   */
+  async editarEmpresaCadastral(
+    empresaId: string,
+    dados: Partial<AdminEmpresaItem>,
+  ): Promise<{ data: { success: boolean; message?: string } | null; error: any }> {
+    try {
+      const { data, error } = await (supabase.rpc as any)('editar_empresa_cadastral_admin', {
+        p_empresa_id: empresaId,
+        p_dados: dados,
+      })
+      if (error) throw error
+      return { data, error: null }
+    } catch (err: any) {
+      return { data: null, error: err }
+    }
+  },
+
+  /**
+   * Lista todas as assinaturas detalhadas
+   */
+  async listarAssinaturas(): Promise<{ data: AdminAssinaturaItem[]; error: any }> {
+    try {
+      const { data, error } = await (supabase.rpc as any)('listar_assinaturas_admin')
+      if (error) throw error
+      return { data: (data as unknown as AdminAssinaturaItem[]) || [], error: null }
+    } catch (err: any) {
+      return { data: [], error: err }
+    }
+  },
+
+  /**
+   * KPIs de assinaturas e MRR
+   */
+  async getAssinaturasKPIs(): Promise<{ data: AdminAssinaturasKPIs | null; error: any }> {
+    try {
+      const { data, error } = await (supabase.rpc as any)('get_kpis_assinaturas_admin')
+      if (error) throw error
+      return { data: data as unknown as AdminAssinaturasKPIs, error: null }
+    } catch (err: any) {
+      return { data: null, error: err }
+    }
+  },
+
+  /**
+   * Ações manuais de controle de assinatura (suspender, reativar, cancelar, estender teste, alterar valores/datas)
+   */
+  async atualizarAssinaturaManual(
+    empresaId: string,
+    acao: 'suspender' | 'reativar' | 'cancelar' | 'alterar_dados' | 'estender_teste',
+    payload: any,
+  ): Promise<{ data: { success: boolean; message?: string } | null; error: any }> {
+    try {
+      const { data, error } = await (supabase.rpc as any)('atualizar_assinatura_manual_admin', {
+        p_empresa_id: empresaId,
+        p_acao: acao,
+        p_payload: payload,
+      })
+      if (error) throw error
+      const res = data as any
+      if (res && res.success === false) {
+        throw new Error(res.error || 'Falha ao atualizar assinatura.')
+      }
+      return { data: res, error: null }
+    } catch (err: any) {
+      return { data: null, error: err }
+    }
+  },
+
+  /**
+   * Registra pagamento manual de assinatura
+   */
+  async registrarPagamentoManual(params: {
+    empresa_id: string
+    valor: number
+    data_pagamento: string
+    forma_pagamento: string
+    competencia?: string
+    proximo_vencimento?: string
+    referencia?: string
+  }): Promise<{
+    data: { success: boolean; transacao_id?: string; message?: string } | null
+    error: any
+  }> {
+    try {
+      const { data, error } = await (supabase.rpc as any)('registrar_pagamento_manual_admin', {
+        p_empresa_id: params.empresa_id,
+        p_valor: params.valor,
+        p_data_pagamento: params.data_pagamento,
+        p_forma_pagamento: params.forma_pagamento,
+        p_competencia: params.competencia || '',
+        p_proximo_vencimento: params.proximo_vencimento || null,
+        p_referencia: params.referencia || '',
+      })
+      if (error) throw error
+      const res = data as any
+      if (res && res.success === false) {
+        throw new Error(res.error || 'Falha ao registrar pagamento manual.')
+      }
+      return { data: res, error: null }
+    } catch (err: any) {
+      return { data: null, error: err }
+    }
+  },
+
+  /**
+   * Lista o histórico de alterações específico de uma empresa
+   */
+  async listarHistoricoEmpresa(empresaId: string): Promise<{ data: any[]; error: any }> {
+    try {
+      const { data, error } = await (supabase.rpc as any)('listar_historico_empresa_admin', {
+        p_empresa_id: empresaId,
+      })
+      if (error) throw error
+      return { data: (data as any[]) || [], error: null }
     } catch (err: any) {
       return { data: [], error: err }
     }
