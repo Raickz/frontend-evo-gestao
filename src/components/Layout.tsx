@@ -35,7 +35,6 @@ import { useEmpresa } from '@/hooks/use-empresa'
 import { useTheme } from '@/hooks/use-theme'
 import { EvoHexagonLogo } from '@/components/common/EvoLogo'
 import { formatPerfilBadge, canAccessPage, AppPage } from '@/lib/permissions'
-import AssinaturaBloqueadaPage from '@/pages/AssinaturaBloqueada'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -150,7 +149,6 @@ export default function Layout() {
     return 'EVO Gestão'
   }
 
-  const { statusAssinatura, loadingStatus, acessoPermitido } = useEmpresa()
   const [modalSuporteOpen, setModalSuporteOpen] = useState(false)
 
   const userInitials = usuario?.nome
@@ -163,9 +161,6 @@ export default function Layout() {
     : 'EV'
 
   const empresaNome = empresa?.nome_fantasia || empresa?.nome || 'Minha Empresa'
-  const planoNome = statusAssinatura?.plano_nome || 'Profissional'
-
-  const trialExpiradoOuBloqueado = !loadingStatus && statusAssinatura && !acessoPermitido
 
   return (
     <div className="flex min-h-screen bg-[#F5F7FB] dark:bg-[#050B18] text-slate-900 dark:text-slate-100 font-sans antialiased transition-colors duration-300">
@@ -295,23 +290,22 @@ export default function Layout() {
           ))}
         </div>
 
-        {/* Bottom Sidebar Footer: Current Plan, User Info & Support (Requirement #3) */}
+        {/* Bottom Sidebar Footer: User Info & Support */}
         <div className="p-2.5 border-t border-[#152342] bg-[#081022] space-y-2">
           {!collapsed ? (
             <>
-              {/* Plan Badge + Support Quick Link */}
+              {/* Support Quick Link */}
               <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-[#0E1A33] border border-[#1A2C50] text-[11px]">
                 <div className="flex items-center gap-1.5 truncate">
-                  <CreditCard className="w-3.5 h-3.5 text-[#0066FF] shrink-0" />
-                  <span className="text-[#C0C6CF] truncate font-medium">Plano {planoNome}</span>
+                  <HelpCircle className="w-3.5 h-3.5 text-[#0066FF] shrink-0" />
+                  <span className="text-[#C0C6CF] truncate font-medium">Central de Suporte</span>
                 </div>
                 <button
                   onClick={() => setModalSuporteOpen(true)}
                   className="flex items-center gap-1 text-[10px] text-[#0066FF] hover:text-[#3385FF] font-semibold transition-colors shrink-0"
                   title="Suporte EVO"
                 >
-                  <HelpCircle className="w-3 h-3" />
-                  Suporte
+                  Ajuda
                 </button>
               </div>
 
@@ -325,7 +319,7 @@ export default function Layout() {
                   </Avatar>
                   <div className="truncate leading-tight">
                     <p className="text-[11px] font-semibold text-white truncate">
-                      {usuario?.nome || user?.email?.split('@')[0] || 'Master Demo'}
+                      {usuario?.nome || user?.email?.split('@')[0] || 'Usuário'}
                     </p>
                     <span className="text-[9px] text-[#6E7785] uppercase tracking-wider">
                       {roleInfo.label}
@@ -368,30 +362,6 @@ export default function Layout() {
           collapsed ? 'lg:pl-[76px]' : 'lg:pl-[260px]'
         }`}
       >
-        {/* Banner de Aviso de Assinatura / Trial Expirado no Topo */}
-        {trialExpiradoOuBloqueado && (
-          <div className="bg-gradient-to-r from-rose-600 via-rose-500 to-amber-600 text-white px-4 py-2.5 text-xs font-medium shadow-sm flex items-center justify-between gap-3 sticky top-0 z-40">
-            <div className="flex items-center gap-2 min-w-0">
-              <Clock className="w-4 h-4 shrink-0 text-white animate-pulse" />
-              <span className="truncate">
-                <strong className="font-bold">Modo Somente Leitura:</strong> Seu período de teste
-                terminou. Seus dados estão salvos, mas ações de cadastro e escrita estão bloqueadas.
-              </span>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => navigate('/planos')}
-                className="h-7 px-2.5 text-[11px] bg-white text-rose-700 hover:bg-rose-50 font-bold shadow-xs flex items-center gap-1"
-              >
-                <Sparkles className="w-3 h-3 text-amber-500" />
-                Regularizar Assinatura
-              </Button>
-            </div>
-          </div>
-        )}
-
         {/* Header Superior Global (Light / Dark responsive) */}
         <header className="sticky top-0 z-30 h-16 bg-white/85 dark:bg-[#0A1328]/85 backdrop-blur-md border-b border-slate-200/80 dark:border-[#152342] px-4 sm:px-6 flex items-center justify-between shadow-xs transition-colors duration-200">
           <div className="flex items-center gap-3">
@@ -521,11 +491,7 @@ export default function Layout() {
 
         {/* Page Main Content with smooth fade */}
         <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl w-full mx-auto animate-fade-in-up">
-          {trialExpiradoOuBloqueado ? (
-            <AssinaturaBloqueadaPage onVerPlanos={() => navigate('/planos')} />
-          ) : (
-            <Outlet />
-          )}
+          <Outlet />
         </main>
       </div>
 
@@ -533,37 +499,35 @@ export default function Layout() {
       <Dialog open={modalSuporteOpen} onOpenChange={setModalSuporteOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <div className="h-10 w-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center mb-2">
+            <div className="h-10 w-10 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center mb-2">
               <PhoneCall className="w-5 h-5" />
             </div>
             <DialogTitle className="text-base font-bold text-slate-900">
-              Contratação de Planos EVO Gestão
+              Suporte Técnico EVO Gestão
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
-              A contratação de planos estará disponível em breve. Entre em contato com o suporte EVO
-              Gestão para regularizar sua assinatura.
+              Entre em contato com nossa equipe para tirar dúvidas ou solicitar assistência técnica.
             </DialogDescription>
           </DialogHeader>
 
           <div className="py-3 text-xs space-y-3">
-            <div className="p-3.5 rounded-xl border border-teal-100 bg-teal-50/50 space-y-1.5">
-              <p className="font-semibold text-teal-900">
-                Fale com nossa equipe comercial e de suporte
+            <div className="p-3.5 rounded-xl border border-sky-100 bg-sky-50/50 space-y-1.5">
+              <p className="font-semibold text-sky-900">
+                Atendimento ao Cliente
               </p>
               <p className="text-slate-600">
-                Regularize sua conta para reabilitar imediatamente as funções de cadastro de
-                produtos, clientes, emissão de vendas e movimentações.
+                Estamos disponíveis para auxiliar no uso das ferramentas, configurações da sua empresa e dúvidas operacionais.
               </p>
             </div>
             <div className="p-3 rounded-lg border border-slate-100 bg-slate-50 flex items-center justify-between">
-              <span className="text-slate-500 font-medium">E-mail:</span>
+              <span className="text-slate-500 font-medium">E-mail de Suporte:</span>
               <span className="font-mono font-semibold text-slate-900">
                 suporte@evogestao.com.br
               </span>
             </div>
           </div>
 
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+          <DialogFooter className="flex flex-col sm:flex-row justify-end gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -571,16 +535,6 @@ export default function Layout() {
               className="text-xs"
             >
               Fechar
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                setModalSuporteOpen(false)
-                navigate('/app/configuracoes')
-              }}
-              className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold"
-            >
-              Ver Detalhes do Plano
             </Button>
           </DialogFooter>
         </DialogContent>

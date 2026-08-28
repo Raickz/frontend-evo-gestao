@@ -14,23 +14,16 @@ import {
   Users,
   AlertTriangle,
   CheckCircle2,
-  Boxes,
   ArrowRight,
   RefreshCw,
   ClipboardCheck,
   Circle,
   EyeOff,
-  CreditCard,
-  Clock,
-  ShieldAlert,
   TrendingUp,
   TrendingDown,
   PlusCircle,
   UserPlus,
   ShoppingBag,
-  Sparkles,
-  Calendar,
-  Layers,
   ChevronRight,
   Percent,
   FileSpreadsheet,
@@ -43,7 +36,6 @@ import { VendasService } from '@/services/vendas'
 import { ClientesService } from '@/services/clientes'
 import { ProdutosService } from '@/services/produtos'
 import { EstoqueService } from '@/services/estoque'
-import { AssinaturasService, AssinaturaComPlano } from '@/services/assinaturas'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -90,10 +82,15 @@ interface ItemEstoqueBaixo {
 }
 
 interface DashboardData {
+  faturamentoHoje: number
+  pedidosHojeCount: number
+  lucroHoje: number
   faturamentoMes: number
   vendasMesCount: number
   clientesAtivosCount: number
   produtosAtivosCount: number
+  estoqueTotalQuantidade: number
+  vendedoresAtivosCount: number
   estoqueBaixoCount: number
   vendasRecentes: VendaRecente[]
   estoqueBaixoItens: ItemEstoqueBaixo[]
@@ -236,14 +233,29 @@ export default function DashboardPage() {
   const [chartPeriod, setChartPeriod] = useState<'7d' | '30d' | 'mes'>('7d')
   const [selectedDayInfo, setSelectedDayInfo] = useState<string | null>(null)
   const [data, setData] = useState<DashboardData>({
+    faturamentoHoje: 0,
+    pedidosHojeCount: 0,
+    lucroHoje: 0,
     faturamentoMes: 0,
     vendasMesCount: 0,
     clientesAtivosCount: 0,
     produtosAtivosCount: 0,
+    estoqueTotalQuantidade: 0,
+    vendedoresAtivosCount: 0,
     estoqueBaixoCount: 0,
     vendasRecentes: [],
     estoqueBaixoItens: [],
   })
+
+  const [sales7DaysRealData, setSales7DaysRealData] = useState<
+    { data: string; valor: number; pedidos: number; display: string }[]
+  >([])
+  const [topProdutosRealData, setTopProdutosRealData] = useState<
+    { pos: number; nome: string; categoria: string; qtd: number; valor: string }[]
+  >([])
+  const [paymentMethodsRealData, setPaymentMethodsRealData] = useState<
+    { name: string; value: number; color: string; amount: string }[]
+  >([])
 
   const perfilLogado = (usuario?.perfil || '').toLowerCase()
   const isMasterOrAdmin = perfilLogado === 'master' || perfilLogado === 'admin'
@@ -251,45 +263,6 @@ export default function DashboardPage() {
   const [onboardingData, setOnboardingData] = useState<OnboardingProgress | null>(null)
   const [loadingOnboarding, setLoadingOnboarding] = useState(true)
   const [checklistDismissed, setChecklistDismissed] = useState(false)
-
-  // Assinatura do usuário / empresa
-  const { statusAssinatura, refreshStatus } = useEmpresa()
-  const [assinatura, setAssinatura] = useState<AssinaturaComPlano | null>(null)
-  const [loadingAssinatura, setLoadingAssinatura] = useState(true)
-
-  // Contadores de Uso do Plano (para Master/Admin)
-  const [planUsage, setPlanUsage] = useState<{
-    usuarios: number
-    vendedores: number
-    produtos: number
-    clientes: number
-    vendasMes: number
-  }>({
-    usuarios: 0,
-    vendedores: 0,
-    produtos: 0,
-    clientes: 0,
-    vendasMes: 0,
-  })
-
-  const loadAssinatura = useCallback(async () => {
-    if (!empresaId || !isMasterOrAdmin) {
-      setLoadingAssinatura(false)
-      return
-    }
-
-    try {
-      const { data: assData } = await AssinaturasService.getByEmpresaId(empresaId)
-      setAssinatura(assData)
-      await refreshStatus()
-    } catch (err) {
-      if (import.meta.env.DEV) {
-        console.error('Erro ao carregar assinatura no Dashboard:', err)
-      }
-    } finally {
-      setLoadingAssinatura(false)
-    }
-  }, [empresaId, isMasterOrAdmin, refreshStatus])
 
   useEffect(() => {
     if (empresaId) {
@@ -373,16 +346,53 @@ export default function DashboardPage() {
         resolvedVendedorId = vendedorData?.id || '00000000-0000-0000-0000-000000000000'
       }
 
+      const startOfToday = new Date()
+      startOfToday.setHours(0, 0, 0, 0)
+      const startOfTodayIso = startOfToday.toISOString()
+
+      const sevenDaysAgo = new Date()
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
+      sevenDaysAgo.setHours(0, 0, 0, 0)
+      const sevenDaysAgoIso = sevenDaysAgo.toISOString()
+
+      let queryVendasHoje = supabase
+        .from('vendas')
+        .select(
+          'id, total, created_at, itens_venda(quantidade, preco_unitario, subtotal, produto_id, produto:produtos(nome, preco_custo, categoria))',
+        )
+        .eq('empresa_id', empresaId)
+        .eq('status', 'finalizada')
+        .gte('created_at', startOfTodayIso)
+
+      if (resolvedVendedorId) {
+        queryVendasHoje = queryVendasHoje.eq('vendedor_id', resolvedVendedorId)
+      }
+
+      let queryVendas7Dias = supabase
+        .from('vendas')
+        .select(
+          'id, total, created_at, forma_pagamento, itens_venda(quantidade, preco_unitario, subtotal, produto_id, produto:produtos(nome, categoria))',
+        )
+        .eq('empresa_id', empresaId)
+        .eq('status', 'finalizada')
+        .gte('created_at', sevenDaysAgoIso)
+        .order('created_at', { ascending: true })
+
+      if (resolvedVendedorId) {
+        queryVendas7Dias = queryVendas7Dias.eq('vendedor_id', resolvedVendedorId)
+      }
+
       const [
-        faturamentoRes,
-        vendasCountRes,
+        faturamentoMesRes,
+        vendasMesCountRes,
         clientesCountRes,
         produtosCountRes,
         estoqueBaixoRes,
         vendasRecentesRes,
-        usuariosCountRes,
         vendedoresCountRes,
-        vendasMesTotalRes,
+        estoquesSomaRes,
+        vendasHojeRes,
+        vendas7DiasRes,
       ] = await Promise.all([
         VendasService.getFaturamentoMensal(empresaId, resolvedVendedorId),
         VendasService.getCountMensal(empresaId, resolvedVendedorId),
@@ -391,27 +401,50 @@ export default function DashboardPage() {
         EstoqueService.listEstoqueBaixo(empresaId),
         VendasService.getRecentes(empresaId, resolvedVendedorId),
         supabase
-          .from('usuarios')
-          .select('id', { count: 'exact' })
-          .eq('empresa_id', empresaId)
-          .eq('ativo', true),
-        supabase
           .from('vendedores')
           .select('id', { count: 'exact' })
           .eq('empresa_id', empresaId)
           .eq('ativo', true),
-        VendasService.getCountMensal(empresaId, null),
+        supabase.from('estoques').select('quantidade').eq('empresa_id', empresaId),
+        queryVendasHoje,
+        queryVendas7Dias,
       ])
 
-      if (faturamentoRes.error) throw faturamentoRes.error
-      if (vendasCountRes.error) throw vendasCountRes.error
+      if (faturamentoMesRes.error) throw faturamentoMesRes.error
+      if (vendasMesCountRes.error) throw vendasMesCountRes.error
       if (clientesCountRes.error) throw clientesCountRes.error
       if (produtosCountRes.error) throw produtosCountRes.error
       if (estoqueBaixoRes.error) throw estoqueBaixoRes.error
       if (vendasRecentesRes.error) throw vendasRecentesRes.error
 
-      const totalFaturado = (faturamentoRes.data || []).reduce(
+      const totalFaturadoMes = (faturamentoMesRes.data || []).reduce(
         (acc: number, curr: { total: number }) => acc + (curr.total || 0),
+        0,
+      )
+
+      const vendasHojeList = vendasHojeRes.data || []
+      const faturamentoHojeTotal = vendasHojeList.reduce(
+        (acc: number, curr: any) => acc + Number(curr.total || 0),
+        0,
+      )
+      const pedidosHojeTotal = vendasHojeList.length
+
+      let lucroHojeTotal = 0
+      vendasHojeList.forEach((v: any) => {
+        if (Array.isArray(v.itens_venda)) {
+          v.itens_venda.forEach((it: any) => {
+            const vendaItem = Number(
+              it.subtotal || Number(it.quantidade || 0) * Number(it.preco_unitario || 0) || 0,
+            )
+            const custoUnitario = Number(it.produto?.preco_custo || 0)
+            const custoTotal = custoUnitario * Number(it.quantidade || 1)
+            lucroHojeTotal += Math.max(0, vendaItem - custoTotal)
+          })
+        }
+      })
+
+      const estoqueTotalQtd = (estoquesSomaRes.data || []).reduce(
+        (acc: number, item: { quantidade: number }) => acc + Number(item.quantidade || 0),
         0,
       )
 
@@ -419,22 +452,126 @@ export default function DashboardPage() {
       const vendasRecentesList = (vendasRecentesRes.data || []) as unknown as VendaRecente[]
 
       setData({
-        faturamentoMes: totalFaturado,
-        vendasMesCount: vendasCountRes.count ?? 0,
+        faturamentoHoje: faturamentoHojeTotal,
+        pedidosHojeCount: pedidosHojeTotal,
+        lucroHoje: lucroHojeTotal,
+        faturamentoMes: totalFaturadoMes,
+        vendasMesCount: vendasMesCountRes.count ?? 0,
         clientesAtivosCount: clientesCountRes.count ?? 0,
         produtosAtivosCount: produtosCountRes.count ?? 0,
+        estoqueTotalQuantidade: estoqueTotalQtd,
+        vendedoresAtivosCount: vendedoresCountRes.count ?? 0,
         estoqueBaixoCount: estoqueBaixoList.length,
         vendasRecentes: vendasRecentesList,
         estoqueBaixoItens: estoqueBaixoList,
       })
 
-      setPlanUsage({
-        usuarios: usuariosCountRes.count ?? 0,
-        vendedores: vendedoresCountRes.count ?? 0,
-        produtos: produtosCountRes.count ?? 0,
-        clientes: clientesCountRes.count ?? 0,
-        vendasMes: vendasMesTotalRes.count ?? 0,
+      // Montar dados reais dos 7 dias
+      const dias7Map: Record<string, { valor: number; pedidos: number }> = {}
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date()
+        d.setDate(d.getDate() - i)
+        const diaStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`
+        dias7Map[diaStr] = { valor: 0, pedidos: 0 }
+      }
+
+      const vendas7List = vendas7DiasRes.data || []
+      vendas7List.forEach((v: any) => {
+        if (v.created_at) {
+          const vd = new Date(v.created_at)
+          const key = `${String(vd.getDate()).padStart(2, '0')}/${String(vd.getMonth() + 1).padStart(2, '0')}`
+          if (dias7Map[key]) {
+            dias7Map[key].valor += Number(v.total || 0)
+            dias7Map[key].pedidos += 1
+          }
+        }
       })
+
+      const chart7Dias = Object.keys(dias7Map).map((k) => ({
+        data: k,
+        valor: dias7Map[k].valor,
+        pedidos: dias7Map[k].pedidos,
+        display: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+          dias7Map[k].valor,
+        ),
+      }))
+      setSales7DaysRealData(chart7Dias)
+
+      // Montar Top Produtos reais
+      const prodMap: Record<
+        string,
+        { nome: string; categoria: string; qtd: number; valor: number }
+      > = {}
+      vendas7List.forEach((v: any) => {
+        if (Array.isArray(v.itens_venda)) {
+          v.itens_venda.forEach((it: any) => {
+            const nomeProd = it.produto?.nome || 'Produto'
+            const catProd = it.produto?.categoria || 'Geral'
+            if (!prodMap[nomeProd]) {
+              prodMap[nomeProd] = { nome: nomeProd, categoria: catProd, qtd: 0, valor: 0 }
+            }
+            prodMap[nomeProd].qtd += Number(it.quantidade || 1)
+            prodMap[nomeProd].valor += Number(it.subtotal || it.preco_unitario || 0)
+          })
+        }
+      })
+
+      const topProdList = Object.values(prodMap)
+        .sort((a, b) => b.valor - a.valor)
+        .slice(0, 5)
+        .map((p, idx) => ({
+          pos: idx + 1,
+          nome: p.nome,
+          categoria: p.categoria,
+          qtd: p.qtd,
+          valor: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+            p.valor,
+          ),
+        }))
+      setTopProdutosRealData(topProdList)
+
+      // Formas de Pagamento reais
+      const formasCount: Record<string, number> = {}
+      let totalFormas = 0
+      vendas7List.forEach((v: any) => {
+        const fp = v.forma_pagamento ? String(v.forma_pagamento).toLowerCase() : 'outros'
+        formasCount[fp] = (formasCount[fp] || 0) + Number(v.total || 0)
+        totalFormas += Number(v.total || 0)
+      })
+
+      const paymentColors: Record<string, string> = {
+        pix: '#0066FF',
+        cartao_credito: '#3385FF',
+        cartao_debito: '#6E7785',
+        dinheiro: '#10B981',
+        boleto: '#F59E0B',
+        a_prazo: '#8B5CF6',
+        outros: '#C0C6CF',
+      }
+
+      const paymentLabels: Record<string, string> = {
+        pix: 'PIX',
+        cartao_credito: 'Cartão de Crédito',
+        cartao_debito: 'Cartão de Débito',
+        dinheiro: 'Dinheiro',
+        boleto: 'Boleto',
+        a_prazo: 'A Prazo',
+        outros: 'Outros',
+      }
+
+      const formasList = Object.keys(formasCount).map((fpKey) => {
+        const amt = formasCount[fpKey]
+        const percent = totalFormas > 0 ? Math.round((amt / totalFormas) * 100) : 0
+        return {
+          name: paymentLabels[fpKey] || fpKey.toUpperCase(),
+          value: percent,
+          color: paymentColors[fpKey] || '#0066FF',
+          amount: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+            amt,
+          ),
+        }
+      })
+      setPaymentMethodsRealData(formasList)
     } catch (err: any) {
       if (import.meta.env.DEV) {
         console.error('Erro ao carregar dados do dashboard:', err)
@@ -450,8 +587,7 @@ export default function DashboardPage() {
   useEffect(() => {
     loadDashboardData()
     loadOnboardingProgress()
-    loadAssinatura()
-  }, [loadDashboardData, loadOnboardingProgress, loadAssinatura])
+  }, [loadDashboardData, loadOnboardingProgress])
 
   const handleDismissChecklist = () => {
     if (empresaId) {
@@ -547,156 +683,97 @@ export default function DashboardPage() {
     return mapa[fp.toLowerCase()] || fp.toUpperCase()
   }
 
-  // Dados para Gráfico dos últimos 7 dias (Requirement #7: 21/08 a 27/08 com valores coerentes)
-  const sales7DaysData = [
-    { data: '21/08', valor: 1420, pedidos: 11, display: 'R$ 1.420,00' },
-    { data: '22/08', valor: 1890, pedidos: 14, display: 'R$ 1.890,00' },
-    { data: '23/08', valor: 2150, pedidos: 16, display: 'R$ 2.150,00' },
-    { data: '24/08', valor: 1780, pedidos: 13, display: 'R$ 1.780,00' },
-    { data: '25/08', valor: 2630, pedidos: 20, display: 'R$ 2.630,00' },
-    { data: '26/08', valor: 2100, pedidos: 15, display: 'R$ 2.100,00' },
-    { data: '27/08', valor: 2450, pedidos: 18, display: 'R$ 2.450,00' },
-  ]
+  // Gráfico dos 7 dias real
+  const sales7DaysData = sales7DaysRealData
 
-  // Top Produtos (Requirement #8)
-  const topProdutosData = [
-    {
-      pos: 1,
-      nome: 'Smartphone Galaxy A54',
-      categoria: 'Eletrônicos',
-      qtd: 42,
-      valor: 'R$ 75.180,00',
-    },
-    {
-      pos: 2,
-      nome: 'Fone Bluetooth Wave',
-      categoria: 'Acessórios',
-      qtd: 38,
-      valor: 'R$ 11.020,00',
-    },
-    {
-      pos: 3,
-      nome: 'Smartwatch D20 Ultra',
-      categoria: 'Wearables',
-      qtd: 29,
-      valor: 'R$ 8.670,00',
-    },
-    {
-      pos: 4,
-      nome: 'Caixa de Som Pulse 30W',
-      categoria: 'Áudio',
-      qtd: 24,
-      valor: 'R$ 9.360,00',
-    },
-    {
-      pos: 5,
-      nome: 'Carregador Turbo 20W USB-C',
-      categoria: 'Acessórios',
-      qtd: 19,
-      valor: 'R$ 2.280,00',
-    },
-  ]
+  // Top Produtos real
+  const topProdutosData = topProdutosRealData
 
-  // Vendas por Forma de Pagamento Donut (Requirement #12: Pix 45%, CC 30%, CD 15%, Boleto 10%)
-  const paymentMethodsData = [
-    { name: 'PIX', value: 45, color: '#0066FF', amount: 'R$ 4.860,00' },
-    { name: 'Cartão de Crédito', value: 30, color: '#3385FF', amount: 'R$ 3.240,00' },
-    { name: 'Cartão de Débito', value: 15, color: '#6E7785', amount: 'R$ 1.620,00' },
-    { name: 'Boleto', value: 10, color: '#C0C6CF', amount: 'R$ 1.080,00' },
-  ]
+  // Formas de Pagamento real
+  const paymentMethodsData = paymentMethodsRealData
 
-  // Alertas Importantes (Requirement #9: Vermelho = crítico, Laranja = atenção, Azul = info, Verde = positivo)
-  const alertsData = [
-    {
+  // Alertas Baseados em Dados Reais
+  const alertsData: {
+    type: 'critical' | 'warning' | 'info' | 'success'
+    tag: string
+    title: string
+    desc: string
+    actionLink: string
+    actionText: string
+    badgeClass: string
+    dotClass: string
+  }[] = []
+
+  if (data.estoqueBaixoCount > 0) {
+    alertsData.push({
       type: 'critical',
       tag: 'Estoque Baixo',
-      title: '3 itens atingiram o nível de segurança',
-      desc: 'Smartphone Galaxy A54 e outros 2 itens demandam pedido de compra imediato.',
+      title: `${data.estoqueBaixoCount} ${data.estoqueBaixoCount === 1 ? 'item atingiu' : 'itens atingiram'} o nível de segurança`,
+      desc: 'Itens com estoque abaixo do mínimo exigem reposição ou pedido de compra.',
       actionLink: '/app/estoque',
       actionText: 'Ver Estoque',
       badgeClass: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30',
       dotClass: 'bg-rose-500',
-    },
-    {
-      type: 'warning',
-      tag: 'Pedidos Pendentes',
-      title: '4 pedidos aguardam aprovação comercial',
-      desc: 'Pedidos de distribuidora somando R$ 6.420,00 prontos para faturamento.',
-      actionLink: '/app/pedidos',
-      actionText: 'Aprovar Pedidos',
-      badgeClass: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
-      dotClass: 'bg-amber-500',
-    },
-    {
-      type: 'info',
-      tag: 'Assinatura',
-      title: 'Período de avaliação regular',
-      desc: 'Aproveite todas as ferramentas liberadas sem restrições.',
-      actionLink: '/app/configuracoes',
-      actionText: 'Gerenciar',
-      badgeClass: 'bg-[#0066FF]/15 text-[#0066FF] dark:text-[#3385FF] border-[#0066FF]/30',
-      dotClass: 'bg-[#0066FF]',
-    },
-    {
+    })
+  }
+
+  if (data.clientesAtivosCount > 0) {
+    alertsData.push({
       type: 'success',
-      tag: 'Novos Clientes',
-      title: '+8 clientes cadastrados esta semana',
-      desc: 'Aumento de 14% na base de clientes em relação à semana anterior.',
+      tag: 'Clientes Ativos',
+      title: `${data.clientesAtivosCount} clientes ativos na base`,
+      desc: 'Carteira de clientes cadastrados e ativos no sistema da empresa.',
       actionLink: '/app/clientes',
       actionText: 'Ver Clientes',
       badgeClass: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
       dotClass: 'bg-emerald-500',
-    },
-  ]
+    })
+  }
 
-  // Sparkline mockup data
-  const sparklineSales = [
-    { v: 14 },
-    { v: 18 },
-    { v: 21 },
-    { v: 17 },
-    { v: 26 },
-    { v: 21 },
-    { v: 24 },
-  ]
-  const sparklineOrders = [
-    { v: 10 },
-    { v: 12 },
-    { v: 14 },
-    { v: 13 },
-    { v: 17 },
-    { v: 15 },
-    { v: 18 },
-  ]
-  const sparklineProfit = [
-    { v: 420 },
-    { v: 510 },
-    { v: 620 },
-    { v: 490 },
-    { v: 710 },
-    { v: 640 },
-    { v: 684 },
-  ]
-  const sparklineClients = [
-    { v: 110 },
-    { v: 114 },
-    { v: 118 },
-    { v: 120 },
-    { v: 122 },
-    { v: 125 },
-    { v: 128 },
-  ]
-  const sparklineStock = [
-    { v: 380 },
-    { v: 374 },
-    { v: 368 },
-    { v: 362 },
-    { v: 358 },
-    { v: 355 },
-    { v: 352 },
-  ]
+  if (data.produtosAtivosCount === 0) {
+    alertsData.push({
+      type: 'warning',
+      tag: 'Catálogo',
+      title: 'Nenhum produto cadastrado',
+      desc: 'Cadastre os primeiros produtos para começar a movimentar vendas e estoque.',
+      actionLink: '/app/produtos',
+      actionText: 'Cadastrar Produto',
+      badgeClass: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+      dotClass: 'bg-amber-500',
+    })
+  } else {
+    alertsData.push({
+      type: 'info',
+      tag: 'Catálogo',
+      title: `${data.produtosAtivosCount} produtos ativos`,
+      desc: 'Produtos prontos para venda e movimentação de estoque.',
+      actionLink: '/app/produtos',
+      actionText: 'Ver Produtos',
+      badgeClass: 'bg-[#0066FF]/15 text-[#0066FF] dark:text-[#3385FF] border-[#0066FF]/30',
+      dotClass: 'bg-[#0066FF]',
+    })
+  }
 
-  const userName = usuario?.nome || 'Master Demo'
+  // Sparklines com base nos dados reais dos 7 dias
+  const sparklineSales =
+    sales7DaysData.length > 0
+      ? sales7DaysData.map((d) => ({ v: d.valor }))
+      : [{ v: 0 }, { v: 0 }, { v: 0 }, { v: 0 }, { v: 0 }, { v: 0 }, { v: 0 }]
+
+  const sparklineOrders =
+    sales7DaysData.length > 0
+      ? sales7DaysData.map((d) => ({ v: d.pedidos }))
+      : [{ v: 0 }, { v: 0 }, { v: 0 }, { v: 0 }, { v: 0 }, { v: 0 }, { v: 0 }]
+
+  const sparklineProfit =
+    sales7DaysData.length > 0
+      ? sales7DaysData.map((d) => ({ v: Math.round(d.valor * 0.25) }))
+      : [{ v: 0 }, { v: 0 }, { v: 0 }, { v: 0 }, { v: 0 }, { v: 0 }, { v: 0 }]
+
+  const sparklineClients = [{ v: data.clientesAtivosCount }, { v: data.clientesAtivosCount }]
+  const sparklineStock = [{ v: data.estoqueTotalQuantidade }, { v: data.estoqueTotalQuantidade }]
+
+  const userName = usuario?.nome || 'Usuário'
 
   return (
     <div className="space-y-6 pb-12">
@@ -733,7 +810,6 @@ export default function DashboardPage() {
             onClick={() => {
               loadDashboardData()
               loadOnboardingProgress()
-              loadAssinatura()
             }}
             disabled={loading}
             className="h-9 rounded-xl border-slate-200/80 dark:border-[#1A2C50] text-slate-700 dark:text-[#C0C6CF] bg-white/80 dark:bg-[#0E1A33]/80 hover:bg-slate-100 dark:hover:bg-[#15274D] backdrop-blur-md text-xs font-semibold shadow-xs"
@@ -754,165 +830,6 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
-
-      {/* Card de Status da Assinatura & Uso do Plano (Apenas Master/Admin) */}
-      {isMasterOrAdmin && !loadingAssinatura && (
-        <div className="space-y-4">
-          {(() => {
-            const planoNome =
-              statusAssinatura?.plano_nome || assinatura?.planos?.nome || 'Profissional'
-            const status = statusAssinatura?.status || assinatura?.status || 'trial'
-            const acessoPermitido = statusAssinatura ? statusAssinatura.acesso_permitido : true
-
-            if (!acessoPermitido) {
-              const isTrial = status === 'trial'
-              return (
-                <div className="glass-card rounded-2xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/60 dark:bg-rose-950/20 p-4 sm:p-5">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-start sm:items-center gap-3.5">
-                      <div className="h-10 w-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 text-rose-600 flex items-center justify-center shrink-0">
-                        <ShieldAlert className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-sm font-bold text-slate-900 dark:text-white">
-                            Plano {planoNome}
-                          </span>
-                          <Badge
-                            variant="outline"
-                            className="text-[11px] font-bold py-0.5 px-2 bg-rose-100 dark:bg-rose-900/40 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-800"
-                          >
-                            {isTrial ? 'Expirado' : 'Assinatura Inativa'}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-rose-900/90 dark:text-rose-300/90 font-medium mt-1">
-                          {isTrial
-                            ? 'Seu período de teste terminou. O sistema está em modo somente leitura (todos os dados preservados).'
-                            : statusAssinatura?.motivo_bloqueio ||
-                              'Sua assinatura requer regularização.'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Link to="/app/configuracoes" className="shrink-0 self-end sm:self-auto">
-                      <Button
-                        size="sm"
-                        className="h-8 text-xs bg-rose-600 hover:bg-rose-700 text-white font-bold flex items-center gap-1.5 shadow-xs"
-                      >
-                        Regularizar Assinatura
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              )
-            }
-
-            return null
-          })()}
-
-          {/* Seção Uso do Plano */}
-          {assinatura?.planos && (
-            <div className="glass-card rounded-2xl p-4 sm:p-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-100 dark:border-[#18284B]">
-                <div className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-[#0066FF]" />
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Uso do Plano</h3>
-                  <Badge
-                    variant="outline"
-                    className="text-[10px] bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3385FF] border-[#0066FF]/20 font-bold"
-                  >
-                    {assinatura.planos.nome}
-                  </Badge>
-                </div>
-                <span className="text-[11px] text-[#6E7785] dark:text-[#C0C6CF]">
-                  Consumo em tempo real dos limites da empresa
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                {[
-                  {
-                    label: 'Usuários',
-                    current: planUsage.usuarios,
-                    limit: assinatura.planos.limite_usuarios,
-                  },
-                  {
-                    label: 'Vendedores',
-                    current: planUsage.vendedores,
-                    limit: assinatura.planos.limite_vendedores,
-                  },
-                  {
-                    label: 'Produtos',
-                    current: planUsage.produtos,
-                    limit: assinatura.planos.limite_produtos,
-                  },
-                  {
-                    label: 'Clientes',
-                    current: planUsage.clientes,
-                    limit: assinatura.planos.limite_clientes,
-                  },
-                  {
-                    label: 'Vendas no mês',
-                    current: planUsage.vendasMes,
-                    limit: assinatura.planos.limite_vendas_mes,
-                  },
-                ].map((item, idx) => {
-                  const isUnlimited = item.limit === null || item.limit === undefined
-                  const percent = isUnlimited
-                    ? 100
-                    : item.limit > 0
-                      ? Math.min(Math.round((item.current / item.limit) * 100), 100)
-                      : 0
-                  const isFull = !isUnlimited && item.limit !== null && item.current >= item.limit
-
-                  const barColor = isUnlimited
-                    ? 'bg-[#0066FF]'
-                    : percent >= 100
-                      ? 'bg-rose-500'
-                      : percent > 70
-                        ? 'bg-amber-500'
-                        : 'bg-[#0066FF]'
-
-                  return (
-                    <div
-                      key={idx}
-                      className="p-3 rounded-xl border border-slate-100 dark:border-[#1A2C50] bg-white/40 dark:bg-[#0E1A33]/40 flex flex-col justify-between space-y-2 backdrop-blur-sm"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-slate-700 dark:text-[#C0C6CF]">
-                          {item.label}
-                        </span>
-                        {isFull && (
-                          <Badge className="bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300 text-[9px] px-1.5 py-0 font-bold">
-                            Limite
-                          </Badge>
-                        )}
-                      </div>
-
-                      <div className="flex items-baseline justify-between text-xs">
-                        <span className="font-bold text-slate-900 dark:text-white text-sm">
-                          {item.current}
-                        </span>
-                        <span className="text-[#6E7785] dark:text-[#8E9AA8] text-[11px]">
-                          {isUnlimited ? '/ Ilimitado' : `/ ${item.limit}`}
-                        </span>
-                      </div>
-
-                      <div className="w-full bg-slate-200/80 dark:bg-[#152342] rounded-full h-1.5 overflow-hidden">
-                        <div
-                          className={`h-1.5 rounded-full transition-all duration-500 ${barColor}`}
-                          style={{ width: `${percent}%` }}
-                        />
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Banner de Primeiro Acesso */}
       {showFirstAccessBanner && (
@@ -966,9 +883,9 @@ export default function DashboardPage() {
                 {/* 1. Vendas Hoje */}
                 <KpiCard
                   title="Vendas hoje"
-                  value={data.faturamentoMes > 0 ? 2450.0 : 2450.0}
+                  value={data.faturamentoHoje}
                   isCurrency={true}
-                  percentage="12,5%"
+                  percentage={data.faturamentoHoje > 0 ? '+100%' : '0%'}
                   isPositive={true}
                   comparisonText="vs ontem"
                   icon={DollarSign}
@@ -978,9 +895,9 @@ export default function DashboardPage() {
                 {/* 2. Pedidos Hoje */}
                 <KpiCard
                   title="Pedidos hoje"
-                  value={data.vendasMesCount > 0 ? 18 : 18}
+                  value={data.pedidosHojeCount}
                   isCurrency={false}
-                  percentage="8,0%"
+                  percentage={data.pedidosHojeCount > 0 ? `+${data.pedidosHojeCount}` : '0'}
                   isPositive={true}
                   comparisonText="vs ontem"
                   icon={ShoppingCart}
@@ -990,9 +907,9 @@ export default function DashboardPage() {
                 {/* 3. Lucro Hoje */}
                 <KpiCard
                   title="Lucro hoje"
-                  value={684.5}
+                  value={data.lucroHoje}
                   isCurrency={true}
-                  percentage="15,0%"
+                  percentage={data.lucroHoje > 0 ? '+100%' : '0%'}
                   isPositive={true}
                   comparisonText="vs ontem"
                   icon={TrendingUp}
@@ -1002,11 +919,11 @@ export default function DashboardPage() {
                 {/* 4. Clientes Ativos */}
                 <KpiCard
                   title="Clientes ativos"
-                  value={data.clientesAtivosCount > 0 ? data.clientesAtivosCount : 128}
+                  value={data.clientesAtivosCount}
                   isCurrency={false}
-                  percentage="6,0%"
+                  percentage={data.clientesAtivosCount > 0 ? `+${data.clientesAtivosCount}` : '0'}
                   isPositive={true}
-                  comparisonText="vs mês passado"
+                  comparisonText="total na base"
                   icon={Users}
                   sparklineData={sparklineClients}
                 />
@@ -1014,11 +931,15 @@ export default function DashboardPage() {
                 {/* 5. Itens em Estoque */}
                 <KpiCard
                   title="Itens em estoque"
-                  value={data.produtosAtivosCount > 0 ? data.produtosAtivosCount : 352}
+                  value={data.estoqueTotalQuantidade}
                   isCurrency={false}
-                  percentage="3,0%"
-                  isPositive={false}
-                  comparisonText="vs mês passado"
+                  percentage={
+                    data.produtosAtivosCount > 0
+                      ? `${data.produtosAtivosCount} produtos`
+                      : '0 produtos'
+                  }
+                  isPositive={data.estoqueTotalQuantidade > 0}
+                  comparisonText="unidades físicas"
                   icon={Package}
                   sparklineData={sparklineStock}
                 />
@@ -1224,9 +1145,11 @@ export default function DashboardPage() {
               {/* Day indicator footer */}
               <div className="flex items-center justify-between text-[11px] text-[#6E7785] dark:text-[#8E9AA8] pt-2 border-t border-slate-100 dark:border-[#18284B] mt-2">
                 <span>
-                  Pico de faturamento: <strong>25/08 (R$ 2.630,00)</strong>
+                  Faturamento no mês: <strong>{formatCurrency(data.faturamentoMes)}</strong>
                 </span>
-                <span className="text-[#0066FF] font-semibold">Média diária: R$ 2.060,00</span>
+                <span className="text-[#0066FF] font-semibold">
+                  Total de pedidos: {data.vendasMesCount}
+                </span>
               </div>
             </div>
 
@@ -1242,55 +1165,71 @@ export default function DashboardPage() {
                 </p>
               </div>
 
-              {/* Donut Chart with center total */}
-              <div className="relative h-44 w-full flex items-center justify-center my-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={paymentMethodsData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={52}
-                      outerRadius={72}
-                      paddingAngle={4}
-                      dataKey="value"
-                    >
-                      {paymentMethodsData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-                {/* Center text in Donut */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-[10px] uppercase font-bold text-[#6E7785] dark:text-[#C0C6CF]">
-                    Total
-                  </span>
-                  <span className="text-base font-black text-[#0A1328] dark:text-white">100%</span>
+              {paymentMethodsData.length === 0 ? (
+                <div className="h-44 w-full flex flex-col items-center justify-center text-center p-4">
+                  <Percent className="w-8 h-8 text-slate-300 dark:text-slate-600 mb-2" />
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Nenhuma venda registrada
+                  </p>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                    As formas de pagamento aparecerão conforme as vendas forem emitidas.
+                  </p>
                 </div>
-              </div>
-
-              {/* Legend with percentages and colors */}
-              <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-[#18284B]">
-                {paymentMethodsData.map((item) => (
-                  <div key={item.name} className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2 truncate">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <span className="text-slate-700 dark:text-[#C0C6CF] font-medium truncate">
-                        {item.name}
+              ) : (
+                <>
+                  {/* Donut Chart with center total */}
+                  <div className="relative h-44 w-full flex items-center justify-center my-2">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={paymentMethodsData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={52}
+                          outerRadius={72}
+                          paddingAngle={4}
+                          dataKey="value"
+                        >
+                          {paymentMethodsData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                    {/* Center text in Donut */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                      <span className="text-[10px] uppercase font-bold text-[#6E7785] dark:text-[#C0C6CF]">
+                        Total
                       </span>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="font-bold text-[#0A1328] dark:text-white">
-                        {item.value}%
+                      <span className="text-base font-black text-[#0A1328] dark:text-white">
+                        100%
                       </span>
                     </div>
                   </div>
-                ))}
-              </div>
+
+                  {/* Legend with percentages and colors */}
+                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-[#18284B]">
+                    {paymentMethodsData.map((item) => (
+                      <div key={item.name} className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 truncate">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0"
+                            style={{ backgroundColor: item.color }}
+                          />
+                          <span className="text-slate-700 dark:text-[#C0C6CF] font-medium truncate">
+                            {item.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="font-bold text-[#0A1328] dark:text-white">
+                            {item.value}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -1320,42 +1259,52 @@ export default function DashboardPage() {
                 </Link>
               </div>
 
-              <div className="divide-y divide-slate-100 dark:divide-[#18284B] my-2">
-                {topProdutosData.map((prod) => (
-                  <div
-                    key={prod.pos}
-                    className="py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50/50 dark:hover:bg-[#111F38]/40 px-2 rounded-xl transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span
-                        className={`h-7 w-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
-                          prod.pos === 1
-                            ? 'bg-[#0066FF] text-white shadow-xs'
-                            : prod.pos === 2
-                              ? 'bg-[#3385FF]/20 text-[#0066FF] dark:text-[#3385FF]'
-                              : 'bg-slate-100 dark:bg-[#152342] text-[#6E7785] dark:text-[#C0C6CF]'
-                        }`}
-                      >
-                        {prod.pos}
-                      </span>
-                      <div className="truncate">
-                        <p className="text-xs font-bold text-[#0A1328] dark:text-white truncate">
-                          {prod.nome}
-                        </p>
-                        <span className="text-[10px] text-[#6E7785] dark:text-[#8E9AA8]">
-                          {prod.categoria} · {prod.qtd} un vendidas
+              {topProdutosData.length === 0 ? (
+                <div className="py-8 text-center text-slate-500 dark:text-[#C0C6CF]">
+                  <Package className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                  <p className="text-xs font-medium">Nenhum produto vendido ainda</p>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                    Os itens mais vendidos nos últimos 7 dias aparecerão aqui.
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100 dark:divide-[#18284B] my-2">
+                  {topProdutosData.map((prod) => (
+                    <div
+                      key={prod.pos}
+                      className="py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50/50 dark:hover:bg-[#111F38]/40 px-2 rounded-xl transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span
+                          className={`h-7 w-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
+                            prod.pos === 1
+                              ? 'bg-[#0066FF] text-white shadow-xs'
+                              : prod.pos === 2
+                                ? 'bg-[#3385FF]/20 text-[#0066FF] dark:text-[#3385FF]'
+                                : 'bg-slate-100 dark:bg-[#152342] text-[#6E7785] dark:text-[#C0C6CF]'
+                          }`}
+                        >
+                          {prod.pos}
+                        </span>
+                        <div className="truncate">
+                          <p className="text-xs font-bold text-[#0A1328] dark:text-white truncate">
+                            {prod.nome}
+                          </p>
+                          <span className="text-[10px] text-[#6E7785] dark:text-[#8E9AA8]">
+                            {prod.categoria} · {prod.qtd} un vendidas
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <span className="text-xs font-black text-[#0A1328] dark:text-white font-mono">
+                          {prod.valor}
                         </span>
                       </div>
                     </div>
-
-                    <div className="text-right shrink-0">
-                      <span className="text-xs font-black text-[#0A1328] dark:text-white font-mono">
-                        {prod.valor}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* 9. Alertas Importantes */}
@@ -1374,7 +1323,7 @@ export default function DashboardPage() {
                   variant="outline"
                   className="text-[10px] border-amber-300 dark:border-amber-800 text-amber-600 font-bold"
                 >
-                  4 ativos
+                  {alertsData.length} {alertsData.length === 1 ? 'ativo' : 'ativos'}
                 </Badge>
               </div>
 

@@ -117,7 +117,7 @@ const App = () => (
               {/* Root redirect com verificação de bootstrap */}
               <Route path="/" element={<BootstrapRedirect />} />
 
-              {/* Página de Planos e Checkout públicos - Temporariamente restritos a platform_admin na UI do cliente */}
+              {/* Página de Planos e Checkout - Restritos a Platform Admin ou redirecionados */}
               <Route
                 path="/planos"
                 element={
@@ -141,6 +141,10 @@ const App = () => (
                     <CheckoutSucessoPage />
                   </AdminProtectedRoute>
                 }
+              />
+              <Route
+                path="/assinatura-bloqueada"
+                element={<Navigate to="/app/dashboard" replace />}
               />
 
               {/* Setup público */}
