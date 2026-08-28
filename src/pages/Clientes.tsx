@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { PageHeader, EmptyState, TableSkeleton, ErrorState } from '@/components/common/CommonUI'
+import { PageHeader, EmptyState, TableSkeleton, ErrorState, AnimatedNumber } from '@/components/common/CommonUI'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -316,7 +316,11 @@ export default function ClientesPage() {
       <PageHeader
         title="Gestão de Clientes"
         description="Consulte a carteira de clientes, limites de crédito e contatos da distribuidora."
-        badge={`${clientes.length} Cadastrados`}
+        badge={
+          <span className="inline-flex items-center gap-1 font-semibold">
+            <AnimatedNumber value={clientes.length} /> Cadastrados
+          </span>
+        }
         actions={
           <Button
             onClick={handleOpenCreate}
