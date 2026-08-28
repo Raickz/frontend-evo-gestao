@@ -439,7 +439,7 @@ export const RelatoriosService = {
         .lte('created_at', fimTs),
       supabase
         .from('clientes')
-        .select('id', { count: 'exact', head: true })
+        .select('id', { count: 'exact' })
         .eq('empresa_id', empresaId)
         .gte('created_at', inicioTs)
         .lte('created_at', fimTs),

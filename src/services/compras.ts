@@ -145,7 +145,7 @@ export const ComprasService = {
 
     let query = supabase
       .from('compras')
-      .select('id, fornecedores!inner(nome)', { count: 'exact', head: true })
+      .select('id, fornecedores!inner(nome)', { count: 'exact' })
       .eq('empresa_id', empresaId)
 
     if (status && status !== 'todos') {

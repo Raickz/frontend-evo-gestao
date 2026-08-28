@@ -90,10 +90,7 @@ export const VendasService = {
   async countFiltered(empresaId: string, options: ListVendasFilters = {}) {
     const { search, status, formaPagamento, dataInicio, dataFim, vendedorId } = options
 
-    let query = supabase
-      .from('vendas')
-      .select('id', { count: 'exact', head: true })
-      .eq('empresa_id', empresaId)
+    let query = supabase.from('vendas').select('id', { count: 'exact' }).eq('empresa_id', empresaId)
 
     if (vendedorId) {
       query = query.eq('vendedor_id', vendedorId)
@@ -203,7 +200,7 @@ export const VendasService = {
 
     let query = supabase
       .from('vendas')
-      .select('id', { count: 'exact', head: true })
+      .select('id', { count: 'exact' })
       .eq('empresa_id', empresaId)
       .eq('status', 'finalizada')
       .gte('created_at', inicioMes.toISOString())

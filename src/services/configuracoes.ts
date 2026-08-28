@@ -92,7 +92,7 @@ export const ConfiguracoesService = {
   async countUsuariosEmpresa(empresaId: string, options?: CountUsuariosOptions) {
     let query = supabase
       .from('usuarios')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact' })
       .eq('empresa_id', empresaId)
 
     if (options?.excludeMasters) {

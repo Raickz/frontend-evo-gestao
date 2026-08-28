@@ -143,7 +143,7 @@ export const PedidosService = {
 
     let query = supabase
       .from('pedidos')
-      .select('id', { count: 'exact', head: true })
+      .select('id', { count: 'exact' })
       .eq('empresa_id', empresaId)
 
     if (status && status !== 'todos') {

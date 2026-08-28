@@ -159,33 +159,32 @@ export default function ConfiguracoesPage() {
         AssinaturasService.getByEmpresaId(empresaId),
         supabase
           .from('usuarios')
-          .select('id', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })
           .eq('empresa_id', empresaId)
           .eq('ativo', true),
         supabase
           .from('vendedores')
-          .select('id', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })
           .eq('empresa_id', empresaId)
           .eq('ativo', true),
         supabase
           .from('produtos')
-          .select('id', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })
           .eq('empresa_id', empresaId)
           .eq('ativo', true),
         supabase
           .from('clientes')
-          .select('id', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })
           .eq('empresa_id', empresaId)
           .eq('ativo', true),
         supabase
           .from('vendas')
-          .select('id', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })
           .eq('empresa_id', empresaId)
           .eq('status', 'finalizada')
           .gte('created_at', inicioMes.toISOString()),
         PagamentosService.listMinhasTransacoes(),
       ])
-
       await refreshStatus()
 
       if (assinaturaRes.error) throw assinaturaRes.error

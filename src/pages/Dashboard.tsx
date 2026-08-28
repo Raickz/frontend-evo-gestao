@@ -312,27 +312,27 @@ export default function DashboardPage() {
           supabase.from('empresas').select('nome,logo_url').eq('id', empresaId).single(),
           supabase
             .from('usuarios')
-            .select('id', { count: 'exact', head: true })
+            .select('id', { count: 'exact' })
             .eq('empresa_id', empresaId)
             .eq('ativo', true),
           supabase
             .from('vendedores')
-            .select('id', { count: 'exact', head: true })
+            .select('id', { count: 'exact' })
             .eq('empresa_id', empresaId)
             .eq('ativo', true),
           supabase
             .from('clientes')
-            .select('id', { count: 'exact', head: true })
+            .select('id', { count: 'exact' })
             .eq('empresa_id', empresaId)
             .eq('ativo', true),
           supabase
             .from('produtos')
-            .select('id', { count: 'exact', head: true })
+            .select('id', { count: 'exact' })
             .eq('empresa_id', empresaId)
             .eq('ativo', true),
           supabase
             .from('estoques')
-            .select('id', { count: 'exact', head: true })
+            .select('id', { count: 'exact' })
             .eq('empresa_id', empresaId)
             .gt('quantidade', 0),
         ])
@@ -392,12 +392,12 @@ export default function DashboardPage() {
         VendasService.getRecentes(empresaId, resolvedVendedorId),
         supabase
           .from('usuarios')
-          .select('id', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })
           .eq('empresa_id', empresaId)
           .eq('ativo', true),
         supabase
           .from('vendedores')
-          .select('id', { count: 'exact', head: true })
+          .select('id', { count: 'exact' })
           .eq('empresa_id', empresaId)
           .eq('ativo', true),
         VendasService.getCountMensal(empresaId, null),

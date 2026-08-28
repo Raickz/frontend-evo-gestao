@@ -174,7 +174,7 @@ export const FinanceiroService = {
 
     let query = supabase
       .from('contas_receber')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact' })
       .eq('empresa_id', empresaId)
 
     if (status && status !== 'todos') {
@@ -310,7 +310,7 @@ export const FinanceiroService = {
 
     let query = supabase
       .from('contas_pagar')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact' })
       .eq('empresa_id', empresaId)
 
     if (status && status !== 'todos') {

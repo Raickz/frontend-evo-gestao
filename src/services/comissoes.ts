@@ -93,7 +93,7 @@ export const ComissoesService = {
   async countFiltered(empresaId: string, options: ComissoesFilterOptions = {}) {
     let query = supabase
       .from('comissoes')
-      .select('id, vendedores!inner(id, nome)', { count: 'exact', head: true })
+      .select('id, vendedores!inner(id, nome)', { count: 'exact' })
       .eq('empresa_id', empresaId)
 
     if (options.termo && options.termo.trim()) {

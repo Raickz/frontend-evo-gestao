@@ -306,7 +306,6 @@ export const EstoqueService = {
       .from('estoques')
       .select('quantidade, produtos!inner(nome, codigo, estoque_minimo, ativo)', {
         count: 'exact',
-        head: statusFilter === 'zerados' || statusFilter === 'todos',
       })
       .eq('empresa_id', empresaId)
       .eq('produtos.ativo', true)
@@ -407,7 +406,7 @@ export const EstoqueService = {
 
     let query = supabase
       .from('movimentacoes_estoque')
-      .select('id, produtos!inner(nome, codigo)', { count: 'exact', head: true })
+      .select('id, produtos!inner(nome, codigo)', { count: 'exact' })
       .eq('empresa_id', empresaId)
 
     if (search && search.trim()) {

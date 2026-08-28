@@ -17,7 +17,7 @@ export const ClientesService = {
   async countAtivos(empresaId: string) {
     return supabase
       .from('clientes')
-      .select('id', { count: 'exact', head: true })
+      .select('id', { count: 'exact' })
       .eq('empresa_id', empresaId)
       .eq('ativo', true)
   },
