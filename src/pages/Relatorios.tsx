@@ -541,7 +541,7 @@ export default function RelatoriosPage() {
       {/* SEÇÃO 1: RESUMO GERAL */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600 dark:text-[#C0C6CF]/80">
             1. Resumo Geral do Período
           </h2>
         </div>
@@ -551,10 +551,10 @@ export default function RelatoriosPage() {
             {Array.from({ length: 7 }).map((_, i) => (
               <div
                 key={`kpi-skel-${i}`}
-                className="p-4 rounded-xl border border-slate-200 bg-white space-y-2 shadow-xs"
+                className="p-4 rounded-2xl border border-slate-200/80 dark:border-[#1A294A] bg-slate-50/70 dark:bg-[#0A1328]/60 space-y-2 shadow-xs"
               >
-                <Skeleton className="h-3 w-16" />
-                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-3 w-16 bg-slate-200 dark:bg-[#1A294A]" />
+                <Skeleton className="h-6 w-24 bg-slate-200 dark:bg-[#1A294A]" />
               </div>
             ))}
           </div>
@@ -687,26 +687,26 @@ export default function RelatoriosPage() {
 
       {/* SEÇÃO 2: DESEMPENHO DE VENDAS (Evolução) */}
       <section>
-        <Card className="rounded-xl border border-slate-200 bg-white shadow-xs">
-          <CardHeader className="pb-2">
+        <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 sm:p-6 shadow-sm">
+          <div className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <CardTitle className="text-base font-bold text-slate-900">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
                   2. Evolução do Faturamento
-                </CardTitle>
-                <CardDescription className="text-xs text-slate-500">
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-[#C0C6CF]/80 mt-0.5">
                   Acompanhamento cronológico do faturamento bruto no período
-                </CardDescription>
+                </p>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          </div>
+          <div className="space-y-4 pt-4">
             {loading ? (
               <div className="h-72 flex items-center justify-center">
-                <Skeleton className="w-full h-full rounded-xl" />
+                <Skeleton className="w-full h-full rounded-xl bg-slate-100 dark:bg-[#0A1328]" />
               </div>
             ) : vendasChartData.length === 0 ? (
-              <div className="py-12 text-center text-xs text-slate-400">
+              <div className="py-12 text-center text-xs text-slate-400 dark:text-slate-500">
                 Nenhuma venda registrada no período selecionado.
               </div>
             ) : (
@@ -718,11 +718,15 @@ export default function RelatoriosPage() {
                   >
                     <defs>
                       <linearGradient id="colorFaturamento" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#0d9488" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#0d9488" stopOpacity={0.0} />
+                        <stop offset="5%" stopColor="#0066FF" stopOpacity={0.45} />
+                        <stop offset="95%" stopColor="#0066FF" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="rgba(192, 198, 207, 0.15)"
+                    />
                     <XAxis
                       dataKey="label"
                       tickLine={false}
@@ -745,7 +749,7 @@ export default function RelatoriosPage() {
                     <Area
                       type="monotone"
                       dataKey="faturamento"
-                      stroke="#0d9488"
+                      stroke="#0066FF"
                       strokeWidth={2.5}
                       fillOpacity={1}
                       fill="url(#colorFaturamento)"
@@ -756,51 +760,59 @@ export default function RelatoriosPage() {
             )}
 
             {/* Sub-cards de apoio */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100">
-              <div className="p-3 bg-slate-50 rounded-lg">
-                <span className="text-[11px] text-slate-500 font-medium block">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100 dark:border-[#1A294A]">
+              <div className="p-3 bg-slate-50/70 dark:bg-[#0A1328]/60 border border-slate-200/60 dark:border-[#1A294A] rounded-xl">
+                <span className="text-[11px] text-slate-500 dark:text-[#C0C6CF]/80 font-medium block">
                   Faturamento Total
                 </span>
-                <span className="text-base font-bold text-slate-900 tabular-nums">
+                <span className="text-base font-bold text-slate-900 dark:text-white tabular-nums">
                   {formatCurrency(resumoGeral?.faturamento)}
                 </span>
               </div>
-              <div className="p-3 bg-slate-50 rounded-lg">
-                <span className="text-[11px] text-slate-500 font-medium block">Nº de Vendas</span>
-                <span className="text-base font-bold text-slate-900 tabular-nums">
+              <div className="p-3 bg-slate-50/70 dark:bg-[#0A1328]/60 border border-slate-200/60 dark:border-[#1A294A] rounded-xl">
+                <span className="text-[11px] text-slate-500 dark:text-[#C0C6CF]/80 font-medium block">
+                  Nº de Vendas
+                </span>
+                <span className="text-base font-bold text-slate-900 dark:text-white tabular-nums">
                   {resumoGeral?.numeroVendas ?? 0}
                 </span>
               </div>
-              <div className="p-3 bg-slate-50 rounded-lg">
-                <span className="text-[11px] text-slate-500 font-medium block">Ticket Médio</span>
-                <span className="text-base font-bold text-slate-900 tabular-nums">
+              <div className="p-3 bg-slate-50/70 dark:bg-[#0A1328]/60 border border-slate-200/60 dark:border-[#1A294A] rounded-xl">
+                <span className="text-[11px] text-slate-500 dark:text-[#C0C6CF]/80 font-medium block">
+                  Ticket Médio
+                </span>
+                <span className="text-base font-bold text-slate-900 dark:text-white tabular-nums">
                   {formatCurrency(resumoGeral?.ticketMedio)}
                 </span>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
 
       {/* SEÇÃO 3: PRODUTOS MAIS VENDIDOS */}
       <section>
-        <Card className="rounded-xl border border-slate-200 bg-white shadow-xs">
-          <CardHeader className="pb-3">
+        <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 sm:p-6 shadow-sm">
+          <div className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <CardTitle className="text-base font-bold text-slate-900">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
                   3. Produtos Mais Vendidos (Top 20)
-                </CardTitle>
-                <CardDescription className="text-xs text-slate-500">
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-[#C0C6CF]/80 mt-0.5">
                   Ranking de produtos ordenado por quantidade vendida ou faturamento
-                </CardDescription>
+                </p>
               </div>
-              <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg">
+              <div className="flex items-center gap-1.5 bg-slate-100/80 dark:bg-[#0A1328]/80 p-1 rounded-xl border border-slate-200/80 dark:border-[#1A294A]">
                 <Button
                   size="sm"
                   variant={rankingOrdem === 'faturamento' ? 'default' : 'ghost'}
                   onClick={() => setRankingOrdem('faturamento')}
-                  className={`h-7 text-xs px-2.5 ${rankingOrdem === 'faturamento' ? 'bg-teal-700 hover:bg-teal-800 text-white font-semibold' : 'text-slate-600'}`}
+                  className={`h-7 text-xs px-3 rounded-lg ${
+                    rankingOrdem === 'faturamento'
+                      ? 'bg-[#0066FF] text-white font-semibold'
+                      : 'text-slate-600 dark:text-slate-300'
+                  }`}
                 >
                   Por Faturamento
                 </Button>
@@ -808,24 +820,28 @@ export default function RelatoriosPage() {
                   size="sm"
                   variant={rankingOrdem === 'quantidade' ? 'default' : 'ghost'}
                   onClick={() => setRankingOrdem('quantidade')}
-                  className={`h-7 text-xs px-2.5 ${rankingOrdem === 'quantidade' ? 'bg-teal-700 hover:bg-teal-800 text-white font-semibold' : 'text-slate-600'}`}
+                  className={`h-7 text-xs px-3 rounded-lg ${
+                    rankingOrdem === 'quantidade'
+                      ? 'bg-[#0066FF] text-white font-semibold'
+                      : 'text-slate-600 dark:text-slate-300'
+                  }`}
                 >
                   Por Quantidade
                 </Button>
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div className="pt-4">
             {loading ? (
               <TableSkeleton rows={5} cols={6} />
             ) : rankingProdutos.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-400">
+              <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
                 Nenhuma venda de produtos registrada no período.
               </div>
             ) : (
-              <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                <table className="w-full text-left text-xs text-slate-600">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <div className="overflow-x-auto border border-slate-200/80 dark:border-[#1A294A] rounded-xl overflow-hidden">
+                <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                  <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <tr>
                       <th className="py-3 px-3 text-center w-12">#</th>
                       <th className="py-3 px-4">Produto</th>
@@ -835,23 +851,28 @@ export default function RelatoriosPage() {
                       <th className="py-3 px-4 text-right">Ticket Médio</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                     {rankingProdutos.map((item, idx) => (
-                      <tr key={item.produto_id} className="hover:bg-slate-50/70">
+                      <tr
+                        key={item.produto_id}
+                        className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
+                      >
                         <td className="py-2.5 px-3 text-center font-bold text-slate-400">
                           {idx + 1}º
                         </td>
-                        <td className="py-2.5 px-4 font-semibold text-slate-900">{item.nome}</td>
-                        <td className="py-2.5 px-3 text-slate-500 font-mono text-[11px]">
+                        <td className="py-2.5 px-4 font-semibold text-slate-900 dark:text-white">
+                          {item.nome}
+                        </td>
+                        <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
                           {item.codigo ? `#${item.codigo}` : '-'}
                         </td>
-                        <td className="py-2.5 px-4 text-center font-bold text-slate-800 tabular-nums">
+                        <td className="py-2.5 px-4 text-center font-bold text-slate-800 dark:text-slate-200 tabular-nums">
                           {item.quantidadeVendida} {item.unidade}
                         </td>
-                        <td className="py-2.5 px-4 text-right font-black text-teal-800 tabular-nums">
+                        <td className="py-2.5 px-4 text-right font-black text-[#0066FF] dark:text-[#3B82F6] tabular-nums">
                           {formatCurrency(item.faturamento)}
                         </td>
-                        <td className="py-2.5 px-4 text-right text-slate-600 tabular-nums">
+                        <td className="py-2.5 px-4 text-right text-slate-600 dark:text-slate-300 tabular-nums">
                           {formatCurrency(item.ticketMedio)}
                         </td>
                       </tr>
@@ -860,32 +881,32 @@ export default function RelatoriosPage() {
                 </table>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
 
       {/* SEÇÃO 4: DESEMPENHO DOS VENDEDORES */}
       <section>
-        <Card className="rounded-xl border border-slate-200 bg-white shadow-xs">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold text-slate-900">
+        <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 sm:p-6 shadow-sm">
+          <div className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               4. Desempenho dos Vendedores
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-500">
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-[#C0C6CF]/80 mt-0.5">
               Resultados de vendas, faturamento e comissões geradas no período
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
+          <div className="pt-4">
             {loading ? (
               <TableSkeleton rows={4} cols={5} />
             ) : desempenhoVendedores.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-400">
+              <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
                 Nenhum vendedor vinculado a vendas no período.
               </div>
             ) : (
-              <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                <table className="w-full text-left text-xs text-slate-600">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <div className="overflow-x-auto border border-slate-200/80 dark:border-[#1A294A] rounded-xl overflow-hidden">
+                <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                  <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <tr>
                       <th className="py-3 px-4">Vendedor</th>
                       <th className="py-3 px-4 text-center">Nº Vendas</th>
@@ -894,20 +915,25 @@ export default function RelatoriosPage() {
                       <th className="py-3 px-4 text-right">Comissão Total</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                     {desempenhoVendedores.map((v) => (
-                      <tr key={v.vendedor_id} className="hover:bg-slate-50/70">
-                        <td className="py-2.5 px-4 font-semibold text-slate-900">{v.nome}</td>
-                        <td className="py-2.5 px-4 text-center font-bold text-slate-800 tabular-nums">
+                      <tr
+                        key={v.vendedor_id}
+                        className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
+                      >
+                        <td className="py-2.5 px-4 font-semibold text-slate-900 dark:text-white">
+                          {v.nome}
+                        </td>
+                        <td className="py-2.5 px-4 text-center font-bold text-slate-800 dark:text-slate-200 tabular-nums">
                           {v.vendas}
                         </td>
-                        <td className="py-2.5 px-4 text-right font-black text-slate-900 tabular-nums">
+                        <td className="py-2.5 px-4 text-right font-black text-slate-900 dark:text-white tabular-nums">
                           {formatCurrency(v.faturamento)}
                         </td>
-                        <td className="py-2.5 px-4 text-right text-slate-600 tabular-nums">
+                        <td className="py-2.5 px-4 text-right text-slate-600 dark:text-slate-300 tabular-nums">
                           {formatCurrency(v.ticketMedio)}
                         </td>
-                        <td className="py-2.5 px-4 text-right font-bold text-emerald-700 tabular-nums">
+                        <td className="py-2.5 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
                           {formatCurrency(v.comissaoTotal)}
                         </td>
                       </tr>
@@ -916,29 +942,29 @@ export default function RelatoriosPage() {
                 </table>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
 
       {/* SEÇÃO 5: FORMAS DE PAGAMENTO */}
       <section>
-        <Card className="rounded-xl border border-slate-200 bg-white shadow-xs">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold text-slate-900">
+        <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 sm:p-6 shadow-sm">
+          <div className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               5. Vendas por Forma de Pagamento
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-500">
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-[#C0C6CF]/80 mt-0.5">
               Distribuição do faturamento pelas modalidades de recebimento
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
+          <div className="pt-4">
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Skeleton className="h-56 rounded-lg" />
-                <Skeleton className="h-56 rounded-lg" />
+                <Skeleton className="h-56 rounded-xl bg-slate-100 dark:bg-[#0A1328]" />
+                <Skeleton className="h-56 rounded-xl bg-slate-100 dark:bg-[#0A1328]" />
               </div>
             ) : formasPagamento.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-400">
+              <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
                 Nenhum pagamento registrado no período.
               </div>
             ) : (
@@ -973,9 +999,9 @@ export default function RelatoriosPage() {
                 </div>
 
                 {/* Tabela descritiva */}
-                <div className="border border-slate-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-left text-xs text-slate-600">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <div className="border border-slate-200/80 dark:border-[#1A294A] rounded-xl overflow-hidden">
+                  <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                    <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       <tr>
                         <th className="py-2.5 px-3">Forma</th>
                         <th className="py-2.5 px-3 text-center">Qtd</th>
@@ -983,26 +1009,29 @@ export default function RelatoriosPage() {
                         <th className="py-2.5 px-3 text-right">%</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                       {formasPagamento.map((fp, idx) => {
                         const pct = totalValorFormas > 0 ? (fp.valor / totalValorFormas) * 100 : 0
                         const label = FORMA_PAGTO_LABELS[fp.forma_pagamento] || fp.forma_pagamento
                         return (
-                          <tr key={fp.forma_pagamento} className="hover:bg-slate-50/70">
-                            <td className="py-2 px-3 font-semibold text-slate-900 flex items-center gap-2">
+                          <tr
+                            key={fp.forma_pagamento}
+                            className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
+                          >
+                            <td className="py-2 px-3 font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                               <span
                                 className="w-2.5 h-2.5 rounded-full shrink-0"
                                 style={{ backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }}
                               />
                               {label}
                             </td>
-                            <td className="py-2 px-3 text-center font-bold text-slate-800 tabular-nums">
+                            <td className="py-2 px-3 text-center font-bold text-slate-800 dark:text-slate-200 tabular-nums">
                               {fp.quantidade}
                             </td>
-                            <td className="py-2 px-3 text-right font-black text-slate-900 tabular-nums">
+                            <td className="py-2 px-3 text-right font-black text-slate-900 dark:text-white tabular-nums">
                               {formatCurrency(fp.valor)}
                             </td>
-                            <td className="py-2 px-3 text-right text-slate-500 font-mono">
+                            <td className="py-2 px-3 text-right text-slate-500 dark:text-slate-400 font-mono">
                               {pct.toFixed(1)}%
                             </td>
                           </tr>
@@ -1013,46 +1042,46 @@ export default function RelatoriosPage() {
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
 
       {/* SEÇÃO 6: CLIENTES */}
       <section>
-        <Card className="rounded-xl border border-slate-200 bg-white shadow-xs">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold text-slate-900">
+        <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 sm:p-6 shadow-sm">
+          <div className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               6. Desempenho de Clientes (Top 20)
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-500">
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-[#C0C6CF]/80 mt-0.5">
               Clientes que mais compraram no período e novos cadastros
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            </p>
+          </div>
+          <div className="space-y-4 pt-4">
             {/* 3 Indicadores de Clientes */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <span className="text-[11px] text-slate-500 font-medium block">
+              <div className="p-3 bg-slate-50/70 dark:bg-[#0A1328]/60 border border-slate-200/80 dark:border-[#1A294A] rounded-xl">
+                <span className="text-[11px] text-slate-500 dark:text-[#C0C6CF]/80 font-medium block">
                   Compraram no Período
                 </span>
-                <span className="text-lg font-black text-slate-900 tabular-nums">
+                <span className="text-lg font-black text-slate-900 dark:text-white tabular-nums">
                   {clientesResumo.compraramNoPeriodo}
                 </span>
               </div>
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <span className="text-[11px] text-slate-500 font-medium block">
+              <div className="p-3 bg-slate-50/70 dark:bg-[#0A1328]/60 border border-slate-200/80 dark:border-[#1A294A] rounded-xl">
+                <span className="text-[11px] text-slate-500 dark:text-[#C0C6CF]/80 font-medium block">
                   Novos Cadastrados
                 </span>
-                <span className="text-lg font-black text-teal-700 tabular-nums">
+                <span className="text-lg font-black text-[#0066FF] dark:text-[#3B82F6] tabular-nums">
                   {clientesResumo.novosNoPeriodo}
                 </span>
               </div>
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <span className="text-[11px] text-slate-500 font-medium block">
+              <div className="p-3 bg-slate-50/70 dark:bg-[#0A1328]/60 border border-slate-200/80 dark:border-[#1A294A] rounded-xl">
+                <span className="text-[11px] text-slate-500 dark:text-[#C0C6CF]/80 font-medium block">
                   Maior Comprador
                 </span>
                 <span
-                  className="text-sm font-bold text-slate-900 truncate block"
+                  className="text-sm font-bold text-slate-900 dark:text-white truncate block"
                   title={clientesResumo.topCliente || '-'}
                 >
                   {clientesResumo.topCliente || 'Nenhum'}
@@ -1063,13 +1092,13 @@ export default function RelatoriosPage() {
             {loading ? (
               <TableSkeleton rows={4} cols={4} />
             ) : clientesResumo.clientes.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-400">
+              <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
                 Nenhum cliente realizou compras no período.
               </div>
             ) : (
-              <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                <table className="w-full text-left text-xs text-slate-600">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <div className="overflow-x-auto border border-slate-200/80 dark:border-[#1A294A] rounded-xl overflow-hidden">
+                <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                  <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <tr>
                       <th className="py-3 px-4">Cliente</th>
                       <th className="py-3 px-4 text-center">Nº Compras</th>
@@ -1077,17 +1106,22 @@ export default function RelatoriosPage() {
                       <th className="py-3 px-4 text-right">Última Compra</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                     {clientesResumo.clientes.map((c) => (
-                      <tr key={c.cliente_id} className="hover:bg-slate-50/70">
-                        <td className="py-2.5 px-4 font-semibold text-slate-900">{c.nome}</td>
-                        <td className="py-2.5 px-4 text-center font-bold text-slate-800 tabular-nums">
+                      <tr
+                        key={c.cliente_id}
+                        className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
+                      >
+                        <td className="py-2.5 px-4 font-semibold text-slate-900 dark:text-white">
+                          {c.nome}
+                        </td>
+                        <td className="py-2.5 px-4 text-center font-bold text-slate-800 dark:text-slate-200 tabular-nums">
                           {c.quantidadeCompras}
                         </td>
-                        <td className="py-2.5 px-4 text-right font-black text-slate-900 tabular-nums">
+                        <td className="py-2.5 px-4 text-right font-black text-slate-900 dark:text-white tabular-nums">
                           {formatCurrency(c.valorTotal)}
                         </td>
-                        <td className="py-2.5 px-4 text-right text-slate-500">
+                        <td className="py-2.5 px-4 text-right text-slate-500 dark:text-slate-400">
                           {formatDate(c.ultimaCompra)}
                         </td>
                       </tr>
@@ -1096,54 +1130,57 @@ export default function RelatoriosPage() {
                 </table>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
 
       {/* SEÇÃO 7: COMPRAS */}
       <section className="space-y-4">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600 dark:text-[#C0C6CF]/80">
           7. Compras e Fornecedores
         </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Card 1: Compras por Fornecedor */}
-          <Card className="rounded-xl border border-slate-200 bg-white shadow-xs">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-bold text-slate-900">
+          <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 shadow-sm">
+            <div className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                 Compras por Fornecedor
-              </CardTitle>
-              <CardDescription className="text-xs text-slate-500">
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-[#C0C6CF]/80 mt-0.5">
                 Volume de aquisições por fornecedor no período
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+              </p>
+            </div>
+            <div className="pt-4">
               {loading ? (
                 <TableSkeleton rows={4} cols={3} />
               ) : comprasFornecedores.length === 0 ? (
-                <div className="py-8 text-center text-xs text-slate-400">
+                <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
                   Nenhuma compra registrada com fornecedores no período.
                 </div>
               ) : (
-                <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                  <table className="w-full text-left text-xs text-slate-600">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <div className="overflow-x-auto border border-slate-200/80 dark:border-[#1A294A] rounded-xl overflow-hidden">
+                  <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                    <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       <tr>
                         <th className="py-2.5 px-3">Fornecedor</th>
                         <th className="py-2.5 px-3 text-center">Nº Compras</th>
                         <th className="py-2.5 px-3 text-right">Valor Total</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                       {comprasFornecedores.map((f) => (
-                        <tr key={f.fornecedor_id} className="hover:bg-slate-50/70">
-                          <td className="py-2 px-3 font-semibold text-slate-900 truncate max-w-[180px]">
+                        <tr
+                          key={f.fornecedor_id}
+                          className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
+                        >
+                          <td className="py-2 px-3 font-semibold text-slate-900 dark:text-white truncate max-w-[180px]">
                             {f.nome}
                           </td>
-                          <td className="py-2 px-3 text-center font-bold text-slate-800 tabular-nums">
+                          <td className="py-2 px-3 text-center font-bold text-slate-800 dark:text-slate-200 tabular-nums">
                             {f.numeroCompras}
                           </td>
-                          <td className="py-2 px-3 text-right font-black text-slate-900 tabular-nums">
+                          <td className="py-2 px-3 text-right font-black text-slate-900 dark:text-white tabular-nums">
                             {formatCurrency(f.valorTotal)}
                           </td>
                         </tr>
@@ -1152,30 +1189,30 @@ export default function RelatoriosPage() {
                   </table>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Card 2: Produtos Mais Comprados */}
-          <Card className="rounded-xl border border-slate-200 bg-white shadow-xs">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-bold text-slate-900">
+          <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 shadow-sm">
+            <div className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                 Produtos Mais Comprados
-              </CardTitle>
-              <CardDescription className="text-xs text-slate-500">
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-[#C0C6CF]/80 mt-0.5">
                 Itens com maior volume e custo médio de reposição
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+              </p>
+            </div>
+            <div className="pt-4">
               {loading ? (
                 <TableSkeleton rows={4} cols={4} />
               ) : produtosComprados.length === 0 ? (
-                <div className="py-8 text-center text-xs text-slate-400">
+                <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
                   Nenhum item comprado no período.
                 </div>
               ) : (
-                <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                  <table className="w-full text-left text-xs text-slate-600">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <div className="overflow-x-auto border border-slate-200/80 dark:border-[#1A294A] rounded-xl overflow-hidden">
+                  <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                    <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       <tr>
                         <th className="py-2.5 px-3">Produto</th>
                         <th className="py-2.5 px-3 text-center">Qtd</th>
@@ -1183,19 +1220,22 @@ export default function RelatoriosPage() {
                         <th className="py-2.5 px-3 text-right">Custo Médio</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                       {produtosComprados.map((p) => (
-                        <tr key={p.produto_id} className="hover:bg-slate-50/70">
-                          <td className="py-2 px-3 font-semibold text-slate-900 truncate max-w-[160px]">
+                        <tr
+                          key={p.produto_id}
+                          className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
+                        >
+                          <td className="py-2 px-3 font-semibold text-slate-900 dark:text-white truncate max-w-[160px]">
                             {p.nome}
                           </td>
-                          <td className="py-2 px-3 text-center font-bold text-slate-800 tabular-nums">
+                          <td className="py-2 px-3 text-center font-bold text-slate-800 dark:text-slate-200 tabular-nums">
                             {p.quantidadeComprada} {p.unidade}
                           </td>
-                          <td className="py-2 px-3 text-right font-black text-slate-900 tabular-nums">
+                          <td className="py-2 px-3 text-right font-black text-slate-900 dark:text-white tabular-nums">
                             {formatCurrency(p.valorTotal)}
                           </td>
-                          <td className="py-2 px-3 text-right text-slate-600 tabular-nums">
+                          <td className="py-2 px-3 text-right text-slate-600 dark:text-slate-300 tabular-nums">
                             {formatCurrency(p.custoMedio)}
                           </td>
                         </tr>
@@ -1204,99 +1244,117 @@ export default function RelatoriosPage() {
                   </table>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* SEÇÃO 8: ESTOQUE */}
       <section>
-        <Card className="rounded-xl border border-slate-200 bg-white shadow-xs">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold text-slate-900">
+        <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 sm:p-6 shadow-sm">
+          <div className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               8. Situação do Estoque e Movimentações
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-500">
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-[#C0C6CF]/80 mt-0.5">
               Status atual dos saldos, níveis de reposição e movimentações no período
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            </p>
+          </div>
+          <div className="space-y-4 pt-4">
             {/* 4 Indicadores de Estoque */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="p-3.5 bg-red-50/60 border border-red-200 rounded-xl">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-red-700 block">
+              <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-2xl">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400 block">
                   Produtos Zerados
                 </span>
-                <span className="text-2xl font-black text-red-900 tabular-nums">
+                <span className="text-2xl font-black text-rose-700 dark:text-rose-300 tabular-nums">
                   {estoqueIndicadores?.produtosZerados ?? 0}
                 </span>
-                <p className="text-[10px] text-red-600 mt-0.5">Sem saldo em estoque</p>
+                <p className="text-[10px] text-rose-600/80 dark:text-rose-400/80 mt-0.5">
+                  Sem saldo em estoque
+                </p>
               </div>
 
-              <div className="p-3.5 bg-amber-50/60 border border-amber-200 rounded-xl">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700 block">
+              <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 block">
                   Abaixo do Mínimo
                 </span>
-                <span className="text-2xl font-black text-amber-900 tabular-nums">
+                <span className="text-2xl font-black text-amber-700 dark:text-amber-300 tabular-nums">
                   {estoqueIndicadores?.produtosAbaixoMinimo ?? 0}
                 </span>
-                <p className="text-[10px] text-amber-600 mt-0.5">Necessitam reposição</p>
+                <p className="text-[10px] text-amber-600/80 dark:text-amber-400/80 mt-0.5">
+                  Necessitam reposição
+                </p>
               </div>
 
-              <div className="p-3.5 bg-emerald-50/60 border border-emerald-200 rounded-xl">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 block">
+              <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 block">
                   Estoque Normal
                 </span>
-                <span className="text-2xl font-black text-emerald-900 tabular-nums">
+                <span className="text-2xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums">
                   {estoqueIndicadores?.produtosNormais ?? 0}
                 </span>
-                <p className="text-[10px] text-emerald-600 mt-0.5">Acima do mínimo</p>
+                <p className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80 mt-0.5">
+                  Acima do mínimo
+                </p>
               </div>
 
-              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 block">
+              <div className="p-3.5 bg-slate-50/70 dark:bg-[#0A1328]/60 border border-slate-200/80 dark:border-[#1A294A] rounded-2xl">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-[#C0C6CF] block">
                   Qtd Total em Estoque
                 </span>
-                <span className="text-2xl font-black text-slate-900 tabular-nums">
+                <span className="text-2xl font-black text-slate-900 dark:text-white tabular-nums">
                   {estoqueIndicadores?.quantidadeTotalEstoque ?? 0}
                 </span>
-                <p className="text-[10px] text-slate-500 mt-0.5">Soma de todas as unidades</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Soma de todas as unidades
+                </p>
               </div>
             </div>
 
             {/* Movimentações no Período */}
-            <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+            <div className="p-3.5 bg-slate-50/70 dark:bg-[#0A1328]/60 rounded-2xl border border-slate-200/80 dark:border-[#1A294A] space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block">
                 Movimentações Realizadas no Período
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
-                <div className="p-2 bg-white rounded-lg border border-emerald-200">
-                  <span className="text-[10px] text-emerald-700 font-bold block">Entradas (+)</span>
-                  <span className="text-sm font-black text-emerald-900">
+                <div className="p-2 bg-white/80 dark:bg-[#0E1A33] rounded-xl border border-emerald-500/20">
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block">
+                    Entradas (+)
+                  </span>
+                  <span className="text-sm font-black text-emerald-700 dark:text-emerald-300">
                     {movimentacoesResumo?.entradas ?? 0}
                   </span>
                 </div>
-                <div className="p-2 bg-white rounded-lg border border-red-200">
-                  <span className="text-[10px] text-red-700 font-bold block">Saídas (-)</span>
-                  <span className="text-sm font-black text-red-900">
+                <div className="p-2 bg-white/80 dark:bg-[#0E1A33] rounded-xl border border-rose-500/20">
+                  <span className="text-[10px] text-rose-600 dark:text-rose-400 font-bold block">
+                    Saídas (-)
+                  </span>
+                  <span className="text-sm font-black text-rose-700 dark:text-rose-300">
                     {movimentacoesResumo?.saidas ?? 0}
                   </span>
                 </div>
-                <div className="p-2 bg-white rounded-lg border border-slate-200">
-                  <span className="text-[10px] text-slate-600 font-bold block">Perdas</span>
-                  <span className="text-sm font-black text-slate-800">
+                <div className="p-2 bg-white/80 dark:bg-[#0E1A33] rounded-xl border border-slate-200 dark:border-[#1A294A]">
+                  <span className="text-[10px] text-slate-600 dark:text-[#C0C6CF] font-bold block">
+                    Perdas
+                  </span>
+                  <span className="text-sm font-black text-slate-800 dark:text-slate-200">
                     {movimentacoesResumo?.perdas ?? 0}
                   </span>
                 </div>
-                <div className="p-2 bg-white rounded-lg border border-blue-200">
-                  <span className="text-[10px] text-blue-700 font-bold block">Ajustes</span>
-                  <span className="text-sm font-black text-blue-900">
+                <div className="p-2 bg-white/80 dark:bg-[#0E1A33] rounded-xl border border-[#0066FF]/20">
+                  <span className="text-[10px] text-[#0066FF] dark:text-[#3B82F6] font-bold block">
+                    Ajustes
+                  </span>
+                  <span className="text-sm font-black text-[#0066FF] dark:text-[#3B82F6]">
                     {movimentacoesResumo?.ajustes ?? 0}
                   </span>
                 </div>
-                <div className="p-2 bg-white rounded-lg border border-orange-200">
-                  <span className="text-[10px] text-orange-700 font-bold block">Devoluções</span>
-                  <span className="text-sm font-black text-orange-900">
+                <div className="p-2 bg-white/80 dark:bg-[#0E1A33] rounded-xl border border-amber-500/20">
+                  <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold block">
+                    Devoluções
+                  </span>
+                  <span className="text-sm font-black text-amber-700 dark:text-amber-300">
                     {movimentacoesResumo?.devolucoes ?? 0}
                   </span>
                 </div>
@@ -1306,31 +1364,43 @@ export default function RelatoriosPage() {
             {/* Tabela de Produtos com Filtro de Status */}
             <div className="space-y-2 pt-2">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <span className="text-xs font-bold text-slate-800">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                   Produtos em Estoque ({estoqueItens.length})
                 </span>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 bg-slate-100/80 dark:bg-[#0A1328]/80 p-1 rounded-xl border border-slate-200/80 dark:border-[#1A294A]">
                   <Button
                     size="sm"
-                    variant={estoqueFiltroStatus === 'todos' ? 'default' : 'outline'}
+                    variant={estoqueFiltroStatus === 'todos' ? 'default' : 'ghost'}
                     onClick={() => setEstoqueFiltroStatus('todos')}
-                    className={`h-7 text-xs ${estoqueFiltroStatus === 'todos' ? 'bg-teal-700 hover:bg-teal-800 text-white font-semibold' : 'text-slate-600'}`}
+                    className={`h-7 text-xs px-2.5 rounded-lg ${
+                      estoqueFiltroStatus === 'todos'
+                        ? 'bg-[#0066FF] text-white font-semibold'
+                        : 'text-slate-600 dark:text-slate-300'
+                    }`}
                   >
                     Todos
                   </Button>
                   <Button
                     size="sm"
-                    variant={estoqueFiltroStatus === 'zerado' ? 'default' : 'outline'}
+                    variant={estoqueFiltroStatus === 'zerado' ? 'default' : 'ghost'}
                     onClick={() => setEstoqueFiltroStatus('zerado')}
-                    className={`h-7 text-xs ${estoqueFiltroStatus === 'zerado' ? 'bg-red-700 hover:bg-red-800 text-white font-semibold' : 'text-red-700 border-red-200'}`}
+                    className={`h-7 text-xs px-2.5 rounded-lg ${
+                      estoqueFiltroStatus === 'zerado'
+                        ? 'bg-rose-600 text-white font-semibold'
+                        : 'text-rose-600 dark:text-rose-400'
+                    }`}
                   >
                     Zerados
                   </Button>
                   <Button
                     size="sm"
-                    variant={estoqueFiltroStatus === 'abaixo_minimo' ? 'default' : 'outline'}
+                    variant={estoqueFiltroStatus === 'abaixo_minimo' ? 'default' : 'ghost'}
                     onClick={() => setEstoqueFiltroStatus('abaixo_minimo')}
-                    className={`h-7 text-xs ${estoqueFiltroStatus === 'abaixo_minimo' ? 'bg-amber-700 hover:bg-amber-800 text-white font-semibold' : 'text-amber-700 border-amber-200'}`}
+                    className={`h-7 text-xs px-2.5 rounded-lg ${
+                      estoqueFiltroStatus === 'abaixo_minimo'
+                        ? 'bg-amber-600 text-white font-semibold'
+                        : 'text-amber-600 dark:text-amber-400'
+                    }`}
                   >
                     Abaixo do Mínimo
                   </Button>
@@ -1340,13 +1410,13 @@ export default function RelatoriosPage() {
               {loadingEstoqueItens ? (
                 <TableSkeleton rows={4} cols={5} />
               ) : estoqueItens.length === 0 ? (
-                <div className="py-6 text-center text-xs text-slate-400">
+                <div className="py-6 text-center text-xs text-slate-400 dark:text-slate-500">
                   Nenhum produto cadastrado com este status de estoque.
                 </div>
               ) : (
-                <div className="overflow-x-auto border border-slate-200 rounded-lg max-h-72 overflow-y-auto">
-                  <table className="w-full text-left text-xs text-slate-600">
-                    <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500 sticky top-0">
+                <div className="overflow-x-auto border border-slate-200/80 dark:border-[#1A294A] rounded-xl max-h-72 overflow-y-auto">
+                  <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                    <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 sticky top-0">
                       <tr>
                         <th className="py-2.5 px-3">Produto</th>
                         <th className="py-2.5 px-3">Código</th>
@@ -1355,45 +1425,41 @@ export default function RelatoriosPage() {
                         <th className="py-2.5 px-3 text-center">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                       {estoqueItens.map((p) => {
                         const isZerado = p.status === 'zerado'
                         const isAbaixo = p.status === 'abaixo_minimo'
 
                         return (
-                          <tr key={p.produto_id} className="hover:bg-slate-50/70">
-                            <td className="py-2 px-3 font-semibold text-slate-900">{p.nome}</td>
-                            <td className="py-2 px-3 text-slate-500 font-mono text-[11px]">
+                          <tr
+                            key={p.produto_id}
+                            className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
+                          >
+                            <td className="py-2 px-3 font-semibold text-slate-900 dark:text-white">
+                              {p.nome}
+                            </td>
+                            <td className="py-2 px-3 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
                               {p.codigo ? `#${p.codigo}` : '-'}
                             </td>
-                            <td className="py-2 px-3 text-center font-bold text-slate-900 tabular-nums">
+                            <td className="py-2 px-3 text-center font-bold text-slate-900 dark:text-white tabular-nums">
                               {p.estoqueAtual} {p.unidade}
                             </td>
-                            <td className="py-2 px-3 text-center text-slate-500 tabular-nums">
+                            <td className="py-2 px-3 text-center text-slate-500 dark:text-slate-400 tabular-nums">
                               {p.estoqueMinimo} {p.unidade}
                             </td>
                             <td className="py-2 px-3 text-center">
                               {isZerado ? (
-                                <Badge
-                                  variant="outline"
-                                  className="bg-red-100 text-red-800 border-red-200 font-semibold text-[10px]"
-                                >
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
                                   Zerado
-                                </Badge>
+                                </span>
                               ) : isAbaixo ? (
-                                <Badge
-                                  variant="outline"
-                                  className="bg-amber-100 text-amber-800 border-amber-200 font-semibold text-[10px]"
-                                >
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                                   Abaixo do Mínimo
-                                </Badge>
+                                </span>
                               ) : (
-                                <Badge
-                                  variant="outline"
-                                  className="bg-green-100 text-green-800 border-green-200 font-semibold text-[10px]"
-                                >
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                                   Normal
-                                </Badge>
+                                </span>
                               )}
                             </td>
                           </tr>
@@ -1404,135 +1470,135 @@ export default function RelatoriosPage() {
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
 
       {/* SEÇÃO 9: FINANCEIRO */}
       <section className="space-y-4">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600 dark:text-[#C0C6CF]/80">
           9. Desempenho Financeiro
         </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Card Contas a Receber */}
-          <Card className="rounded-xl border border-slate-200 bg-white shadow-xs">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <ArrowUpCircle className="w-4 h-4 text-teal-700" />
+          <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 shadow-sm">
+            <div className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <ArrowUpCircle className="w-4 h-4 text-[#0066FF] dark:text-[#3B82F6]" />
                 Contas a Receber (Saldo Geral)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </h3>
+            </div>
+            <div className="pt-4">
               {loading ? (
-                <Skeleton className="h-24 rounded-lg" />
+                <Skeleton className="h-24 rounded-xl bg-slate-100 dark:bg-[#0A1328]" />
               ) : (
                 <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                    <span className="text-[10px] text-slate-500 uppercase font-bold block">
+                  <div className="p-3 bg-slate-50/70 dark:bg-[#0A1328]/60 rounded-xl border border-slate-200/80 dark:border-[#1A294A]">
+                    <span className="text-[10px] text-slate-500 dark:text-[#C0C6CF]/80 uppercase font-bold block">
                       Total Gerado
                     </span>
-                    <span className="text-base font-black text-slate-900 tabular-nums">
+                    <span className="text-base font-black text-slate-900 dark:text-white tabular-nums">
                       {formatCurrency(financeiroResumo?.contasReceber.total)}
                     </span>
                   </div>
-                  <div className="p-3 bg-emerald-50/50 rounded-lg border border-emerald-200">
-                    <span className="text-[10px] text-emerald-700 uppercase font-bold block">
+                  <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold block">
                       Já Recebido
                     </span>
-                    <span className="text-base font-black text-emerald-800 tabular-nums">
+                    <span className="text-base font-black text-emerald-600 dark:text-emerald-400 tabular-nums">
                       {formatCurrency(financeiroResumo?.contasReceber.recebido)}
                     </span>
                   </div>
-                  <div className="p-3 bg-blue-50/50 rounded-lg border border-blue-200">
-                    <span className="text-[10px] text-blue-700 uppercase font-bold block">
+                  <div className="p-3 bg-[#0066FF]/10 rounded-xl border border-[#0066FF]/20">
+                    <span className="text-[10px] text-[#0066FF] dark:text-[#3B82F6] uppercase font-bold block">
                       Em Aberto
                     </span>
-                    <span className="text-base font-black text-blue-800 tabular-nums">
+                    <span className="text-base font-black text-[#0066FF] dark:text-[#3B82F6] tabular-nums">
                       {formatCurrency(financeiroResumo?.contasReceber.aberto)}
                     </span>
                   </div>
-                  <div className="p-3 bg-red-50/50 rounded-lg border border-red-200">
-                    <span className="text-[10px] text-red-700 uppercase font-bold block">
+                  <div className="p-3 bg-rose-500/10 rounded-xl border border-rose-500/20">
+                    <span className="text-[10px] text-rose-600 dark:text-rose-400 uppercase font-bold block">
                       Vencido
                     </span>
-                    <span className="text-base font-black text-red-800 tabular-nums">
+                    <span className="text-base font-black text-rose-600 dark:text-rose-400 tabular-nums">
                       {formatCurrency(financeiroResumo?.contasReceber.vencido)}
                     </span>
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Card Contas a Pagar */}
-          <Card className="rounded-xl border border-slate-200 bg-white shadow-xs">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <ArrowDownCircle className="w-4 h-4 text-amber-600" />
+          <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 shadow-sm">
+            <div className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <ArrowDownCircle className="w-4 h-4 text-amber-500" />
                 Contas a Pagar (Saldo Geral)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </h3>
+            </div>
+            <div className="pt-4">
               {loading ? (
-                <Skeleton className="h-24 rounded-lg" />
+                <Skeleton className="h-24 rounded-xl bg-slate-100 dark:bg-[#0A1328]" />
               ) : (
                 <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                    <span className="text-[10px] text-slate-500 uppercase font-bold block">
+                  <div className="p-3 bg-slate-50/70 dark:bg-[#0A1328]/60 rounded-xl border border-slate-200/80 dark:border-[#1A294A]">
+                    <span className="text-[10px] text-slate-500 dark:text-[#C0C6CF]/80 uppercase font-bold block">
                       Total Gerado
                     </span>
-                    <span className="text-base font-black text-slate-900 tabular-nums">
+                    <span className="text-base font-black text-slate-900 dark:text-white tabular-nums">
                       {formatCurrency(financeiroResumo?.contasPagar.total)}
                     </span>
                   </div>
-                  <div className="p-3 bg-emerald-50/50 rounded-lg border border-emerald-200">
-                    <span className="text-[10px] text-emerald-700 uppercase font-bold block">
+                  <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold block">
                       Já Pago
                     </span>
-                    <span className="text-base font-black text-emerald-800 tabular-nums">
+                    <span className="text-base font-black text-emerald-600 dark:text-emerald-400 tabular-nums">
                       {formatCurrency(financeiroResumo?.contasPagar.pago)}
                     </span>
                   </div>
-                  <div className="p-3 bg-amber-50/50 rounded-lg border border-amber-200">
-                    <span className="text-[10px] text-amber-700 uppercase font-bold block">
+                  <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                    <span className="text-[10px] text-amber-600 dark:text-amber-400 uppercase font-bold block">
                       Em Aberto
                     </span>
-                    <span className="text-base font-black text-amber-800 tabular-nums">
+                    <span className="text-base font-black text-amber-600 dark:text-amber-400 tabular-nums">
                       {formatCurrency(financeiroResumo?.contasPagar.aberto)}
                     </span>
                   </div>
-                  <div className="p-3 bg-red-50/50 rounded-lg border border-red-200">
-                    <span className="text-[10px] text-red-700 uppercase font-bold block">
+                  <div className="p-3 bg-rose-500/10 rounded-xl border border-rose-500/20">
+                    <span className="text-[10px] text-rose-600 dark:text-rose-400 uppercase font-bold block">
                       Vencido
                     </span>
-                    <span className="text-base font-black text-red-800 tabular-nums">
+                    <span className="text-base font-black text-rose-600 dark:text-rose-400 tabular-nums">
                       {formatCurrency(financeiroResumo?.contasPagar.vencido)}
                     </span>
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Card Fluxo Financeiro (Gráfico) */}
-        <Card className="rounded-xl border border-slate-200 bg-white shadow-xs">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-bold text-slate-900">
+        <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 sm:p-6 shadow-sm">
+          <div className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Fluxo Financeiro Efetivado (Recebimentos vs Pagamentos)
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-500">
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-[#C0C6CF]/80 mt-0.5">
               Valores efetivamente quitados por mês no período
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
+          <div className="pt-4">
             {loading ? (
               <div className="h-64 flex items-center justify-center">
-                <Skeleton className="w-full h-full rounded-xl" />
+                <Skeleton className="w-full h-full rounded-xl bg-slate-100 dark:bg-[#0A1328]" />
               </div>
             ) : fluxoFinanceiro.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-400">
+              <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
                 Nenhum pagamento ou recebimento liquidado no período.
               </div>
             ) : (
@@ -1542,7 +1608,11 @@ export default function RelatoriosPage() {
                     data={fluxoFinanceiro}
                     margin={{ top: 10, right: 10, left: 10, bottom: 0 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="rgba(192, 198, 207, 0.15)"
+                    />
                     <XAxis
                       dataKey="mes"
                       tickLine={false}
@@ -1568,93 +1638,93 @@ export default function RelatoriosPage() {
                 </ChartContainer>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
 
       {/* SEÇÃO 10: PEDIDOS */}
       <section>
-        <Card className="rounded-xl border border-slate-200 bg-white shadow-xs">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold text-slate-900">
+        <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 sm:p-6 shadow-sm">
+          <div className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               10. Pedidos Comerciais e Conversão
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-500">
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-[#C0C6CF]/80 mt-0.5">
               Volume de pedidos abertos, status de atendimento e conversão em vendas faturadas
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            </p>
+          </div>
+          <div className="space-y-4 pt-4">
             {loading ? (
-              <Skeleton className="h-24 rounded-lg" />
+              <Skeleton className="h-24 rounded-xl bg-slate-100 dark:bg-[#0A1328]" />
             ) : (
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase block">
+                  <div className="p-3 bg-slate-50/70 dark:bg-[#0A1328]/60 rounded-xl border border-slate-200/80 dark:border-[#1A294A]">
+                    <span className="text-[10px] text-slate-500 dark:text-[#C0C6CF]/80 font-bold uppercase block">
                       Total Pedidos
                     </span>
-                    <span className="text-xl font-black text-slate-900 tabular-nums">
+                    <span className="text-xl font-black text-slate-900 dark:text-white tabular-nums">
                       {pedidosIndicadores?.total ?? 0}
                     </span>
                   </div>
-                  <div className="p-3 bg-amber-50/60 rounded-lg border border-amber-200">
-                    <span className="text-[10px] text-amber-700 font-bold uppercase block">
+                  <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                    <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase block">
                       Pendentes
                     </span>
-                    <span className="text-xl font-black text-amber-900 tabular-nums">
+                    <span className="text-xl font-black text-amber-600 dark:text-amber-300 tabular-nums">
                       {pedidosIndicadores?.pendentes ?? 0}
                     </span>
                   </div>
-                  <div className="p-3 bg-blue-50/60 rounded-lg border border-blue-200">
-                    <span className="text-[10px] text-blue-700 font-bold uppercase block">
+                  <div className="p-3 bg-[#0066FF]/10 rounded-xl border border-[#0066FF]/20">
+                    <span className="text-[10px] text-[#0066FF] dark:text-[#3B82F6] font-bold uppercase block">
                       Confirmados
                     </span>
-                    <span className="text-xl font-black text-blue-900 tabular-nums">
+                    <span className="text-xl font-black text-[#0066FF] dark:text-[#3B82F6] tabular-nums">
                       {pedidosIndicadores?.confirmados ?? 0}
                     </span>
                   </div>
-                  <div className="p-3 bg-emerald-50/60 rounded-lg border border-emerald-200">
-                    <span className="text-[10px] text-emerald-700 font-bold uppercase block">
+                  <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase block">
                       Faturados
                     </span>
-                    <span className="text-xl font-black text-emerald-900 tabular-nums">
+                    <span className="text-xl font-black text-emerald-600 dark:text-emerald-300 tabular-nums">
                       {pedidosIndicadores?.faturados ?? 0}
                     </span>
                   </div>
-                  <div className="p-3 bg-red-50/60 rounded-lg border border-red-200">
-                    <span className="text-[10px] text-red-700 font-bold uppercase block">
+                  <div className="p-3 bg-rose-500/10 rounded-xl border border-rose-500/20">
+                    <span className="text-[10px] text-rose-600 dark:text-rose-400 font-bold uppercase block">
                       Cancelados
                     </span>
-                    <span className="text-xl font-black text-red-900 tabular-nums">
+                    <span className="text-xl font-black text-rose-600 dark:text-rose-300 tabular-nums">
                       {pedidosIndicadores?.cancelados ?? 0}
                     </span>
                   </div>
                 </div>
 
-                <div className="p-4 bg-teal-50/60 rounded-xl border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="p-4 bg-[#0066FF]/5 dark:bg-[#0066FF]/10 rounded-2xl border border-[#0066FF]/20 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div>
-                    <span className="text-xs font-bold text-teal-900 uppercase tracking-wider block">
+                    <span className="text-xs font-bold text-[#0066FF] dark:text-[#3B82F6] uppercase tracking-wider block">
                       Taxa de Conversão em Vendas
                     </span>
-                    <p className="text-xs text-teal-700 mt-0.5">
+                    <p className="text-xs text-slate-600 dark:text-[#C0C6CF] mt-0.5">
                       Vendas originadas diretamente a partir de ordens de pedidos registradas no
                       período
                     </p>
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-right">
-                      <span className="text-[10px] text-teal-700 font-medium block">
+                      <span className="text-[10px] text-slate-500 dark:text-[#C0C6CF]/80 font-medium block">
                         Pedidos Convertidos
                       </span>
-                      <span className="text-lg font-black text-teal-950 tabular-nums">
+                      <span className="text-lg font-black text-slate-900 dark:text-white tabular-nums">
                         {pedidosIndicadores?.convertidosEmVenda ?? 0}
                       </span>
                     </div>
-                    <div className="text-right border-l border-teal-200 pl-6">
-                      <span className="text-[10px] text-teal-700 font-medium block">
+                    <div className="text-right border-l border-slate-200 dark:border-[#1A294A] pl-6">
+                      <span className="text-[10px] text-slate-500 dark:text-[#C0C6CF]/80 font-medium block">
                         Valor Convertido
                       </span>
-                      <span className="text-lg font-black text-teal-950 tabular-nums">
+                      <span className="text-lg font-black text-[#0066FF] dark:text-[#3B82F6] tabular-nums">
                         {formatCurrency(pedidosIndicadores?.valorConvertido)}
                       </span>
                     </div>
@@ -1662,8 +1732,8 @@ export default function RelatoriosPage() {
                 </div>
               </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
     </div>
   )

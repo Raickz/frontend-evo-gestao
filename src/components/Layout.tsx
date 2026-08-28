@@ -168,11 +168,18 @@ export default function Layout() {
   const trialExpiradoOuBloqueado = !loadingStatus && statusAssinatura && !acessoPermitido
 
   return (
-    <div className="flex min-h-screen bg-[#F5F7FB] dark:bg-[#070D1C] text-slate-900 dark:text-slate-100 font-sans antialiased transition-colors duration-300">
+    <div className="flex min-h-screen bg-[#F5F7FB] dark:bg-[#050B18] text-slate-900 dark:text-slate-100 font-sans antialiased transition-colors duration-300">
+      {/* Background Decorativo Sutil EVO Dark (apenas no modo escuro) */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-0 dark:opacity-100 transition-opacity duration-500">
+        <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-[#0066FF]/[0.035] rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 left-1/3 w-[500px] h-[500px] bg-[#0052CC]/[0.025] rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#0A1328]/40 rounded-full blur-2xl" />
+      </div>
+
       {/* Mobile Drawer Backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden transition-opacity"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -386,7 +393,7 @@ export default function Layout() {
         )}
 
         {/* Header Superior Global (Light / Dark responsive) */}
-        <header className="sticky top-0 z-30 h-16 bg-white/80 dark:bg-[#0A1328]/85 backdrop-blur-md border-b border-slate-200/80 dark:border-[#152342] px-4 sm:px-6 flex items-center justify-between shadow-xs transition-colors duration-200">
+        <header className="sticky top-0 z-30 h-16 bg-white/85 dark:bg-[#0A1328]/85 backdrop-blur-md border-b border-slate-200/80 dark:border-[#152342] px-4 sm:px-6 flex items-center justify-between shadow-xs transition-colors duration-200">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(true)}

@@ -1148,13 +1148,13 @@ export default function PedidosPage() {
             MODAL 1: NOVO PEDIDO (UI COMPLETA COM CATÁLOGO E CARRINHO)
             ========================================================================= */}
         <Dialog open={modalNovoAberto} onOpenChange={setModalNovoAberto}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-lg font-bold text-slate-900">
-                <ClipboardList className="w-5 h-5 text-teal-700" />
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+            <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+              <DialogTitle className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
+                <ClipboardList className="w-5 h-5 text-[#0066FF] dark:text-[#3B82F6]" />
                 Novo Pedido / Orçamento
               </DialogTitle>
-              <DialogDescription className="text-xs text-slate-500">
+              <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80">
                 Preencha os dados do cliente, vendedor e selecione os produtos para montar o pedido.
               </DialogDescription>
             </DialogHeader>
@@ -1162,19 +1162,21 @@ export default function PedidosPage() {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-2">
               {/* COLUNA ESQUERDA: CATÁLOGO DE PRODUTOS (7 colunas) */}
               <div className="md:col-span-7 space-y-4">
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                <div className="p-3.5 bg-slate-50/80 dark:bg-[#071126]/60 border border-slate-200/80 dark:border-[#1A294A] rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Package className="w-4 h-4 text-teal-700" />
-                      <span className="text-xs font-bold text-slate-900">Catálogo de Produtos</span>
+                      <Package className="w-4 h-4 text-[#0066FF] dark:text-[#3B82F6]" />
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">
+                        Catálogo de Produtos
+                      </span>
                     </div>
                     <div className="w-48 relative">
-                      <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                      <Search className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
                       <Input
                         placeholder="Buscar produto..."
                         value={buscaProdutoCatalogo}
                         onChange={(e) => setBuscaProdutoCatalogo(e.target.value)}
-                        className="pl-8 h-8 text-xs bg-white"
+                        className="pl-8 h-8 text-xs rounded-xl bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A] dark:text-white"
                       />
                     </div>
                   </div>
@@ -1182,11 +1184,11 @@ export default function PedidosPage() {
                   {/* Lista de produtos no catálogo */}
                   <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                     {loadingProdutos ? (
-                      <div className="py-8 text-center text-xs text-slate-400">
+                      <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
                         Carregando produtos...
                       </div>
                     ) : produtos.length === 0 ? (
-                      <div className="py-8 text-center text-xs text-slate-400">
+                      <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
                         Nenhum produto ativo encontrado.
                       </div>
                     ) : (
@@ -1197,27 +1199,27 @@ export default function PedidosPage() {
                         return (
                           <div
                             key={prod.id}
-                            className={`p-2.5 rounded-lg border text-xs flex items-center justify-between gap-3 transition-colors ${
+                            className={`p-2.5 rounded-xl border text-xs flex items-center justify-between gap-3 transition-colors ${
                               itemNoCarrinho
-                                ? 'bg-teal-50/50 border-teal-200'
-                                : 'bg-white border-slate-200 hover:border-slate-300'
+                                ? 'bg-[#0066FF]/10 border-[#0066FF]/30 dark:bg-[#0066FF]/15'
+                                : 'bg-white/80 dark:bg-[#0A1328]/80 border-slate-200/80 dark:border-[#1A294A] hover:border-slate-300 dark:hover:border-slate-700'
                             }`}
                           >
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-slate-900 truncate">
+                                <span className="font-bold text-slate-900 dark:text-white truncate">
                                   {prod.nome}
                                 </span>
                                 {prod.codigo && (
-                                  <span className="text-[10px] font-mono text-slate-400 bg-slate-100 px-1 py-0.2 rounded shrink-0">
+                                  <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-[#071126] px-1.5 py-0.5 rounded-md shrink-0">
                                     {prod.codigo}
                                   </span>
                                 )}
                               </div>
-                              <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
+                              <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-[#C0C6CF]/80 mt-0.5">
                                 <span>Estoque: {estoqueAtual}</span>
                                 <span>•</span>
-                                <span className="font-semibold text-teal-700">
+                                <span className="font-semibold text-[#0066FF] dark:text-[#3B82F6]">
                                   {formatCurrency(prod.preco_venda || 0)} / {prod.unidade || 'UN'}
                                 </span>
                               </div>
@@ -1225,21 +1227,21 @@ export default function PedidosPage() {
 
                             <div className="shrink-0">
                               {itemNoCarrinho ? (
-                                <div className="flex items-center gap-1 bg-white border border-teal-300 rounded p-0.5">
+                                <div className="flex items-center gap-1 bg-white dark:bg-[#0A1328] border border-[#0066FF]/40 rounded-xl p-0.5">
                                   <button
                                     type="button"
                                     onClick={() => alterarQuantidadeCarrinho(prod.id, -1)}
-                                    className="w-5 h-5 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded"
+                                    className="w-5 h-5 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A294A] rounded-lg"
                                   >
                                     <Minus className="w-3 h-3" />
                                   </button>
-                                  <span className="w-6 text-center font-bold text-xs text-teal-900">
+                                  <span className="w-6 text-center font-bold text-xs text-[#0066FF] dark:text-[#3B82F6]">
                                     {itemNoCarrinho.quantidade}
                                   </span>
                                   <button
                                     type="button"
                                     onClick={() => alterarQuantidadeCarrinho(prod.id, 1)}
-                                    className="w-5 h-5 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded"
+                                    className="w-5 h-5 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A294A] rounded-lg"
                                   >
                                     <Plus className="w-3 h-3" />
                                   </button>
@@ -1249,7 +1251,7 @@ export default function PedidosPage() {
                                   type="button"
                                   size="sm"
                                   onClick={() => adicionarAoCarrinho(prod)}
-                                  className="h-7 text-xs bg-teal-700 hover:bg-teal-800 text-white px-2.5"
+                                  className="h-7 text-xs bg-[#0066FF] hover:bg-[#0052CC] text-white px-2.5 rounded-xl shadow-xs"
                                 >
                                   <Plus className="w-3 h-3 mr-1" />
                                   Adicionar
@@ -1265,7 +1267,7 @@ export default function PedidosPage() {
 
                 {/* Observações */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-slate-700">
+                  <Label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
                     Observações do Pedido (opcional)
                   </Label>
                   <Textarea
@@ -1273,7 +1275,7 @@ export default function PedidosPage() {
                     value={novoObservacoes}
                     onChange={(e) => setNovoObservacoes(e.target.value)}
                     rows={2}
-                    className="text-xs resize-none"
+                    className="text-xs resize-none rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                 </div>
               </div>
@@ -1282,24 +1284,24 @@ export default function PedidosPage() {
               <div className="md:col-span-5 space-y-4">
                 {/* Select Cliente */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
-                    <User className="w-3.5 h-3.5 text-slate-500" />
+                  <Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1">
+                    <User className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
                     Cliente
                   </Label>
                   <Select
                     value={novoClienteId || 'sem_cliente'}
                     onValueChange={(val) => setNovoClienteId(val === 'sem_cliente' ? null : val)}
                   >
-                    <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                    <SelectTrigger className="text-xs h-9 bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] rounded-xl dark:text-white">
                       <SelectValue placeholder="Selecione o cliente" />
                     </SelectTrigger>
-                    <SelectContent className="max-h-56">
-                      <div className="p-1 border-b border-slate-100">
+                    <SelectContent className="max-h-56 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
+                      <div className="p-1 border-b border-slate-100 dark:border-[#1A294A]">
                         <Input
                           placeholder="Pesquisar cliente..."
                           value={buscaClienteModal}
                           onChange={(e) => setBuscaClienteModal(e.target.value)}
-                          className="h-7 text-xs"
+                          className="h-7 text-xs rounded-lg dark:text-white"
                           onClick={(e) => e.stopPropagation()}
                           onKeyDown={(e) => e.stopPropagation()}
                         />
@@ -1318,24 +1320,24 @@ export default function PedidosPage() {
 
                 {/* Select Vendedor */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1">
-                    <Percent className="w-3.5 h-3.5 text-slate-500" />
+                  <Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1">
+                    <Percent className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
                     Vendedor
                   </Label>
                   <Select
                     value={novoVendedorId || 'sem_vendedor'}
                     onValueChange={(val) => setNovoVendedorId(val === 'sem_vendedor' ? null : val)}
                   >
-                    <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                    <SelectTrigger className="text-xs h-9 bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] rounded-xl dark:text-white">
                       <SelectValue placeholder="Selecione o vendedor" />
                     </SelectTrigger>
-                    <SelectContent className="max-h-56">
-                      <div className="p-1 border-b border-slate-100">
+                    <SelectContent className="max-h-56 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
+                      <div className="p-1 border-b border-slate-100 dark:border-[#1A294A]">
                         <Input
                           placeholder="Pesquisar vendedor..."
                           value={buscaVendedorModal}
                           onChange={(e) => setBuscaVendedorModal(e.target.value)}
-                          className="h-7 text-xs"
+                          className="h-7 text-xs rounded-lg dark:text-white"
                           onClick={(e) => e.stopPropagation()}
                           onKeyDown={(e) => e.stopPropagation()}
                         />
@@ -1353,8 +1355,8 @@ export default function PedidosPage() {
                 </div>
 
                 {/* Carrinho / Itens */}
-                <div className="space-y-2 pt-2 border-t border-slate-200">
-                  <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-[#1A294A]">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
                     <span>Itens do Pedido ({carrinho.length})</span>
                     {carrinho.length > 0 && (
                       <button
@@ -1368,7 +1370,7 @@ export default function PedidosPage() {
                   </div>
 
                   {carrinho.length === 0 ? (
-                    <div className="py-6 text-center border border-dashed border-slate-200 rounded-lg bg-slate-50/50 text-xs text-slate-400">
+                    <div className="py-6 text-center border border-dashed border-slate-200 dark:border-[#1A294A] rounded-xl bg-slate-50/50 dark:bg-[#071126]/40 text-xs text-slate-400 dark:text-slate-500">
                       Nenhum item adicionado ao pedido
                     </div>
                   ) : (
@@ -1376,11 +1378,13 @@ export default function PedidosPage() {
                       {carrinho.map((item) => (
                         <div
                           key={item.produto_id}
-                          className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-100 text-xs"
+                          className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border border-slate-100 dark:border-[#1A294A] text-xs"
                         >
                           <div className="flex-1 min-w-0 mr-2">
-                            <p className="font-semibold text-slate-900 truncate">{item.nome}</p>
-                            <p className="text-[10px] text-slate-500">
+                            <p className="font-semibold text-slate-900 dark:text-white truncate">
+                              {item.nome}
+                            </p>
+                            <p className="text-[10px] text-slate-500 dark:text-[#C0C6CF]/80">
                               {formatCurrency(item.preco_unitario)} un.
                             </p>
                           </div>
@@ -1395,9 +1399,9 @@ export default function PedidosPage() {
                                   parseInt(e.target.value, 10),
                                 )
                               }
-                              className="w-10 text-center text-xs font-bold bg-white border border-slate-200 rounded py-0.5"
+                              className="w-10 text-center text-xs font-bold bg-white dark:bg-[#0A1328] border border-slate-200 dark:border-[#1A294A] rounded-lg py-0.5 dark:text-white"
                             />
-                            <span className="font-bold text-slate-900 tabular-nums w-14 text-right">
+                            <span className="font-bold text-slate-900 dark:text-white tabular-nums w-14 text-right">
                               {formatCurrency(item.subtotal)}
                             </span>
                             <button
@@ -1415,29 +1419,31 @@ export default function PedidosPage() {
                 </div>
 
                 {/* Totais & Desconto */}
-                <div className="space-y-2 pt-2 border-t border-slate-200 text-xs">
-                  <div className="flex justify-between text-slate-600">
+                <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-[#1A294A] text-xs">
+                  <div className="flex justify-between text-slate-600 dark:text-[#C0C6CF]">
                     <span>Subtotal:</span>
-                    <span className="font-semibold text-slate-900 tabular-nums">
+                    <span className="font-semibold text-slate-900 dark:text-white tabular-nums">
                       {formatCurrency(subtotalNovo)}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-slate-600">Desconto Total (R$):</span>
+                    <span className="text-slate-600 dark:text-[#C0C6CF]">Desconto Total (R$):</span>
                     <Input
                       type="number"
                       min="0"
                       step="0.01"
                       value={descontoTotalInput}
                       onChange={(e) => handleDescontoTotalChange(e.target.value)}
-                      className="w-24 h-7 text-xs text-right"
+                      className="w-24 h-7 text-xs text-right rounded-lg bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                     />
                   </div>
 
-                  <div className="flex justify-between items-center pt-2 border-t border-slate-200">
-                    <span className="text-sm font-bold text-slate-900">Total do Pedido:</span>
-                    <span className="text-lg font-black text-teal-700 tabular-nums">
+                  <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-[#1A294A]">
+                    <span className="text-sm font-bold text-slate-900 dark:text-white">
+                      Total do Pedido:
+                    </span>
+                    <span className="text-lg font-black text-[#0066FF] dark:text-[#3B82F6] tabular-nums">
                       {formatCurrency(totalNovo)}
                     </span>
                   </div>
@@ -1445,13 +1451,13 @@ export default function PedidosPage() {
               </div>
             </div>
 
-            <DialogFooter className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-2">
+            <DialogFooter className="pt-4 border-t border-slate-100 dark:border-[#1A294A] flex flex-col sm:flex-row gap-2">
               <Button
                 variant="outline"
                 type="button"
                 disabled={submetendoNovo}
                 onClick={() => setModalNovoAberto(false)}
-                className="text-xs"
+                className="text-xs rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A294A]"
               >
                 Cancelar
               </Button>
@@ -1459,7 +1465,7 @@ export default function PedidosPage() {
                 type="button"
                 disabled={submetendoNovo || carrinho.length === 0}
                 onClick={handleSubmitNovoPedido}
-                className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-2"
+                className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold flex items-center gap-2 rounded-xl px-4 shadow-sm"
               >
                 {submetendoNovo ? (
                   <>
@@ -1478,49 +1484,53 @@ export default function PedidosPage() {
             MODAL 2: DETALHES DO PEDIDO
             ========================================================================= */}
         <Dialog open={modalDetalhesAberto} onOpenChange={setModalDetalhesAberto}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+            <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-teal-700" />
-                  <DialogTitle className="text-base font-bold text-slate-900">
+                  <FileText className="w-5 h-5 text-[#0066FF] dark:text-[#3B82F6]" />
+                  <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
                     Pedido #{pedidoDetalhe?.numero}
                   </DialogTitle>
                 </div>
                 {pedidoDetalhe?.status && getStatusBadge(pedidoDetalhe.status)}
               </div>
-              <DialogDescription className="text-xs text-slate-500">
+              <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80">
                 Criado em {formatDateTime(pedidoDetalhe?.created_at)}
               </DialogDescription>
             </DialogHeader>
 
             {loadingDetalhes ? (
-              <div className="py-12 text-center text-xs text-slate-400">
+              <div className="py-12 text-center text-xs text-slate-400 dark:text-slate-500">
                 Carregando detalhes do pedido...
               </div>
             ) : pedidoDetalhe ? (
               <div className="space-y-4 text-xs">
                 {/* Informações do Cliente & Vendedor */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50/80 dark:bg-[#071126]/60 rounded-xl border border-slate-200/80 dark:border-[#1A294A]">
                   <div>
-                    <span className="text-[11px] font-semibold text-slate-500 uppercase block mb-1">
+                    <span className="text-[11px] font-semibold text-slate-500 dark:text-[#C0C6CF]/80 uppercase block mb-1">
                       Cliente
                     </span>
-                    <p className="font-bold text-slate-900 text-sm">
+                    <p className="font-bold text-slate-900 dark:text-white text-sm">
                       {pedidoDetalhe.clientes?.nome || 'Consumidor / Não informado'}
                     </p>
                     {pedidoDetalhe.clientes?.documento && (
-                      <p className="text-slate-600">Doc: {pedidoDetalhe.clientes.documento}</p>
+                      <p className="text-slate-600 dark:text-slate-300">
+                        Doc: {pedidoDetalhe.clientes.documento}
+                      </p>
                     )}
                     {pedidoDetalhe.clientes?.telefone && (
-                      <p className="text-slate-600">Tel: {pedidoDetalhe.clientes.telefone}</p>
+                      <p className="text-slate-600 dark:text-slate-300">
+                        Tel: {pedidoDetalhe.clientes.telefone}
+                      </p>
                     )}
                   </div>
                   <div>
-                    <span className="text-[11px] font-semibold text-slate-500 uppercase block mb-1">
+                    <span className="text-[11px] font-semibold text-slate-500 dark:text-[#C0C6CF]/80 uppercase block mb-1">
                       Vendedor Responsável
                     </span>
-                    <p className="font-bold text-slate-900 text-sm">
+                    <p className="font-bold text-slate-900 dark:text-white text-sm">
                       {pedidoDetalhe.vendedores?.nome || 'Nenhum vendedor associado'}
                     </p>
                   </div>
@@ -1528,10 +1538,12 @@ export default function PedidosPage() {
 
                 {/* Tabela de Itens */}
                 <div className="space-y-2">
-                  <span className="font-bold text-slate-900 block">Itens do Pedido</span>
-                  <div className="border border-slate-200 rounded-lg overflow-hidden">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 text-[11px] font-bold uppercase text-slate-500 border-b border-slate-200">
+                  <span className="font-bold text-slate-900 dark:text-white block">
+                    Itens do Pedido
+                  </span>
+                  <div className="border border-slate-200/80 dark:border-[#1A294A] rounded-xl overflow-hidden">
+                    <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                      <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400 border-b border-slate-200/80 dark:border-[#1A294A]">
                         <tr>
                           <th className="py-2.5 px-3">Produto</th>
                           <th className="py-2.5 px-3 text-center">Qtd</th>
@@ -1540,36 +1552,42 @@ export default function PedidosPage() {
                           <th className="py-2.5 px-3 text-right">Subtotal</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                         {!pedidoDetalhe.itens_pedido || pedidoDetalhe.itens_pedido.length === 0 ? (
                           <tr>
-                            <td colSpan={5} className="py-4 text-center text-slate-400 italic">
+                            <td
+                              colSpan={5}
+                              className="py-4 text-center text-slate-400 dark:text-slate-500 italic"
+                            >
                               Nenhum item registrado para este pedido.
                             </td>
                           </tr>
                         ) : (
                           pedidoDetalhe.itens_pedido.map((item: any) => (
-                            <tr key={item.id}>
+                            <tr
+                              key={item.id}
+                              className="hover:bg-slate-50/50 dark:hover:bg-white/[0.03]"
+                            >
                               <td className="py-2.5 px-3">
-                                <p className="font-semibold text-slate-900">
+                                <p className="font-semibold text-slate-900 dark:text-white">
                                   {item.produtos?.nome || 'Produto não identificado'}
                                 </p>
                                 {item.produtos?.codigo && (
-                                  <span className="text-[10px] text-slate-400 font-mono">
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
                                     Cód: {item.produtos.codigo}
                                   </span>
                                 )}
                               </td>
-                              <td className="py-2.5 px-3 text-center font-semibold">
+                              <td className="py-2.5 px-3 text-center font-semibold text-slate-800 dark:text-slate-200">
                                 {item.quantidade} {item.produtos?.unidade || ''}
                               </td>
-                              <td className="py-2.5 px-3 text-right tabular-nums">
+                              <td className="py-2.5 px-3 text-right tabular-nums text-slate-600 dark:text-slate-300">
                                 {formatCurrency(item.preco_unitario)}
                               </td>
-                              <td className="py-2.5 px-3 text-right tabular-nums text-slate-500">
+                              <td className="py-2.5 px-3 text-right tabular-nums text-slate-500 dark:text-slate-400">
                                 {formatCurrency(item.desconto || 0)}
                               </td>
-                              <td className="py-2.5 px-3 text-right font-bold text-slate-900 tabular-nums">
+                              <td className="py-2.5 px-3 text-right font-bold text-slate-900 dark:text-white tabular-nums">
                                 {formatCurrency(item.subtotal)}
                               </td>
                             </tr>
@@ -1582,10 +1600,10 @@ export default function PedidosPage() {
 
                 {/* Resumo do Total */}
                 <div className="flex justify-end pt-2">
-                  <div className="w-64 space-y-1.5 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                    <div className="flex justify-between items-center text-slate-900 font-bold text-sm">
+                  <div className="w-64 space-y-1.5 p-3.5 bg-slate-50/80 dark:bg-[#071126]/60 rounded-xl border border-slate-200/80 dark:border-[#1A294A]">
+                    <div className="flex justify-between items-center text-slate-900 dark:text-white font-bold text-sm">
                       <span>Total do Pedido:</span>
-                      <span className="text-teal-700 font-black">
+                      <span className="text-[#0066FF] dark:text-[#3B82F6] font-black">
                         {formatCurrency(pedidoDetalhe.total || 0)}
                       </span>
                     </div>
@@ -1594,69 +1612,77 @@ export default function PedidosPage() {
 
                 {/* Venda Relacionada (se houver) */}
                 {vendaRelacionada && (
-                  <Card className="border-teal-200 bg-teal-50/40">
-                    <CardContent className="p-3.5 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Receipt className="w-4 h-4 text-teal-700" />
-                          <span className="font-bold text-slate-900 text-xs">
-                            Venda Gerada #{vendaRelacionada.numero}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge
-                            variant="outline"
-                            className="bg-teal-100 text-teal-800 border-teal-300 font-semibold text-[10px]"
-                          >
-                            {vendaRelacionada.status || 'Concluída'}
-                          </Badge>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => navigate('/app/vendas')}
-                            className="h-7 text-[11px] px-2.5 bg-white border-teal-300 text-teal-800 hover:bg-teal-50 flex items-center gap-1 font-medium"
-                          >
-                            <ExternalLink className="w-3 h-3" />
-                            Ver Venda
-                          </Button>
-                        </div>
+                  <div className="border border-[#0066FF]/30 bg-[#0066FF]/5 dark:bg-[#0066FF]/10 rounded-xl p-3.5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Receipt className="w-4 h-4 text-[#0066FF] dark:text-[#3B82F6]" />
+                        <span className="font-bold text-slate-900 dark:text-white text-xs">
+                          Venda Gerada #{vendaRelacionada.numero}
+                        </span>
                       </div>
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          variant="outline"
+                          className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-semibold text-[10px]"
+                        >
+                          {vendaRelacionada.status || 'Concluída'}
+                        </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate('/app/vendas')}
+                          className="h-7 text-[11px] px-2.5 rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1A294A] flex items-center gap-1 font-medium"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          Ver Venda
+                        </Button>
+                      </div>
+                    </div>
 
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px] text-slate-600 border-t border-teal-100">
-                        <div>
-                          <span className="text-slate-400 block text-[10px]">Data da Venda</span>
-                          <span className="font-semibold text-slate-800">
-                            {formatDateTime(vendaRelacionada.created_at)}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-slate-400 block text-[10px]">Total da Venda</span>
-                          <span className="font-bold text-teal-800 tabular-nums">
-                            {formatCurrency(vendaRelacionada.total || 0)}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-slate-400 block text-[10px]">Forma de Pagto</span>
-                          <span className="font-semibold text-slate-800 uppercase">
-                            {vendaRelacionada.forma_pagamento || '-'}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-slate-400 block text-[10px]">Status</span>
-                          <span className="font-semibold text-slate-800 capitalize">
-                            {vendaRelacionada.status || 'Finalizada'}
-                          </span>
-                        </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px] text-slate-600 dark:text-[#C0C6CF] border-t border-[#0066FF]/15">
+                      <div>
+                        <span className="text-slate-400 dark:text-slate-500 block text-[10px]">
+                          Data da Venda
+                        </span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">
+                          {formatDateTime(vendaRelacionada.created_at)}
+                        </span>
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div>
+                        <span className="text-slate-400 dark:text-slate-500 block text-[10px]">
+                          Total da Venda
+                        </span>
+                        <span className="font-bold text-[#0066FF] dark:text-[#3B82F6] tabular-nums">
+                          {formatCurrency(vendaRelacionada.total || 0)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 dark:text-slate-500 block text-[10px]">
+                          Forma de Pagto
+                        </span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200 uppercase">
+                          {vendaRelacionada.forma_pagamento || '-'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 dark:text-slate-500 block text-[10px]">
+                          Status
+                        </span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200 capitalize">
+                          {vendaRelacionada.status || 'Finalizada'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 )}
 
                 {/* Observações */}
                 {pedidoDetalhe.observacoes && (
-                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                    <span className="font-semibold text-slate-700 block mb-1">Observações:</span>
-                    <p className="text-slate-600 whitespace-pre-wrap">
+                  <div className="p-3.5 bg-slate-50/80 dark:bg-[#071126]/60 rounded-xl border border-slate-200/80 dark:border-[#1A294A]">
+                    <span className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                      Observações:
+                    </span>
+                    <p className="text-slate-600 dark:text-[#C0C6CF] whitespace-pre-wrap">
                       {pedidoDetalhe.observacoes}
                     </p>
                   </div>
@@ -1664,16 +1690,16 @@ export default function PedidosPage() {
               </div>
             ) : null}
 
-            <DialogFooter className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-2 justify-between items-center">
+            <DialogFooter className="pt-4 border-t border-slate-100 dark:border-[#1A294A] flex flex-col sm:flex-row gap-2 justify-between items-center">
               <div className="flex items-center gap-2">
                 {/* Botão Imprimir Pedido */}
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setPrintPreviewAberto(true)}
-                  className="text-xs border-slate-300 text-slate-700 hover:bg-slate-50 flex items-center gap-1.5"
+                  className="text-xs rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A294A] flex items-center gap-1.5"
                 >
-                  <Printer className="w-3.5 h-3.5 text-teal-700" />
+                  <Printer className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
                   Imprimir
                 </Button>
 
@@ -1683,9 +1709,9 @@ export default function PedidosPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => abrirModalConversao(pedidoDetalhe)}
-                    className="text-xs border-teal-600 text-teal-700 hover:bg-teal-50 hover:text-teal-800 font-medium flex items-center gap-1.5"
+                    className="text-xs rounded-xl border-[#0066FF]/40 text-[#0066FF] dark:text-[#3B82F6] hover:bg-[#0066FF]/10 font-medium flex items-center gap-1.5"
                   >
-                    <ArrowRightCircle className="w-3.5 h-3.5 text-teal-600" />
+                    <ArrowRightCircle className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
                     Converter em Venda
                   </Button>
                 )}
@@ -1696,7 +1722,7 @@ export default function PedidosPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => abrirEdicao(pedidoDetalhe)}
-                    className="text-xs border-teal-300 text-teal-800 hover:bg-teal-50 flex items-center gap-1.5"
+                    className="text-xs rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A294A] flex items-center gap-1.5"
                   >
                     <Edit className="w-3.5 h-3.5" />
                     Editar Pedido
@@ -1708,7 +1734,7 @@ export default function PedidosPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setModalDetalhesAberto(false)}
-                className="text-xs"
+                className="text-xs rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A294A]"
               >
                 Fechar
               </Button>
@@ -1720,13 +1746,13 @@ export default function PedidosPage() {
             MODAL 3: EDIÇÃO DE PEDIDO (Apenas cabeçalho de pedidos 'pendente')
             ========================================================================= */}
         <Dialog open={modalEdicaoAberto} onOpenChange={setModalEdicaoAberto}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-base font-bold text-slate-900">
-                <Edit className="w-4 h-4 text-teal-700" />
+          <DialogContent className="max-w-md bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+            <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+              <DialogTitle className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
+                <Edit className="w-4 h-4 text-[#0066FF] dark:text-[#3B82F6]" />
                 Editar Pedido #{editNumero}
               </DialogTitle>
-              <DialogDescription className="text-xs text-slate-500">
+              <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80">
                 Altere os dados de cliente, vendedor ou observações. (Os itens são fixos neste
                 pedido).
               </DialogDescription>
@@ -1735,15 +1761,17 @@ export default function PedidosPage() {
             <div className="space-y-4 py-2 text-xs">
               {/* Select Cliente */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-slate-700">Cliente</Label>
+                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Cliente
+                </Label>
                 <Select
                   value={editClienteId || 'sem_cliente'}
                   onValueChange={(val) => setEditClienteId(val === 'sem_cliente' ? null : val)}
                 >
-                  <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                  <SelectTrigger className="text-xs h-9 bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] rounded-xl dark:text-white">
                     <SelectValue placeholder="Selecione o cliente" />
                   </SelectTrigger>
-                  <SelectContent className="max-h-56">
+                  <SelectContent className="max-h-56 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
                     <SelectItem value="sem_cliente" className="text-xs">
                       Nenhum cliente selecionado
                     </SelectItem>
@@ -1758,15 +1786,17 @@ export default function PedidosPage() {
 
               {/* Select Vendedor */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-slate-700">Vendedor</Label>
+                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Vendedor
+                </Label>
                 <Select
                   value={editVendedorId || 'sem_vendedor'}
                   onValueChange={(val) => setEditVendedorId(val === 'sem_vendedor' ? null : val)}
                 >
-                  <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                  <SelectTrigger className="text-xs h-9 bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] rounded-xl dark:text-white">
                     <SelectValue placeholder="Selecione o vendedor" />
                   </SelectTrigger>
-                  <SelectContent className="max-h-56">
+                  <SelectContent className="max-h-56 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
                     <SelectItem value="sem_vendedor" className="text-xs">
                       Sem vendedor vinculado
                     </SelectItem>
@@ -1781,24 +1811,26 @@ export default function PedidosPage() {
 
               {/* Observações */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-slate-700">Observações</Label>
+                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Observações
+                </Label>
                 <Textarea
                   placeholder="Informações adicionais..."
                   value={editObservacoes}
                   onChange={(e) => setEditObservacoes(e.target.value)}
                   rows={3}
-                  className="text-xs resize-none"
+                  className="text-xs resize-none rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                 />
               </div>
             </div>
 
-            <DialogFooter className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row gap-2">
+            <DialogFooter className="pt-3 border-t border-slate-100 dark:border-[#1A294A] flex flex-col sm:flex-row gap-2">
               <Button
                 variant="outline"
                 type="button"
                 disabled={salvandoEdicao}
                 onClick={() => setModalEdicaoAberto(false)}
-                className="text-xs"
+                className="text-xs rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A294A]"
               >
                 Cancelar
               </Button>
@@ -1806,7 +1838,7 @@ export default function PedidosPage() {
                 type="button"
                 disabled={salvandoEdicao}
                 onClick={handleSalvarEdicao}
-                className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold"
+                className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold rounded-xl px-4 shadow-sm"
               >
                 {salvandoEdicao ? 'Salvando...' : 'Salvar Alterações'}
               </Button>
@@ -1823,19 +1855,19 @@ export default function PedidosPage() {
             if (!executandoAcao) setModalConfirmarAcaoAberto(open)
           }}
         >
-          <DialogContent className="max-w-md w-full">
-            <DialogHeader>
-              <div className="flex items-center gap-2 text-teal-800">
+          <DialogContent className="max-w-md w-full bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+            <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+              <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
                 {acaoPedido?.acao === 'confirmar' ? (
-                  <CheckCircle2 className="w-5 h-5 text-teal-600" />
+                  <CheckCircle2 className="w-5 h-5" />
                 ) : (
-                  <Receipt className="w-5 h-5 text-teal-600" />
+                  <Receipt className="w-5 h-5" />
                 )}
-                <DialogTitle className="text-base font-bold text-slate-900">
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
                   {acaoPedido?.acao === 'confirmar' ? 'Confirmar Pedido' : 'Faturar Pedido'}
                 </DialogTitle>
               </div>
-              <DialogDescription className="text-xs text-slate-600 pt-2 leading-relaxed">
+              <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80 pt-2 leading-relaxed">
                 {acaoPedido?.acao === 'confirmar'
                   ? 'Confirmar este pedido? O pedido será marcado como confirmado e poderá ser faturado em seguida.'
                   : 'Faturar este pedido? O pedido ficará disponível para conversão em venda.'}
@@ -1843,20 +1875,20 @@ export default function PedidosPage() {
             </DialogHeader>
 
             {acaoPedido?.pedido && (
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-1.5 my-2">
-                <div className="flex justify-between text-slate-700">
+              <div className="p-3.5 bg-slate-50/80 dark:bg-[#071126]/60 rounded-xl border border-slate-200/80 dark:border-[#1A294A] text-xs space-y-1.5 my-2">
+                <div className="flex justify-between text-slate-600 dark:text-[#C0C6CF]">
                   <span>Número do Pedido:</span>
-                  <span className="font-bold text-slate-900">#{acaoPedido.pedido.numero}</span>
+                  <span className="font-bold text-slate-900 dark:text-white">#{acaoPedido.pedido.numero}</span>
                 </div>
-                <div className="flex justify-between text-slate-700">
+                <div className="flex justify-between text-slate-600 dark:text-[#C0C6CF]">
                   <span>Cliente:</span>
-                  <span className="font-semibold text-slate-900 truncate max-w-[200px]">
+                  <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[200px]">
                     {acaoPedido.pedido.clientes?.nome || 'Consumidor / Não informado'}
                   </span>
                 </div>
-                <div className="flex justify-between text-slate-700 pt-1 border-t border-slate-200 font-bold">
+                <div className="flex justify-between text-slate-700 dark:text-slate-300 pt-1 border-t border-slate-200/80 dark:border-[#1A294A] font-bold">
                   <span>Total:</span>
-                  <span className="text-teal-700 font-black">
+                  <span className="text-[#0066FF] dark:text-[#3B82F6] font-black">
                     {formatCurrency(acaoPedido.pedido.total || 0)}
                   </span>
                 </div>
@@ -1869,7 +1901,7 @@ export default function PedidosPage() {
                 type="button"
                 disabled={executandoAcao}
                 onClick={() => setModalConfirmarAcaoAberto(false)}
-                className="text-xs"
+                className="text-xs rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A294A]"
               >
                 Cancelar
               </Button>
@@ -1877,7 +1909,7 @@ export default function PedidosPage() {
                 type="button"
                 disabled={executandoAcao}
                 onClick={handleExecutarAcao}
-                className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-2"
+                className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold flex items-center gap-2 rounded-xl px-4 shadow-sm"
               >
                 {executandoAcao ? (
                   <>
@@ -1909,15 +1941,15 @@ export default function PedidosPage() {
             if (!convertendo) setModalConversaoAberto(open)
           }}
         >
-          <DialogContent className="max-w-md w-full sm:max-w-lg">
-            <DialogHeader>
+          <DialogContent className="max-w-md w-full sm:max-w-lg bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+            <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
               <div className="flex items-center gap-2">
-                <ArrowRightCircle className="w-5 h-5 text-teal-700" />
-                <DialogTitle className="text-base sm:text-lg font-bold text-slate-900">
+                <ArrowRightCircle className="w-5 h-5 text-[#0066FF] dark:text-[#3B82F6]" />
+                <DialogTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
                   Converter Pedido #{pedidoParaConverter?.numero} em Venda
                 </DialogTitle>
               </div>
-              <DialogDescription className="text-xs text-slate-500">
+              <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80">
                 Selecione a forma de pagamento para faturar este pedido e gerar a venda.
               </DialogDescription>
             </DialogHeader>
@@ -1925,29 +1957,29 @@ export default function PedidosPage() {
             {pedidoParaConverter && (
               <div className="space-y-4 py-2 text-xs">
                 {/* Resumo do Pedido */}
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700">
+                <div className="p-3.5 bg-slate-50/80 dark:bg-[#071126]/60 rounded-xl border border-slate-200/80 dark:border-[#1A294A] space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700 dark:text-slate-300">
                     <div>
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block">
                         Cliente
                       </span>
-                      <span className="font-semibold text-slate-900 truncate block">
+                      <span className="font-semibold text-slate-900 dark:text-white truncate block">
                         {pedidoParaConverter.clientes?.nome || 'Consumidor / Não informado'}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block">
                         Vendedor
                       </span>
-                      <span className="font-semibold text-slate-900 truncate block">
+                      <span className="font-semibold text-slate-900 dark:text-white truncate block">
                         {pedidoParaConverter.vendedores?.nome || 'Nenhum vendedor'}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-200 text-slate-900">
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-200/80 dark:border-[#1A294A] text-slate-900 dark:text-white">
                     <div>
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block">
                         Itens
                       </span>
                       <span className="font-semibold">
@@ -1956,10 +1988,10 @@ export default function PedidosPage() {
                       </span>
                     </div>
                     <div className="text-right">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block">
                         Total do Pedido
                       </span>
-                      <span className="text-sm sm:text-base font-black text-teal-700 tabular-nums">
+                      <span className="text-sm sm:text-base font-black text-[#0066FF] dark:text-[#3B82F6] tabular-nums">
                         {formatCurrency(pedidoParaConverter.total || 0)}
                       </span>
                     </div>
@@ -1967,8 +1999,8 @@ export default function PedidosPage() {
                 </div>
 
                 {/* Aviso Importante */}
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2.5 text-amber-900 text-xs">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2.5 text-amber-900 dark:text-amber-200 text-xs">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                   <p className="leading-relaxed">
                     Esta operação irá registrar a venda e realizar a baixa dos produtos no estoque.
                   </p>
@@ -1976,8 +2008,8 @@ export default function PedidosPage() {
 
                 {/* Campo: Forma de Pagamento */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                    <CreditCard className="w-3.5 h-3.5 text-slate-500" />
+                  <Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                    <CreditCard className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
                     Forma de Pagamento <span className="text-rose-500">*</span>
                   </Label>
                   <Select
@@ -1985,10 +2017,10 @@ export default function PedidosPage() {
                     onValueChange={(val) => setFormaPagamentoConversao(val)}
                     disabled={convertendo}
                   >
-                    <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                    <SelectTrigger className="text-xs h-9 bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] rounded-xl dark:text-white">
                       <SelectValue placeholder="Selecione a forma de pagamento" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
                       <SelectItem value="pix" className="text-xs">
                         Pix
                       </SelectItem>
@@ -2007,9 +2039,9 @@ export default function PedidosPage() {
 
                 {/* Campo Condicional: Data de Vencimento (apenas Fiado) */}
                 {formaPagamentoConversao === 'fiado' && (
-                  <div className="space-y-1.5 p-3 bg-amber-50/50 rounded-lg border border-amber-200">
-                    <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-amber-600" />
+                  <div className="space-y-1.5 p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                    <Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                       Data de Vencimento <span className="text-rose-500">*</span>
                     </Label>
                     <Input
@@ -2018,9 +2050,9 @@ export default function PedidosPage() {
                       min={new Date().toISOString().split('T')[0]}
                       onChange={(e) => setVencimentoConversao(e.target.value)}
                       disabled={convertendo}
-                      className="text-xs h-9 bg-white border-slate-200"
+                      className="text-xs h-9 bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] rounded-xl dark:text-white"
                     />
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-slate-500 dark:text-[#C0C6CF]/80">
                       Informe a data limite para o pagamento da conta a receber do cliente.
                     </p>
                   </div>
@@ -2028,13 +2060,13 @@ export default function PedidosPage() {
               </div>
             )}
 
-            <DialogFooter className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row gap-2">
+            <DialogFooter className="pt-3 border-t border-slate-100 dark:border-[#1A294A] flex flex-col sm:flex-row gap-2">
               <Button
                 variant="outline"
                 type="button"
                 disabled={convertendo}
                 onClick={() => setModalConversaoAberto(false)}
-                className="text-xs"
+                className="text-xs rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A294A]"
               >
                 Cancelar
               </Button>
@@ -2042,7 +2074,7 @@ export default function PedidosPage() {
                 type="button"
                 disabled={convertendo}
                 onClick={validarEAvancarConfirmacao}
-                className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-2"
+                className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold flex items-center gap-2 rounded-xl px-4 shadow-sm"
               >
                 {convertendo ? (
                   <>
@@ -2069,42 +2101,42 @@ export default function PedidosPage() {
             if (!convertendo) setModalConfirmacaoAberto(open)
           }}
         >
-          <DialogContent className="max-w-md w-full">
-            <DialogHeader>
-              <div className="flex items-center gap-2 text-teal-800">
-                <AlertTriangle className="w-5 h-5 text-amber-500" />
-                <DialogTitle className="text-base font-bold text-slate-900">
+          <DialogContent className="max-w-md w-full bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+            <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+              <div className="flex items-center gap-2 text-amber-500">
+                <AlertTriangle className="w-5 h-5" />
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
                   Confirmar Conversão
                 </DialogTitle>
               </div>
-              <DialogDescription className="text-xs text-slate-600 pt-2 leading-relaxed">
+              <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80 pt-2 leading-relaxed">
                 Converter este pedido em venda? Esta operação irá registrar a venda e realizar a
                 baixa dos produtos no estoque.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-1 my-2">
-              <div className="flex justify-between text-slate-700">
+            <div className="p-3.5 bg-slate-50/80 dark:bg-[#071126]/60 rounded-xl border border-slate-200/80 dark:border-[#1A294A] text-xs space-y-1 my-2">
+              <div className="flex justify-between text-slate-600 dark:text-[#C0C6CF]">
                 <span>Pedido:</span>
-                <span className="font-bold text-slate-900">#{pedidoParaConverter?.numero}</span>
+                <span className="font-bold text-slate-900 dark:text-white">#{pedidoParaConverter?.numero}</span>
               </div>
-              <div className="flex justify-between text-slate-700">
+              <div className="flex justify-between text-slate-600 dark:text-[#C0C6CF]">
                 <span>Forma de Pagamento:</span>
-                <span className="font-bold text-slate-900 uppercase">
+                <span className="font-bold text-slate-900 dark:text-white uppercase">
                   {formaPagamentoConversao}
                 </span>
               </div>
               {formaPagamentoConversao === 'fiado' && vencimentoConversao && (
-                <div className="flex justify-between text-slate-700">
+                <div className="flex justify-between text-slate-600 dark:text-[#C0C6CF]">
                   <span>Vencimento:</span>
-                  <span className="font-bold text-slate-900">
+                  <span className="font-bold text-slate-900 dark:text-white">
                     {formatDate(vencimentoConversao)}
                   </span>
                 </div>
               )}
-              <div className="flex justify-between text-slate-700 pt-1 border-t border-slate-200 font-bold">
+              <div className="flex justify-between text-slate-700 dark:text-slate-300 pt-1 border-t border-slate-200/80 dark:border-[#1A294A] font-bold">
                 <span>Total a Faturar:</span>
-                <span className="text-teal-700 font-black">
+                <span className="text-[#0066FF] dark:text-[#3B82F6] font-black">
                   {formatCurrency(pedidoParaConverter?.total || 0)}
                 </span>
               </div>
@@ -2116,7 +2148,7 @@ export default function PedidosPage() {
                 type="button"
                 disabled={convertendo}
                 onClick={() => setModalConfirmacaoAberto(false)}
-                className="text-xs"
+                className="text-xs rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A294A]"
               >
                 Cancelar
               </Button>
@@ -2124,7 +2156,7 @@ export default function PedidosPage() {
                 type="button"
                 disabled={convertendo}
                 onClick={handleExecutarConversao}
-                className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-2"
+                className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold flex items-center gap-2 rounded-xl px-4 shadow-sm"
               >
                 {convertendo ? (
                   <>

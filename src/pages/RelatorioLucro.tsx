@@ -236,8 +236,8 @@ export default function RelatorioLucroPage() {
 
       {/* Aviso sobre Vendas Antigas sem Custo Histórico */}
       {resumo.custoProdutos === 0 && resumo.faturamento > 0 && !loading && (
-        <div className="flex items-start gap-2.5 rounded-lg border border-amber-100 bg-amber-50/80 p-3.5 text-xs text-amber-900">
-          <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-2.5 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-xs text-amber-900 dark:text-amber-200">
+          <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <div>
             <span className="font-semibold">Aviso:</span> Algumas vendas neste período foram
             registradas antes da implementação do custo histórico e podem exibir custo zerado,

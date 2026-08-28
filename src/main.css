@@ -135,23 +135,43 @@
 
   /* Glassmorphism utility classes for EVO Gestão cards and panels */
   .glass-card {
-    background: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.82);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.85);
     box-shadow:
       0 4px 20px -2px rgba(10, 19, 40, 0.04),
       0 2px 6px -1px rgba(10, 19, 40, 0.02);
   }
 
   .dark .glass-card {
-    background: rgba(14, 25, 48, 0.65);
+    background: rgba(10, 19, 40, 0.72);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border: 1px solid rgba(192, 198, 207, 0.12);
     box-shadow:
-      0 8px 30px -4px rgba(0, 0, 0, 0.35),
-      0 2px 8px -1px rgba(0, 102, 255, 0.05);
+      0 8px 30px -4px rgba(0, 0, 0, 0.38),
+      0 2px 8px -1px rgba(0, 102, 255, 0.06);
+  }
+
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(226, 232, 240, 0.85);
+    box-shadow:
+      0 4px 24px -2px rgba(10, 19, 40, 0.05),
+      0 2px 6px -1px rgba(10, 19, 40, 0.02);
+  }
+
+  .dark .glass-panel {
+    background: rgba(10, 19, 40, 0.78);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(192, 198, 207, 0.12);
+    box-shadow:
+      0 10px 32px -4px rgba(0, 0, 0, 0.45),
+      0 2px 10px -1px rgba(0, 102, 255, 0.08);
   }
 
   .glass-card-hover {

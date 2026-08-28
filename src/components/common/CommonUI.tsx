@@ -1,68 +1,77 @@
-import { ReactNode } from 'react'
+import React from 'react'
+import { LucideIcon, Search, AlertCircle, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { LucideIcon, AlertCircle, Inbox } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 
+/* =========================================================================
+   1. PAGE HEADER
+   ========================================================================= */
 interface PageHeaderProps {
   title: string
   description?: string
-  badge?: string
-  actions?: ReactNode
-  className?: string
+  badge?: string | React.ReactNode
+  actions?: React.ReactNode
+  breadcrumbs?: Array<{ label: string; href?: string }>
 }
 
-export function PageHeader({ title, description, badge, actions, className }: PageHeaderProps) {
+export function PageHeader({ title, description, badge, actions, breadcrumbs }: PageHeaderProps) {
   return (
-    <div
-      className={cn(
-        'flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200/80 dark:border-[#1A294A]',
-        className,
-      )}
-    >
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-1">
       <div className="space-y-1">
-        <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white font-sans">
+        {breadcrumbs && breadcrumbs.length > 0 && (
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-[#C0C6CF]/70 mb-1">
+            {breadcrumbs.map((b, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && <span className="text-slate-400 dark:text-slate-600">/</span>}
+                {b.href ? (
+                  <a href={b.href} className="hover:text-[#0066FF] transition-colors">
+                    {b.label}
+                  </a>
+                ) : (
+                  <span>{b.label}</span>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        )}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             {title}
           </h1>
-          {badge && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] border border-[#0066FF]/20">
-              {badge}
-            </span>
-          )}
+          {badge &&
+            (typeof badge === 'string' ? (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] border border-[#0066FF]/20">
+                {badge}
+              </span>
+            ) : (
+              badge
+            ))}
         </div>
         {description && (
-          <p className="text-sm text-slate-500 dark:text-[#C0C6CF] leading-relaxed max-w-2xl">
-            {description}
-          </p>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-[#C0C6CF]">{description}</p>
         )}
       </div>
-      {actions && <div className="flex items-center gap-2.5 flex-wrap">{actions}</div>}
+      {actions && <div className="flex items-center gap-2.5 flex-wrap shrink-0">{actions}</div>}
     </div>
   )
 }
 
-interface GlassCardProps {
-  children: ReactNode
-  className?: string
-  hoverEffect?: boolean
-}
-
-export function GlassCard({ children, className, hoverEffect = false }: GlassCardProps) {
-  return (
-    <div
-      className={cn(
-        'glass-card rounded-2xl transition-all duration-200',
-        hoverEffect && 'glass-card-hover',
-        className,
-      )}
-    >
-      {children}
-    </div>
-  )
-}
-
-interface MetricCardProps {
+/* =========================================================================
+   2. STAT / KPI CARD (Padrão Dashboard EVO)
+   ========================================================================= */
+interface StatCardProps {
   title: string
   value: string | number
   subtitle?: string
@@ -71,110 +80,460 @@ interface MetricCardProps {
   trend?: {
     value: string | number
     isPositive: boolean
+    label?: string
   }
+  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger'
+  loading?: boolean
   className?: string
+  onClick?: () => void
 }
 
-export function MetricCard({
+const variantStyles: Record<
+  NonNullable<StatCardProps['variant']>,
+  {
+    iconBg: string
+    iconColor: string
+    borderColor?: string
+  }
+> = {
+  default: {
+    iconBg: 'bg-[#0066FF]/10 dark:bg-[#0066FF]/15',
+    iconColor: 'text-[#0066FF]',
+  },
+  primary: {
+    iconBg: 'bg-[#0066FF]/10 dark:bg-[#0066FF]/20',
+    iconColor: 'text-[#0066FF] dark:text-[#3B82F6]',
+  },
+  success: {
+    iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/15',
+    iconColor: 'text-emerald-600 dark:text-emerald-400',
+  },
+  warning: {
+    iconBg: 'bg-amber-500/10 dark:bg-amber-500/15',
+    iconColor: 'text-amber-600 dark:text-amber-400',
+  },
+  danger: {
+    iconBg: 'bg-rose-500/10 dark:bg-rose-500/15',
+    iconColor: 'text-rose-600 dark:text-rose-400',
+  },
+}
+
+export function StatCard({
   title,
   value,
   subtitle,
   icon: Icon,
-  iconColor,
   trend,
+  variant = 'default',
+  loading,
   className,
-}: MetricCardProps) {
+  onClick,
+}: StatCardProps) {
+  const currentVariant = variantStyles[variant] || variantStyles.default
+
+  if (loading) {
+    return (
+      <div className="glass-card rounded-2xl p-5 border border-slate-200/80 dark:border-[#1A294A]">
+        <div className="flex items-center justify-between mb-3">
+          <Skeleton className="h-4 w-28 bg-slate-200 dark:bg-[#1A294A]" />
+          <Skeleton className="h-10 w-10 rounded-xl bg-slate-200 dark:bg-[#1A294A]" />
+        </div>
+        <Skeleton className="h-8 w-36 mb-2 bg-slate-200 dark:bg-[#1A294A]" />
+        <Skeleton className="h-3 w-20 bg-slate-200 dark:bg-[#1A294A]" />
+      </div>
+    )
+  }
+
   return (
     <div
+      onClick={onClick}
       className={cn(
-        'glass-card glass-card-hover rounded-2xl p-5 border border-slate-200/80 dark:border-[#1A294A] transition-all duration-200',
+        'glass-card glass-card-hover rounded-2xl p-5 border border-slate-200/80 dark:border-[#1A294A] flex flex-col justify-between relative overflow-hidden group',
+        onClick && 'cursor-pointer',
         className,
       )}
     >
-      <div className="flex items-center justify-between gap-2 pb-2">
-        <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
-          {title}
-        </span>
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]/80">
+            {title}
+          </span>
+          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            {value}
+          </div>
+        </div>
         {Icon && (
           <div
             className={cn(
-              'w-9 h-9 rounded-xl bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] flex items-center justify-center shrink-0 shadow-xs',
-              iconColor,
+              'w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border border-transparent transition-transform group-hover:scale-105',
+              currentVariant.iconBg,
             )}
           >
-            <Icon className="w-4 h-4" />
+            <Icon className={cn('w-5 h-5', currentVariant.iconColor)} />
           </div>
         )}
       </div>
-      <div>
-        <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white tabular-nums mt-1">
-          {value}
+
+      {(subtitle || trend) && (
+        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-[#1A294A]/60 text-xs">
+          {trend && (
+            <span
+              className={cn(
+                'inline-flex items-center gap-0.5 font-bold px-1.5 py-0.5 rounded-md text-[11px]',
+                trend.isPositive
+                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
+              )}
+            >
+              {trend.isPositive ? '+' : ''}
+              {trend.value}
+            </span>
+          )}
+          {subtitle && (
+            <span className="text-slate-500 dark:text-[#C0C6CF]/70 truncate">{subtitle}</span>
+          )}
         </div>
-        {(subtitle || trend) && (
-          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            {trend && (
-              <span
-                className={`text-xs font-bold ${
-                  trend.isPositive
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : 'text-rose-600 dark:text-rose-400'
-                }`}
-              >
-                {trend.isPositive ? '↑ +' : '↓ '}
-                {trend.value}
-              </span>
-            )}
-            {subtitle && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{subtitle}</p>
-            )}
-          </div>
-        )}
+      )}
+    </div>
+  )
+}
+
+/* =========================================================================
+   3. GLASS PANEL & GLASS CARD CONTAINERS
+   ========================================================================= */
+export interface GlassPanelProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode
+  className?: string
+  hover?: boolean
+}
+
+export function GlassPanel({ children, className, hover, ...props }: GlassPanelProps) {
+  return (
+    <div
+      className={cn(
+        'glass-panel rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 sm:p-6 transition-all',
+        hover && 'glass-card-hover',
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+}
+
+export function GlassCard({ children, className, hover, ...props }: GlassPanelProps) {
+  return (
+    <div
+      className={cn(
+        'glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 sm:p-5 transition-all',
+        hover && 'glass-card-hover',
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+}
+
+/* =========================================================================
+   4. GLASS TABLE CONTAINER & ELEMENTS
+   ========================================================================= */
+interface GlassTableProps {
+  children: React.ReactNode
+  className?: string
+}
+
+export function GlassTable({ children, className }: GlassTableProps) {
+  return (
+    <div
+      className={cn(
+        'glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden',
+        className,
+      )}
+    >
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+          {children}
+        </table>
       </div>
     </div>
   )
 }
 
+export function GlassTableHeader({
+  children,
+  className,
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <thead
+      className={cn(
+        'bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400',
+        className,
+      )}
+    >
+      {children}
+    </thead>
+  )
+}
+
+export function GlassTableRow({
+  children,
+  className,
+  onClick,
+}: {
+  children: React.ReactNode
+  className?: string
+  onClick?: () => void
+}) {
+  return (
+    <tr
+      onClick={onClick}
+      className={cn(
+        'hover:bg-slate-50/70 dark:hover:bg-white/[0.03] transition-colors border-b border-slate-100 dark:border-[#1A294A]/60 last:border-b-0',
+        onClick && 'cursor-pointer',
+        className,
+      )}
+    >
+      {children}
+    </tr>
+  )
+}
+
+/* =========================================================================
+   5. SEARCH BAR & FILTER BAR
+   ========================================================================= */
+interface SearchBarProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  value: string
+  onChangeValue?: (val: string) => void
+  containerClassName?: string
+}
+
+export function SearchBar({
+  value,
+  onChangeValue,
+  onChange,
+  placeholder = 'Buscar...',
+  className,
+  containerClassName,
+  ...props
+}: SearchBarProps) {
+  return (
+    <div className={cn('relative flex-1', containerClassName)}>
+      <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0066FF] dark:text-[#3B82F6]/90 pointer-events-none" />
+      <Input
+        value={value}
+        onChange={(e) => {
+          onChange?.(e)
+          onChangeValue?.(e.target.value)
+        }}
+        placeholder={placeholder}
+        className={cn(
+          'pl-9 h-10 bg-slate-50/80 dark:bg-[#0A1328]/60 border-slate-200 dark:border-[#1A294A] text-xs rounded-xl focus-visible:ring-[#0066FF] dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500',
+          className,
+        )}
+        {...props}
+      />
+    </div>
+  )
+}
+
+interface FilterBarProps {
+  children: React.ReactNode
+  className?: string
+}
+
+export function FilterBar({ children, className }: FilterBarProps) {
+  return (
+    <div
+      className={cn(
+        'glass-card flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between p-4 rounded-2xl border border-slate-200/80 dark:border-[#1A294A]',
+        className,
+      )}
+    >
+      {children}
+    </div>
+  )
+}
+
+/* =========================================================================
+   6. GLASS INPUT & SELECT STYLES (Helpers / Classes)
+   ========================================================================= */
+export const glassInputClass =
+  'h-10 bg-slate-50/80 dark:bg-[#0A1328]/60 border-slate-200 dark:border-[#1A294A] text-xs rounded-xl focus-visible:ring-[#0066FF] dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500'
+
+export const glassSelectTriggerClass =
+  'h-10 bg-slate-50/80 dark:bg-[#0A1328]/60 border-slate-200 dark:border-[#1A294A] text-xs rounded-xl focus:ring-[#0066FF] dark:text-white'
+
+export const glassSelectContentClass =
+  'bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-white shadow-xl'
+
+/* =========================================================================
+   7. GLASS MODAL (Dialog com Estética Dark Glass EVO)
+   ========================================================================= */
+interface GlassModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  title: string
+  description?: string
+  icon?: LucideIcon
+  badge?: string
+  children: React.ReactNode
+  footer?: React.ReactNode
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'
+}
+
+const maxWidthMap = {
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+  xl: 'max-w-xl',
+  '2xl': 'max-w-2xl',
+  '3xl': 'max-w-3xl',
+  '4xl': 'max-w-4xl',
+  '5xl': 'max-w-5xl',
+}
+
+export function GlassModal({
+  open,
+  onOpenChange,
+  title,
+  description,
+  icon: Icon,
+  badge,
+  children,
+  footer,
+  maxWidth = 'lg',
+}: GlassModalProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className={cn(
+          'w-full max-h-[92vh] overflow-y-auto custom-scrollbar border border-slate-200/80 dark:border-[#1A294A] bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-2xl shadow-2xl rounded-2xl p-6 text-slate-900 dark:text-white',
+          maxWidthMap[maxWidth] || 'max-w-lg',
+        )}
+      >
+        <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5">
+              {Icon && (
+                <div className="w-9 h-9 rounded-xl bg-[#0066FF]/10 dark:bg-[#0066FF]/20 text-[#0066FF] dark:text-[#3B82F6] flex items-center justify-center shrink-0 border border-[#0066FF]/20">
+                  <Icon className="w-4 h-4" />
+                </div>
+              )}
+              <div>
+                <DialogTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                  {title}
+                </DialogTitle>
+                {description && (
+                  <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80 mt-0.5">
+                    {description}
+                  </DialogDescription>
+                )}
+              </div>
+            </div>
+            {badge && (
+              <Badge className="bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] border-[#0066FF]/20 text-[11px] font-semibold">
+                {badge}
+              </Badge>
+            )}
+          </div>
+        </DialogHeader>
+
+        <div className="py-3 text-xs text-slate-700 dark:text-slate-200">{children}</div>
+
+        {footer && (
+          <DialogFooter className="pt-3 border-t border-slate-100 dark:border-[#1A294A] gap-2">
+            {footer}
+          </DialogFooter>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+/* =========================================================================
+   8. GLASS BADGE
+   ========================================================================= */
+interface GlassBadgeProps {
+  children: React.ReactNode
+  variant?: 'blue' | 'green' | 'amber' | 'red' | 'purple' | 'slate'
+  className?: string
+}
+
+const badgeVariants = {
+  blue: 'bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] border-[#0066FF]/20',
+  green: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
+  amber: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20',
+  red: 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20',
+  purple: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
+  slate: 'bg-slate-500/10 text-slate-700 dark:text-[#C0C6CF] border-slate-500/20',
+}
+
+export function GlassBadge({ children, variant = 'blue', className }: GlassBadgeProps) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border',
+        badgeVariants[variant] || badgeVariants.blue,
+        className,
+      )}
+    >
+      {children}
+    </span>
+  )
+}
+
+/* =========================================================================
+   9. EMPTY STATE
+   ========================================================================= */
 interface EmptyStateProps {
   icon?: LucideIcon
   title: string
   description?: string
   actionLabel?: string
   onAction?: () => void
+  actionIcon?: LucideIcon
   className?: string
 }
 
 export function EmptyState({
-  icon: Icon = Inbox,
+  icon: Icon = AlertCircle,
   title,
   description,
   actionLabel,
   onAction,
+  actionIcon: ActionIcon,
   className,
 }: EmptyStateProps) {
   return (
     <div
       className={cn(
-        'glass-card flex flex-col items-center justify-center p-8 sm:p-12 text-center rounded-2xl border border-dashed border-slate-300 dark:border-[#1A294A]',
+        'glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-8 sm:p-12 text-center flex flex-col items-center justify-center',
         className,
       )}
     >
-      <div className="w-14 h-14 rounded-2xl bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] flex items-center justify-center mb-4 shadow-inner">
+      <div className="w-14 h-14 rounded-2xl bg-[#0066FF]/10 dark:bg-[#0066FF]/15 text-[#0066FF] dark:text-[#3B82F6] flex items-center justify-center mb-4 border border-[#0066FF]/20 shadow-sm">
         <Icon className="w-7 h-7" />
       </div>
-      <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-1.5">
+      <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-1">
         {title}
       </h3>
       {description && (
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-[#C0C6CF] max-w-md mb-5 leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-[#C0C6CF] max-w-md mx-auto mb-5 leading-relaxed">
           {description}
         </p>
       )}
       {actionLabel && onAction && (
         <Button
           onClick={onAction}
-          size="sm"
-          className="bg-[#0066FF] hover:bg-[#0052CC] text-white font-semibold shadow-sm px-4 rounded-xl"
+          className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-medium rounded-xl h-10 px-4 shadow-sm flex items-center gap-2"
         >
+          {ActionIcon && <ActionIcon className="w-4 h-4" />}
           {actionLabel}
         </Button>
       )}
@@ -182,135 +541,187 @@ export function EmptyState({
   )
 }
 
-interface ErrorStateProps {
-  title?: string
-  message: string
-  onRetry?: () => void
-  className?: string
+/* =========================================================================
+   10. SKELETON & ERROR STATES
+   ========================================================================= */
+export function TableSkeleton({ rows = 5, cols = 5 }: { rows?: number; cols?: number }) {
+  return (
+    <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 space-y-3">
+      <div className="flex gap-4 pb-2 border-b border-slate-100 dark:border-[#1A294A]">
+        {Array.from({ length: cols }).map((_, i) => (
+          <Skeleton key={i} className="h-4 flex-1 bg-slate-200 dark:bg-[#1A294A]" />
+        ))}
+      </div>
+      {Array.from({ length: rows }).map((_, r) => (
+        <div key={r} className="flex gap-4 py-2">
+          {Array.from({ length: cols }).map((_, c) => (
+            <Skeleton
+              key={c}
+              className={`h-4 flex-1 bg-slate-100 dark:bg-[#1A294A]/60 ${
+                c === 0 ? 'w-1/3' : 'w-full'
+              }`}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  )
 }
 
 export function ErrorState({
-  title = 'Erro ao carregar dados',
+  title = 'Ocorreu um erro',
   message,
   onRetry,
-  className,
-}: ErrorStateProps) {
+}: {
+  title?: string
+  message?: string
+  onRetry?: () => void
+}) {
   return (
-    <div
-      className={cn(
-        'glass-card flex flex-col items-center justify-center p-8 text-center rounded-2xl border border-rose-500/30 bg-rose-500/5',
-        className,
-      )}
-    >
-      <div className="w-12 h-12 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3">
+    <div className="glass-card rounded-2xl border border-rose-200 dark:border-rose-900/40 p-8 text-center flex flex-col items-center justify-center bg-rose-50/20 dark:bg-rose-950/20">
+      <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3">
         <AlertCircle className="w-6 h-6" />
       </div>
-      <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mb-1">
-        {title}
-      </h3>
-      <p className="text-xs text-slate-600 dark:text-slate-300 max-w-md mb-4">{message}</p>
+      <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">{title}</h3>
+      {message && (
+        <p className="text-xs text-rose-600 dark:text-rose-300 max-w-md mx-auto mb-4">{message}</p>
+      )}
       {onRetry && (
         <Button
           onClick={onRetry}
           variant="outline"
           size="sm"
-          className="border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 text-xs rounded-xl"
+          className="border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950 text-xs rounded-xl h-9 gap-1.5"
         >
-          Tentar novamente
+          <RefreshCw className="w-3.5 h-3.5" />
+          Tentar Novamente
         </Button>
       )}
     </div>
   )
 }
 
-export function TableSkeleton({ rows = 5, cols = 4 }: { rows?: number; cols?: number }) {
+/* =========================================================================
+   11. SECTION HEADER
+   ========================================================================= */
+export function SectionHeader({
+  title,
+  description,
+  badge,
+  actions,
+  className,
+}: {
+  title: string
+  description?: string
+  badge?: string | React.ReactNode
+  actions?: React.ReactNode
+  className?: string
+}) {
   return (
-    <div className="space-y-4">
-      <div className="glass-card rounded-2xl p-4 border border-slate-200/80 dark:border-[#1A294A]">
-        <div className="flex items-center justify-between pb-2 gap-3">
-          <Skeleton className="h-9 w-64 rounded-xl dark:bg-slate-800" />
-          <Skeleton className="h-9 w-32 rounded-xl dark:bg-slate-800" />
+    <div
+      className={cn(
+        'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-2',
+        className,
+      )}
+    >
+      <div>
+        <div className="flex items-center gap-2">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">{title}</h3>
+          {badge &&
+            (typeof badge === 'string' ? (
+              <Badge className="bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] border-[#0066FF]/20 text-[10px] font-semibold">
+                {badge}
+              </Badge>
+            ) : (
+              badge
+            ))}
         </div>
+        {description && (
+          <p className="text-xs text-slate-500 dark:text-[#C0C6CF] mt-0.5">{description}</p>
+        )}
       </div>
-      <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-        <div className="h-12 bg-slate-50/70 dark:bg-[#0A1328]/70 border-b border-slate-200/80 dark:border-[#1A294A] px-4 flex items-center gap-4">
-          {Array.from({ length: cols }).map((_, i) => (
-            <Skeleton key={i} className="h-4 flex-1 rounded-md dark:bg-slate-800" />
-          ))}
-        </div>
-        <div className="divide-y divide-slate-100 dark:divide-[#1A294A]">
-          {Array.from({ length: rows }).map((_, r) => (
-            <div key={r} className="h-14 px-4 flex items-center gap-4">
-              {Array.from({ length: cols }).map((_, c) => (
-                <Skeleton key={c} className="h-4 flex-1 rounded-md dark:bg-slate-800" />
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
+      {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
   )
 }
 
-interface StatusBadgeProps {
-  status: string
-  label?: string
+/* =========================================================================
+   12. PAGINATION (Padronizada)
+   ========================================================================= */
+interface PaginationProps {
+  currentPage: number
+  totalPages: number
+  totalItems?: number
+  pageSize?: number
+  onPageChange: (page: number) => void
   className?: string
 }
 
-export function StatusBadge({ status, label, className }: StatusBadgeProps) {
-  const s = (status || '').toLowerCase()
-  let styleClasses = 'bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20'
-
-  if (
-    s === 'ativo' ||
-    s === 'aprovado' ||
-    s === 'finalizada' ||
-    s === 'finalizado' ||
-    s === 'pago' ||
-    s === 'concluido' ||
-    s === 'recebido' ||
-    s === 'ativa'
-  ) {
-    styleClasses =
-      'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25 font-semibold'
-  } else if (
-    s === 'pendente' ||
-    s === 'aberto' ||
-    s === 'processando' ||
-    s === 'trial' ||
-    s === 'orçamento' ||
-    s === 'orcamento'
-  ) {
-    styleClasses =
-      'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/25 font-semibold'
-  } else if (
-    s === 'cancelado' ||
-    s === 'cancelada' ||
-    s === 'rejeitado' ||
-    s === 'inativo' ||
-    s === 'bloqueado' ||
-    s === 'atrasado' ||
-    s === 'zerado'
-  ) {
-    styleClasses =
-      'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25 font-semibold'
-  } else if (s === 'em_andamento' || s === 'parcial' || s === 'alerta' || s === 'abaixo_minimo') {
-    styleClasses =
-      'bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] border-[#0066FF]/25 font-semibold'
-  }
-
-  const displayLabel = label || status
+export function GlassPagination({
+  currentPage,
+  totalPages,
+  totalItems,
+  pageSize,
+  onPageChange,
+  className,
+}: PaginationProps) {
+  const safeTotalPages = Math.max(1, totalPages)
 
   return (
-    <span
+    <div
       className={cn(
-        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs border font-medium capitalize',
-        styleClasses,
+        'flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-200/80 dark:border-[#1A294A] bg-slate-50/50 dark:bg-[#0A1328]/50 text-xs text-slate-600 dark:text-[#C0C6CF]',
         className,
       )}
     >
-      {displayLabel}
-    </span>
+      <div>
+        {totalItems !== undefined && pageSize !== undefined ? (
+          <>
+            Mostrando{' '}
+            <span className="font-semibold text-slate-900 dark:text-white">
+              {totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1}
+            </span>{' '}
+            a{' '}
+            <span className="font-semibold text-slate-900 dark:text-white">
+              {Math.min(totalItems, currentPage * pageSize)}
+            </span>{' '}
+            de <span className="font-semibold text-slate-900 dark:text-white">{totalItems}</span>{' '}
+            registros
+          </>
+        ) : (
+          <span>
+            Página{' '}
+            <span className="font-semibold text-slate-900 dark:text-white">{currentPage}</span> de{' '}
+            <span className="font-semibold text-slate-900 dark:text-white">{safeTotalPages}</span>
+          </span>
+        )}
+      </div>
+
+      <div className="flex items-center gap-1.5">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+          disabled={currentPage <= 1}
+          className="h-8 px-2.5 text-xs rounded-xl border-slate-200 dark:border-[#1A294A] hover:bg-slate-100 dark:hover:bg-[#1A294A]"
+        >
+          <ChevronLeft className="w-3.5 h-3.5 mr-1" />
+          Anterior
+        </Button>
+        <span className="px-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+          {currentPage} / {safeTotalPages}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(Math.min(safeTotalPages, currentPage + 1))}
+          disabled={currentPage >= safeTotalPages}
+          className="h-8 px-2.5 text-xs rounded-xl border-slate-200 dark:border-[#1A294A] hover:bg-slate-100 dark:hover:bg-[#1A294A]"
+        >
+          Próxima
+          <ChevronRight className="w-3.5 h-3.5 ml-1" />
+        </Button>
+      </div>
+    </div>
   )
 }

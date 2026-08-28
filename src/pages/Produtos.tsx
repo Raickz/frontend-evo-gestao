@@ -824,12 +824,12 @@ export default function ProdutosPage() {
 
       {/* Modal Dialog CRUD */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-slate-900">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+          <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+            <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">
               {editingProduto ? 'Editar Produto' : 'Novo Produto'}
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80">
               {editingProduto
                 ? 'Atualize as informações cadastrais, preços e regras do produto.'
                 : 'Preencha as informações para cadastrar um novo produto no estoque.'}
@@ -839,12 +839,15 @@ export default function ProdutosPage() {
           <form onSubmit={handleSubmit} className="space-y-4 py-2">
             {/* Dados Principais */}
             <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 pb-1 border-b border-slate-100">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] dark:text-[#3B82F6] pb-1 border-b border-slate-100 dark:border-[#1A294A]">
                 Identificação
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1 sm:col-span-2">
-                  <Label htmlFor="nome" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="nome"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Nome do Produto <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -855,14 +858,19 @@ export default function ProdutosPage() {
                       if (formErrors.nome) setFormErrors({ ...formErrors, nome: '' })
                     }}
                     placeholder="Ex: Óleo de Soja 900ml ou Arroz Tipo 1 5kg"
-                    className={`h-9 text-xs ${formErrors.nome ? 'border-red-500' : ''}`}
+                    className={`h-9 text-xs rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white ${
+                      formErrors.nome ? 'border-red-500' : ''
+                    }`}
                     required
                   />
                   {formErrors.nome && <p className="text-[11px] text-red-500">{formErrors.nome}</p>}
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="codigo" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="codigo"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Código Interno / SKU
                   </Label>
                   <Input
@@ -870,25 +878,34 @@ export default function ProdutosPage() {
                     value={formData.codigo}
                     onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
                     placeholder="Ex: PROD-001"
-                    className="h-9 text-xs font-mono"
+                    className="h-9 text-xs font-mono rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                 <div className="space-y-1">
-                  <Label htmlFor="categoria" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="categoria"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Categoria
                   </Label>
                   <Select
                     value={formData.categoria_id}
                     onValueChange={(val) => setFormData({ ...formData, categoria_id: val })}
                   >
-                    <SelectTrigger id="categoria" className="h-9 text-xs">
+                    <SelectTrigger
+                      id="categoria"
+                      className="h-9 text-xs rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
+                    >
                       <SelectValue placeholder="Selecione uma categoria" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none" className="text-xs text-slate-500">
+                    <SelectContent className="bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
+                      <SelectItem
+                        value="none"
+                        className="text-xs text-slate-500 dark:text-slate-400"
+                      >
                         Sem categoria
                       </SelectItem>
                       {categorias.map((cat) => (
@@ -901,18 +918,27 @@ export default function ProdutosPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="fornecedor" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="fornecedor"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Fornecedor
                   </Label>
                   <Select
                     value={formData.fornecedor_id}
                     onValueChange={(val) => setFormData({ ...formData, fornecedor_id: val })}
                   >
-                    <SelectTrigger id="fornecedor" className="h-9 text-xs">
+                    <SelectTrigger
+                      id="fornecedor"
+                      className="h-9 text-xs rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
+                    >
                       <SelectValue placeholder="Selecione um fornecedor" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none" className="text-xs text-slate-500">
+                    <SelectContent className="bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
+                      <SelectItem
+                        value="none"
+                        className="text-xs text-slate-500 dark:text-slate-400"
+                      >
                         Sem fornecedor
                       </SelectItem>
                       {fornecedores.map((forn) => (
@@ -925,17 +951,23 @@ export default function ProdutosPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="unidade" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="unidade"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Unidade de Medida <span className="text-red-500">*</span>
                   </Label>
                   <Select
                     value={formData.unidade}
                     onValueChange={(val) => setFormData({ ...formData, unidade: val })}
                   >
-                    <SelectTrigger id="unidade" className="h-9 text-xs">
+                    <SelectTrigger
+                      id="unidade"
+                      className="h-9 text-xs rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
+                    >
                       <SelectValue placeholder="Selecione a unidade" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
                       {UNIDADES_MEDIDA.map((u) => (
                         <SelectItem key={u.valor} value={u.valor} className="text-xs">
                           {u.label}
@@ -949,11 +981,11 @@ export default function ProdutosPage() {
 
             {/* Foto do Produto */}
             <div className="space-y-3 pt-1">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 pb-1 border-b border-slate-100">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] dark:text-[#3B82F6] pb-1 border-b border-slate-100 dark:border-[#1A294A]">
                 Foto do Produto
               </h4>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <div className="w-20 h-20 rounded-lg border-2 border-dashed border-slate-300 bg-white flex items-center justify-center overflow-hidden shrink-0">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 bg-slate-50/80 dark:bg-[#071126]/60 rounded-xl border border-slate-200/80 dark:border-[#1A294A]">
+                <div className="w-20 h-20 rounded-xl border-2 border-dashed border-slate-300 dark:border-[#1A294A] bg-white dark:bg-[#0A1328] flex items-center justify-center overflow-hidden shrink-0">
                   {fotoPreviewUrl ? (
                     <img
                       src={fotoPreviewUrl}
@@ -962,7 +994,7 @@ export default function ProdutosPage() {
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center">
-                      <ImageIcon className="w-6 h-6 mb-1 text-slate-300" />
+                      <ImageIcon className="w-6 h-6 mb-1 text-slate-400 dark:text-slate-500" />
                       <span className="text-[9px]">Sem foto</span>
                     </div>
                   )}
@@ -982,7 +1014,7 @@ export default function ProdutosPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => fileInputRef.current?.click()}
-                      className="text-xs h-8 gap-1.5 bg-white border-slate-300 hover:bg-slate-50"
+                      className="text-xs h-8 gap-1.5 rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1A294A]"
                     >
                       <Upload className="w-3.5 h-3.5" />
                       {fotoPreviewUrl ? 'Alterar foto' : 'Adicionar foto'}
@@ -993,14 +1025,14 @@ export default function ProdutosPage() {
                         variant="ghost"
                         size="sm"
                         onClick={handleRemoverFoto}
-                        className="text-xs h-8 gap-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                        className="text-xs h-8 gap-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                         Remover foto
                       </Button>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 dark:text-[#C0C6CF]/80">
                     Formatos aceitos: JPG, PNG ou WEBP. Tamanho máximo: 5 MB.
                   </p>
                 </div>
@@ -1009,12 +1041,15 @@ export default function ProdutosPage() {
 
             {/* Preços e Estoque */}
             <div className="space-y-3 pt-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 pb-1 border-b border-slate-100">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] dark:text-[#3B82F6] pb-1 border-b border-slate-100 dark:border-[#1A294A]">
                 Preços e Parâmetros de Estoque
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label htmlFor="preco_custo" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="preco_custo"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Preço de Custo (R$)
                   </Label>
                   <Input
@@ -1028,7 +1063,9 @@ export default function ProdutosPage() {
                       if (formErrors.preco_custo) setFormErrors({ ...formErrors, preco_custo: '' })
                     }}
                     placeholder="0.00"
-                    className={`h-9 text-xs font-mono ${formErrors.preco_custo ? 'border-red-500' : ''}`}
+                    className={`h-9 text-xs font-mono rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white ${
+                      formErrors.preco_custo ? 'border-red-500' : ''
+                    }`}
                   />
                   {formErrors.preco_custo && (
                     <p className="text-[11px] text-red-500">{formErrors.preco_custo}</p>
@@ -1036,7 +1073,10 @@ export default function ProdutosPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="preco_venda" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="preco_venda"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Preço de Venda (R$)
                   </Label>
                   <Input
@@ -1050,7 +1090,9 @@ export default function ProdutosPage() {
                       if (formErrors.preco_venda) setFormErrors({ ...formErrors, preco_venda: '' })
                     }}
                     placeholder="0.00"
-                    className={`h-9 text-xs font-mono ${formErrors.preco_venda ? 'border-red-500' : ''}`}
+                    className={`h-9 text-xs font-mono rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white ${
+                      formErrors.preco_venda ? 'border-red-500' : ''
+                    }`}
                   />
                   {formErrors.preco_venda && (
                     <p className="text-[11px] text-red-500">{formErrors.preco_venda}</p>
@@ -1060,7 +1102,10 @@ export default function ProdutosPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <div className="space-y-1">
-                  <Label htmlFor="estoque_minimo" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="estoque_minimo"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Estoque Mínimo (Alerta)
                   </Label>
                   <Input
@@ -1075,7 +1120,9 @@ export default function ProdutosPage() {
                         setFormErrors({ ...formErrors, estoque_minimo: '' })
                     }}
                     placeholder="0"
-                    className={`h-9 text-xs font-mono ${formErrors.estoque_minimo ? 'border-red-500' : ''}`}
+                    className={`h-9 text-xs font-mono rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white ${
+                      formErrors.estoque_minimo ? 'border-red-500' : ''
+                    }`}
                   />
                   {formErrors.estoque_minimo && (
                     <p className="text-[11px] text-red-500">{formErrors.estoque_minimo}</p>
@@ -1086,7 +1133,7 @@ export default function ProdutosPage() {
                   <div className="space-y-1">
                     <Label
                       htmlFor="estoque_inicial"
-                      className="text-xs font-semibold text-slate-700"
+                      className="text-xs font-semibold text-slate-700 dark:text-slate-200"
                     >
                       Estoque Inicial (Entrada Automática)
                     </Label>
@@ -1102,7 +1149,9 @@ export default function ProdutosPage() {
                           setFormErrors({ ...formErrors, estoque_inicial: '' })
                       }}
                       placeholder="0"
-                      className={`h-9 text-xs font-mono ${formErrors.estoque_inicial ? 'border-red-500' : ''}`}
+                      className={`h-9 text-xs font-mono rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white ${
+                        formErrors.estoque_inicial ? 'border-red-500' : ''
+                      }`}
                     />
                     {formErrors.estoque_inicial && (
                       <p className="text-[11px] text-red-500">{formErrors.estoque_inicial}</p>
@@ -1114,7 +1163,10 @@ export default function ProdutosPage() {
 
             {/* Descrição */}
             <div className="space-y-1 pt-2">
-              <Label htmlFor="descricao" className="text-xs font-semibold text-slate-700">
+              <Label
+                htmlFor="descricao"
+                className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+              >
                 Descrição Detalhada / Observações
               </Label>
               <Textarea
@@ -1123,24 +1175,24 @@ export default function ProdutosPage() {
                 value={formData.descricao}
                 onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
                 placeholder="Detalhes adicionais, especificações técnicas, marca ou instruções de armazenamento..."
-                className="text-xs resize-none"
+                className="text-xs resize-none rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
               />
             </div>
 
-            <DialogFooter className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+            <DialogFooter className="pt-4 border-t border-slate-100 dark:border-[#1A294A] flex items-center justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setDialogOpen(false)}
                 disabled={submitting}
-                className="text-xs h-9"
+                className="text-xs h-9 rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A294A]"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={submitting || uploadingFoto}
-                className="bg-teal-700 hover:bg-teal-800 text-white text-xs h-9 flex items-center gap-1.5"
+                className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs h-9 px-4 rounded-xl flex items-center gap-1.5 shadow-sm"
               >
                 {submitting || uploadingFoto ? (
                   <>
@@ -1163,27 +1215,30 @@ export default function ProdutosPage() {
           if (!open) setConfirmToggleProduto(null)
         }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-slate-900 text-base">
+            <AlertDialogTitle className="text-slate-900 dark:text-white text-base font-bold">
               {confirmToggleProduto?.ativo ? 'Inativar produto?' : 'Ativar produto?'}
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-slate-600">
+            <AlertDialogDescription className="text-xs text-slate-600 dark:text-[#C0C6CF]/80">
               {confirmToggleProduto?.ativo
                 ? `Tem certeza que deseja inativar o produto "${confirmToggleProduto?.nome}"? Produtos inativos não aparecem para novas vendas e pedidos por padrão.`
                 : `Deseja reativar o produto "${confirmToggleProduto?.nome}" para movimentações e vendas?`}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={toggling} className="text-xs h-9">
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel
+              disabled={toggling}
+              className="text-xs h-9 rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300"
+            >
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleToggleAtivo}
               disabled={toggling}
-              className={`text-xs h-9 text-white ${
+              className={`text-xs h-9 rounded-xl text-white ${
                 confirmToggleProduto?.ativo
-                  ? 'bg-red-600 hover:bg-red-700'
+                  ? 'bg-rose-600 hover:bg-rose-700'
                   : 'bg-emerald-600 hover:bg-emerald-700'
               }`}
             >

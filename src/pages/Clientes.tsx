@@ -572,12 +572,12 @@ export default function ClientesPage() {
 
       {/* Modal Dialog CRUD */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-slate-900">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+          <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+            <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">
               {editingCliente ? 'Editar Cliente' : 'Novo Cliente'}
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80">
               {editingCliente
                 ? 'Atualize os dados cadastrais, endereço e limites do cliente.'
                 : 'Preencha as informações para cadastrar um novo cliente na empresa.'}
@@ -587,12 +587,15 @@ export default function ClientesPage() {
           <form onSubmit={handleSubmit} className="space-y-4 py-2">
             {/* Dados Principais */}
             <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 pb-1 border-b border-slate-100">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] dark:text-[#3B82F6] pb-1 border-b border-slate-100 dark:border-[#1A294A]">
                 Identificação
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1 sm:col-span-2">
-                  <Label htmlFor="nome" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="nome"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Nome / Razão Social <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -603,14 +606,19 @@ export default function ClientesPage() {
                       if (formErrors.nome) setFormErrors({ ...formErrors, nome: '' })
                     }}
                     placeholder="Ex: Comercial Alvorada Ltda ou João da Silva"
-                    className={`h-9 text-xs ${formErrors.nome ? 'border-red-500' : ''}`}
+                    className={`h-9 text-xs rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white ${
+                      formErrors.nome ? 'border-red-500' : ''
+                    }`}
                     required
                   />
                   {formErrors.nome && <p className="text-[11px] text-red-500">{formErrors.nome}</p>}
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="documento" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="documento"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Documento (CPF / CNPJ)
                   </Label>
                   <Input
@@ -618,12 +626,15 @@ export default function ClientesPage() {
                     value={formData.documento}
                     onChange={(e) => setFormData({ ...formData, documento: e.target.value })}
                     placeholder="CPF ou CNPJ"
-                    className="h-9 text-xs font-mono"
+                    className="h-9 text-xs font-mono rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="limite_credito" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="limite_credito"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Limite de Crédito (R$)
                   </Label>
                   <Input
@@ -638,7 +649,9 @@ export default function ClientesPage() {
                         setFormErrors({ ...formErrors, limite_credito: '' })
                     }}
                     placeholder="0.00"
-                    className={`h-9 text-xs font-mono ${formErrors.limite_credito ? 'border-red-500' : ''}`}
+                    className={`h-9 text-xs font-mono rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white ${
+                      formErrors.limite_credito ? 'border-red-500' : ''
+                    }`}
                   />
                   {formErrors.limite_credito && (
                     <p className="text-[11px] text-red-500">{formErrors.limite_credito}</p>
@@ -649,12 +662,15 @@ export default function ClientesPage() {
 
             {/* Contato */}
             <div className="space-y-3 pt-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 pb-1 border-b border-slate-100">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] dark:text-[#3B82F6] pb-1 border-b border-slate-100 dark:border-[#1A294A]">
                 Contato
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
-                  <Label htmlFor="telefone" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="telefone"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Telefone
                   </Label>
                   <Input
@@ -662,12 +678,15 @@ export default function ClientesPage() {
                     value={formData.telefone}
                     onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
                     placeholder="(00) 0000-0000"
-                    className="h-9 text-xs"
+                    className="h-9 text-xs rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="whatsapp" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="whatsapp"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     WhatsApp
                   </Label>
                   <Input
@@ -675,12 +694,15 @@ export default function ClientesPage() {
                     value={formData.whatsapp}
                     onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
                     placeholder="(00) 90000-0000"
-                    className="h-9 text-xs"
+                    className="h-9 text-xs rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="email" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="email"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     E-mail
                   </Label>
                   <Input
@@ -692,7 +714,9 @@ export default function ClientesPage() {
                       if (formErrors.email) setFormErrors({ ...formErrors, email: '' })
                     }}
                     placeholder="cliente@empresa.com"
-                    className={`h-9 text-xs ${formErrors.email ? 'border-red-500' : ''}`}
+                    className={`h-9 text-xs rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white ${
+                      formErrors.email ? 'border-red-500' : ''
+                    }`}
                   />
                   {formErrors.email && (
                     <p className="text-[11px] text-red-500">{formErrors.email}</p>
@@ -703,12 +727,15 @@ export default function ClientesPage() {
 
             {/* Endereço */}
             <div className="space-y-3 pt-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 pb-1 border-b border-slate-100">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] dark:text-[#3B82F6] pb-1 border-b border-slate-100 dark:border-[#1A294A]">
                 Endereço
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-6 gap-3">
                 <div className="space-y-1 sm:col-span-2">
-                  <Label htmlFor="cep" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="cep"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     CEP
                   </Label>
                   <Input
@@ -716,22 +743,28 @@ export default function ClientesPage() {
                     value={formData.cep}
                     onChange={(e) => setFormData({ ...formData, cep: e.target.value })}
                     placeholder="00000-000"
-                    className="h-9 text-xs font-mono"
+                    className="h-9 text-xs font-mono rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                 </div>
 
                 <div className="space-y-1 sm:col-span-2">
-                  <Label htmlFor="estado" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="estado"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Estado (UF)
                   </Label>
                   <Select
                     value={formData.estado}
                     onValueChange={(val) => setFormData({ ...formData, estado: val })}
                   >
-                    <SelectTrigger id="estado" className="h-9 text-xs">
+                    <SelectTrigger
+                      id="estado"
+                      className="h-9 text-xs rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
+                    >
                       <SelectValue placeholder="Selecione o estado" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
                       {ESTADOS_BRASIL.map((uf) => (
                         <SelectItem key={uf.sigla} value={uf.sigla} className="text-xs">
                           {uf.sigla} - {uf.nome}
@@ -742,7 +775,10 @@ export default function ClientesPage() {
                 </div>
 
                 <div className="space-y-1 sm:col-span-2">
-                  <Label htmlFor="cidade" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="cidade"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Cidade
                   </Label>
                   <Input
@@ -750,12 +786,15 @@ export default function ClientesPage() {
                     value={formData.cidade}
                     onChange={(e) => setFormData({ ...formData, cidade: e.target.value })}
                     placeholder="Cidade"
-                    className="h-9 text-xs"
+                    className="h-9 text-xs rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                 </div>
 
                 <div className="space-y-1 sm:col-span-3">
-                  <Label htmlFor="endereco" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="endereco"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Logradouro / Endereço
                   </Label>
                   <Input
@@ -763,12 +802,15 @@ export default function ClientesPage() {
                     value={formData.endereco}
                     onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
                     placeholder="Rua, Avenida, etc."
-                    className="h-9 text-xs"
+                    className="h-9 text-xs rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                 </div>
 
                 <div className="space-y-1 sm:col-span-1">
-                  <Label htmlFor="numero" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="numero"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Número
                   </Label>
                   <Input
@@ -776,12 +818,15 @@ export default function ClientesPage() {
                     value={formData.numero}
                     onChange={(e) => setFormData({ ...formData, numero: e.target.value })}
                     placeholder="123"
-                    className="h-9 text-xs"
+                    className="h-9 text-xs rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                 </div>
 
                 <div className="space-y-1 sm:col-span-2">
-                  <Label htmlFor="bairro" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="bairro"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Bairro
                   </Label>
                   <Input
@@ -789,7 +834,7 @@ export default function ClientesPage() {
                     value={formData.bairro}
                     onChange={(e) => setFormData({ ...formData, bairro: e.target.value })}
                     placeholder="Bairro"
-                    className="h-9 text-xs"
+                    className="h-9 text-xs rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                 </div>
               </div>
@@ -797,7 +842,10 @@ export default function ClientesPage() {
 
             {/* Observações */}
             <div className="space-y-1 pt-2">
-              <Label htmlFor="observacoes" className="text-xs font-semibold text-slate-700">
+              <Label
+                htmlFor="observacoes"
+                className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+              >
                 Observações
               </Label>
               <Textarea
@@ -806,24 +854,24 @@ export default function ClientesPage() {
                 value={formData.observacoes}
                 onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
                 placeholder="Informações adicionais, referências comerciais ou preferências de entrega..."
-                className="text-xs resize-none"
+                className="text-xs resize-none rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
               />
             </div>
 
-            <DialogFooter className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+            <DialogFooter className="pt-4 border-t border-slate-100 dark:border-[#1A294A] flex items-center justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setDialogOpen(false)}
                 disabled={submitting}
-                className="text-xs h-9"
+                className="text-xs h-9 rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A294A]"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-teal-700 hover:bg-teal-800 text-white text-xs h-9 flex items-center gap-1.5"
+                className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs h-9 px-4 rounded-xl flex items-center gap-1.5 shadow-sm"
               >
                 {submitting ? (
                   <>
@@ -846,27 +894,30 @@ export default function ClientesPage() {
           if (!open) setConfirmToggleCliente(null)
         }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-slate-900 text-base">
+            <AlertDialogTitle className="text-slate-900 dark:text-white text-base font-bold">
               {confirmToggleCliente?.ativo ? 'Inativar cliente?' : 'Ativar cliente?'}
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-slate-600">
+            <AlertDialogDescription className="text-xs text-slate-600 dark:text-[#C0C6CF]/80">
               {confirmToggleCliente?.ativo
                 ? `Tem certeza que deseja inativar o cliente "${confirmToggleCliente?.nome}"? Clientes inativos não aparecem para novos pedidos por padrão.`
                 : `Deseja reativar o cliente "${confirmToggleCliente?.nome}" para movimentações e vendas?`}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={toggling} className="text-xs h-9">
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel
+              disabled={toggling}
+              className="text-xs h-9 rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300"
+            >
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleToggleAtivo}
               disabled={toggling}
-              className={`text-xs h-9 text-white ${
+              className={`text-xs h-9 rounded-xl text-white ${
                 confirmToggleCliente?.ativo
-                  ? 'bg-red-600 hover:bg-red-700'
+                  ? 'bg-rose-600 hover:bg-rose-700'
                   : 'bg-emerald-600 hover:bg-emerald-700'
               }`}
             >
