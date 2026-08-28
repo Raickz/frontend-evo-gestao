@@ -277,27 +277,31 @@ export default function ComissoesPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Total Comissões Geradas"
-          value={formatCurrency(indicadores.totalComissoes)}
+          value={indicadores.totalComissoes}
           subtitle="Registros ativos e quitados"
           icon={Percent}
+          animate={true}
         />
         <MetricCard
           title="Comissões Pendentes"
-          value={formatCurrency(indicadores.comissoesPendentes)}
+          value={indicadores.comissoesPendentes}
           subtitle="Aguardando liquidação"
           icon={DollarSign}
+          animate={true}
         />
         <MetricCard
           title="Comissões Pagas"
-          value={formatCurrency(indicadores.comissoesPagas)}
+          value={indicadores.comissoesPagas}
           subtitle="Liquidadas no financeiro"
           icon={CheckCircle2}
+          animate={true}
         />
         <MetricCard
           title="Vendas Comissionadas"
-          value={`${indicadores.totalVendasComissionadas}`}
+          value={indicadores.totalVendasComissionadas}
           subtitle="Total de registros apurados"
           icon={Calendar}
+          animate={true}
         />
       </div>
 

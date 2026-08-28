@@ -363,70 +363,57 @@ export default function RelatorioLucroPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <MetricCard
             title="Faturamento"
-            value={loading ? 'Carregando...' : formatCurrency(resumo.faturamento)}
+            value={resumo.faturamento}
             subtitle="Total de vendas finalizadas"
             icon={DollarSign}
+            loading={loading}
+            animate={true}
           />
 
           <MetricCard
             title="Custo dos Produtos"
-            value={loading ? 'Carregando...' : formatCurrency(resumo.custoProdutos)}
+            value={resumo.custoProdutos}
             subtitle="Custo histórico registrado na venda"
             icon={ShoppingCart}
+            loading={loading}
+            animate={true}
           />
 
-          <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-5 transition-all">
-            <div className="flex flex-row items-center justify-between pb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
-                Lucro Bruto
-              </span>
-              <div
-                className={`h-9 w-9 rounded-xl flex items-center justify-center ${
-                  lucroPositivo
-                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                    : 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
-                }`}
-              >
-                <TrendingUp className="w-4 h-4" />
-              </div>
-            </div>
-            <div>
-              <div
-                className={`text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums mt-1 ${
-                  loading
-                    ? 'text-slate-400'
-                    : lucroPositivo
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-rose-600 dark:text-rose-400'
-                }`}
-              >
-                {loading ? 'Carregando...' : formatCurrency(resumo.lucroBruto)}
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                {lucroPositivo ? 'Faturamento - Custo' : 'Resultado negativo'}
-              </p>
-            </div>
-          </div>
+          <MetricCard
+            title="Lucro Bruto"
+            value={resumo.lucroBruto}
+            subtitle={lucroPositivo ? 'Faturamento - Custo' : 'Resultado negativo'}
+            icon={TrendingUp}
+            variant={lucroPositivo ? 'success' : 'danger'}
+            loading={loading}
+            animate={true}
+          />
 
           <MetricCard
             title="Margem de Lucro"
-            value={loading ? 'Carregando...' : `${resumo.margemPercentual.toFixed(1)}%`}
+            value={`${resumo.margemPercentual.toFixed(1)}%`}
             subtitle="Lucro bruto sobre faturamento"
             icon={Percent}
+            loading={loading}
+            animate={true}
           />
 
           <MetricCard
             title="Número de Vendas"
-            value={loading ? 'Carregando...' : String(resumo.numeroVendas)}
+            value={resumo.numeroVendas}
             subtitle="Vendas no período"
             icon={Receipt}
+            loading={loading}
+            animate={true}
           />
 
           <MetricCard
             title="Ticket Médio"
-            value={loading ? 'Carregando...' : formatCurrency(resumo.ticketMedio)}
+            value={resumo.ticketMedio}
             subtitle="Faturamento por venda"
             icon={Activity}
+            loading={loading}
+            animate={true}
           />
         </div>
       )}

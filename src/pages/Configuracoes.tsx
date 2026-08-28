@@ -2143,7 +2143,7 @@ export default function ConfiguracoesPage() {
                                 <div>
                                   <div className="flex items-baseline justify-between text-xs mb-1.5">
                                     <span
-                                      className={`text-xl font-extrabold ${
+                                      className={`text-xl font-extrabold tabular-nums ${
                                         isReached
                                           ? 'text-rose-600 dark:text-rose-400'
                                           : isWarning
@@ -2151,7 +2151,7 @@ export default function ConfiguracoesPage() {
                                             : 'text-slate-900 dark:text-white'
                                       }`}
                                     >
-                                      {limItem.current}
+                                      <AnimatedNumber value={limItem.current} />
                                     </span>
                                     <span className="text-slate-500 dark:text-[#C0C6CF]/70 text-xs font-medium">
                                       {isUnlimited ? '/ Ilimitado' : `/ ${limItem.limit}`}
@@ -3053,26 +3053,29 @@ export default function ConfiguracoesPage() {
             if (!open && !savingCancelar) setModalCancelarOpen(false)
           }}
         >
-          <DialogContent className="max-w-md w-full">
-            <DialogHeader>
-              <div className="flex items-center gap-2 text-rose-700">
-                <AlertTriangle className="w-5 h-5 text-rose-600" />
-                <DialogTitle className="text-base font-bold text-slate-900">
+          <DialogContent className="max-w-md w-full border border-slate-200/80 dark:border-[#1A294A] bg-white dark:bg-[#0A1328] shadow-2xl rounded-2xl">
+            <DialogHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
+              <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+                <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
                   Tem certeza que deseja cancelar sua assinatura?
                 </DialogTitle>
               </div>
-              <DialogDescription className="text-xs text-slate-600 pt-1 leading-relaxed">
+              <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF] pt-1 leading-relaxed">
                 Seus dados serão preservados, mas o acesso será bloqueado. Você pode reativar a
                 assinatura a qualquer momento.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="py-2 text-xs space-y-2">
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-900 space-y-1">
-                <p className="font-bold">O que acontece ao cancelar?</p>
-                <ul className="list-disc list-inside space-y-0.5 text-rose-800">
+            <div className="py-3 text-xs space-y-2">
+              <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-700 dark:text-rose-300 space-y-1.5">
+                <p className="font-bold text-slate-900 dark:text-white">
+                  O que acontece ao cancelar?
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-[#C0C6CF]">
                   <li>
-                    O status da assinatura mudará para <strong>cancelada</strong>.
+                    O status da assinatura mudará para{' '}
+                    <strong className="text-rose-600 dark:text-rose-400">cancelada</strong>.
                   </li>
                   <li>O painel entrará em modo somente leitura para novos cadastros e vendas.</li>
                   <li>
@@ -3083,7 +3086,7 @@ export default function ConfiguracoesPage() {
               </div>
             </div>
 
-            <DialogFooter className="pt-2 flex gap-2">
+            <DialogFooter className="pt-3 border-t border-slate-100 dark:border-[#1A294A] flex gap-2">
               <Button
                 variant="outline"
                 type="button"
@@ -3122,26 +3125,26 @@ export default function ConfiguracoesPage() {
             if (!open && !savingReativar) setModalReativarOpen(false)
           }}
         >
-          <DialogContent className="max-w-md w-full">
-            <DialogHeader>
-              <div className="flex items-center gap-2 text-emerald-700">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                <DialogTitle className="text-base font-bold text-slate-900">
+          <DialogContent className="max-w-md w-full border border-slate-200/80 dark:border-[#1A294A] bg-white dark:bg-[#0A1328] shadow-2xl rounded-2xl">
+            <DialogHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
+              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
                   Reativar Assinatura
                 </DialogTitle>
               </div>
-              <DialogDescription className="text-xs text-slate-600 pt-1 leading-relaxed">
+              <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF] pt-1 leading-relaxed">
                 Ao reativar, sua assinatura voltará ao status ativo com renovação para os próximos
                 30 dias, liberando todas as operações do sistema.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="py-2 text-xs space-y-2">
-              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900">
-                <p className="font-semibold">
+            <div className="py-3 text-xs space-y-2">
+              <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-800 dark:text-emerald-200">
+                <p className="font-semibold text-slate-900 dark:text-white">
                   Plano a ser reativado: {assinatura?.planos?.nome || 'Atual'}
                 </p>
-                <p className="text-emerald-800 mt-1">
+                <p className="text-emerald-700 dark:text-emerald-300 mt-1 font-medium">
                   Valor mensal:{' '}
                   {formatCurrency(
                     Number(assinatura?.valor || assinatura?.planos?.valor_mensal || 0),
@@ -3151,7 +3154,7 @@ export default function ConfiguracoesPage() {
               </div>
             </div>
 
-            <DialogFooter className="pt-2 flex gap-2">
+            <DialogFooter className="pt-3 border-t border-slate-100 dark:border-[#1A294A] flex gap-2">
               <Button
                 variant="outline"
                 type="button"
