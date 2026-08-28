@@ -536,16 +536,18 @@ export const AdminService = {
       })
 
       if (funcRes.error || (funcRes.data && funcRes.data.sucesso === false)) {
-        // Se a criação do auth user falhar, fazer rollback manual deletando a empresa recém-criada
+        // Se a criação do auth user falhar, executar rollback seguro via RPC dedicada
         try {
-          await supabase.from('empresas').delete().eq('id', empresaId)
-        } catch {
-          // Rollback attempt
+          await (supabase.rpc as any)('rollback_empresa_manual_admin', {
+            p_empresa_id: empresaId,
+          })
+        } catch (rollbackErr) {
+          console.error('Falha no rollback seguro:', rollbackErr)
         }
         const errorMsg =
           funcRes.data?.erro ||
           funcRes.error?.message ||
-          'Falha ao gerar credenciais de acesso do usuário Master.'
+          'Falha ao gerar credenciais de acesso do usuário Master. O cadastro da empresa foi revertido.'
         throw new Error(errorMsg)
       }
 

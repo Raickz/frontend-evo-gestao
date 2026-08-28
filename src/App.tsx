@@ -117,10 +117,31 @@ const App = () => (
               {/* Root redirect com verificação de bootstrap */}
               <Route path="/" element={<BootstrapRedirect />} />
 
-              {/* Página pública de Planos */}
-              <Route path="/planos" element={<PlanosPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/checkout/sucesso" element={<CheckoutSucessoPage />} />
+              {/* Página de Planos e Checkout públicos - Temporariamente restritos a platform_admin na UI do cliente */}
+              <Route
+                path="/planos"
+                element={
+                  <AdminProtectedRoute>
+                    <PlanosPage />
+                  </AdminProtectedRoute>
+                }
+              />
+              <Route
+                path="/checkout"
+                element={
+                  <AdminProtectedRoute>
+                    <CheckoutPage />
+                  </AdminProtectedRoute>
+                }
+              />
+              <Route
+                path="/checkout/sucesso"
+                element={
+                  <AdminProtectedRoute>
+                    <CheckoutSucessoPage />
+                  </AdminProtectedRoute>
+                }
+              />
 
               {/* Setup público */}
               <Route path="/setup" element={<SetupPage />} />
