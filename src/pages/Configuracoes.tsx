@@ -1,5 +1,25 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { PageHeader, TableSkeleton, ErrorState, EmptyState } from '@/components/common/CommonUI'
+import {
+  PageHeader,
+  TableSkeleton,
+  ErrorState,
+  EmptyState,
+  GlassCard,
+  GlassCardHeader,
+  GlassCardContent,
+  GlassPanel,
+  GlassTable,
+  GlassTableHeader,
+  GlassTableRow,
+  GlassTableCell,
+  GlassTableHead,
+  GlassButton,
+  GlassBadge,
+  GlassPagination,
+  glassInputClass,
+  glassSelectTriggerClass,
+  glassSelectContentClass,
+} from '@/components/common/CommonUI'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -293,37 +313,37 @@ export default function ConfiguracoesPage() {
       case 'trial':
         return {
           label: 'Período de Teste (Trial)',
-          color: 'bg-amber-100 text-amber-800 border-amber-200',
+          color: 'bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] border-[#0066FF]/20',
         }
       case 'ativa':
         return {
           label: 'Assinatura Ativa',
-          color: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+          color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
         }
       case 'pendente':
         return {
           label: 'Pagamento Pendente',
-          color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+          color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
         }
       case 'atrasada':
         return {
           label: 'Fatura Atrasada',
-          color: 'bg-orange-100 text-orange-800 border-orange-200',
+          color: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
         }
       case 'cancelada':
         return {
           label: 'Assinatura Cancelada',
-          color: 'bg-rose-100 text-rose-800 border-rose-200',
+          color: 'bg-slate-500/10 text-slate-600 dark:text-[#C0C6CF] border-slate-500/20',
         }
       case 'bloqueada':
         return {
           label: 'Acesso Bloqueado',
-          color: 'bg-slate-200 text-slate-800 border-slate-300',
+          color: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
         }
       default:
         return {
           label: status || 'Sem Assinatura',
-          color: 'bg-slate-100 text-slate-700 border-slate-200',
+          color: 'bg-slate-500/10 text-slate-600 dark:text-[#C0C6CF] border-slate-500/20',
         }
     }
   }
@@ -921,20 +941,19 @@ export default function ConfiguracoesPage() {
               <span>Segurança</span>
             </TabsTrigger>
           </TabsList>
-
           {/* =========================================================================
               ABA 1: DADOS DA EMPRESA
               ========================================================================= */}
           <TabsContent value="empresa" className="space-y-6">
-            <Card className="border border-slate-200 bg-white shadow-xs">
-              <CardHeader className="border-b border-slate-100 pb-4">
-                <div className="flex items-center gap-2 text-teal-700">
+            <Card className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] bg-white/70 dark:bg-[#0A1328]/60">
+              <CardHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-4">
+                <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
                   <Building2 className="w-5 h-5" />
-                  <CardTitle className="text-base font-bold text-slate-900">
+                  <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
                     Dados Cadastrais da Empresa
                   </CardTitle>
                 </div>
-                <CardDescription className="text-xs text-slate-500">
+                <CardDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]">
                   Mantenha as informações legais e de contato da sua distribuidora sempre
                   atualizadas.
                 </CardDescription>
@@ -947,7 +966,7 @@ export default function ConfiguracoesPage() {
                     <div className="space-y-1.5 sm:col-span-2">
                       <Label
                         htmlFor="empresa-nome"
-                        className="text-xs font-semibold text-slate-700"
+                        className="text-xs font-semibold text-slate-700 dark:text-slate-300"
                       >
                         Razão Social <span className="text-rose-500">*</span>
                       </Label>
@@ -958,7 +977,7 @@ export default function ConfiguracoesPage() {
                         placeholder="Nome empresarial oficial"
                         required
                         disabled={!isMasterOrAdmin || savingEmpresa}
-                        className="text-xs h-9 bg-white border-slate-200"
+                        className={glassInputClass}
                       />
                     </div>
 
@@ -966,7 +985,7 @@ export default function ConfiguracoesPage() {
                     <div className="space-y-1.5">
                       <Label
                         htmlFor="empresa-fantasia"
-                        className="text-xs font-semibold text-slate-700"
+                        className="text-xs font-semibold text-slate-700 dark:text-slate-300"
                       >
                         Nome Fantasia
                       </Label>
@@ -978,7 +997,7 @@ export default function ConfiguracoesPage() {
                         }
                         placeholder="Nome comercial da empresa"
                         disabled={!isMasterOrAdmin || savingEmpresa}
-                        className="text-xs h-9 bg-white border-slate-200"
+                        className={glassInputClass}
                       />
                     </div>
 
@@ -986,7 +1005,7 @@ export default function ConfiguracoesPage() {
                     <div className="space-y-1.5">
                       <Label
                         htmlFor="empresa-cnpj"
-                        className="text-xs font-semibold text-slate-700"
+                        className="text-xs font-semibold text-slate-700 dark:text-slate-300"
                       >
                         CNPJ
                       </Label>
@@ -996,7 +1015,7 @@ export default function ConfiguracoesPage() {
                         onChange={(e) => setEmpresaForm({ ...empresaForm, cnpj: e.target.value })}
                         placeholder="00.000.000/0000-00"
                         disabled={!isMasterOrAdmin || savingEmpresa}
-                        className="text-xs h-9 bg-white border-slate-200 font-mono"
+                        className={`${glassInputClass} font-mono`}
                       />
                     </div>
 
@@ -1004,7 +1023,7 @@ export default function ConfiguracoesPage() {
                     <div className="space-y-1.5">
                       <Label
                         htmlFor="empresa-email"
-                        className="text-xs font-semibold text-slate-700"
+                        className="text-xs font-semibold text-slate-700 dark:text-slate-300"
                       >
                         E-mail de Contato
                       </Label>
@@ -1015,7 +1034,7 @@ export default function ConfiguracoesPage() {
                         onChange={(e) => setEmpresaForm({ ...empresaForm, email: e.target.value })}
                         placeholder="contato@empresa.com.br"
                         disabled={!isMasterOrAdmin || savingEmpresa}
-                        className="text-xs h-9 bg-white border-slate-200"
+                        className={glassInputClass}
                       />
                     </div>
 
@@ -1023,7 +1042,7 @@ export default function ConfiguracoesPage() {
                     <div className="space-y-1.5">
                       <Label
                         htmlFor="empresa-telefone"
-                        className="text-xs font-semibold text-slate-700"
+                        className="text-xs font-semibold text-slate-700 dark:text-slate-300"
                       >
                         Telefone
                       </Label>
@@ -1035,22 +1054,22 @@ export default function ConfiguracoesPage() {
                         }
                         placeholder="(00) 00000-0000"
                         disabled={!isMasterOrAdmin || savingEmpresa}
-                        className="text-xs h-9 bg-white border-slate-200"
+                        className={glassInputClass}
                       />
                     </div>
                   </div>
 
                   {/* Informações adicionais do sistema (somente leitura) */}
-                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs flex flex-wrap items-center justify-between gap-3 text-slate-600">
+                  <div className="p-3 bg-slate-50 dark:bg-[#0A1328]/80 rounded-xl border border-slate-200/80 dark:border-[#1A294A] text-xs flex flex-wrap items-center justify-between gap-3 text-slate-600 dark:text-[#C0C6CF]">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-slate-700">Status da Conta:</span>
-                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                        {empresa?.status || 'Ativo'}
-                      </Badge>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">
+                        Status da Conta:
+                      </span>
+                      <GlassBadge variant="green">{empresa?.status || 'Ativo'}</GlassBadge>
                     </div>
                     <div>
-                      <span className="text-slate-500">Cadastrada em: </span>
-                      <span className="font-medium text-slate-700">
+                      <span className="text-slate-500 dark:text-[#C0C6CF]/70">Cadastrada em: </span>
+                      <span className="font-medium text-slate-700 dark:text-slate-200">
                         {formatDate(empresa?.created_at)}
                       </span>
                     </div>
@@ -1062,7 +1081,7 @@ export default function ConfiguracoesPage() {
                       <Button
                         type="submit"
                         disabled={savingEmpresa}
-                        className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-semibold flex items-center gap-2 shadow-xs h-9 px-4 rounded-xl"
+                        className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-semibold flex items-center gap-2 shadow-sm h-10 px-5 rounded-xl cursor-pointer"
                       >
                         {savingEmpresa ? (
                           <>
@@ -1078,7 +1097,7 @@ export default function ConfiguracoesPage() {
                       </Button>
                     </div>
                   ) : (
-                    <div className="text-xs text-amber-600 bg-amber-50 p-2.5 rounded border border-amber-200 flex items-center gap-2">
+                    <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 p-3 rounded-xl border border-amber-500/20 flex items-center gap-2">
                       <HelpCircle className="w-4 h-4 shrink-0" />
                       Apenas usuários com perfil Master ou Administrador podem editar os dados da
                       empresa.
@@ -1088,22 +1107,21 @@ export default function ConfiguracoesPage() {
               </CardContent>
             </Card>
           </TabsContent>
-
           {/* =========================================================================
               ABA 2: APARÊNCIA
               ========================================================================= */}
           <TabsContent value="aparencia" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Card Identidade Visual & Logo */}
-              <Card className="border border-slate-200 bg-white shadow-xs">
-                <CardHeader className="border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2 text-teal-700">
+              <Card className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] bg-white/70 dark:bg-[#0A1328]/60">
+                <CardHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
+                  <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
                     <ImageIcon className="w-5 h-5" />
-                    <CardTitle className="text-base font-bold text-slate-900">
+                    <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
                       Identidade Visual
                     </CardTitle>
                   </div>
-                  <CardDescription className="text-xs text-slate-500">
+                  <CardDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]">
                     Logo e identidade da empresa exibidas na barra superior e relatórios.
                   </CardDescription>
                 </CardHeader>
@@ -1111,19 +1129,14 @@ export default function ConfiguracoesPage() {
                   {/* Preview da Logo */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <Label className="text-xs font-semibold text-slate-700 block">
+                      <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
                         Preview da Logo
                       </Label>
                       {selectedLogoFile && (
-                        <Badge
-                          variant="outline"
-                          className="text-[10px] bg-teal-50 text-teal-700 border-teal-200"
-                        >
-                          Novo arquivo selecionado
-                        </Badge>
+                        <GlassBadge variant="blue">Novo arquivo selecionado</GlassBadge>
                       )}
                     </div>
-                    <div className="w-full h-40 rounded-xl border border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center p-4 overflow-hidden relative group">
+                    <div className="w-full h-40 rounded-xl border border-dashed border-slate-200 dark:border-[#1A294A] bg-slate-50 dark:bg-[#0A1328]/80 flex flex-col items-center justify-center p-4 overflow-hidden relative group">
                       {localPreviewUrl || empresa?.logo_url ? (
                         <img
                           src={localPreviewUrl || empresa?.logo_url || ''}
@@ -1135,10 +1148,10 @@ export default function ConfiguracoesPage() {
                           }}
                         />
                       ) : (
-                        <div className="flex flex-col items-center gap-2 text-slate-400">
-                          <Building2 className="w-10 h-10 text-slate-300" />
+                        <div className="flex flex-col items-center gap-2 text-slate-400 dark:text-slate-500">
+                          <Building2 className="w-10 h-10 text-slate-300 dark:text-slate-600" />
                           <span className="text-xs font-medium">Nenhuma logo cadastrada</span>
-                          <span className="text-[11px] text-slate-400">
+                          <span className="text-[11px] text-slate-400 dark:text-slate-500">
                             JPG, PNG ou WebP até 5 MB
                           </span>
                         </div>
@@ -1147,12 +1160,14 @@ export default function ConfiguracoesPage() {
                   </div>
 
                   {/* Upload direto de arquivo */}
-                  <div className="space-y-3 pt-1 border-t border-slate-100">
+                  <div className="space-y-3 pt-1 border-t border-slate-100 dark:border-[#1A294A]">
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs font-semibold text-slate-700">
+                      <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                         Upload de Logo (Supabase Storage)
                       </Label>
-                      <span className="text-[11px] text-slate-400">Máx. 5 MB</span>
+                      <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                        Máx. 5 MB
+                      </span>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
@@ -1170,10 +1185,10 @@ export default function ConfiguracoesPage() {
                           variant="outline"
                           asChild
                           disabled={!isMasterOrAdmin || uploadingLogo || removingLogo}
-                          className="text-xs h-9 cursor-pointer border-slate-200 hover:bg-slate-50"
+                          className="text-xs h-10 rounded-xl cursor-pointer border-slate-200 dark:border-[#1A294A] hover:bg-slate-50 dark:hover:bg-[#1A294A]"
                         >
                           <span>
-                            <Upload className="w-3.5 h-3.5 mr-1.5 text-slate-600" />
+                            <Upload className="w-3.5 h-3.5 mr-1.5 text-slate-600 dark:text-slate-400" />
                             {selectedLogoFile ? 'Trocar Arquivo' : 'Selecionar Arquivo'}
                           </span>
                         </Button>
@@ -1184,7 +1199,7 @@ export default function ConfiguracoesPage() {
                           type="button"
                           onClick={handleUploadLogo}
                           disabled={!isMasterOrAdmin || uploadingLogo || removingLogo}
-                          className="bg-teal-700 hover:bg-teal-800 text-white text-xs h-9 font-medium shadow-xs"
+                          className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs h-10 px-4 rounded-xl font-medium shadow-sm cursor-pointer"
                         >
                           {uploadingLogo ? (
                             <>
@@ -1206,7 +1221,7 @@ export default function ConfiguracoesPage() {
                           variant="outline"
                           onClick={handleRemoverLogo}
                           disabled={!isMasterOrAdmin || uploadingLogo || removingLogo}
-                          className="text-xs h-9 border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                          className="text-xs h-10 rounded-xl border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950 cursor-pointer"
                         >
                           {removingLogo ? (
                             <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
@@ -1219,19 +1234,21 @@ export default function ConfiguracoesPage() {
                     </div>
 
                     {selectedLogoFile && (
-                      <p className="text-[11px] text-slate-500 truncate">
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                         Selecionado:{' '}
-                        <span className="font-mono text-slate-700">{selectedLogoFile.name}</span> (
-                        {(selectedLogoFile.size / 1024).toFixed(1)} KB)
+                        <span className="font-mono text-slate-700 dark:text-slate-300">
+                          {selectedLogoFile.name}
+                        </span>{' '}
+                        ({(selectedLogoFile.size / 1024).toFixed(1)} KB)
                       </p>
                     )}
                   </div>
 
                   {/* Input de URL manual */}
-                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-[#1A294A]">
                     <Label
                       htmlFor="logo-url-input"
-                      className="text-xs font-semibold text-slate-700"
+                      className="text-xs font-semibold text-slate-700 dark:text-slate-300"
                     >
                       Ou informe a URL da Logo (Link Externo)
                     </Label>
@@ -1243,13 +1260,13 @@ export default function ConfiguracoesPage() {
                         onChange={(e) => setLogoUrlInput(e.target.value)}
                         placeholder="https://exemplo.com/logo.png"
                         disabled={!isMasterOrAdmin || savingLogo || uploadingLogo || removingLogo}
-                        className="text-xs h-9 bg-white border-slate-200"
+                        className={glassInputClass}
                       />
                       <Button
                         type="button"
                         onClick={handleSalvarLogoUrl}
                         disabled={!isMasterOrAdmin || savingLogo || uploadingLogo || removingLogo}
-                        className="bg-teal-700 hover:bg-teal-800 text-white text-xs h-9 shrink-0 font-medium"
+                        className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs h-10 rounded-xl px-4 shrink-0 font-medium cursor-pointer shadow-sm"
                       >
                         {savingLogo ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1263,56 +1280,52 @@ export default function ConfiguracoesPage() {
               </Card>
 
               {/* Card Cores e Tema */}
-              <Card className="border border-slate-200 bg-white shadow-xs">
-                <CardHeader className="border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2 text-teal-700">
+              <Card className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] bg-white/70 dark:bg-[#0A1328]/60">
+                <CardHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
+                  <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
                     <Palette className="w-5 h-5" />
-                    <CardTitle className="text-base font-bold text-slate-900">
+                    <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
                       Cores e Tema
                     </CardTitle>
                   </div>
-                  <CardDescription className="text-xs text-slate-500">
+                  <CardDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]">
                     Personalização do esquema de cores e layout do painel.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
-                  <div className="p-8 rounded-xl border border-dashed border-slate-200 bg-slate-50 text-center space-y-2">
-                    <Palette className="w-10 h-10 text-slate-300 mx-auto" />
-                    <p className="text-sm font-semibold text-slate-700">
-                      Personalização de cores e tema disponível em breve.
+                  <div className="p-8 rounded-xl border border-dashed border-slate-200 dark:border-[#1A294A] bg-slate-50 dark:bg-[#0A1328]/80 text-center space-y-2">
+                    <Palette className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto" />
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      Personalização do Design System EVO
                     </p>
-                    <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                      Em atualizações futuras você poderá configurar temas claros/escuros e paletas
-                      personalizadas com a cor da sua marca.
+                    <p className="text-xs text-slate-400 dark:text-slate-500 max-w-sm mx-auto leading-relaxed">
+                      O EVO Gestão conta com alternador Dark / Light integrado na barra superior,
+                      paleta corporativa Dark Glass (#0066FF / #0A1328) e máxima fidelidade visual.
                     </p>
                   </div>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
-
           {/* =========================================================================
               ABA 3: USUÁRIOS
               ========================================================================= */}
           <TabsContent value="usuarios" className="space-y-6">
-            <Card className="border border-slate-200 bg-white shadow-xs">
-              <CardHeader className="border-b border-slate-100 pb-4">
+            <Card className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] bg-white/70 dark:bg-[#0A1328]/60">
+              <CardHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="flex items-center gap-2 text-teal-700">
+                  <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
                     <Users className="w-5 h-5" />
                     <div>
                       <div className="flex items-center gap-2">
-                        <CardTitle className="text-base font-bold text-slate-900">
+                        <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
                           Usuários da Empresa
                         </CardTitle>
-                        <Badge
-                          variant="outline"
-                          className="bg-teal-50 text-teal-700 border-teal-200 font-semibold"
-                        >
+                        <GlassBadge variant="blue">
                           {totalUsuarios} {totalUsuarios === 1 ? 'usuário' : 'usuários'}
-                        </Badge>
+                        </GlassBadge>
                       </div>
-                      <CardDescription className="text-xs text-slate-500 mt-0.5">
+                      <CardDescription className="text-xs text-slate-500 dark:text-[#C0C6CF] mt-0.5">
                         Gerencie acessos, papéis de permissão e status de membros da sua equipe.
                       </CardDescription>
                     </div>
@@ -1324,7 +1337,7 @@ export default function ConfiguracoesPage() {
                       <Button
                         type="button"
                         onClick={() => setDialogNovoUsuario(true)}
-                        className="bg-teal-700 hover:bg-teal-800 text-white text-xs h-9 flex items-center gap-1.5"
+                        className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs h-10 px-4 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
                       >
                         <Plus className="w-4 h-4" />
                         Novo Usuário
@@ -1336,22 +1349,22 @@ export default function ConfiguracoesPage() {
 
               <CardContent className="pt-4 space-y-4">
                 {/* Filtros */}
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                <div className="p-3 bg-slate-50/70 dark:bg-[#0A1328]/70 rounded-xl border border-slate-200/80 dark:border-[#1A294A] space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-3 items-center">
                     {/* Input de Busca */}
                     <div className="sm:col-span-2 relative">
-                      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <Search className="w-4 h-4 text-[#0066FF] dark:text-[#3B82F6] absolute left-3 top-1/2 -translate-y-1/2" />
                       <Input
                         placeholder="Buscar por nome ou e-mail..."
                         value={searchUsuario}
                         onChange={(e) => setSearchUsuario(e.target.value)}
-                        className="pl-9 bg-white border-slate-200 text-xs h-9"
+                        className={`pl-9 ${glassInputClass}`}
                       />
                       {searchUsuario && (
                         <button
                           type="button"
                           onClick={() => setSearchUsuario('')}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
@@ -1367,10 +1380,10 @@ export default function ConfiguracoesPage() {
                           setPage(1)
                         }}
                       >
-                        <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                        <SelectTrigger className={glassSelectTriggerClass}>
                           <SelectValue placeholder="Perfil" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className={glassSelectContentClass}>
                           <SelectItem value="todos" className="text-xs">
                             Todos os perfis
                           </SelectItem>
@@ -1404,20 +1417,23 @@ export default function ConfiguracoesPage() {
                           setPage(1)
                         }}
                       >
-                        <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                        <SelectTrigger className={glassSelectTriggerClass}>
                           <SelectValue placeholder="Status" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className={glassSelectContentClass}>
                           <SelectItem value="todos" className="text-xs">
                             Todos os status
                           </SelectItem>
                           <SelectItem
                             value="ativo"
-                            className="text-xs text-emerald-600 font-medium"
+                            className="text-xs text-emerald-600 dark:text-emerald-400 font-medium"
                           >
                             Ativos
                           </SelectItem>
-                          <SelectItem value="inativo" className="text-xs text-rose-600 font-medium">
+                          <SelectItem
+                            value="inativo"
+                            className="text-xs text-rose-600 dark:text-rose-400 font-medium"
+                          >
                             Inativos
                           </SelectItem>
                         </SelectContent>
@@ -1431,7 +1447,7 @@ export default function ConfiguracoesPage() {
                         variant="ghost"
                         size="sm"
                         onClick={limparFiltrosUsuarios}
-                        className="text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1.5 h-7"
+                        className="text-xs text-slate-600 dark:text-[#C0C6CF] hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 h-7 cursor-pointer"
                       >
                         <X className="w-3 h-3" />
                         Limpar filtros
@@ -1458,21 +1474,21 @@ export default function ConfiguracoesPage() {
                     onAction={temFiltroAtivoUsuarios ? limparFiltrosUsuarios : undefined}
                   />
                 ) : (
-                  <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs">
+                  <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs text-slate-600">
-                        <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                      <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                        <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                           <tr>
-                            <th className="py-3 px-4">Nome</th>
-                            <th className="py-3 px-4">E-mail</th>
-                            <th className="py-3 px-4">Telefone</th>
-                            <th className="py-3 px-4">Perfil</th>
-                            <th className="py-3 px-4 text-center">Status</th>
-                            <th className="py-3 px-4">Criado em</th>
-                            <th className="py-3 px-4 text-right">Ações</th>
+                            <th className="py-3.5 px-4">Nome</th>
+                            <th className="py-3.5 px-4">E-mail</th>
+                            <th className="py-3.5 px-4">Telefone</th>
+                            <th className="py-3.5 px-4">Perfil</th>
+                            <th className="py-3.5 px-4 text-center">Status</th>
+                            <th className="py-3.5 px-4">Criado em</th>
+                            <th className="py-3.5 px-4 text-right">Ações</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]/60">
                           {usuarios.map((usr) => {
                             const badgeInfo = formatPerfilBadge(usr.perfil)
                             const isSelf = usr.id === usuarioLogado?.id
@@ -1484,24 +1500,28 @@ export default function ConfiguracoesPage() {
                               isMasterOrAdmin && !isSelf && (isMaster || !isTargetMaster)
 
                             return (
-                              <tr key={usr.id} className="hover:bg-slate-50/70 transition-colors">
+                              <tr
+                                key={usr.id}
+                                className="hover:bg-slate-50/70 dark:hover:bg-white/[0.03] transition-colors"
+                              >
                                 <td className="py-3 px-4">
-                                  <div className="font-semibold text-slate-900 flex items-center gap-1.5">
+                                  <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
                                     {usr.nome}
                                     {isSelf && (
-                                      <Badge
-                                        variant="outline"
-                                        className="text-[9px] bg-teal-50 text-teal-700 border-teal-200 py-0"
-                                      >
+                                      <GlassBadge variant="blue" className="text-[9px] py-0">
                                         Você
-                                      </Badge>
+                                      </GlassBadge>
                                     )}
                                   </div>
                                 </td>
 
-                                <td className="py-3 px-4 font-mono text-slate-600">{usr.email}</td>
+                                <td className="py-3 px-4 font-mono text-slate-600 dark:text-[#C0C6CF]">
+                                  {usr.email}
+                                </td>
 
-                                <td className="py-3 px-4 text-slate-600">{usr.telefone || '-'}</td>
+                                <td className="py-3 px-4 text-slate-600 dark:text-[#C0C6CF]">
+                                  {usr.telefone || '-'}
+                                </td>
 
                                 <td className="py-3 px-4">
                                   <Badge
@@ -1513,19 +1533,12 @@ export default function ConfiguracoesPage() {
                                 </td>
 
                                 <td className="py-3 px-4 text-center">
-                                  <Badge
-                                    variant="outline"
-                                    className={
-                                      usr.ativo
-                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold'
-                                        : 'bg-rose-50 text-rose-700 border-rose-200 font-semibold'
-                                    }
-                                  >
+                                  <GlassBadge variant={usr.ativo ? 'green' : 'red'}>
                                     {usr.ativo ? 'Ativo' : 'Inativo'}
-                                  </Badge>
+                                  </GlassBadge>
                                 </td>
 
-                                <td className="py-3 px-4 text-slate-500 whitespace-nowrap">
+                                <td className="py-3 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                                   {formatDate(usr.created_at)}
                                 </td>
 
@@ -1537,7 +1550,7 @@ export default function ConfiguracoesPage() {
                                         variant="outline"
                                         size="sm"
                                         onClick={() => handleOpenDialogPerfil(usr)}
-                                        className="h-7 text-[11px] px-2 text-slate-700 border-slate-200 hover:bg-slate-50"
+                                        className="h-7 text-[11px] px-2 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-[#1A294A] hover:bg-slate-50 dark:hover:bg-[#1A294A] cursor-pointer"
                                         title="Alterar Perfil de Acesso"
                                       >
                                         Alterar Perfil
@@ -1550,10 +1563,10 @@ export default function ConfiguracoesPage() {
                                         variant="outline"
                                         size="sm"
                                         onClick={() => setDialogToggleUser(usr)}
-                                        className={`h-7 text-[11px] px-2 flex items-center gap-1 ${
+                                        className={`h-7 text-[11px] px-2 flex items-center gap-1 cursor-pointer ${
                                           usr.ativo
-                                            ? 'text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700'
-                                            : 'text-emerald-700 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800'
+                                            ? 'text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950'
+                                            : 'text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-50 dark:hover:bg-emerald-950'
                                         }`}
                                       >
                                         {usr.ativo ? (
@@ -1600,50 +1613,18 @@ export default function ConfiguracoesPage() {
                     </div>
 
                     {/* Paginação */}
-                    <div className="py-3 px-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
-                      <div>
-                        Mostrando{' '}
-                        <span className="font-semibold text-slate-900">
-                          {totalUsuarios === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}
-                        </span>{' '}
-                        a{' '}
-                        <span className="font-semibold text-slate-900">
-                          {Math.min(page * PAGE_SIZE, totalUsuarios)}
-                        </span>{' '}
-                        de <span className="font-semibold text-slate-900">{totalUsuarios}</span>{' '}
-                        usuários
-                      </div>
-
-                      <div className="flex items-center gap-1.5">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={page <= 1}
-                          onClick={() => setPage((p) => Math.max(1, p - 1))}
-                          className="h-8 w-8 p-0"
-                        >
-                          <ChevronLeft className="w-4 h-4" />
-                        </Button>
-                        <span className="text-xs px-2 font-medium">
-                          Página {page} de {totalPaginasUsuarios}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={page >= totalPaginasUsuarios}
-                          onClick={() => setPage((p) => Math.min(totalPaginasUsuarios, p + 1))}
-                          className="h-8 w-8 p-0"
-                        >
-                          <ChevronRight className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
+                    <GlassPagination
+                      currentPage={page}
+                      totalPages={totalPaginasUsuarios}
+                      totalItems={totalUsuarios}
+                      pageSize={PAGE_SIZE}
+                      onPageChange={setPage}
+                    />
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
-
           {/* =========================================================================
               ABA PLANO E ASSINATURA (Master/Admin)
               ========================================================================= */}
@@ -1651,23 +1632,23 @@ export default function ConfiguracoesPage() {
             <TabsContent value="plano" className="space-y-6">
               {/* Banner de Alerta de Bloqueio se Trial Expirado ou Assinatura Inativa */}
               {statusAssinatura && !statusAssinatura.acesso_permitido && (
-                <div className="p-4 sm:p-5 rounded-2xl border border-rose-200 bg-rose-50/70 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="p-4 sm:p-5 rounded-2xl border border-rose-500/30 bg-rose-500/10 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-start sm:items-center gap-3.5">
-                    <div className="h-10 w-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+                    <div className="h-10 w-10 rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 border border-rose-500/30">
                       <Clock className="w-5 h-5" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="text-sm sm:text-base font-bold text-rose-950">
+                        <h3 className="text-sm sm:text-base font-bold text-rose-950 dark:text-rose-200">
                           {statusAssinatura.status === 'trial'
                             ? 'Período de teste finalizado'
                             : 'Assinatura inativa'}
                         </h3>
-                        <Badge className="bg-rose-100 text-rose-800 border-rose-300 text-[10px] font-bold">
+                        <GlassBadge variant="red" className="text-[10px]">
                           Somente Leitura
-                        </Badge>
+                        </GlassBadge>
                       </div>
-                      <p className="text-xs sm:text-sm text-rose-900/90 mt-0.5">
+                      <p className="text-xs sm:text-sm text-rose-900/90 dark:text-rose-300 mt-0.5">
                         {statusAssinatura.motivo_bloqueio ||
                           'Todos os seus dados estão salvos e preservados. Para liberar as funções de cadastro e emissão, regularize sua assinatura.'}
                       </p>
@@ -1675,7 +1656,7 @@ export default function ConfiguracoesPage() {
                   </div>
                   <Button
                     onClick={handleOpenAlterarPlano}
-                    className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shrink-0 shadow-xs h-9 px-4 flex items-center gap-1.5"
+                    className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shrink-0 shadow-sm h-10 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     Alterar Plano
@@ -1697,16 +1678,16 @@ export default function ConfiguracoesPage() {
                 <div className="space-y-6">
                   {/* Card Principal da Assinatura */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <Card className="border border-slate-200 bg-white shadow-xs lg:col-span-2">
-                      <CardHeader className="border-b border-slate-100 pb-4">
+                    <Card className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] bg-white/70 dark:bg-[#0A1328]/60 lg:col-span-2">
+                      <CardHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-4">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                          <div className="flex items-center gap-2.5 text-teal-700">
+                          <div className="flex items-center gap-2.5 text-[#0066FF] dark:text-[#3B82F6]">
                             <CreditCard className="w-5 h-5" />
                             <div>
-                              <CardTitle className="text-base font-bold text-slate-900">
+                              <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
                                 Detalhes da Assinatura
                               </CardTitle>
-                              <CardDescription className="text-xs text-slate-500 mt-0.5">
+                              <CardDescription className="text-xs text-slate-500 dark:text-[#C0C6CF] mt-0.5">
                                 Informações do plano contratado e vigência da conta
                               </CardDescription>
                             </div>
@@ -1727,88 +1708,84 @@ export default function ConfiguracoesPage() {
 
                       <CardContent className="pt-6 space-y-6">
                         {/* Bloco Destaque: Plano e Valor */}
-                        <div className="p-4 rounded-xl border border-teal-100 bg-teal-50/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="p-4 rounded-2xl border border-[#0066FF]/20 bg-[#0066FF]/5 dark:bg-[#0066FF]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                           <div>
-                            <span className="text-xs font-medium text-teal-800 uppercase tracking-wider block">
+                            <span className="text-xs font-medium text-[#0066FF] dark:text-[#3B82F6] uppercase tracking-wider block">
                               Plano Atual
                             </span>
-                            <h3 className="text-xl font-bold text-slate-900 mt-0.5">
+                            <h3 className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">
                               {assinatura.planos?.nome || 'Plano Personalizado'}
                             </h3>
                             {assinatura.planos?.descricao && (
-                              <p className="text-xs text-slate-600 mt-1 max-w-md">
+                              <p className="text-xs text-slate-600 dark:text-[#C0C6CF] mt-1 max-w-md">
                                 {assinatura.planos.descricao}
                               </p>
                             )}
                           </div>
 
                           <div className="sm:text-right">
-                            <span className="text-xs font-medium text-slate-500 block">
+                            <span className="text-xs font-medium text-slate-500 dark:text-[#C0C6CF]/70 block">
                               Valor Mensal
                             </span>
-                            <div className="text-2xl font-extrabold text-teal-900 mt-0.5">
+                            <div className="text-2xl font-extrabold text-slate-900 dark:text-white mt-0.5">
                               {formatCurrency(
                                 Number(assinatura.valor || assinatura.planos?.valor_mensal || 0),
                               )}
-                              <span className="text-xs font-normal text-slate-500"> /mês</span>
+                              <span className="text-xs font-normal text-slate-500 dark:text-[#C0C6CF]/70">
+                                {' '}
+                                /mês
+                              </span>
                             </div>
                           </div>
                         </div>
 
                         {/* Grade de Datas e Informações de Pagamento */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                          <div className="p-3.5 rounded-lg border border-slate-100 bg-slate-50/70 space-y-1">
-                            <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                          <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-[#1A294A] bg-slate-50/70 dark:bg-[#0A1328]/70 space-y-1">
+                            <span className="text-slate-500 dark:text-[#C0C6CF]/70 font-medium flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                               Data de Início
                             </span>
-                            <p className="text-sm font-semibold text-slate-800">
+                            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                               {formatDate(assinatura.inicio)}
                             </p>
                           </div>
 
                           {assinatura.status === 'trial' ? (
-                            <div className="p-3.5 rounded-lg border border-amber-200 bg-amber-50/50 space-y-1">
-                              <span className="text-amber-800 font-medium flex items-center gap-1.5">
-                                <Clock className="w-3.5 h-3.5 text-amber-600" />
+                            <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10 space-y-1">
+                              <span className="text-amber-800 dark:text-amber-300 font-medium flex items-center gap-1.5">
+                                <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                                 Fim do Período de Teste
                               </span>
                               <div className="flex items-center justify-between gap-2">
-                                <p className="text-sm font-bold text-amber-950">
+                                <p className="text-sm font-bold text-amber-950 dark:text-amber-200">
                                   {formatDate(assinatura.fim_periodo_teste)}
                                 </p>
                                 {(() => {
                                   const dias = calcularDiasRestantesTrial(
                                     assinatura.fim_periodo_teste,
                                   )
-                                  const cor =
-                                    dias <= 0
-                                      ? 'text-red-700 bg-red-100 border-red-200'
-                                      : dias <= 5
-                                        ? 'text-amber-800 bg-amber-100 border-amber-300'
-                                        : 'text-teal-800 bg-teal-100 border-teal-200'
+                                  const variantBadge: 'red' | 'amber' | 'blue' =
+                                    dias <= 0 ? 'red' : dias <= 5 ? 'amber' : 'blue'
                                   return (
-                                    <Badge
-                                      variant="outline"
-                                      className={`text-[11px] font-semibold ${cor}`}
-                                    >
+                                    <GlassBadge variant={variantBadge} className="text-[11px]">
                                       {dias <= 0
                                         ? 'Expirado'
                                         : dias === 1
                                           ? 'Resta 1 dia'
                                           : `Restam ${dias} dias`}
-                                    </Badge>
+                                    </GlassBadge>
                                   )
                                 })()}
                               </div>
                             </div>
                           ) : (
-                            <div className="p-3.5 rounded-lg border border-slate-100 bg-slate-50/70 space-y-1">
-                              <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                            <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-[#1A294A] bg-slate-50/70 dark:bg-[#0A1328]/70 space-y-1">
+                              <span className="text-slate-500 dark:text-[#C0C6CF]/70 font-medium flex items-center gap-1.5">
+                                <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                                 Próxima Cobrança
                               </span>
-                              <p className="text-sm font-semibold text-slate-800">
+                              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                                 {assinatura.proxima_cobranca
                                   ? formatDate(assinatura.proxima_cobranca)
                                   : 'Não agendada'}
@@ -1816,18 +1793,18 @@ export default function ConfiguracoesPage() {
                             </div>
                           )}
 
-                          <div className="p-3.5 rounded-lg border border-slate-100 bg-slate-50/70 space-y-1">
-                            <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                              <CreditCard className="w-3.5 h-3.5 text-slate-400" />
+                          <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-[#1A294A] bg-slate-50/70 dark:bg-[#0A1328]/70 space-y-1">
+                            <span className="text-slate-500 dark:text-[#C0C6CF]/70 font-medium flex items-center gap-1.5">
+                              <CreditCard className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                               Método de Pagamento
                             </span>
                             <div className="flex items-center gap-1.5 mt-0.5">
                               {assinatura.metodo_pagamento?.toLowerCase().includes('pix') ? (
-                                <QrCode className="w-4 h-4 text-teal-600" />
+                                <QrCode className="w-4 h-4 text-[#0066FF] dark:text-[#3B82F6]" />
                               ) : (
-                                <CreditCard className="w-4 h-4 text-blue-600" />
+                                <CreditCard className="w-4 h-4 text-[#0066FF] dark:text-[#3B82F6]" />
                               )}
-                              <span className="text-sm font-semibold text-slate-800 capitalize">
+                              <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 capitalize">
                                 {assinatura.metodo_pagamento || 'Mercado Pago (PIX / Cartão)'}
                               </span>
                             </div>
@@ -1835,9 +1812,9 @@ export default function ConfiguracoesPage() {
                         </div>
 
                         {/* Barra de Ações: Alterar Plano | Cancelar Assinatura | Reativar Assinatura */}
-                        <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                          <div className="flex items-center gap-2 text-slate-600">
-                            <CreditCard className="w-4 h-4 shrink-0 text-teal-600" />
+                        <div className="p-4 rounded-xl border border-slate-200/80 dark:border-[#1A294A] bg-slate-50/70 dark:bg-[#0A1328]/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                          <div className="flex items-center gap-2 text-slate-600 dark:text-[#C0C6CF]">
+                            <CreditCard className="w-4 h-4 shrink-0 text-[#0066FF] dark:text-[#3B82F6]" />
                             <span>Gerencie o plano e status da assinatura da sua empresa.</span>
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
@@ -1850,7 +1827,7 @@ export default function ConfiguracoesPage() {
                               >
                                 <Button
                                   type="button"
-                                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-8 px-3.5 shadow-xs flex items-center gap-1.5"
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-9 px-3.5 rounded-xl shadow-sm flex items-center gap-1.5 cursor-pointer"
                                 >
                                   <CreditCard className="w-3.5 h-3.5" />
                                   Pagar Agora
@@ -1862,7 +1839,7 @@ export default function ConfiguracoesPage() {
                             <Button
                               type="button"
                               onClick={handleOpenAlterarPlano}
-                              className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold h-8 px-3.5 shadow-xs flex items-center gap-1.5"
+                              className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold h-9 px-3.5 rounded-xl shadow-sm flex items-center gap-1.5 cursor-pointer"
                             >
                               <Sparkles className="w-3.5 h-3.5" />
                               Alterar Plano
@@ -1874,7 +1851,7 @@ export default function ConfiguracoesPage() {
                                 type="button"
                                 variant="outline"
                                 onClick={() => setModalCancelarOpen(true)}
-                                className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-xs font-semibold h-8 px-3"
+                                className="border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950 text-xs font-semibold h-9 px-3 rounded-xl cursor-pointer"
                               >
                                 <XCircle className="w-3.5 h-3.5 mr-1" />
                                 Cancelar Assinatura
@@ -1887,7 +1864,7 @@ export default function ConfiguracoesPage() {
                               <Button
                                 type="button"
                                 onClick={() => setModalReativarOpen(true)}
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-8 px-3.5 shadow-xs flex items-center gap-1.5"
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-9 px-3.5 rounded-xl shadow-sm flex items-center gap-1.5 cursor-pointer"
                               >
                                 <CheckCircle2 className="w-3.5 h-3.5" />
                                 Reativar Assinatura
@@ -1899,15 +1876,15 @@ export default function ConfiguracoesPage() {
                     </Card>
 
                     {/* Card de Recursos Inclusos do Plano */}
-                    <Card className="border border-slate-200 bg-white shadow-xs">
-                      <CardHeader className="border-b border-slate-100 pb-3">
-                        <div className="flex items-center gap-2 text-teal-700">
+                    <Card className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] bg-white/70 dark:bg-[#0A1328]/60">
+                      <CardHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
+                        <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
                           <Sparkles className="w-5 h-5" />
-                          <CardTitle className="text-base font-bold text-slate-900">
+                          <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
                             Recursos do Plano
                           </CardTitle>
                         </div>
-                        <CardDescription className="text-xs text-slate-500">
+                        <CardDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]">
                           Benefícios disponíveis no plano {assinatura.planos?.nome || ''}
                         </CardDescription>
                       </CardHeader>
@@ -1930,9 +1907,9 @@ export default function ConfiguracoesPage() {
                               {recursos.map((rec, idx) => (
                                 <li
                                   key={idx}
-                                  className="flex items-start gap-2.5 text-xs text-slate-700"
+                                  className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300"
                                 >
-                                  <div className="h-4 w-4 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
+                                  <div className="h-4 w-4 rounded-full bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] flex items-center justify-center shrink-0 mt-0.5">
                                     <Check className="w-3 h-3" />
                                   </div>
                                   <span className="leading-snug">{rec}</span>
@@ -1945,16 +1922,16 @@ export default function ConfiguracoesPage() {
                     </Card>
 
                     {/* Card Histórico de Pagamentos (Build 4) */}
-                    <Card className="border border-slate-200 bg-white shadow-xs lg:col-span-3">
-                      <CardHeader className="border-b border-slate-100 pb-3">
+                    <Card className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] bg-white/70 dark:bg-[#0A1328]/60 lg:col-span-3">
+                      <CardHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-teal-700">
+                          <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
                             <Receipt className="w-5 h-5" />
                             <div>
-                              <CardTitle className="text-base font-bold text-slate-900">
+                              <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
                                 Histórico de Cobranças e Pagamentos
                               </CardTitle>
-                              <CardDescription className="text-xs text-slate-500 mt-0.5">
+                              <CardDescription className="text-xs text-slate-500 dark:text-[#C0C6CF] mt-0.5">
                                 Faturas processadas e comprovantes de transação do Mercado Pago
                               </CardDescription>
                             </div>
@@ -1967,7 +1944,7 @@ export default function ConfiguracoesPage() {
                             >
                               <Button
                                 size="sm"
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-8 px-3 shadow-xs flex items-center gap-1.5"
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-9 px-3.5 rounded-xl shadow-sm flex items-center gap-1.5 cursor-pointer"
                               >
                                 <CreditCard className="w-3.5 h-3.5" />
                                 Pagar Agora
@@ -1978,10 +1955,10 @@ export default function ConfiguracoesPage() {
                       </CardHeader>
                       <CardContent className="p-0">
                         {minhasTransacoes.length === 0 ? (
-                          <div className="p-8 text-center text-slate-500 text-xs">
-                            <Receipt className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                          <div className="p-8 text-center text-slate-500 dark:text-[#C0C6CF] text-xs">
+                            <Receipt className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
                             <p>Nenhuma transação registrada até o momento.</p>
-                            <p className="text-slate-400 text-[11px] mt-0.5">
+                            <p className="text-slate-400 dark:text-slate-500 text-[11px] mt-0.5">
                               Os pagamentos realizados aparecerão automaticamente aqui após a
                               confirmação.
                             </p>
@@ -1989,57 +1966,57 @@ export default function ConfiguracoesPage() {
                         ) : (
                           <div className="overflow-x-auto">
                             <table className="w-full text-left text-xs border-collapse">
-                              <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                              <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 <tr>
-                                  <th className="py-3 px-4">Plano</th>
-                                  <th className="py-3 px-4">Valor</th>
-                                  <th className="py-3 px-4">Método</th>
-                                  <th className="py-3 px-4">Status</th>
-                                  <th className="py-3 px-4">ID Transação</th>
-                                  <th className="py-3 px-4 text-right">Data</th>
+                                  <th className="py-3.5 px-4">Plano</th>
+                                  <th className="py-3.5 px-4">Valor</th>
+                                  <th className="py-3.5 px-4">Método</th>
+                                  <th className="py-3.5 px-4">Status</th>
+                                  <th className="py-3.5 px-4">ID Transação</th>
+                                  <th className="py-3.5 px-4 text-right">Data</th>
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-slate-100">
+                              <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]/60">
                                 {minhasTransacoes.map((tx) => (
                                   <tr
                                     key={tx.id}
-                                    className="hover:bg-slate-50/70 transition-colors"
+                                    className="hover:bg-slate-50/70 dark:hover:bg-white/[0.03] transition-colors"
                                   >
-                                    <td className="py-3 px-4 font-semibold text-slate-800">
+                                    <td className="py-3 px-4 font-semibold text-slate-800 dark:text-white">
                                       {tx.plano_nome || tx.plano_slug || 'Assinatura Mensal'}
                                     </td>
-                                    <td className="py-3 px-4 font-bold text-slate-900">
+                                    <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">
                                       {formatCurrency(tx.valor)}
                                     </td>
                                     <td className="py-3 px-4">
-                                      <div className="flex items-center gap-1.5 capitalize text-slate-700">
+                                      <div className="flex items-center gap-1.5 capitalize text-slate-700 dark:text-slate-300">
                                         {tx.metodo_pagamento?.toLowerCase().includes('pix') ? (
-                                          <QrCode className="w-3.5 h-3.5 text-teal-600" />
+                                          <QrCode className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
                                         ) : (
-                                          <CreditCard className="w-3.5 h-3.5 text-blue-600" />
+                                          <CreditCard className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
                                         )}
                                         <span>{tx.metodo_pagamento || 'Mercado Pago'}</span>
                                       </div>
                                     </td>
                                     <td className="py-3 px-4">
                                       {tx.status === 'aprovado' ? (
-                                        <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] font-semibold">
+                                        <GlassBadge variant="green" className="text-[10px]">
                                           <Check className="w-3 h-3 mr-1" /> Aprovado
-                                        </Badge>
+                                        </GlassBadge>
                                       ) : tx.status === 'recusado' ? (
-                                        <Badge className="bg-rose-50 text-rose-700 border-rose-200 text-[10px] font-semibold">
+                                        <GlassBadge variant="red" className="text-[10px]">
                                           Recusado
-                                        </Badge>
+                                        </GlassBadge>
                                       ) : (
-                                        <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] font-semibold">
+                                        <GlassBadge variant="amber" className="text-[10px]">
                                           <Clock className="w-3 h-3 mr-1" /> Pendente
-                                        </Badge>
+                                        </GlassBadge>
                                       )}
                                     </td>
-                                    <td className="py-3 px-4 font-mono text-slate-500 text-[11px]">
+                                    <td className="py-3 px-4 font-mono text-slate-500 dark:text-slate-400 text-[11px]">
                                       {tx.gateway_id || tx.id.slice(0, 8)}
                                     </td>
-                                    <td className="py-3 px-4 text-slate-600 text-right text-[11px]">
+                                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 text-right text-[11px]">
                                       {formatDate(tx.created_at)}
                                     </td>
                                   </tr>
@@ -2052,26 +2029,23 @@ export default function ConfiguracoesPage() {
                     </Card>
 
                     {/* Card de Limites do Plano (Consumo Atual) */}
-                    <Card className="border border-slate-200 bg-white shadow-xs lg:col-span-3">
-                      <CardHeader className="border-b border-slate-100 pb-3">
+                    <Card className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] bg-white/70 dark:bg-[#0A1328]/60 lg:col-span-3">
+                      <CardHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                          <div className="flex items-center gap-2 text-teal-700">
+                          <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
                             <Shield className="w-5 h-5" />
                             <div>
-                              <CardTitle className="text-base font-bold text-slate-900">
+                              <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
                                 Limites do Plano
                               </CardTitle>
-                              <CardDescription className="text-xs text-slate-500 mt-0.5">
+                              <CardDescription className="text-xs text-slate-500 dark:text-[#C0C6CF] mt-0.5">
                                 Acompanhamento de capacidade e uso atual dos recursos contratados
                               </CardDescription>
                             </div>
                           </div>
-                          <Badge
-                            variant="outline"
-                            className="bg-teal-50 text-teal-700 border-teal-200 font-semibold text-xs"
-                          >
+                          <GlassBadge variant="blue" className="text-xs">
                             Plano {assinatura.planos?.nome || 'Atual'}
-                          </Badge>
+                          </GlassBadge>
                         </div>
                       </CardHeader>
                       <CardContent className="pt-6">
@@ -2122,11 +2096,11 @@ export default function ConfiguracoesPage() {
                             const isWarning =
                               !isUnlimited && limItem.limit !== null && percent > 70 && !isReached
 
-                            const badgeStatus = isReached
-                              ? 'bg-rose-100 text-rose-800 border-rose-200'
+                            const badgeVariant: 'red' | 'amber' | 'green' = isReached
+                              ? 'red'
                               : isWarning
-                                ? 'bg-amber-100 text-amber-800 border-amber-200'
-                                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                ? 'amber'
+                                : 'green'
 
                             const barColor = isUnlimited
                               ? 'bg-emerald-500'
@@ -2134,41 +2108,37 @@ export default function ConfiguracoesPage() {
                                 ? 'bg-rose-500'
                                 : isWarning
                                   ? 'bg-amber-500'
-                                  : 'bg-emerald-500'
-
-                            const cardBg = isReached
-                              ? 'bg-rose-50/20 border-rose-200'
-                              : isWarning
-                                ? 'bg-amber-50/20 border-amber-200'
-                                : 'bg-slate-50/60 border-slate-200'
+                                  : 'bg-[#0066FF]'
 
                             return (
                               <div
                                 key={lIdx}
-                                className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 transition-colors ${cardBg}`}
+                                className="p-4 rounded-xl border border-slate-200/80 dark:border-[#1A294A] bg-slate-50/70 dark:bg-[#0A1328]/70 flex flex-col justify-between space-y-3 transition-colors"
                               >
                                 <div>
                                   <div className="flex items-start justify-between gap-1.5 mb-1.5">
-                                    <span className="text-xs font-bold text-slate-900 leading-tight">
+                                    <span className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
                                       {limItem.label}
                                     </span>
                                     {isReached ? (
-                                      <Badge
-                                        variant="outline"
-                                        className={`text-[9px] px-1.5 py-0 font-bold ${badgeStatus}`}
+                                      <GlassBadge
+                                        variant={badgeVariant}
+                                        className="text-[9px] px-1.5 py-0"
                                       >
                                         Limite atingido
-                                      </Badge>
+                                      </GlassBadge>
                                     ) : isWarning ? (
-                                      <Badge
-                                        variant="outline"
-                                        className={`text-[9px] px-1.5 py-0 font-semibold ${badgeStatus}`}
+                                      <GlassBadge
+                                        variant={badgeVariant}
+                                        className="text-[9px] px-1.5 py-0"
                                       >
                                         Atenção ({percent}%)
-                                      </Badge>
+                                      </GlassBadge>
                                     ) : null}
                                   </div>
-                                  <p className="text-[11px] text-slate-500">{limItem.desc}</p>
+                                  <p className="text-[11px] text-slate-500 dark:text-[#C0C6CF]/70">
+                                    {limItem.desc}
+                                  </p>
                                 </div>
 
                                 <div>
@@ -2176,20 +2146,20 @@ export default function ConfiguracoesPage() {
                                     <span
                                       className={`text-xl font-extrabold ${
                                         isReached
-                                          ? 'text-rose-700'
+                                          ? 'text-rose-600 dark:text-rose-400'
                                           : isWarning
-                                            ? 'text-amber-700'
-                                            : 'text-slate-900'
+                                            ? 'text-amber-600 dark:text-amber-400'
+                                            : 'text-slate-900 dark:text-white'
                                       }`}
                                     >
                                       {limItem.current}
                                     </span>
-                                    <span className="text-slate-500 text-xs font-medium">
+                                    <span className="text-slate-500 dark:text-[#C0C6CF]/70 text-xs font-medium">
                                       {isUnlimited ? '/ Ilimitado' : `/ ${limItem.limit}`}
                                     </span>
                                   </div>
 
-                                  <div className="w-full bg-slate-200/80 rounded-full h-2 overflow-hidden">
+                                  <div className="w-full bg-slate-200 dark:bg-[#1A294A] rounded-full h-2 overflow-hidden">
                                     <div
                                       className={`h-2 rounded-full transition-all duration-500 ${barColor}`}
                                       style={{ width: `${percent}%` }}
@@ -2207,40 +2177,45 @@ export default function ConfiguracoesPage() {
               )}
             </TabsContent>
           )}
-
           {/* =========================================================================
-              ABA 4: SEGURANÇA
+              ABA 5: SEGURANÇA
               ========================================================================= */}
           <TabsContent value="seguranca" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Card Conta e Acesso */}
-              <Card className="border border-slate-200 bg-white shadow-xs">
-                <CardHeader className="border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2 text-teal-700">
-                    <UserCheck className="w-5 h-5" />
-                    <CardTitle className="text-base font-bold text-slate-900">
+              <Card className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] bg-white/70 dark:bg-[#0A1328]/60">
+                <CardHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
+                  <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
+                    <Key className="w-5 h-5" />
+                    <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
                       Conta e Acesso
                     </CardTitle>
                   </div>
-                  <CardDescription className="text-xs text-slate-500">
-                    Dados da sua conta logada no sistema
+                  <CardDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]">
+                    Informações do usuário atualmente conectado ao sistema
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-4 space-y-3 text-xs">
-                  <div className="flex justify-between py-2 border-b border-slate-100">
-                    <span className="text-slate-500 font-medium">Nome:</span>
-                    <span className="font-semibold text-slate-900">
-                      {usuarioLogado?.nome || '-'}
+                  <div className="flex justify-between py-2 border-b border-slate-100 dark:border-[#1A294A]/60">
+                    <span className="text-slate-500 dark:text-[#C0C6CF]/70 font-medium">
+                      Nome do Usuário:
+                    </span>
+                    <span className="font-semibold text-slate-900 dark:text-white">
+                      {usuarioLogado?.nome || 'Usuário'}
                     </span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-slate-100">
-                    <span className="text-slate-500 font-medium">E-mail:</span>
-                    <span className="font-mono text-slate-900">
+                  <div className="flex justify-between py-2 border-b border-slate-100 dark:border-[#1A294A]/60">
+                    <span className="text-slate-500 dark:text-[#C0C6CF]/70 font-medium">
+                      E-mail:
+                    </span>
+                    <span className="font-mono text-slate-900 dark:text-white">
                       {usuarioLogado?.email || user?.email || '-'}
                     </span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-slate-100 items-center">
-                    <span className="text-slate-500 font-medium">Perfil Atual:</span>
+                  <div className="flex justify-between py-2 border-b border-slate-100 dark:border-[#1A294A]/60 items-center">
+                    <span className="text-slate-500 dark:text-[#C0C6CF]/70 font-medium">
+                      Perfil Atual:
+                    </span>
                     <div>
                       {(() => {
                         const b = formatPerfilBadge(usuarioLogado?.perfil)
@@ -2256,8 +2231,10 @@ export default function ConfiguracoesPage() {
                     </div>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-slate-500 font-medium">Data de Criação:</span>
-                    <span className="font-medium text-slate-700">
+                    <span className="text-slate-500 dark:text-[#C0C6CF]/70 font-medium">
+                      Data de Criação:
+                    </span>
+                    <span className="font-medium text-slate-700 dark:text-slate-300">
                       {formatDate(usuarioLogado?.created_at)}
                     </span>
                   </div>
@@ -2265,34 +2242,38 @@ export default function ConfiguracoesPage() {
               </Card>
 
               {/* Card Sessão */}
-              <Card className="border border-slate-200 bg-white shadow-xs">
-                <CardHeader className="border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2 text-teal-700">
+              <Card className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] bg-white/70 dark:bg-[#0A1328]/60">
+                <CardHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
+                  <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
                     <Lock className="w-5 h-5" />
-                    <CardTitle className="text-base font-bold text-slate-900">
+                    <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
                       Sessão Atual
                     </CardTitle>
                   </div>
-                  <CardDescription className="text-xs text-slate-500">
+                  <CardDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]">
                     Informações de autenticação e histórico da sessão
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-4 space-y-3 text-xs">
-                  <div className="flex justify-between py-2 border-b border-slate-100">
-                    <span className="text-slate-500 font-medium">Status da Conexão:</span>
-                    <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                      Autenticado
-                    </Badge>
+                  <div className="flex justify-between py-2 border-b border-slate-100 dark:border-[#1A294A]/60">
+                    <span className="text-slate-500 dark:text-[#C0C6CF]/70 font-medium">
+                      Status da Conexão:
+                    </span>
+                    <GlassBadge variant="green">Autenticado</GlassBadge>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-slate-100">
-                    <span className="text-slate-500 font-medium">Provedor Auth:</span>
-                    <span className="font-semibold text-slate-800">
+                  <div className="flex justify-between py-2 border-b border-slate-100 dark:border-[#1A294A]/60">
+                    <span className="text-slate-500 dark:text-[#C0C6CF]/70 font-medium">
+                      Provedor Auth:
+                    </span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">
                       {user?.app_metadata?.provider || 'Email/Senha'}
                     </span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-slate-500 font-medium">Último Acesso:</span>
-                    <span className="font-mono text-slate-700">
+                    <span className="text-slate-500 dark:text-[#C0C6CF]/70 font-medium">
+                      Último Acesso:
+                    </span>
+                    <span className="font-mono text-slate-700 dark:text-slate-300">
                       {formatDateTime(user?.last_sign_in_at)}
                     </span>
                   </div>
@@ -2300,38 +2281,38 @@ export default function ConfiguracoesPage() {
               </Card>
 
               {/* Card Permissões (Resumo de Papéis) */}
-              <Card className="border border-slate-200 bg-white shadow-xs md:col-span-2">
-                <CardHeader className="border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2 text-teal-700">
+              <Card className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] bg-white/70 dark:bg-[#0A1328]/60 md:col-span-2">
+                <CardHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
+                  <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
                     <Shield className="w-5 h-5" />
-                    <CardTitle className="text-base font-bold text-slate-900">
+                    <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
                       Matriz de Permissões por Perfil
                     </CardTitle>
                   </div>
-                  <CardDescription className="text-xs text-slate-500">
+                  <CardDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]">
                     Resumo dos níveis de acesso e responsabilidades configurados no EVO Gestão.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs text-slate-600">
-                      <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                      <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         <tr>
-                          <th className="py-3 px-4 w-40">Perfil</th>
-                          <th className="py-3 px-4">Descrição de Acesso</th>
+                          <th className="py-3.5 px-4 w-40">Perfil</th>
+                          <th className="py-3.5 px-4">Descrição de Acesso</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]/60">
                         <tr>
                           <td className="py-3 px-4 font-semibold">
                             <Badge
                               variant="outline"
-                              className="bg-purple-100 text-purple-700 border-purple-200"
+                              className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20"
                             >
                               Master
                             </Badge>
                           </td>
-                          <td className="py-3 px-4 text-slate-700">
+                          <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
                             Acesso total ao sistema, gerenciamento de administradores e
                             configurações globais.
                           </td>
@@ -2340,12 +2321,12 @@ export default function ConfiguracoesPage() {
                           <td className="py-3 px-4 font-semibold">
                             <Badge
                               variant="outline"
-                              className="bg-indigo-100 text-indigo-700 border-indigo-200"
+                              className="bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] border-[#0066FF]/20"
                             >
                               Administrador
                             </Badge>
                           </td>
-                          <td className="py-3 px-4 text-slate-700">
+                          <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
                             Gestão completa da empresa, exceto dados sensíveis do sistema e outros
                             usuários Master.
                           </td>
@@ -2354,12 +2335,12 @@ export default function ConfiguracoesPage() {
                           <td className="py-3 px-4 font-semibold">
                             <Badge
                               variant="outline"
-                              className="bg-blue-100 text-blue-700 border-blue-200"
+                              className="bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20"
                             >
                               Gerente
                             </Badge>
                           </td>
-                          <td className="py-3 px-4 text-slate-700">
+                          <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
                             Gestão operacional, financeiro, equipe de vendas e relatórios
                             executivos.
                           </td>
@@ -2368,12 +2349,12 @@ export default function ConfiguracoesPage() {
                           <td className="py-3 px-4 font-semibold">
                             <Badge
                               variant="outline"
-                              className="bg-amber-100 text-amber-700 border-amber-200"
+                              className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
                             >
                               Operador
                             </Badge>
                           </td>
-                          <td className="py-3 px-4 text-slate-700">
+                          <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
                             Acesso restrito a produtos (visualização) e movimentação de estoque.
                           </td>
                         </tr>
@@ -2381,12 +2362,12 @@ export default function ConfiguracoesPage() {
                           <td className="py-3 px-4 font-semibold">
                             <Badge
                               variant="outline"
-                              className="bg-emerald-100 text-emerald-700 border-emerald-200"
+                              className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
                             >
                               Vendedor
                             </Badge>
                           </td>
-                          <td className="py-3 px-4 text-slate-700">
+                          <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
                             Emissão de vendas, pedidos e visualização da sua carteira de clientes e
                             comissões.
                           </td>
@@ -2397,7 +2378,7 @@ export default function ConfiguracoesPage() {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
+          </TabsContent>{' '}
         </Tabs>
 
         {/* =========================================================================
@@ -2415,15 +2396,15 @@ export default function ConfiguracoesPage() {
             }
           }}
         >
-          <DialogContent className="max-w-md w-full">
-            <DialogHeader>
-              <div className="flex items-center gap-2 text-teal-800">
-                <Users className="w-5 h-5 text-teal-600" />
-                <DialogTitle className="text-base font-bold text-slate-900">
+          <DialogContent className="max-w-md w-full border border-slate-200/80 dark:border-[#1A294A] bg-white dark:bg-[#0A1328] shadow-2xl rounded-2xl">
+            <DialogHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
+              <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
+                <Users className="w-5 h-5" />
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
                   Novo Usuário
                 </DialogTitle>
               </div>
-              <DialogDescription className="text-xs text-slate-600 pt-1">
+              <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF] pt-1">
                 Cadastre um novo usuário para acessar esta empresa.
               </DialogDescription>
             </DialogHeader>
@@ -2431,7 +2412,10 @@ export default function ConfiguracoesPage() {
             <div className="space-y-4 py-2">
               {/* Nome */}
               <div className="space-y-1.5">
-                <Label htmlFor="novo-user-nome" className="text-xs font-semibold text-slate-700">
+                <Label
+                  htmlFor="novo-user-nome"
+                  className="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                >
                   Nome <span className="text-rose-500">*</span>
                 </Label>
                 <Input
@@ -2440,13 +2424,16 @@ export default function ConfiguracoesPage() {
                   value={novoUsuarioNome}
                   onChange={(e) => setNovoUsuarioNome(e.target.value)}
                   disabled={submittingNovoUsuario}
-                  className="text-xs h-9 bg-white border-slate-200"
+                  className={glassInputClass}
                 />
               </div>
 
               {/* Email */}
               <div className="space-y-1.5">
-                <Label htmlFor="novo-user-email" className="text-xs font-semibold text-slate-700">
+                <Label
+                  htmlFor="novo-user-email"
+                  className="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                >
                   E-mail <span className="text-rose-500">*</span>
                 </Label>
                 <Input
@@ -2456,13 +2443,13 @@ export default function ConfiguracoesPage() {
                   value={novoUsuarioEmail}
                   onChange={(e) => setNovoUsuarioEmail(e.target.value)}
                   disabled={submittingNovoUsuario}
-                  className="text-xs h-9 bg-white border-slate-200"
+                  className={glassInputClass}
                 />
               </div>
 
               {/* Perfil */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-slate-700">
+                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Perfil <span className="text-rose-500">*</span>
                 </Label>
                 <Select
@@ -2470,25 +2457,40 @@ export default function ConfiguracoesPage() {
                   onValueChange={setNovoUsuarioPerfil}
                   disabled={submittingNovoUsuario}
                 >
-                  <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                  <SelectTrigger className={glassSelectTriggerClass}>
                     <SelectValue placeholder="Selecione o perfil..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className={glassSelectContentClass}>
                     {isMaster && (
-                      <SelectItem value="master" className="text-xs font-semibold text-purple-700">
+                      <SelectItem
+                        value="master"
+                        className="text-xs font-semibold text-purple-600 dark:text-purple-400"
+                      >
                         Master (Acesso Irrestrito)
                       </SelectItem>
                     )}
-                    <SelectItem value="admin" className="text-xs font-semibold text-indigo-700">
+                    <SelectItem
+                      value="admin"
+                      className="text-xs font-semibold text-[#0066FF] dark:text-[#3B82F6]"
+                    >
                       Administrador (Gestão Completa)
                     </SelectItem>
-                    <SelectItem value="gerente" className="text-xs font-semibold text-blue-700">
+                    <SelectItem
+                      value="gerente"
+                      className="text-xs font-semibold text-sky-600 dark:text-sky-400"
+                    >
                       Gerente (Operacional & Financeiro)
                     </SelectItem>
-                    <SelectItem value="operador" className="text-xs font-semibold text-amber-700">
+                    <SelectItem
+                      value="operador"
+                      className="text-xs font-semibold text-amber-600 dark:text-amber-400"
+                    >
                       Operador (Estoque & Vendas)
                     </SelectItem>
-                    <SelectItem value="vendedor" className="text-xs font-semibold text-emerald-700">
+                    <SelectItem
+                      value="vendedor"
+                      className="text-xs font-semibold text-emerald-600 dark:text-emerald-400"
+                    >
                       Vendedor (Vendas & Carteira)
                     </SelectItem>
                   </SelectContent>
@@ -2497,7 +2499,10 @@ export default function ConfiguracoesPage() {
 
               {/* Senha */}
               <div className="space-y-1.5">
-                <Label htmlFor="novo-user-senha" className="text-xs font-semibold text-slate-700">
+                <Label
+                  htmlFor="novo-user-senha"
+                  className="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                >
                   Senha Inicial <span className="text-rose-500">*</span>
                 </Label>
                 <Input
@@ -2507,12 +2512,12 @@ export default function ConfiguracoesPage() {
                   value={novoUsuarioSenha}
                   onChange={(e) => setNovoUsuarioSenha(e.target.value)}
                   disabled={submittingNovoUsuario}
-                  className="text-xs h-9 bg-white border-slate-200"
+                  className={glassInputClass}
                 />
               </div>
             </div>
 
-            <DialogFooter className="pt-2 flex gap-2">
+            <DialogFooter className="pt-3 border-t border-slate-100 dark:border-[#1A294A] flex gap-2">
               <Button
                 variant="outline"
                 type="button"
@@ -2524,7 +2529,7 @@ export default function ConfiguracoesPage() {
                   setNovoUsuarioPerfil('vendedor')
                   setNovoUsuarioSenha('')
                 }}
-                className="text-xs"
+                className="text-xs rounded-xl border-slate-200 dark:border-[#1A294A] cursor-pointer"
               >
                 Cancelar
               </Button>
@@ -2532,7 +2537,7 @@ export default function ConfiguracoesPage() {
                 type="button"
                 disabled={submittingNovoUsuario}
                 onClick={handleCreateUsuario}
-                className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-1.5"
+                className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
                 {submittingNovoUsuario ? (
                   <>
@@ -2556,34 +2561,34 @@ export default function ConfiguracoesPage() {
             if (!open && !submittingToggle) setDialogToggleUser(null)
           }}
         >
-          <DialogContent className="max-w-md w-full">
-            <DialogHeader>
+          <DialogContent className="max-w-md w-full border border-slate-200/80 dark:border-[#1A294A] bg-white dark:bg-[#0A1328] shadow-2xl rounded-2xl">
+            <DialogHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
               <div className="flex items-center gap-2">
                 {dialogToggleUser?.ativo ? (
-                  <XCircle className="w-5 h-5 text-rose-600" />
+                  <XCircle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
                 ) : (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 )}
-                <DialogTitle className="text-base font-bold text-slate-900">
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
                   {dialogToggleUser?.ativo
                     ? `Inativar usuário ${dialogToggleUser?.nome}?`
                     : `Ativar usuário ${dialogToggleUser?.nome}?`}
                 </DialogTitle>
               </div>
-              <DialogDescription className="text-xs text-slate-600 pt-1 leading-relaxed">
+              <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF] pt-1 leading-relaxed">
                 {dialogToggleUser?.ativo
                   ? `Inativar usuário "${dialogToggleUser?.nome}"? O usuário perderá o acesso ao sistema imediatamente.`
                   : `Ativar usuário "${dialogToggleUser?.nome}"? O usuário poderá voltar a acessar o sistema.`}
               </DialogDescription>
             </DialogHeader>
 
-            <DialogFooter className="pt-3 flex gap-2">
+            <DialogFooter className="pt-3 border-t border-slate-100 dark:border-[#1A294A] flex gap-2">
               <Button
                 variant="outline"
                 type="button"
                 disabled={submittingToggle}
                 onClick={() => setDialogToggleUser(null)}
-                className="text-xs"
+                className="text-xs rounded-xl border-slate-200 dark:border-[#1A294A] cursor-pointer"
               >
                 Cancelar
               </Button>
@@ -2591,11 +2596,11 @@ export default function ConfiguracoesPage() {
                 type="button"
                 disabled={submittingToggle}
                 onClick={handleConfirmToggleAtivo}
-                className={
+                className={`text-white text-xs font-bold rounded-xl cursor-pointer shadow-sm ${
                   dialogToggleUser?.ativo
-                    ? 'bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold'
-                    : 'bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold'
-                }
+                    ? 'bg-rose-600 hover:bg-rose-700'
+                    : 'bg-emerald-600 hover:bg-emerald-700'
+                }`}
               >
                 {submittingToggle ? (
                   <>
@@ -2621,68 +2626,89 @@ export default function ConfiguracoesPage() {
             if (!open && !submittingPerfil) setDialogPerfilUser(null)
           }}
         >
-          <DialogContent className="max-w-md w-full">
-            <DialogHeader>
-              <div className="flex items-center gap-2 text-teal-800">
-                <Shield className="w-5 h-5 text-teal-600" />
-                <DialogTitle className="text-base font-bold text-slate-900">
+          <DialogContent className="max-w-md w-full border border-slate-200/80 dark:border-[#1A294A] bg-white dark:bg-[#0A1328] shadow-2xl rounded-2xl">
+            <DialogHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
+              <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
+                <Shield className="w-5 h-5" />
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
                   Alterar Perfil de Acesso
                 </DialogTitle>
               </div>
-              <DialogDescription className="text-xs text-slate-600 pt-1">
+              <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF] pt-1">
                 Selecione o novo nível de permissão para{' '}
-                <span className="font-semibold text-slate-900">{dialogPerfilUser?.nome}</span> (
-                {dialogPerfilUser?.email}).
+                <span className="font-semibold text-slate-900 dark:text-white">
+                  {dialogPerfilUser?.nome}
+                </span>{' '}
+                ({dialogPerfilUser?.email}).
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 py-2">
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-slate-700">Novo Perfil</Label>
+                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Novo Perfil
+                </Label>
                 <Select
                   value={novoPerfilSelecionado}
                   onValueChange={setNovoPerfilSelecionado}
                   disabled={submittingPerfil}
                 >
-                  <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                  <SelectTrigger className={glassSelectTriggerClass}>
                     <SelectValue placeholder="Selecione o perfil..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className={glassSelectContentClass}>
                     {isMaster && (
-                      <SelectItem value="master" className="text-xs font-semibold text-purple-700">
+                      <SelectItem
+                        value="master"
+                        className="text-xs font-semibold text-purple-600 dark:text-purple-400"
+                      >
                         Master (Acesso Irrestrito)
                       </SelectItem>
                     )}
-                    <SelectItem value="admin" className="text-xs font-semibold text-indigo-700">
+                    <SelectItem
+                      value="admin"
+                      className="text-xs font-semibold text-[#0066FF] dark:text-[#3B82F6]"
+                    >
                       Administrador (Gestão Completa)
                     </SelectItem>
-                    <SelectItem value="gerente" className="text-xs font-semibold text-blue-700">
+                    <SelectItem
+                      value="gerente"
+                      className="text-xs font-semibold text-sky-600 dark:text-sky-400"
+                    >
                       Gerente (Operacional & Financeiro)
                     </SelectItem>
-                    <SelectItem value="operador" className="text-xs font-semibold text-amber-700">
+                    <SelectItem
+                      value="operador"
+                      className="text-xs font-semibold text-amber-600 dark:text-amber-400"
+                    >
                       Operador (Estoque & Vendas)
                     </SelectItem>
-                    <SelectItem value="vendedor" className="text-xs font-semibold text-emerald-700">
+                    <SelectItem
+                      value="vendedor"
+                      className="text-xs font-semibold text-emerald-600 dark:text-emerald-400"
+                    >
                       Vendedor (Vendas & Carteira)
                     </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600">
-                <span className="font-semibold text-slate-700 block mb-1">Atenção:</span>
+              <div className="p-3 bg-slate-50 dark:bg-[#0A1328]/80 border border-slate-200/80 dark:border-[#1A294A] rounded-xl text-xs text-slate-600 dark:text-[#C0C6CF]">
+                <span className="font-semibold text-slate-700 dark:text-slate-200 block mb-1">
+                  Atenção:
+                </span>
                 Alterar o perfil modificará imediatamente as permissões e telas que o usuário poderá
                 acessar no EVO Gestão.
               </div>
             </div>
 
-            <DialogFooter className="pt-2 flex gap-2">
+            <DialogFooter className="pt-3 border-t border-slate-100 dark:border-[#1A294A] flex gap-2">
               <Button
                 variant="outline"
                 type="button"
                 disabled={submittingPerfil}
                 onClick={() => setDialogPerfilUser(null)}
-                className="text-xs"
+                className="text-xs rounded-xl border-slate-200 dark:border-[#1A294A] cursor-pointer"
               >
                 Cancelar
               </Button>
@@ -2690,7 +2716,7 @@ export default function ConfiguracoesPage() {
                 type="button"
                 disabled={submittingPerfil || !novoPerfilSelecionado}
                 onClick={handleConfirmUpdatePerfil}
-                className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-1.5"
+                className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
                 {submittingPerfil ? (
                   <>
@@ -2714,15 +2740,15 @@ export default function ConfiguracoesPage() {
             if (!open && !savingAlterarPlano) setModalAlterarPlanoOpen(false)
           }}
         >
-          <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <div className="flex items-center gap-2 text-teal-800">
-                <Sparkles className="w-5 h-5 text-teal-600" />
-                <DialogTitle className="text-lg font-bold text-slate-900">
+          <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-slate-200/80 dark:border-[#1A294A] bg-white dark:bg-[#0A1328] shadow-2xl rounded-2xl">
+            <DialogHeader className="border-b border-slate-100 dark:border-[#1A294A] pb-3">
+              <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
+                <Sparkles className="w-5 h-5" />
+                <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">
                   Alterar Plano
                 </DialogTitle>
               </div>
-              <DialogDescription className="text-xs text-slate-600 pt-1 leading-relaxed">
+              <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF] pt-1 leading-relaxed">
                 Escolha o novo plano para sua empresa. O downgrade só será permitido se seu uso
                 atual estiver dentro dos limites do novo plano.
               </DialogDescription>
@@ -2730,8 +2756,10 @@ export default function ConfiguracoesPage() {
 
             {loadingPlanos ? (
               <div className="py-12 flex flex-col items-center justify-center gap-2">
-                <Loader2 className="w-7 h-7 animate-spin text-teal-700" />
-                <span className="text-xs text-slate-500">Carregando planos disponíveis...</span>
+                <Loader2 className="w-7 h-7 animate-spin text-[#0066FF]" />
+                <span className="text-xs text-slate-500 dark:text-[#C0C6CF]">
+                  Carregando planos disponíveis...
+                </span>
               </div>
             ) : (
               <div className="py-3 space-y-4">
@@ -2770,54 +2798,60 @@ export default function ConfiguracoesPage() {
                             setPlanoSelecionadoSlug(plano.slug || '')
                           }
                         }}
-                        className={`rounded-xl border p-4 cursor-pointer transition-all flex flex-col justify-between relative ${
+                        className={`rounded-2xl border p-4 cursor-pointer transition-all flex flex-col justify-between relative ${
                           isSelected
-                            ? 'border-teal-600 ring-2 ring-teal-600/20 bg-teal-50/30'
-                            : 'border-slate-200 bg-white hover:border-slate-300'
+                            ? 'border-[#0066FF] ring-2 ring-[#0066FF]/20 bg-[#0066FF]/5 dark:bg-[#0066FF]/10'
+                            : 'border-slate-200/80 dark:border-[#1A294A] bg-slate-50/50 dark:bg-[#0A1328]/60 hover:border-slate-300 dark:hover:border-[#0066FF]/40'
                         }`}
                       >
                         {/* Badges de topo */}
                         <div className="flex items-center justify-between mb-2">
                           {isCurrent ? (
-                            <Badge className="bg-teal-100 text-teal-800 border-teal-300 text-[10px] font-bold">
+                            <GlassBadge variant="blue" className="text-[10px]">
                               Plano Atual
-                            </Badge>
+                            </GlassBadge>
                           ) : (
                             <span />
                           )}
 
                           {plano.slug === 'profissional' && (
-                            <Badge className="bg-amber-100 text-amber-800 border-amber-300 text-[10px] font-bold">
+                            <GlassBadge variant="amber" className="text-[10px]">
                               Recomendado
-                            </Badge>
+                            </GlassBadge>
                           )}
                         </div>
 
                         <div>
-                          <h4 className="text-base font-bold text-slate-900">{plano.nome}</h4>
+                          <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                            {plano.nome}
+                          </h4>
                           {plano.descricao && (
-                            <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">
+                            <p className="text-xs text-slate-500 dark:text-[#C0C6CF] mt-0.5 line-clamp-2">
                               {plano.descricao}
                             </p>
                           )}
 
-                          <div className="mt-3 pt-3 border-t border-slate-100">
+                          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-[#1A294A]">
                             <div className="flex items-baseline gap-1">
-                              <span className="text-2xl font-extrabold text-slate-900">
+                              <span className="text-2xl font-extrabold text-slate-900 dark:text-white">
                                 {formatCurrency(Number(plano.valor_mensal || 0))}
                               </span>
-                              <span className="text-xs text-slate-500">/mês</span>
+                              <span className="text-xs text-slate-500 dark:text-[#C0C6CF]">
+                                /mês
+                              </span>
                             </div>
                           </div>
 
                           {/* Lista de Limites */}
                           <div className="mt-4 space-y-2 text-xs">
                             <div className="flex items-center justify-between">
-                              <span className="text-slate-500">Usuários:</span>
+                              <span className="text-slate-500 dark:text-[#C0C6CF]/80">
+                                Usuários:
+                              </span>
                               {excedeUsuarios ? (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="font-bold text-rose-600 flex items-center gap-1 cursor-help">
+                                    <span className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1 cursor-help">
                                       {plano.limite_usuarios}
                                       <AlertTriangle className="w-3 h-3 text-rose-500" />
                                     </span>
@@ -2829,18 +2863,20 @@ export default function ConfiguracoesPage() {
                                   </TooltipContent>
                                 </Tooltip>
                               ) : (
-                                <span className="font-semibold text-slate-800">
+                                <span className="font-semibold text-slate-800 dark:text-slate-200">
                                   {plano.limite_usuarios ?? 'Ilimitado'}
                                 </span>
                               )}
                             </div>
 
                             <div className="flex items-center justify-between">
-                              <span className="text-slate-500">Vendedores:</span>
+                              <span className="text-slate-500 dark:text-[#C0C6CF]/80">
+                                Vendedores:
+                              </span>
                               {excedeVendedores ? (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="font-bold text-rose-600 flex items-center gap-1 cursor-help">
+                                    <span className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1 cursor-help">
                                       {plano.limite_vendedores}
                                       <AlertTriangle className="w-3 h-3 text-rose-500" />
                                     </span>
@@ -2852,18 +2888,20 @@ export default function ConfiguracoesPage() {
                                   </TooltipContent>
                                 </Tooltip>
                               ) : (
-                                <span className="font-semibold text-slate-800">
+                                <span className="font-semibold text-slate-800 dark:text-slate-200">
                                   {plano.limite_vendedores ?? 'Ilimitado'}
                                 </span>
                               )}
                             </div>
 
                             <div className="flex items-center justify-between">
-                              <span className="text-slate-500">Produtos:</span>
+                              <span className="text-slate-500 dark:text-[#C0C6CF]/80">
+                                Produtos:
+                              </span>
                               {excedeProdutos ? (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="font-bold text-rose-600 flex items-center gap-1 cursor-help">
+                                    <span className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1 cursor-help">
                                       {plano.limite_produtos}
                                       <AlertTriangle className="w-3 h-3 text-rose-500" />
                                     </span>
@@ -2875,18 +2913,20 @@ export default function ConfiguracoesPage() {
                                   </TooltipContent>
                                 </Tooltip>
                               ) : (
-                                <span className="font-semibold text-slate-800">
+                                <span className="font-semibold text-slate-800 dark:text-slate-200">
                                   {plano.limite_produtos ?? 'Ilimitado'}
                                 </span>
                               )}
                             </div>
 
                             <div className="flex items-center justify-between">
-                              <span className="text-slate-500">Clientes:</span>
+                              <span className="text-slate-500 dark:text-[#C0C6CF]/80">
+                                Clientes:
+                              </span>
                               {excedeClientes ? (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="font-bold text-rose-600 flex items-center gap-1 cursor-help">
+                                    <span className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1 cursor-help">
                                       {plano.limite_clientes}
                                       <AlertTriangle className="w-3 h-3 text-rose-500" />
                                     </span>
@@ -2898,18 +2938,20 @@ export default function ConfiguracoesPage() {
                                   </TooltipContent>
                                 </Tooltip>
                               ) : (
-                                <span className="font-semibold text-slate-800">
+                                <span className="font-semibold text-slate-800 dark:text-slate-200">
                                   {plano.limite_clientes ?? 'Ilimitado'}
                                 </span>
                               )}
                             </div>
 
                             <div className="flex items-center justify-between">
-                              <span className="text-slate-500">Vendas/mês:</span>
+                              <span className="text-slate-500 dark:text-[#C0C6CF]/80">
+                                Vendas/mês:
+                              </span>
                               {excedeVendas ? (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="font-bold text-rose-600 flex items-center gap-1 cursor-help">
+                                    <span className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1 cursor-help">
                                       {plano.limite_vendas_mes}
                                       <AlertTriangle className="w-3 h-3 text-rose-500" />
                                     </span>
@@ -2921,7 +2963,7 @@ export default function ConfiguracoesPage() {
                                   </TooltipContent>
                                 </Tooltip>
                               ) : (
-                                <span className="font-semibold text-slate-800">
+                                <span className="font-semibold text-slate-800 dark:text-slate-200">
                                   {plano.limite_vendas_mes ?? 'Ilimitado'}
                                 </span>
                               )}
@@ -2929,13 +2971,13 @@ export default function ConfiguracoesPage() {
                           </div>
 
                           {hasAnyExceed && !isCurrent && (
-                            <div className="mt-3 p-2 rounded bg-rose-50 border border-rose-200 text-[11px] text-rose-700 font-medium">
+                            <div className="mt-3 p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-600 dark:text-rose-400 font-medium">
                               Seu uso atual excede os limites deste plano.
                             </div>
                           )}
                         </div>
 
-                        <div className="mt-4 pt-3 border-t border-slate-100">
+                        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-[#1A294A]">
                           <Button
                             type="button"
                             variant={isSelected ? 'default' : 'outline'}
@@ -2945,10 +2987,10 @@ export default function ConfiguracoesPage() {
                               e.stopPropagation()
                               setPlanoSelecionadoSlug(plano.slug || '')
                             }}
-                            className={`w-full text-xs font-semibold h-8 ${
+                            className={`w-full text-xs font-semibold h-9 rounded-xl cursor-pointer ${
                               isSelected
-                                ? 'bg-teal-700 hover:bg-teal-800 text-white'
-                                : 'text-slate-700'
+                                ? 'bg-[#0066FF] hover:bg-[#0052CC] text-white shadow-sm'
+                                : 'border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-[#C0C6CF]'
                             }`}
                           >
                             {isCurrent ? 'Plano Atual' : isSelected ? 'Selecionado' : 'Selecionar'}
@@ -2961,8 +3003,8 @@ export default function ConfiguracoesPage() {
               </div>
             )}
 
-            <DialogFooter className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-2">
-              <span className="text-xs text-slate-500">
+            <DialogFooter className="pt-3 border-t border-slate-100 dark:border-[#1A294A] flex flex-col sm:flex-row items-center justify-between gap-2">
+              <span className="text-xs text-slate-500 dark:text-[#C0C6CF]/80">
                 {planoSelecionadoSlug &&
                   `Plano selecionado: ${
                     planosDisponiveis.find((p) => p.slug === planoSelecionadoSlug)?.nome ||
@@ -2975,7 +3017,7 @@ export default function ConfiguracoesPage() {
                   type="button"
                   disabled={savingAlterarPlano}
                   onClick={() => setModalAlterarPlanoOpen(false)}
-                  className="text-xs"
+                  className="text-xs rounded-xl border-slate-200 dark:border-[#1A294A] cursor-pointer"
                 >
                   Cancelar
                 </Button>
@@ -2987,7 +3029,7 @@ export default function ConfiguracoesPage() {
                     planoSelecionadoSlug === assinatura?.planos?.slug
                   }
                   onClick={handleConfirmAlterarPlano}
-                  className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs"
+                  className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
                 >
                   {savingAlterarPlano ? (
                     <>

@@ -991,7 +991,15 @@ export default function RelatoriosPage() {
                         ))}
                       </Pie>
                       <Tooltip
-                        formatter={(val: any) => formatCurrency(Number(val))}
+                        contentStyle={{
+                          backgroundColor: '#0A1328',
+                          borderColor: '#1A294A',
+                          borderRadius: '12px',
+                          color: '#FFFFFF',
+                          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)',
+                        }}
+                        itemStyle={{ color: '#FFFFFF' }}
+                        formatter={(val: any) => [formatCurrency(Number(val)), 'Valor']}
                         labelFormatter={(label) => FORMA_PAGTO_LABELS[label] || label}
                       />
                     </PieChart>
@@ -1065,7 +1073,7 @@ export default function RelatoriosPage() {
                   Compraram no Período
                 </span>
                 <span className="text-lg font-black text-slate-900 dark:text-white tabular-nums">
-                  {clientesResumo.compraramNoPeriodo}
+                  <AnimatedNumber value={clientesResumo.compraramNoPeriodo} />
                 </span>
               </div>
               <div className="p-3 bg-slate-50/70 dark:bg-[#0A1328]/60 border border-slate-200/80 dark:border-[#1A294A] rounded-xl">
@@ -1073,7 +1081,7 @@ export default function RelatoriosPage() {
                   Novos Cadastrados
                 </span>
                 <span className="text-lg font-black text-[#0066FF] dark:text-[#3B82F6] tabular-nums">
-                  {clientesResumo.novosNoPeriodo}
+                  <AnimatedNumber value={clientesResumo.novosNoPeriodo} />
                 </span>
               </div>
               <div className="p-3 bg-slate-50/70 dark:bg-[#0A1328]/60 border border-slate-200/80 dark:border-[#1A294A] rounded-xl">
@@ -1268,7 +1276,7 @@ export default function RelatoriosPage() {
                   Produtos Zerados
                 </span>
                 <span className="text-2xl font-black text-rose-700 dark:text-rose-300 tabular-nums">
-                  {estoqueIndicadores?.produtosZerados ?? 0}
+                  <AnimatedNumber value={estoqueIndicadores?.produtosZerados ?? 0} />
                 </span>
                 <p className="text-[10px] text-rose-600/80 dark:text-rose-400/80 mt-0.5">
                   Sem saldo em estoque
@@ -1280,7 +1288,7 @@ export default function RelatoriosPage() {
                   Abaixo do Mínimo
                 </span>
                 <span className="text-2xl font-black text-amber-700 dark:text-amber-300 tabular-nums">
-                  {estoqueIndicadores?.produtosAbaixoMinimo ?? 0}
+                  <AnimatedNumber value={estoqueIndicadores?.produtosAbaixoMinimo ?? 0} />
                 </span>
                 <p className="text-[10px] text-amber-600/80 dark:text-amber-400/80 mt-0.5">
                   Necessitam reposição
@@ -1292,7 +1300,7 @@ export default function RelatoriosPage() {
                   Estoque Normal
                 </span>
                 <span className="text-2xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums">
-                  {estoqueIndicadores?.produtosNormais ?? 0}
+                  <AnimatedNumber value={estoqueIndicadores?.produtosNormais ?? 0} />
                 </span>
                 <p className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80 mt-0.5">
                   Acima do mínimo
@@ -1304,7 +1312,7 @@ export default function RelatoriosPage() {
                   Qtd Total em Estoque
                 </span>
                 <span className="text-2xl font-black text-slate-900 dark:text-white tabular-nums">
-                  {estoqueIndicadores?.quantidadeTotalEstoque ?? 0}
+                  <AnimatedNumber value={estoqueIndicadores?.quantidadeTotalEstoque ?? 0} />
                 </span>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                   Soma de todas as unidades
