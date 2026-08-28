@@ -1,6 +1,5 @@
 import React from 'react'
 import { LucideIcon, Search, AlertCircle, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -71,7 +70,7 @@ export function PageHeader({ title, description, badge, actions, breadcrumbs }: 
 /* =========================================================================
    2. STAT / KPI CARD (Padrão Dashboard EVO)
    ========================================================================= */
-interface StatCardProps {
+export interface StatCardProps {
   title: string
   value: string | number
   subtitle?: string
@@ -197,6 +196,10 @@ export function StatCard({
     </div>
   )
 }
+
+// Alias para compatibilidade total com páginas
+export const MetricCard = StatCard
+export type MetricCardProps = StatCardProps
 
 /* =========================================================================
    3. GLASS PANEL & GLASS CARD CONTAINERS

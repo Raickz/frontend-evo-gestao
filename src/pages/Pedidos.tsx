@@ -1878,7 +1878,9 @@ export default function PedidosPage() {
               <div className="p-3.5 bg-slate-50/80 dark:bg-[#071126]/60 rounded-xl border border-slate-200/80 dark:border-[#1A294A] text-xs space-y-1.5 my-2">
                 <div className="flex justify-between text-slate-600 dark:text-[#C0C6CF]">
                   <span>Número do Pedido:</span>
-                  <span className="font-bold text-slate-900 dark:text-white">#{acaoPedido.pedido.numero}</span>
+                  <span className="font-bold text-slate-900 dark:text-white">
+                    #{acaoPedido.pedido.numero}
+                  </span>
                 </div>
                 <div className="flex justify-between text-slate-600 dark:text-[#C0C6CF]">
                   <span>Cliente:</span>
@@ -2118,7 +2120,9 @@ export default function PedidosPage() {
             <div className="p-3.5 bg-slate-50/80 dark:bg-[#071126]/60 rounded-xl border border-slate-200/80 dark:border-[#1A294A] text-xs space-y-1 my-2">
               <div className="flex justify-between text-slate-600 dark:text-[#C0C6CF]">
                 <span>Pedido:</span>
-                <span className="font-bold text-slate-900 dark:text-white">#{pedidoParaConverter?.numero}</span>
+                <span className="font-bold text-slate-900 dark:text-white">
+                  #{pedidoParaConverter?.numero}
+                </span>
               </div>
               <div className="flex justify-between text-slate-600 dark:text-[#C0C6CF]">
                 <span>Forma de Pagamento:</span>
