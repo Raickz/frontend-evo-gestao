@@ -127,6 +127,26 @@ Deno.serve(async (req: Request) => {
       )
     }
 
+    // Extrair e validar o payload
+    let body: any
+    try {
+      body = await req.json()
+    } catch {
+      return new Response(
+        JSON.stringify({ sucesso: false, erro: 'Corpo da requisição inválido.' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        },
+      )
+    }
+
+    // Determinar target empresaId: se for platform_admin, pode passar empresa_id explicitamente no payload
+    let empresaId = usuarioCaller.empresa_id
+    if (isPlatformAdmin && body?.empresa_id) {
+      empresaId = body.empresa_id
+    }
+
     // Se NÃO for platform_admin, valida status de assinatura da empresa
     if (!isPlatformAdmin) {
       const { data: statusAssinatura, error: statusAssError } =
@@ -151,60 +171,6 @@ Deno.serve(async (req: Request) => {
           },
         )
       }
-    }
-
-    // Validar limite de usuários do plano atomicamente via RPC
-    const { data: validacaoLimite, error: limiteErr } = await supabaseAdmin.rpc(
-      'validar_limite_usuarios',
-      { p_empresa_id: empresaId },
-    )
-
-    if (limiteErr) {
-      return new Response(
-        JSON.stringify({
-          sucesso: false,
-          erro: limiteErr.message || 'Erro ao validar limites do plano.',
-        }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        },
-      )
-    }
-
-    if (validacaoLimite && validacaoLimite.permitido === false) {
-      return new Response(
-        JSON.stringify({
-          sucesso: false,
-          erro:
-            validacaoLimite.erro ||
-            'Limite de usuários do plano atingido. Faça upgrade do seu plano para adicionar novos usuários.',
-        }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        },
-      )
-    }
-
-    // Extrair e validar o payload
-    let body: any
-    try {
-      body = await req.json()
-    } catch {
-      return new Response(
-        JSON.stringify({ sucesso: false, erro: 'Corpo da requisição inválido.' }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        },
-      )
-    }
-
-    // Determinar target empresaId: se for platform_admin, pode passar empresa_id explicitamente no payload
-    let empresaId = usuarioCaller.empresa_id
-    if (isPlatformAdmin && body?.empresa_id) {
-      empresaId = body.empresa_id
     }
 
     if (!empresaId) {
