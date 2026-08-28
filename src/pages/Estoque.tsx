@@ -469,9 +469,10 @@ export default function EstoquePage() {
           <>
             <MetricCard
               title="Total em Estoque"
-              value={String(indicadores.total)}
+              value={indicadores.total}
               subtitle="Itens ativos cadastrados"
               icon={Boxes}
+              animate={true}
             />
             <div className="glass-card rounded-2xl border border-rose-500/30 bg-rose-500/5 p-5 transition-all duration-200">
               <div className="flex items-center justify-between pb-2">
@@ -1073,8 +1074,8 @@ export default function EstoquePage() {
 
       {/* 2d. Modal de Entrada por Fornecedor (Dialog) */}
       <Dialog open={modalEntradaOpen} onOpenChange={setModalEntradaOpen}>
-        <DialogContent className="max-w-lg bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
-          <DialogHeader>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+          <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <div className="p-2 rounded-xl bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6]">
                 <Boxes className="w-5 h-5" />

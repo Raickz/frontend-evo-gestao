@@ -435,54 +435,62 @@ export default function FinanceiroPage() {
           <>
             <MetricCard
               title="Total a Receber"
-              value={formatCurrency(currentIndicadores.total)}
+              value={currentIndicadores.total}
               subtitle="Soma de títulos ativos"
               icon={TrendingUp}
+              animate={true}
             />
             <MetricCard
               title="Total Recebido"
-              value={formatCurrency(currentIndicadores.recebidoOuPago)}
+              value={currentIndicadores.recebidoOuPago}
               subtitle="Valores liquidados"
               icon={CheckCircle2}
+              animate={true}
             />
             <MetricCard
               title="Vencidos"
-              value={formatCurrency(currentIndicadores.vencido)}
+              value={currentIndicadores.vencido}
               subtitle="Saldo devedor vencido"
               icon={AlertTriangle}
+              animate={true}
             />
             <MetricCard
               title="A Vencer"
-              value={formatCurrency(currentIndicadores.aVencer)}
+              value={currentIndicadores.aVencer}
               subtitle="Saldo com prazo vigente"
               icon={Calendar}
+              animate={true}
             />
           </>
         ) : (
           <>
             <MetricCard
               title="Total a Pagar"
-              value={formatCurrency(currentIndicadores.total)}
+              value={currentIndicadores.total}
               subtitle="Soma de títulos ativos"
               icon={TrendingDown}
+              animate={true}
             />
             <MetricCard
               title="Total Pago"
-              value={formatCurrency(currentIndicadores.recebidoOuPago)}
+              value={currentIndicadores.recebidoOuPago}
               subtitle="Valores liquidados"
               icon={CheckCircle2}
+              animate={true}
             />
             <MetricCard
               title="Vencidos"
-              value={formatCurrency(currentIndicadores.vencido)}
+              value={currentIndicadores.vencido}
               subtitle="Saldo devedor vencido"
               icon={AlertTriangle}
+              animate={true}
             />
             <MetricCard
               title="A Vencer"
-              value={formatCurrency(currentIndicadores.aVencer)}
+              value={currentIndicadores.aVencer}
               subtitle="Saldo com prazo vigente"
               icon={Calendar}
+              animate={true}
             />
           </>
         )}
@@ -918,47 +926,53 @@ export default function FinanceiroPage() {
           }
         }}
       >
-        <DialogContent className="sm:max-w-[480px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <Banknote className="w-5 h-5 text-emerald-600" />
+        <DialogContent className="sm:max-w-[480px] bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+          <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+            <DialogTitle className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-base">
+              <Banknote className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               Registrar Recebimento
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80">
               Informe o valor e a data do recebimento do título selecionado.
             </DialogDescription>
           </DialogHeader>
 
           {contaReceberSelecionada && (
             <form onSubmit={handleConfirmarRecebimento} className="space-y-4 pt-2">
-              <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200 space-y-2 text-xs">
+              <div className="bg-slate-50/80 dark:bg-[#071126]/60 p-3.5 rounded-xl border border-slate-200/80 dark:border-[#1A294A] space-y-2 text-xs">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-medium">Cliente:</span>
-                  <span className="font-semibold text-slate-900">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Cliente:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">
                     {contaReceberSelecionada.clientes?.nome || 'Não informado'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-medium">Descrição:</span>
-                  <span className="text-slate-700 text-right font-medium">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Descrição:</span>
+                  <span className="text-slate-700 dark:text-slate-300 text-right font-medium">
                     {contaReceberSelecionada.descricao}
                   </span>
                 </div>
-                <div className="flex justify-between items-center pt-1 border-t border-slate-200/60">
-                  <span className="text-slate-500 font-medium">Valor da conta:</span>
-                  <span className="tabular-nums text-slate-700 font-medium">
+                <div className="flex justify-between items-center pt-1 border-t border-slate-200/60 dark:border-[#1A294A]">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">
+                    Valor da conta:
+                  </span>
+                  <span className="tabular-nums text-slate-700 dark:text-slate-300 font-medium">
                     {formatCurrency(Number(contaReceberSelecionada.valor))}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-medium">Valor já recebido:</span>
-                  <span className="tabular-nums text-slate-600 font-medium">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">
+                    Valor já recebido:
+                  </span>
+                  <span className="tabular-nums text-slate-600 dark:text-slate-400 font-medium">
                     {formatCurrency(Number(contaReceberSelecionada.valor_pago))}
                   </span>
                 </div>
-                <div className="flex justify-between items-center pt-1 border-t border-slate-200/60 bg-emerald-50/50 p-1.5 rounded -mx-1.5">
-                  <span className="text-emerald-900 font-bold">Saldo restante:</span>
-                  <span className="tabular-nums font-bold text-emerald-700 text-sm">
+                <div className="flex justify-between items-center pt-1 border-t border-slate-200/60 dark:border-[#1A294A] bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
+                  <span className="text-emerald-900 dark:text-emerald-300 font-bold">
+                    Saldo restante:
+                  </span>
+                  <span className="tabular-nums font-black text-emerald-600 dark:text-emerald-400 text-sm">
                     {formatCurrency(
                       Math.max(
                         0,
@@ -972,7 +986,10 @@ export default function FinanceiroPage() {
 
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="rec-valor" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="rec-valor"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Valor do recebimento (R$) *
                   </Label>
                   <Input
@@ -990,12 +1007,15 @@ export default function FinanceiroPage() {
                     onChange={(e) => setValorRecebimento(e.target.value)}
                     disabled={submittingRecebimento}
                     placeholder="0.00"
-                    className="text-sm font-semibold"
+                    className="text-xs h-9 font-mono rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="rec-data" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="rec-data"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Data do pagamento *
                   </Label>
                   <Input
@@ -1005,18 +1025,19 @@ export default function FinanceiroPage() {
                     value={dataRecebimento}
                     onChange={(e) => setDataRecebimento(e.target.value)}
                     disabled={submittingRecebimento}
-                    className="text-sm"
+                    className="text-xs h-9 rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                 </div>
               </div>
 
-              <DialogFooter className="pt-3 gap-2">
+              <DialogFooter className="pt-3 border-t border-slate-100 dark:border-[#1A294A] gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   disabled={submittingRecebimento}
                   onClick={() => setModalRecebimentoOpen(false)}
+                  className="text-xs h-9 rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A294A]"
                 >
                   Cancelar
                 </Button>
@@ -1024,7 +1045,7 @@ export default function FinanceiroPage() {
                   type="submit"
                   size="sm"
                   disabled={submittingRecebimento}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-9 font-bold flex items-center gap-2 rounded-xl px-4 shadow-sm"
                 >
                   {submittingRecebimento ? (
                     <>
@@ -1051,47 +1072,55 @@ export default function FinanceiroPage() {
           }
         }}
       >
-        <DialogContent className="sm:max-w-[480px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <Banknote className="w-5 h-5 text-blue-600" />
+        <DialogContent className="sm:max-w-[480px] bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+          <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
+            <DialogTitle className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-base">
+              <Banknote className="w-5 h-5 text-[#0066FF] dark:text-[#3B82F6]" />
               Registrar Pagamento
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80">
               Informe o valor e a data do pagamento do título selecionado.
             </DialogDescription>
           </DialogHeader>
 
           {contaPagarSelecionada && (
             <form onSubmit={handleConfirmarPagamento} className="space-y-4 pt-2">
-              <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200 space-y-2 text-xs">
+              <div className="bg-slate-50/80 dark:bg-[#071126]/60 p-3.5 rounded-xl border border-slate-200/80 dark:border-[#1A294A] space-y-2 text-xs">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-medium">Fornecedor:</span>
-                  <span className="font-semibold text-slate-900">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">
+                    Fornecedor:
+                  </span>
+                  <span className="font-semibold text-slate-900 dark:text-white">
                     {contaPagarSelecionada.fornecedores?.nome || 'Não informado'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-medium">Descrição:</span>
-                  <span className="text-slate-700 text-right font-medium">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Descrição:</span>
+                  <span className="text-slate-700 dark:text-slate-300 text-right font-medium">
                     {contaPagarSelecionada.descricao}
                   </span>
                 </div>
-                <div className="flex justify-between items-center pt-1 border-t border-slate-200/60">
-                  <span className="text-slate-500 font-medium">Valor da conta:</span>
-                  <span className="tabular-nums text-slate-700 font-medium">
+                <div className="flex justify-between items-center pt-1 border-t border-slate-200/60 dark:border-[#1A294A]">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">
+                    Valor da conta:
+                  </span>
+                  <span className="tabular-nums text-slate-700 dark:text-slate-300 font-medium">
                     {formatCurrency(Number(contaPagarSelecionada.valor))}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-medium">Valor já pago:</span>
-                  <span className="tabular-nums text-slate-600 font-medium">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">
+                    Valor já pago:
+                  </span>
+                  <span className="tabular-nums text-slate-600 dark:text-slate-400 font-medium">
                     {formatCurrency(Number(contaPagarSelecionada.valor_pago))}
                   </span>
                 </div>
-                <div className="flex justify-between items-center pt-1 border-t border-slate-200/60 bg-blue-50/50 p-1.5 rounded -mx-1.5">
-                  <span className="text-blue-900 font-bold">Saldo restante:</span>
-                  <span className="tabular-nums font-bold text-blue-700 text-sm">
+                <div className="flex justify-between items-center pt-1 border-t border-slate-200/60 dark:border-[#1A294A] bg-[#0066FF]/10 p-2 rounded-lg border border-[#0066FF]/20">
+                  <span className="text-slate-900 dark:text-slate-100 font-bold">
+                    Saldo restante:
+                  </span>
+                  <span className="tabular-nums font-black text-[#0066FF] dark:text-[#3B82F6] text-sm">
                     {formatCurrency(
                       Math.max(
                         0,
@@ -1105,7 +1134,10 @@ export default function FinanceiroPage() {
 
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="pag-valor" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="pag-valor"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Valor do pagamento (R$) *
                   </Label>
                   <Input
@@ -1123,12 +1155,15 @@ export default function FinanceiroPage() {
                     onChange={(e) => setValorPagamento(e.target.value)}
                     disabled={submittingPagamento}
                     placeholder="0.00"
-                    className="text-sm font-semibold"
+                    className="text-xs h-9 font-mono rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="pag-data" className="text-xs font-semibold text-slate-700">
+                  <Label
+                    htmlFor="pag-data"
+                    className="text-xs font-semibold text-slate-700 dark:text-slate-200"
+                  >
                     Data do pagamento *
                   </Label>
                   <Input
@@ -1138,18 +1173,19 @@ export default function FinanceiroPage() {
                     value={dataPagamento}
                     onChange={(e) => setDataPagamento(e.target.value)}
                     disabled={submittingPagamento}
-                    className="text-sm"
+                    className="text-xs h-9 rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                 </div>
               </div>
 
-              <DialogFooter className="pt-3 gap-2">
+              <DialogFooter className="pt-3 border-t border-slate-100 dark:border-[#1A294A] gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   disabled={submittingPagamento}
                   onClick={() => setModalPagamentoOpen(false)}
+                  className="text-xs h-9 rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1A294A]"
                 >
                   Cancelar
                 </Button>
@@ -1157,7 +1193,7 @@ export default function FinanceiroPage() {
                   type="submit"
                   size="sm"
                   disabled={submittingPagamento}
-                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+                  className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs h-9 font-bold flex items-center gap-2 rounded-xl px-4 shadow-sm"
                 >
                   {submittingPagamento ? (
                     <>

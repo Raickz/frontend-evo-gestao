@@ -531,8 +531,8 @@ export default function VendedoresPage() {
 
       {/* Dialog Único de Cadastro / Edição */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
-          <DialogHeader>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+          <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
             <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <div className="p-2 rounded-xl bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6]">
                 <Users className="w-5 h-5" />
@@ -682,27 +682,30 @@ export default function VendedoresPage() {
           if (!open) setConfirmToggleVendedor(null)
         }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A] rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-slate-900 text-base">
+            <AlertDialogTitle className="text-slate-900 dark:text-white text-base font-bold">
               {confirmToggleVendedor?.ativo ? 'Inativar vendedor?' : 'Ativar vendedor?'}
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-slate-600">
+            <AlertDialogDescription className="text-xs text-slate-600 dark:text-[#C0C6CF]/80">
               {confirmToggleVendedor?.ativo
                 ? `Tem certeza que deseja inativar o vendedor "${confirmToggleVendedor?.nome}"? Vendedores inativos não aparecem na seleção de novas vendas e pedidos.`
                 : `Deseja reativar o vendedor "${confirmToggleVendedor?.nome}" para emissão de pedidos e vendas comerciais?`}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={toggling} className="text-xs h-9">
+          <AlertDialogFooter className="border-t border-slate-100 dark:border-[#1A294A] pt-3">
+            <AlertDialogCancel
+              disabled={toggling}
+              className="text-xs h-9 rounded-xl border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-300"
+            >
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleToggleAtivo}
               disabled={toggling}
-              className={`text-xs h-9 text-white ${
+              className={`text-xs h-9 text-white font-bold rounded-xl shadow-xs ${
                 confirmToggleVendedor?.ativo
-                  ? 'bg-red-600 hover:bg-red-700'
+                  ? 'bg-rose-600 hover:bg-rose-700'
                   : 'bg-emerald-600 hover:bg-emerald-700'
               }`}
             >

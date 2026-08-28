@@ -864,16 +864,18 @@ export default function ComprasPage() {
           <>
             <MetricCard
               title="Compras no Período"
-              value={String(indicadores.totalCompras)}
+              value={indicadores.totalCompras}
               subtitle="Total de registros de compras"
               icon={ShoppingCart}
+              animate={true}
             />
 
             <MetricCard
               title="Valor Comprado"
-              value={formatCurrency(indicadores.valorCompras)}
+              value={indicadores.valorCompras}
               subtitle="Soma total das compras"
               icon={DollarSign}
+              animate={true}
             />
 
             <div className="glass-card rounded-2xl border border-emerald-500/30 bg-emerald-50/5 p-5 transition-all duration-200">
@@ -1210,8 +1212,8 @@ export default function ComprasPage() {
           DIALOG 1: NOVA COMPRA
           ========================================================================= */}
       <Dialog open={modalNovaAberta} onOpenChange={setModalNovaAberta}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+          <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
             <DialogTitle className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
               <div className="p-2 rounded-xl bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6]">
                 <ShoppingCart className="w-5 h-5" />
@@ -1532,19 +1534,18 @@ export default function ComprasPage() {
           DIALOG 2: EDITAR COMPRA (Rascunho)
           ========================================================================= */}
       <Dialog open={modalEditarAberta} onOpenChange={setModalEditarAberta}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+          <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
             <DialogTitle className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
               <div className="p-2 rounded-xl bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6]">
                 <Edit className="w-5 h-5" />
               </div>
-              Editar Compra #{editNumeroCompra}
+              Editar Ordem de Compra
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80">
-              Modifique os dados ou itens da compra antes da confirmação de entrada.
+              Altere os itens ou dados gerais do rascunho de compra antes da confirmação.
             </DialogDescription>
           </DialogHeader>
-
           {loadingEditarData ? (
             <div className="py-12 text-center text-xs text-slate-400 dark:text-slate-500">
               Carregando dados da compra...
@@ -1655,7 +1656,7 @@ export default function ComprasPage() {
                     size="sm"
                     variant="outline"
                     onClick={adicionarEditLinhaItem}
-                    className="h-8 text-xs text-teal-700 border-teal-300 hover:bg-teal-50 flex items-center gap-1 font-semibold"
+                    className="h-8 text-xs text-[#0066FF] dark:text-[#3B82F6] border-[#0066FF]/30 hover:bg-[#0066FF]/10 flex items-center gap-1 font-semibold rounded-xl"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     Adicionar Produto
@@ -1742,7 +1743,7 @@ export default function ComprasPage() {
               <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-baseline gap-2">
                   <span className="text-xs font-semibold text-slate-500">Total da Compra:</span>
-                  <span className="text-2xl font-black text-teal-700 tabular-nums">
+                  <span className="text-2xl font-black text-[#0066FF] dark:text-[#3B82F6] tabular-nums">
                     {formatCurrency(totalEditCompra)}
                   </span>
                 </div>
@@ -1753,14 +1754,14 @@ export default function ComprasPage() {
                     variant="outline"
                     disabled={submittingEditar}
                     onClick={() => setModalEditarAberta(false)}
-                    className="text-xs"
+                    className="text-xs rounded-xl border-slate-200 dark:border-[#1A294A]"
                   >
                     Cancelar
                   </Button>
                   <Button
                     type="submit"
                     disabled={submittingEditar || editItensForm.length === 0}
-                    className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-2"
+                    className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold flex items-center gap-2 rounded-xl"
                   >
                     {submittingEditar ? 'Salvando...' : 'Salvar Alterações'}
                   </Button>

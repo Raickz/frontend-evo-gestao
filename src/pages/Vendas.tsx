@@ -674,7 +674,7 @@ export default function VendasPage() {
                 limparNovaVenda()
                 setModo('nova')
               }}
-              className="bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-sm font-medium"
+              className="bg-[#0066FF] hover:bg-[#0052CC] text-white flex items-center gap-1.5 shadow-sm font-semibold rounded-xl"
             >
               <Plus className="w-4 h-4" />
               Nova Venda (PDV)
@@ -1492,8 +1492,8 @@ export default function VendasPage() {
           }
         }}
       >
-        <DialogContent className="sm:max-w-md bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-md bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
+          <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
             <div className="mx-auto w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
               <CheckCircle2 className="w-7 h-7" />
             </div>

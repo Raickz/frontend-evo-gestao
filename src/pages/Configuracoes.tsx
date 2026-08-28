@@ -4,6 +4,7 @@ import {
   TableSkeleton,
   ErrorState,
   EmptyState,
+  AnimatedNumber,
   GlassCard,
   GlassCardHeader,
   GlassCardContent,
