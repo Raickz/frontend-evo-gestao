@@ -1,5 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { PageHeader, EmptyState, TableSkeleton, ErrorState } from '@/components/common/CommonUI'
+import {
+  PageHeader,
+  EmptyState,
+  TableSkeleton,
+  ErrorState,
+  AnimatedNumber,
+} from '@/components/common/CommonUI'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -280,7 +286,11 @@ export default function VendedoresPage() {
       <PageHeader
         title="Equipe de Vendedores"
         description="Gestão da equipe comercial, vínculos com usuários e percentuais padrão de comissão."
-        badge={`${vendedores.length} Vendedores`}
+        badge={
+          <span>
+            <AnimatedNumber value={vendedores.length} /> Vendedores
+          </span>
+        }
         actions={
           <Button
             onClick={handleOpenCreate}
@@ -521,12 +531,15 @@ export default function VendedoresPage() {
 
       {/* Dialog Único de Cadastro / Edição */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-slate-900">
+            <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <div className="p-2 rounded-xl bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6]">
+                <Users className="w-5 h-5" />
+              </div>
               {editingVendedor ? 'Editar Vendedor' : 'Novo Vendedor'}
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80">
               {editingVendedor
                 ? 'Atualize o nome, usuário vinculado ou percentual de comissão.'
                 : 'Cadastre um novo integrante da equipe de vendas da distribuidora.'}
@@ -534,9 +547,12 @@ export default function VendedoresPage() {
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4 py-2">
-            <div className="space-y-1">
-              <Label htmlFor="nome" className="text-xs font-semibold text-slate-700">
-                Nome do Vendedor <span className="text-red-500">*</span>
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="nome"
+                className="text-xs font-bold text-slate-700 dark:text-slate-300"
+              >
+                Nome do Vendedor <span className="text-rose-500">*</span>
               </Label>
               <Input
                 id="nome"
@@ -546,49 +562,60 @@ export default function VendedoresPage() {
                   if (formErrors.nome) setFormErrors({ ...formErrors, nome: '' })
                 }}
                 placeholder="Ex: Carlos Eduardo de Oliveira"
-                className={`h-9 text-xs ${formErrors.nome ? 'border-red-500' : ''}`}
+                className={`h-9 text-xs bg-white dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-xl ${
+                  formErrors.nome ? 'border-rose-500' : ''
+                }`}
                 required
               />
-              {formErrors.nome && <p className="text-[11px] text-red-500">{formErrors.nome}</p>}
+              {formErrors.nome && (
+                <p className="text-[11px] text-rose-500 font-medium">{formErrors.nome}</p>
+              )}
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <Label
                 htmlFor="usuario"
-                className="text-xs font-semibold text-slate-700 flex items-center gap-1.5"
+                className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5"
               >
-                <Users className="w-3.5 h-3.5 text-slate-500" />
+                <Users className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
                 Usuário Vinculado (Opcional)
               </Label>
               <Select
                 value={formData.usuario_id}
                 onValueChange={(val) => setFormData({ ...formData, usuario_id: val })}
               >
-                <SelectTrigger id="usuario" className="h-9 text-xs">
+                <SelectTrigger
+                  id="usuario"
+                  className="h-9 text-xs bg-white dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-xl"
+                >
                   <SelectValue placeholder="Selecione um usuário" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none" className="text-xs text-slate-500">
+                <SelectContent className="bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
+                  <SelectItem value="none" className="text-xs text-slate-500 dark:text-slate-400">
                     Sem vínculo
                   </SelectItem>
                   {usuarios.map((u) => (
-                    <SelectItem key={u.id} value={u.id} className="text-xs">
+                    <SelectItem
+                      key={u.id}
+                      value={u.id}
+                      className="text-xs text-slate-700 dark:text-slate-200"
+                    >
                       {u.nome} ({u.email})
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-500 dark:text-[#C0C6CF]/70 font-medium">
                 Permite que o usuário acesse o sistema identificado como este vendedor.
               </p>
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <Label
                 htmlFor="percentual_comissao"
-                className="text-xs font-semibold text-slate-700 flex items-center gap-1.5"
+                className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5"
               >
-                <Percent className="w-3.5 h-3.5 text-slate-500" />
+                <Percent className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
                 Percentual de Comissão (%)
               </Label>
               <Input
@@ -605,30 +632,34 @@ export default function VendedoresPage() {
                   }
                 }}
                 placeholder="Ex: 3.5"
-                className={`h-9 text-xs font-mono ${formErrors.percentual_comissao ? 'border-red-500' : ''}`}
+                className={`h-9 text-xs font-mono bg-white dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-xl ${
+                  formErrors.percentual_comissao ? 'border-rose-500' : ''
+                }`}
               />
               {formErrors.percentual_comissao && (
-                <p className="text-[11px] text-red-500">{formErrors.percentual_comissao}</p>
+                <p className="text-[11px] text-rose-500 font-medium">
+                  {formErrors.percentual_comissao}
+                </p>
               )}
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-500 dark:text-[#C0C6CF]/70 font-medium">
                 Alíquota aplicada automaticamente ao finalizar vendas com este vendedor.
               </p>
             </div>
 
-            <DialogFooter className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+            <DialogFooter className="pt-4 border-t border-slate-200/80 dark:border-[#1A294A] flex items-center justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setDialogOpen(false)}
                 disabled={submitting}
-                className="text-xs h-9"
+                className="text-xs h-9 border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1A294A] rounded-xl"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-teal-700 hover:bg-teal-800 text-white text-xs h-9 flex items-center gap-1.5"
+                className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs h-9 font-bold flex items-center gap-1.5 rounded-xl shadow-md shadow-[#0066FF]/20"
               >
                 {submitting ? (
                   <>

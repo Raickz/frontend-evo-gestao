@@ -5,6 +5,7 @@ import {
   TableSkeleton,
   ErrorState,
   EmptyState,
+  AnimatedNumber,
 } from '@/components/common/CommonUI'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -885,7 +886,7 @@ export default function ComprasPage() {
                 </div>
               </div>
               <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white tabular-nums mt-1">
-                {indicadores.comprasConfirmadas}
+                <AnimatedNumber value={indicadores.comprasConfirmadas} />
               </div>
               <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
                 Estoque atualizado
@@ -902,7 +903,7 @@ export default function ComprasPage() {
                 </div>
               </div>
               <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white tabular-nums mt-1">
-                {indicadores.comprasPendentes}
+                <AnimatedNumber value={indicadores.comprasPendentes} />
               </div>
               <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-medium">
                 Aguardando confirmação
@@ -1209,13 +1210,15 @@ export default function ComprasPage() {
           DIALOG 1: NOVA COMPRA
           ========================================================================= */}
       <Dialog open={modalNovaAberta} onOpenChange={setModalNovaAberta}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-slate-900">
-              <ShoppingCart className="w-5 h-5 text-teal-700" />
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
+              <div className="p-2 rounded-xl bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6]">
+                <ShoppingCart className="w-5 h-5" />
+              </div>
               Nova Ordem de Compra
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80">
               Registre os itens e dados da compra com o fornecedor. A compra será salva como
               rascunho para conferência.
             </DialogDescription>
@@ -1223,39 +1226,43 @@ export default function ComprasPage() {
 
           <form onSubmit={handleSubmitNovaCompra} className="space-y-6 pt-2">
             {/* Step 1 — Dados Gerais */}
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
-                1. Dados Gerais do Pedido
+            <div className="p-4 bg-slate-50/80 dark:bg-[#071126] rounded-2xl border border-slate-200/80 dark:border-[#1A294A] space-y-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block">
+                1. DADOS GERAIS DO PEDIDO
               </span>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* Fornecedor */}
                 <div className="space-y-1.5 sm:col-span-2">
-                  <Label className="text-xs font-semibold text-slate-700">
+                  <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                     Fornecedor <span className="text-rose-500">*</span>
                   </Label>
                   <Select value={fornecedorId} onValueChange={setFornecedorId}>
-                    <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                    <SelectTrigger className="text-xs h-9 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF]">
                       <SelectValue placeholder="Selecione o fornecedor..." />
                     </SelectTrigger>
-                    <SelectContent className="max-h-56">
-                      <div className="p-1 border-b border-slate-100">
+                    <SelectContent className="max-h-56 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
+                      <div className="p-1 border-b border-slate-100 dark:border-[#1A294A]">
                         <Input
                           placeholder="Buscar fornecedor..."
                           value={buscaFornecedorModal}
                           onChange={(e) => setBuscaFornecedorModal(e.target.value)}
-                          className="h-7 text-xs"
+                          className="h-7 text-xs bg-slate-50 dark:bg-[#071126] border-slate-200 dark:border-[#1A294A]"
                           onClick={(e) => e.stopPropagation()}
                           onKeyDown={(e) => e.stopPropagation()}
                         />
                       </div>
                       {fornecedoresFiltradosModal.length === 0 ? (
-                        <div className="p-2 text-xs text-slate-400 text-center">
+                        <div className="p-2 text-xs text-slate-400 dark:text-slate-500 text-center">
                           Nenhum fornecedor ativo encontrado
                         </div>
                       ) : (
                         fornecedoresFiltradosModal.map((f) => (
-                          <SelectItem key={f.id} value={f.id} className="text-xs">
+                          <SelectItem
+                            key={f.id}
+                            value={f.id}
+                            className="text-xs text-slate-700 dark:text-slate-200"
+                          >
                             {f.nome} {f.documento ? `(${f.documento})` : ''}
                           </SelectItem>
                         ))
@@ -1266,31 +1273,41 @@ export default function ComprasPage() {
 
                 {/* Data da Compra */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-slate-700">Data da Compra</Label>
+                  <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Data da Compra <span className="text-rose-500">*</span>
+                  </Label>
                   <Input
                     type="date"
                     value={dataCompra}
                     onChange={(e) => setDataCompra(e.target.value)}
-                    className="text-xs h-9 bg-white border-slate-200"
+                    className="text-xs h-9 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-xl"
                     required
                   />
                 </div>
 
                 {/* Forma de Pagamento */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-slate-700">Forma de Pagamento</Label>
+                  <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Forma de Pagamento
+                  </Label>
                   <Select
                     value={formaPagamento}
                     onValueChange={(val: 'a_prazo' | 'pago') => setFormaPagamento(val)}
                   >
-                    <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                    <SelectTrigger className="text-xs h-9 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="a_prazo" className="text-xs">
+                    <SelectContent className="bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
+                      <SelectItem
+                        value="a_prazo"
+                        className="text-xs text-slate-700 dark:text-slate-200"
+                      >
                         A Prazo (Conta a Pagar)
                       </SelectItem>
-                      <SelectItem value="pago" className="text-xs">
+                      <SelectItem
+                        value="pago"
+                        className="text-xs text-slate-700 dark:text-slate-200"
+                      >
                         À Vista (Pago)
                       </SelectItem>
                     </SelectContent>
@@ -1302,19 +1319,21 @@ export default function ComprasPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 {formaPagamento === 'a_prazo' ? (
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-slate-700">
-                      Data de Vencimento da Conta a Pagar
+                    <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Data de Vencimento
                     </Label>
                     <Input
                       type="date"
                       value={vencimento}
                       onChange={(e) => setVencimento(e.target.value)}
-                      className="text-xs h-9 bg-white border-slate-200"
+                      className="text-xs h-9 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-xl"
                     />
                   </div>
                 ) : (
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-slate-700">Valor Pago (R$)</Label>
+                    <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Valor Pago (R$)
+                    </Label>
                     <Input
                       type="number"
                       step="0.01"
@@ -1322,13 +1341,13 @@ export default function ComprasPage() {
                       value={valorPago}
                       onChange={(e) => setValorPago(e.target.value)}
                       placeholder="0,00"
-                      className="text-xs h-9 bg-white border-slate-200 font-mono"
+                      className="text-xs h-9 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 font-mono rounded-xl"
                     />
                   </div>
                 )}
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-slate-700">
+                  <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                     Observações (opcional)
                   </Label>
                   <Input
@@ -1336,7 +1355,7 @@ export default function ComprasPage() {
                     value={observacoes}
                     onChange={(e) => setObservacoes(e.target.value)}
                     placeholder="Ex: Pedido nº 1234, NF, frete..."
-                    className="text-xs h-9 bg-white border-slate-200"
+                    className="text-xs h-9 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl"
                   />
                 </div>
               </div>
@@ -1345,15 +1364,15 @@ export default function ComprasPage() {
             {/* Step 2 — Itens da Compra */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
-                  2. Itens da Compra ({itensForm.length})
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  2. ITENS DA COMPRA ({itensForm.length})
                 </span>
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
                   onClick={adicionarLinhaItem}
-                  className="h-8 text-xs text-teal-700 border-teal-300 hover:bg-teal-50 flex items-center gap-1 font-semibold"
+                  className="h-8 text-xs text-[#0066FF] dark:text-[#3B82F6] border-[#0066FF]/30 dark:border-[#0066FF]/40 hover:bg-[#0066FF]/10 flex items-center gap-1 font-semibold rounded-xl"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Adicionar Produto
@@ -1361,14 +1380,14 @@ export default function ComprasPage() {
               </div>
 
               {itensForm.length === 0 ? (
-                <div className="py-8 text-center border border-dashed border-slate-200 rounded-xl bg-slate-50/50 text-xs text-slate-400 space-y-2">
-                  <Package className="w-8 h-8 text-slate-300 mx-auto" />
-                  <p>Nenhum produto adicionado ainda.</p>
+                <div className="py-8 text-center border border-dashed border-slate-200 dark:border-[#1A294A] rounded-2xl bg-slate-50/50 dark:bg-[#071126]/50 text-xs text-slate-400 dark:text-slate-500 space-y-2">
+                  <Package className="w-8 h-8 text-slate-400 dark:text-slate-600 mx-auto" />
+                  <p className="font-medium">Nenhum produto adicionado ainda.</p>
                   <Button
                     type="button"
                     size="sm"
                     onClick={adicionarLinhaItem}
-                    className="h-7 text-xs bg-teal-700 hover:bg-teal-800 text-white"
+                    className="h-8 text-xs bg-[#0066FF] hover:bg-[#0052CC] text-white font-semibold rounded-xl"
                   >
                     + Adicionar Primeiro Produto
                   </Button>
@@ -1378,21 +1397,27 @@ export default function ComprasPage() {
                   {itensForm.map((item, idx) => (
                     <div
                       key={`item-linha-${idx}`}
-                      className="p-3 bg-white rounded-xl border border-slate-200 shadow-xs grid grid-cols-1 sm:grid-cols-12 gap-3 items-center text-xs"
+                      className="p-3.5 bg-white dark:bg-[#071126] rounded-2xl border border-slate-200/80 dark:border-[#1A294A] shadow-xs grid grid-cols-1 sm:grid-cols-12 gap-3 items-center text-xs"
                     >
                       {/* Produto Select */}
                       <div className="sm:col-span-5 space-y-1">
-                        <Label className="text-[11px] text-slate-500">Produto #{idx + 1}</Label>
+                        <Label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                          Produto #{idx + 1}
+                        </Label>
                         <Select
                           value={item.produto_id}
                           onValueChange={(val) => handleSelectProdutoItem(idx, val)}
                         >
-                          <SelectTrigger className="text-xs h-9 bg-slate-50 border-slate-200">
+                          <SelectTrigger className="text-xs h-9 bg-slate-50 dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-xl">
                             <SelectValue placeholder="Selecione um produto..." />
                           </SelectTrigger>
-                          <SelectContent className="max-h-56">
+                          <SelectContent className="max-h-56 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
                             {produtos.map((p) => (
-                              <SelectItem key={p.id} value={p.id} className="text-xs">
+                              <SelectItem
+                                key={p.id}
+                                value={p.id}
+                                className="text-xs text-slate-700 dark:text-slate-200"
+                              >
                                 <span className="font-semibold">{p.nome}</span>
                                 {p.codigo && ` (${p.codigo})`} — Saldo:{' '}
                                 {p.estoques?.[0]?.quantidade ?? 0} {p.unidade} (Custo:{' '}
@@ -1405,7 +1430,7 @@ export default function ComprasPage() {
 
                       {/* Quantidade */}
                       <div className="sm:col-span-2 space-y-1">
-                        <Label className="text-[11px] text-slate-500">
+                        <Label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                           Qtd ({item.unidade || 'UN'})
                         </Label>
                         <Input
@@ -1414,29 +1439,33 @@ export default function ComprasPage() {
                           min="0.01"
                           value={item.quantidade}
                           onChange={(e) => handleUpdateItemQuantidade(idx, e.target.value)}
-                          className="text-xs h-9 font-mono"
+                          className="text-xs h-9 font-mono bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-xl"
                           required
                         />
                       </div>
 
                       {/* Preço Unitário */}
                       <div className="sm:col-span-2 space-y-1">
-                        <Label className="text-[11px] text-slate-500">Preço Unit. (R$)</Label>
+                        <Label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                          Preço Unit. (R$)
+                        </Label>
                         <Input
                           type="number"
                           step="0.01"
                           min="0"
                           value={item.preco_unitario}
                           onChange={(e) => handleUpdateItemPreco(idx, e.target.value)}
-                          className="text-xs h-9 font-mono"
+                          className="text-xs h-9 font-mono bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-xl"
                           required
                         />
                       </div>
 
                       {/* Subtotal */}
                       <div className="sm:col-span-2 space-y-1 text-right">
-                        <Label className="text-[11px] text-slate-500">Subtotal</Label>
-                        <div className="h-9 flex items-center justify-end font-bold text-slate-900 tabular-nums">
+                        <Label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                          Subtotal
+                        </Label>
+                        <div className="h-9 flex items-center justify-end font-bold text-slate-900 dark:text-white tabular-nums">
                           {formatCurrency(item.subtotal)}
                         </div>
                       </div>
@@ -1446,7 +1475,7 @@ export default function ComprasPage() {
                         <button
                           type="button"
                           onClick={() => removerLinhaItem(idx)}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50"
+                          className="p-2 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors"
                           title="Remover Item"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -1459,10 +1488,12 @@ export default function ComprasPage() {
             </div>
 
             {/* Rodapé: Total & Botões */}
-            <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="pt-4 border-t border-slate-200/80 dark:border-[#1A294A] flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-baseline gap-2">
-                <span className="text-xs font-semibold text-slate-500">Total da Compra:</span>
-                <span className="text-2xl font-black text-teal-700 tabular-nums">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                  Total da Compra:
+                </span>
+                <span className="text-2xl font-black text-[#0066FF] dark:text-[#3B82F6] tabular-nums">
                   {formatCurrency(totalNovaCompra)}
                 </span>
               </div>
@@ -1473,14 +1504,14 @@ export default function ComprasPage() {
                   variant="outline"
                   disabled={submittingNova}
                   onClick={() => setModalNovaAberta(false)}
-                  className="text-xs"
+                  className="text-xs border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1A294A] rounded-xl"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
                   disabled={submittingNova || itensForm.length === 0}
-                  className="bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-2"
+                  className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold flex items-center gap-2 rounded-xl shadow-md shadow-[#0066FF]/20"
                 >
                   {submittingNova ? (
                     <>
@@ -1501,26 +1532,28 @@ export default function ComprasPage() {
           DIALOG 2: EDITAR COMPRA (Rascunho)
           ========================================================================= */}
       <Dialog open={modalEditarAberta} onOpenChange={setModalEditarAberta}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-slate-900">
-              <Edit className="w-5 h-5 text-teal-700" />
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
+              <div className="p-2 rounded-xl bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6]">
+                <Edit className="w-5 h-5" />
+              </div>
               Editar Compra #{editNumeroCompra}
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80">
               Modifique os dados ou itens da compra antes da confirmação de entrada.
             </DialogDescription>
           </DialogHeader>
 
           {loadingEditarData ? (
-            <div className="py-12 text-center text-xs text-slate-400">
+            <div className="py-12 text-center text-xs text-slate-400 dark:text-slate-500">
               Carregando dados da compra...
             </div>
           ) : (
             <form onSubmit={handleSubmitSalvarEdicao} className="space-y-6 pt-2">
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
-                  1. Dados Gerais
+              <div className="p-4 bg-slate-50/80 dark:bg-[#071126] rounded-2xl border border-slate-200/80 dark:border-[#1A294A] space-y-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block">
+                  1. DADOS GERAIS
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">

@@ -5,6 +5,7 @@ import {
   TableSkeleton,
   ErrorState,
   EmptyState,
+  AnimatedNumber,
 } from '@/components/common/CommonUI'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -482,7 +483,7 @@ export default function EstoquePage() {
                 </div>
               </div>
               <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white tabular-nums mt-1">
-                {indicadores.zerados}
+                <AnimatedNumber value={indicadores.zerados} />
               </div>
               <p className="text-xs text-rose-600 dark:text-rose-400 mt-1 font-medium">
                 Saldo zero no momento
@@ -499,7 +500,7 @@ export default function EstoquePage() {
                 </div>
               </div>
               <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white tabular-nums mt-1">
-                {indicadores.abaixoMinimo}
+                <AnimatedNumber value={indicadores.abaixoMinimo} />
               </div>
               <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-medium">
                 Abaixo do estoque seguro
@@ -516,7 +517,7 @@ export default function EstoquePage() {
                 </div>
               </div>
               <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white tabular-nums mt-1">
-                {indicadores.normal}
+                <AnimatedNumber value={indicadores.normal} />
               </div>
               <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
                 Estoque acima do mínimo
@@ -1072,28 +1073,33 @@ export default function EstoquePage() {
 
       {/* 2d. Modal de Entrada por Fornecedor (Dialog) */}
       <Dialog open={modalEntradaOpen} onOpenChange={setModalEntradaOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <Boxes className="w-5 h-5 text-teal-700" />
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <div className="p-2 rounded-xl bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6]">
+                <Boxes className="w-5 h-5" />
+              </div>
               Entrada por Fornecedor
             </DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
-              Registre a entrada física de mercadorias vinculadas a um fornecedor ativo e atualize o
-              custo unitário.
+            <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80">
+              Registrar a entrada física de mercadorias vinculadas a um fornecedor ativo e atualizar
+              o custo unitário.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmitEntrada} className="space-y-4 py-2">
             {/* Campo 1: Fornecedor */}
             <div className="space-y-1.5">
-              <Label htmlFor="fornecedor-select" className="text-xs font-semibold text-slate-700">
-                Fornecedor <span className="text-red-500">*</span>
+              <Label
+                htmlFor="fornecedor-select"
+                className="text-xs font-bold text-slate-700 dark:text-slate-300"
+              >
+                Fornecedor <span className="text-rose-500">*</span>
               </Label>
 
               {loadingModalData ? (
-                <div className="flex items-center gap-2 h-9 px-3 border border-slate-200 rounded-md bg-slate-50 text-xs text-slate-500">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-teal-600" />
+                <div className="flex items-center gap-2 h-9 px-3 border border-slate-200 dark:border-[#1A294A] rounded-xl bg-slate-50 dark:bg-[#071126] text-xs text-slate-500 dark:text-slate-400">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0066FF] dark:text-[#3B82F6]" />
                   Carregando fornecedores...
                 </div>
               ) : (
@@ -1104,7 +1110,7 @@ export default function EstoquePage() {
                       placeholder="Buscar fornecedor por nome..."
                       value={filtroFornecedorEntrada}
                       onChange={(e) => setFiltroFornecedorEntrada(e.target.value)}
-                      className="pl-8 h-8 text-xs bg-slate-50 border-slate-200"
+                      className="pl-8 h-8 text-xs bg-slate-50 dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-lg"
                     />
                   </div>
 
@@ -1119,21 +1125,27 @@ export default function EstoquePage() {
                   >
                     <SelectTrigger
                       id="fornecedor-select"
-                      className={`h-9 text-xs bg-white ${
-                        entradaErrors.fornecedor ? 'border-red-500' : 'border-slate-200'
+                      className={`h-9 text-xs bg-white dark:bg-[#071126] rounded-xl text-slate-900 dark:text-slate-100 ${
+                        entradaErrors.fornecedor
+                          ? 'border-rose-500'
+                          : 'border-slate-200 dark:border-[#1A294A]'
                       }`}
                     >
                       <SelectValue placeholder="Selecione o fornecedor..." />
                     </SelectTrigger>
-                    <SelectContent className="max-h-56">
+                    <SelectContent className="max-h-56 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
                       {fornecedoresEntradaFiltrados.length === 0 ? (
-                        <div className="p-3 text-xs text-center text-slate-500">
+                        <div className="p-3 text-xs text-center text-slate-400 dark:text-slate-500">
                           Nenhum fornecedor ativo encontrado
                         </div>
                       ) : (
                         fornecedoresEntradaFiltrados.map((f) => (
-                          <SelectItem key={f.id} value={f.id} className="text-xs py-2">
-                            <span className="font-semibold text-slate-900">{f.nome}</span>
+                          <SelectItem
+                            key={f.id}
+                            value={f.id}
+                            className="text-xs py-2 text-slate-700 dark:text-slate-200"
+                          >
+                            <span className="font-semibold">{f.nome}</span>
                           </SelectItem>
                         ))
                       )}
@@ -1143,19 +1155,22 @@ export default function EstoquePage() {
               )}
 
               {entradaErrors.fornecedor && (
-                <p className="text-[11px] text-red-500">{entradaErrors.fornecedor}</p>
+                <p className="text-[11px] text-rose-500 font-medium">{entradaErrors.fornecedor}</p>
               )}
             </div>
 
             {/* Campo 2: Produto */}
             <div className="space-y-1.5">
-              <Label htmlFor="produto-select" className="text-xs font-semibold text-slate-700">
-                Produto <span className="text-red-500">*</span>
+              <Label
+                htmlFor="produto-select"
+                className="text-xs font-bold text-slate-700 dark:text-slate-300"
+              >
+                Produto <span className="text-rose-500">*</span>
               </Label>
 
               {loadingModalData ? (
-                <div className="flex items-center gap-2 h-9 px-3 border border-slate-200 rounded-md bg-slate-50 text-xs text-slate-500">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-teal-600" />
+                <div className="flex items-center gap-2 h-9 px-3 border border-slate-200 dark:border-[#1A294A] rounded-xl bg-slate-50 dark:bg-[#071126] text-xs text-slate-500 dark:text-slate-400">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0066FF] dark:text-[#3B82F6]" />
                   Carregando catálogo de produtos...
                 </div>
               ) : (
@@ -1166,34 +1181,40 @@ export default function EstoquePage() {
                       placeholder="Filtrar produto por nome ou código..."
                       value={filtroProdutoEntrada}
                       onChange={(e) => setFiltroProdutoEntrada(e.target.value)}
-                      className="pl-8 h-8 text-xs bg-slate-50 border-slate-200"
+                      className="pl-8 h-8 text-xs bg-slate-50 dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-lg"
                     />
                   </div>
 
                   <Select value={selectedProdutoId} onValueChange={handleSelectProduto}>
                     <SelectTrigger
                       id="produto-select"
-                      className={`h-9 text-xs bg-white ${
-                        entradaErrors.produto ? 'border-red-500' : 'border-slate-200'
+                      className={`h-9 text-xs bg-white dark:bg-[#071126] rounded-xl text-slate-900 dark:text-slate-100 ${
+                        entradaErrors.produto
+                          ? 'border-rose-500'
+                          : 'border-slate-200 dark:border-[#1A294A]'
                       }`}
                     >
                       <SelectValue placeholder="Selecione o produto..." />
                     </SelectTrigger>
-                    <SelectContent className="max-h-56">
+                    <SelectContent className="max-h-56 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
                       {produtosEntradaFiltrados.length === 0 ? (
-                        <div className="p-3 text-xs text-center text-slate-500">
+                        <div className="p-3 text-xs text-center text-slate-400 dark:text-slate-500">
                           Nenhum produto ativo encontrado
                         </div>
                       ) : (
                         produtosEntradaFiltrados.map((p) => (
-                          <SelectItem key={p.id} value={p.id} className="text-xs py-2">
-                            <span className="font-semibold text-slate-900">{p.nome}</span>
+                          <SelectItem
+                            key={p.id}
+                            value={p.id}
+                            className="text-xs py-2 text-slate-700 dark:text-slate-200"
+                          >
+                            <span className="font-semibold">{p.nome}</span>
                             {p.codigo && (
-                              <span className="ml-1 text-[11px] text-slate-400 font-mono">
+                              <span className="ml-1 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                                 ({p.codigo})
                               </span>
                             )}
-                            <span className="ml-2 text-slate-500 font-medium">
+                            <span className="ml-2 text-slate-500 dark:text-slate-400 font-medium">
                               — Saldo: {p.saldoAtual} {p.unidade}
                             </span>
                           </SelectItem>
@@ -1205,20 +1226,20 @@ export default function EstoquePage() {
               )}
 
               {entradaErrors.produto && (
-                <p className="text-[11px] text-red-500">{entradaErrors.produto}</p>
+                <p className="text-[11px] text-rose-500 font-medium">{entradaErrors.produto}</p>
               )}
 
               {produtoSelecionadoObj && (
-                <div className="p-2.5 rounded-lg bg-teal-50/80 border border-teal-100 flex flex-wrap items-center justify-between gap-2 text-xs text-teal-950">
+                <div className="p-3 rounded-xl bg-[#0066FF]/10 dark:bg-[#0066FF]/15 border border-[#0066FF]/25 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-800 dark:text-slate-200">
                   <span>
                     Saldo atual:{' '}
-                    <strong className="text-teal-900 font-mono">
+                    <strong className="text-[#0066FF] dark:text-[#3B82F6] font-mono">
                       {produtoSelecionadoObj.saldoAtual} {produtoSelecionadoObj.unidade}
                     </strong>
                   </span>
                   <span>
                     Preço de custo atual:{' '}
-                    <strong className="text-teal-900 font-mono">
+                    <strong className="text-[#0066FF] dark:text-[#3B82F6] font-mono">
                       R${' '}
                       {produtoSelecionadoObj.preco_custo.toLocaleString('pt-BR', {
                         minimumFractionDigits: 2,
@@ -1227,7 +1248,7 @@ export default function EstoquePage() {
                     </strong>
                   </span>
                   {novoEstoqueCalculado !== null && (
-                    <span className="w-full pt-1 border-t border-teal-200/60 font-semibold text-teal-800">
+                    <span className="w-full pt-1.5 border-t border-[#0066FF]/20 font-semibold text-[#0066FF] dark:text-[#3B82F6]">
                       Novo estoque estimado: {novoEstoqueCalculado} {produtoSelecionadoObj.unidade}
                     </span>
                   )}
@@ -1239,8 +1260,11 @@ export default function EstoquePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Campo 3: Quantidade */}
               <div className="space-y-1.5">
-                <Label htmlFor="quantidade" className="text-xs font-semibold text-slate-700">
-                  Quantidade <span className="text-red-500">*</span>
+                <Label
+                  htmlFor="quantidade"
+                  className="text-xs font-bold text-slate-700 dark:text-slate-300"
+                >
+                  Quantidade <span className="text-rose-500">*</span>
                 </Label>
                 <Input
                   id="quantidade"
@@ -1255,20 +1279,27 @@ export default function EstoquePage() {
                     }
                   }}
                   placeholder="0,00"
-                  className={`h-9 text-xs font-mono ${
-                    entradaErrors.quantidade ? 'border-red-500' : ''
+                  className={`h-9 text-xs font-mono bg-white dark:bg-[#071126] text-slate-900 dark:text-slate-100 rounded-xl ${
+                    entradaErrors.quantidade
+                      ? 'border-rose-500'
+                      : 'border-slate-200 dark:border-[#1A294A]'
                   }`}
                   required
                 />
                 {entradaErrors.quantidade && (
-                  <p className="text-[11px] text-red-500">{entradaErrors.quantidade}</p>
+                  <p className="text-[11px] text-rose-500 font-medium">
+                    {entradaErrors.quantidade}
+                  </p>
                 )}
               </div>
 
               {/* Campo 4: Preço de Custo Unitário */}
               <div className="space-y-1.5">
-                <Label htmlFor="preco-custo" className="text-xs font-semibold text-slate-700">
-                  Preço de Custo Unitário (R$) <span className="text-red-500">*</span>
+                <Label
+                  htmlFor="preco-custo"
+                  className="text-xs font-bold text-slate-700 dark:text-slate-300"
+                >
+                  Preço de Custo Unitário (R$) <span className="text-rose-500">*</span>
                 </Label>
                 <Input
                   id="preco-custo"
@@ -1283,20 +1314,27 @@ export default function EstoquePage() {
                     }
                   }}
                   placeholder="0,00"
-                  className={`h-9 text-xs font-mono ${
-                    entradaErrors.precoCusto ? 'border-red-500' : ''
+                  className={`h-9 text-xs font-mono bg-white dark:bg-[#071126] text-slate-900 dark:text-slate-100 rounded-xl ${
+                    entradaErrors.precoCusto
+                      ? 'border-rose-500'
+                      : 'border-slate-200 dark:border-[#1A294A]'
                   }`}
                   required
                 />
                 {entradaErrors.precoCusto && (
-                  <p className="text-[11px] text-red-500">{entradaErrors.precoCusto}</p>
+                  <p className="text-[11px] text-rose-500 font-medium">
+                    {entradaErrors.precoCusto}
+                  </p>
                 )}
               </div>
             </div>
 
             {/* Campo 5: Motivo/Observação */}
             <div className="space-y-1.5">
-              <Label htmlFor="motivo" className="text-xs font-semibold text-slate-700">
+              <Label
+                htmlFor="motivo"
+                className="text-xs font-bold text-slate-700 dark:text-slate-300"
+              >
                 Motivo / Observação
               </Label>
               <Input
@@ -1305,42 +1343,44 @@ export default function EstoquePage() {
                 value={motivoEntrada}
                 onChange={(e) => setMotivoEntrada(e.target.value)}
                 placeholder="Ex: Entrada de estoque, Nota fiscal 1234..."
-                className="h-9 text-xs"
+                className="h-9 text-xs bg-white dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl"
               />
             </div>
 
             {/* Resumo da Operação */}
             {fornecedorSelecionadoObj && produtoSelecionadoObj && (
-              <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 text-xs space-y-1 text-slate-700">
-                <div className="font-semibold text-slate-900 mb-1 border-b border-slate-200 pb-1 flex items-center justify-between">
+              <div className="rounded-2xl bg-slate-50/80 dark:bg-[#071126] border border-slate-200/80 dark:border-[#1A294A] p-3 text-xs space-y-1.5 text-slate-700 dark:text-slate-300">
+                <div className="font-bold text-slate-900 dark:text-white mb-1 border-b border-slate-200/80 dark:border-[#1A294A] pb-1.5 flex items-center justify-between">
                   <span>Resumo da Entrada</span>
                   <Badge
                     variant="outline"
-                    className="bg-teal-50 text-teal-700 border-teal-200 text-[10px]"
+                    className="bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] border-[#0066FF]/30 text-[10px] font-semibold"
                   >
-                    Operação Pendente
+                    Operação Pronta
                   </Badge>
                 </div>
-                <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                <div className="grid grid-cols-2 gap-2 pt-0.5">
                   <div>
-                    <span className="text-slate-500">Fornecedor:</span>{' '}
-                    <span className="font-medium text-slate-900">
+                    <span className="text-slate-500 dark:text-slate-400">Fornecedor:</span>{' '}
+                    <span className="font-semibold text-slate-900 dark:text-white">
                       {fornecedorSelecionadoObj.nome}
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-500">Produto:</span>{' '}
-                    <span className="font-medium text-slate-900">{produtoSelecionadoObj.nome}</span>
+                    <span className="text-slate-500 dark:text-slate-400">Produto:</span>{' '}
+                    <span className="font-semibold text-slate-900 dark:text-white">
+                      {produtoSelecionadoObj.nome}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-slate-500">Quantidade:</span>{' '}
-                    <span className="font-medium text-slate-900 font-mono">
+                    <span className="text-slate-500 dark:text-slate-400">Quantidade:</span>{' '}
+                    <span className="font-bold text-[#0066FF] dark:text-[#3B82F6] font-mono">
                       {parsedQuantidade > 0 ? parsedQuantidade : 0} {produtoSelecionadoObj.unidade}
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-500">Custo unitário:</span>{' '}
-                    <span className="font-medium text-slate-900 font-mono">
+                    <span className="text-slate-500 dark:text-slate-400">Custo unitário:</span>{' '}
+                    <span className="font-bold text-[#0066FF] dark:text-[#3B82F6] font-mono">
                       R${' '}
                       {!isNaN(parsedPrecoCusto) && parsedPrecoCusto >= 0
                         ? parsedPrecoCusto.toLocaleString('pt-BR', {
@@ -1354,20 +1394,20 @@ export default function EstoquePage() {
               </div>
             )}
 
-            <DialogFooter className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+            <DialogFooter className="pt-4 border-t border-slate-200/80 dark:border-[#1A294A] flex items-center justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setModalEntradaOpen(false)}
                 disabled={submittingEntrada}
-                className="text-xs h-9"
+                className="text-xs h-9 border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1A294A] rounded-xl"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={submittingEntrada}
-                className="bg-teal-700 hover:bg-teal-800 text-white text-xs h-9 flex items-center gap-1.5 shadow-xs"
+                className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs h-9 font-bold flex items-center gap-1.5 rounded-xl shadow-md shadow-[#0066FF]/20"
               >
                 {submittingEntrada ? (
                   <>

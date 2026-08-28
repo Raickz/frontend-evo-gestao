@@ -1,5 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { PageHeader, EmptyState, TableSkeleton, ErrorState } from '@/components/common/CommonUI'
+import {
+  PageHeader,
+  EmptyState,
+  TableSkeleton,
+  ErrorState,
+  AnimatedNumber,
+} from '@/components/common/CommonUI'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -293,7 +299,11 @@ export default function FornecedoresPage() {
       <PageHeader
         title="Gestão de Fornecedores"
         description="Gerencie os parceiros comerciais, contatos e fornecedores da distribuidora."
-        badge={`${fornecedores.length} Cadastrados`}
+        badge={
+          <span>
+            <AnimatedNumber value={fornecedores.length} /> Cadastrados
+          </span>
+        }
         actions={
           canManage ? (
             <Button

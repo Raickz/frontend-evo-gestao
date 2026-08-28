@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PageHeader, EmptyState, TableSkeleton, ErrorState } from '@/components/common/CommonUI'
+import {
+  PageHeader,
+  EmptyState,
+  TableSkeleton,
+  ErrorState,
+  AnimatedNumber,
+} from '@/components/common/CommonUI'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -829,9 +835,11 @@ export default function PedidosPage() {
           title="Gestão de Pedidos & Orçamentos"
           description="Acompanhe orçamentos e pedidos comerciais antes da emissão e faturamento final."
           badge={
-            totalPedidos > 0
-              ? `${totalPedidos} ${totalPedidos === 1 ? 'pedido' : 'pedidos'}`
-              : undefined
+            totalPedidos > 0 ? (
+              <span>
+                <AnimatedNumber value={totalPedidos} /> {totalPedidos === 1 ? 'pedido' : 'pedidos'}
+              </span>
+            ) : undefined
           }
           actions={
             podeGerenciar && (

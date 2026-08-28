@@ -572,7 +572,7 @@ export default function RelatoriosPage() {
                 </div>
               </div>
               <div className="text-lg font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
-                {formatCurrency(resumoGeral?.faturamento)}
+                <AnimatedNumber value={formatCurrency(resumoGeral?.faturamento)} />
               </div>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                 Vendas finalizadas
@@ -590,7 +590,7 @@ export default function RelatoriosPage() {
                 </div>
               </div>
               <div className="text-lg font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
-                {resumoGeral?.numeroVendas ?? 0}
+                <AnimatedNumber value={resumoGeral?.numeroVendas ?? 0} />
               </div>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                 Pedidos fechados
@@ -608,7 +608,7 @@ export default function RelatoriosPage() {
                 </div>
               </div>
               <div className="text-lg font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
-                {formatCurrency(resumoGeral?.ticketMedio)}
+                <AnimatedNumber value={formatCurrency(resumoGeral?.ticketMedio)} />
               </div>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Por venda</p>
             </div>
@@ -624,7 +624,7 @@ export default function RelatoriosPage() {
                 </div>
               </div>
               <div className="text-lg font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
-                {resumoGeral?.totalCompras ?? 0}
+                <AnimatedNumber value={resumoGeral?.totalCompras ?? 0} />
               </div>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                 Ordens de compra
@@ -642,7 +642,7 @@ export default function RelatoriosPage() {
                 </div>
               </div>
               <div className="text-lg font-black tracking-tight text-slate-900 dark:text-white tabular-nums">
-                {formatCurrency(resumoGeral?.valorCompras)}
+                <AnimatedNumber value={formatCurrency(resumoGeral?.valorCompras)} />
               </div>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Total gasto</p>
             </div>
@@ -658,7 +658,7 @@ export default function RelatoriosPage() {
                 </div>
               </div>
               <div className="text-lg font-black tracking-tight text-rose-600 dark:text-rose-400 tabular-nums">
-                {formatCurrency(resumoGeral?.contasReceberAberto)}
+                <AnimatedNumber value={formatCurrency(resumoGeral?.contasReceberAberto)} />
               </div>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                 Saldo pendente atual
@@ -676,7 +676,7 @@ export default function RelatoriosPage() {
                 </div>
               </div>
               <div className="text-lg font-black tracking-tight text-amber-600 dark:text-amber-400 tabular-nums">
-                {formatCurrency(resumoGeral?.contasPagarAberto)}
+                <AnimatedNumber value={formatCurrency(resumoGeral?.contasPagarAberto)} />
               </div>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                 Compromissos atuais
@@ -767,7 +767,7 @@ export default function RelatoriosPage() {
                   Faturamento Total
                 </span>
                 <span className="text-base font-bold text-slate-900 dark:text-white tabular-nums">
-                  {formatCurrency(resumoGeral?.faturamento)}
+                  <AnimatedNumber value={formatCurrency(resumoGeral?.faturamento)} />
                 </span>
               </div>
               <div className="p-3 bg-slate-50/70 dark:bg-[#0A1328]/60 border border-slate-200/60 dark:border-[#1A294A] rounded-xl">
@@ -775,7 +775,7 @@ export default function RelatoriosPage() {
                   Nº de Vendas
                 </span>
                 <span className="text-base font-bold text-slate-900 dark:text-white tabular-nums">
-                  {resumoGeral?.numeroVendas ?? 0}
+                  <AnimatedNumber value={resumoGeral?.numeroVendas ?? 0} />
                 </span>
               </div>
               <div className="p-3 bg-slate-50/70 dark:bg-[#0A1328]/60 border border-slate-200/60 dark:border-[#1A294A] rounded-xl">
@@ -783,7 +783,7 @@ export default function RelatoriosPage() {
                   Ticket Médio
                 </span>
                 <span className="text-base font-bold text-slate-900 dark:text-white tabular-nums">
-                  {formatCurrency(resumoGeral?.ticketMedio)}
+                  <AnimatedNumber value={formatCurrency(resumoGeral?.ticketMedio)} />
                 </span>
               </div>
             </div>

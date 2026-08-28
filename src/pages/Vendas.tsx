@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { PageHeader, EmptyState, TableSkeleton, ErrorState } from '@/components/common/CommonUI'
+import {
+  PageHeader,
+  EmptyState,
+  TableSkeleton,
+  ErrorState,
+  AnimatedNumber,
+} from '@/components/common/CommonUI'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -656,7 +662,11 @@ export default function VendasPage() {
           title="Vendas Comerciais"
           description="Histórico completo de vendas, relatórios e emissão de pedidos no PDV."
           badge={
-            totalVendas > 0 ? `${totalVendas} ${totalVendas === 1 ? 'venda' : 'vendas'}` : undefined
+            totalVendas > 0 ? (
+              <span>
+                <AnimatedNumber value={totalVendas} /> {totalVendas === 1 ? 'venda' : 'vendas'}
+              </span>
+            ) : undefined
           }
           actions={
             <Button
@@ -682,7 +692,7 @@ export default function VendasPage() {
                 limparNovaVenda()
                 setModo('listagem')
               }}
-              className="border-slate-300 text-slate-700 hover:bg-slate-100 flex items-center gap-1.5"
+              className="border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1A294A] flex items-center gap-1.5 rounded-xl font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
               Voltar para Listagem
@@ -1012,14 +1022,14 @@ export default function VendasPage() {
                           key={prod.id}
                           className={`p-3.5 rounded-xl border transition-all flex flex-col justify-between gap-3 ${
                             itemNoCarrinho
-                              ? 'border-teal-300 bg-teal-50/40'
-                              : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs'
+                              ? 'border-[#0066FF] bg-[#0066FF]/10 dark:bg-[#0066FF]/15'
+                              : 'border-slate-200/80 dark:border-[#1A294A] bg-white/80 dark:bg-[#0A1328]/60 hover:border-[#0066FF]/50 hover:shadow-xs'
                           }`}
                         >
                           <div>
                             <div className="flex items-start gap-2.5">
                               {prod.foto_url && (
-                                <div className="w-12 h-12 rounded-lg border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center shrink-0">
+                                <div className="w-12 h-12 rounded-lg border border-slate-200/80 dark:border-[#1A294A] bg-slate-50 dark:bg-[#071126] overflow-hidden flex items-center justify-center shrink-0">
                                   <img
                                     src={prod.foto_url}
                                     alt={prod.nome}
@@ -1031,28 +1041,30 @@ export default function VendasPage() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-2">
                                   <h4
-                                    className="font-bold text-slate-900 text-xs line-clamp-1"
+                                    className="font-bold text-slate-900 dark:text-white text-xs line-clamp-1"
                                     title={prod.nome}
                                   >
                                     {prod.nome}
                                   </h4>
                                   {prod.codigo && (
-                                    <span className="text-[10px] font-mono text-slate-400 bg-slate-100 px-1 py-0.5 rounded shrink-0">
+                                    <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-[#1A294A] px-1.5 py-0.5 rounded shrink-0">
                                       {prod.codigo}
                                     </span>
                                   )}
                                 </div>
 
                                 <div className="flex items-center gap-2 mt-1.5">
-                                  <span className="text-[11px] text-slate-500">Estoque:</span>
+                                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                                    Estoque:
+                                  </span>
                                   <Badge
                                     variant="outline"
-                                    className={`text-[10px] px-1.5 py-0 ${
+                                    className={`text-[10px] px-2 py-0.5 font-semibold ${
                                       isZerado
-                                        ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                        ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/30'
                                         : isBaixo
-                                          ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                          ? 'bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/30'
+                                          : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
                                     }`}
                                   >
                                     {estoqueAtual} {prod.unidade || 'UN'}
@@ -1062,32 +1074,34 @@ export default function VendasPage() {
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between pt-2 border-t border-slate-100/80">
+                          <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 dark:border-[#1A294A]">
                             <div>
-                              <span className="text-[10px] text-slate-400 uppercase font-semibold block">
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider block">
                                 Preço
                               </span>
-                              <span className="text-sm font-bold text-teal-800">
+                              <span className="text-sm font-black text-[#0066FF] dark:text-[#3B82F6] tabular-nums">
                                 {formatCurrency(prod.preco_venda || 0)}
                               </span>
                             </div>
 
                             {itemNoCarrinho ? (
-                              <div className="flex items-center gap-1.5 bg-white dark:bg-[#0A1328] border border-[#0066FF]/40 rounded-xl p-1 shadow-xs">
+                              <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-[#071126] border border-[#0066FF]/50 rounded-xl p-1 shadow-xs">
                                 <button
                                   type="button"
                                   onClick={() => alterarQuantidade(prod.id, -1)}
-                                  className="w-6 h-6 rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                  className="w-6 h-6 rounded-lg flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-[#1A294A] transition-colors"
+                                  aria-label="Diminuir quantidade"
                                 >
                                   <Minus className="w-3 h-3" />
                                 </button>
-                                <span className="w-7 text-center font-bold text-xs text-[#0066FF] dark:text-[#3B82F6]">
+                                <span className="w-7 text-center font-bold text-xs text-[#0066FF] dark:text-[#3B82F6] tabular-nums">
                                   {itemNoCarrinho.quantidade}
                                 </span>
                                 <button
                                   type="button"
                                   onClick={() => alterarQuantidade(prod.id, 1)}
-                                  className="w-6 h-6 rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                  className="w-6 h-6 rounded-lg flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-[#1A294A] transition-colors"
+                                  aria-label="Aumentar quantidade"
                                 >
                                   <Plus className="w-3 h-3" />
                                 </button>
@@ -1097,9 +1111,9 @@ export default function VendasPage() {
                                 size="sm"
                                 onClick={() => adicionarAoCarrinho(prod)}
                                 disabled={isZerado}
-                                className={`text-xs h-8 px-3 rounded-xl font-medium ${
+                                className={`text-xs h-8 px-3 rounded-xl font-semibold transition-all ${
                                   isZerado
-                                    ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
+                                    ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border border-slate-300 dark:border-slate-700 cursor-not-allowed opacity-60'
                                     : 'bg-[#0066FF] hover:bg-[#0052CC] text-white shadow-xs'
                                 }`}
                               >
@@ -1141,8 +1155,8 @@ export default function VendasPage() {
               <div className="p-4 space-y-4">
                 {/* SELECT CLIENTE */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-slate-500" />
+                  <Label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
                     Cliente
                   </Label>
                   <Select
@@ -1151,25 +1165,32 @@ export default function VendasPage() {
                       setClienteSelecionadoId(val === 'consumidor_final' ? null : val)
                     }
                   >
-                    <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                    <SelectTrigger className="text-xs h-9 bg-white dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] rounded-xl">
                       <SelectValue placeholder="Selecione o cliente" />
                     </SelectTrigger>
-                    <SelectContent className="max-h-60">
-                      <div className="p-1 border-b border-slate-100">
+                    <SelectContent className="max-h-60 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
+                      <div className="p-1 border-b border-slate-100 dark:border-[#1A294A]">
                         <Input
                           placeholder="Pesquisar cliente..."
                           value={buscaCliente}
                           onChange={(e) => setBuscaCliente(e.target.value)}
-                          className="h-7 text-xs"
+                          className="h-7 text-xs bg-slate-50 dark:bg-[#071126] border-slate-200 dark:border-[#1A294A]"
                           onClick={(e) => e.stopPropagation()}
                           onKeyDown={(e) => e.stopPropagation()}
                         />
                       </div>
-                      <SelectItem value="consumidor_final" className="text-xs font-semibold">
+                      <SelectItem
+                        value="consumidor_final"
+                        className="text-xs font-semibold text-slate-800 dark:text-slate-200"
+                      >
                         👤 Consumidor Final (Sem cadastro)
                       </SelectItem>
                       {clientesFiltrados.map((cli) => (
-                        <SelectItem key={cli.id} value={cli.id} className="text-xs">
+                        <SelectItem
+                          key={cli.id}
+                          value={cli.id}
+                          className="text-xs text-slate-700 dark:text-slate-200"
+                        >
                           {cli.nome} {cli.documento ? `(${cli.documento})` : ''}
                         </SelectItem>
                       ))}
@@ -1179,8 +1200,8 @@ export default function VendasPage() {
 
                 {/* SELECT VENDEDOR */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                    <Percent className="w-3.5 h-3.5 text-slate-500" />
+                  <Label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <Percent className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
                     Vendedor
                   </Label>
                   <Select
@@ -1189,25 +1210,32 @@ export default function VendasPage() {
                       setVendedorSelecionadoId(val === 'sem_vendedor' ? null : val)
                     }
                   >
-                    <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                    <SelectTrigger className="text-xs h-9 bg-white dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] rounded-xl">
                       <SelectValue placeholder="Selecione o vendedor" />
                     </SelectTrigger>
-                    <SelectContent className="max-h-60">
-                      <div className="p-1 border-b border-slate-100">
+                    <SelectContent className="max-h-60 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
+                      <div className="p-1 border-b border-slate-100 dark:border-[#1A294A]">
                         <Input
                           placeholder="Pesquisar vendedor..."
                           value={buscaVendedor}
                           onChange={(e) => setBuscaVendedor(e.target.value)}
-                          className="h-7 text-xs"
+                          className="h-7 text-xs bg-slate-50 dark:bg-[#071126] border-slate-200 dark:border-[#1A294A]"
                           onClick={(e) => e.stopPropagation()}
                           onKeyDown={(e) => e.stopPropagation()}
                         />
                       </div>
-                      <SelectItem value="sem_vendedor" className="text-xs font-semibold">
+                      <SelectItem
+                        value="sem_vendedor"
+                        className="text-xs font-semibold text-slate-800 dark:text-slate-200"
+                      >
                         Sem vendedor vinculado
                       </SelectItem>
                       {vendedoresFiltrados.map((vend) => (
-                        <SelectItem key={vend.id} value={vend.id} className="text-xs">
+                        <SelectItem
+                          key={vend.id}
+                          value={vend.id}
+                          className="text-xs text-slate-700 dark:text-slate-200"
+                        >
                           {vend.nome}
                         </SelectItem>
                       ))}
@@ -1216,17 +1244,17 @@ export default function VendasPage() {
                 </div>
 
                 {/* LISTA DE ITENS DO CARRINHO */}
-                <div className="space-y-2 pt-2 border-t border-slate-100">
+                <div className="space-y-2 pt-3 border-t border-slate-200/80 dark:border-[#1A294A]">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-700">
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
                       Itens adicionados ({carrinho.length})
                     </span>
                   </div>
 
                   {carrinho.length === 0 ? (
-                    <div className="py-6 text-center border border-dashed border-slate-200 rounded-lg bg-slate-50/50">
-                      <ShoppingCart className="w-6 h-6 text-slate-300 mx-auto mb-1" />
-                      <p className="text-xs text-slate-500">
+                    <div className="py-7 text-center border border-dashed border-slate-200 dark:border-[#1A294A] rounded-xl bg-slate-50/50 dark:bg-[#071126]/50">
+                      <ShoppingCart className="w-6 h-6 text-slate-400 dark:text-slate-600 mx-auto mb-1.5" />
+                      <p className="text-xs font-medium text-slate-600 dark:text-slate-400">
                         Adicione produtos para iniciar a venda
                       </p>
                     </div>
@@ -1235,21 +1263,23 @@ export default function VendasPage() {
                       {carrinho.map((item) => (
                         <div
                           key={item.produto_id}
-                          className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 text-xs"
+                          className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#071126] border border-slate-200/70 dark:border-[#1A294A] text-xs transition-colors"
                         >
                           <div className="flex-1 min-w-0 mr-2">
-                            <p className="font-semibold text-slate-900 truncate">{item.nome}</p>
-                            <p className="text-[11px] text-slate-500 tabular-nums">
+                            <p className="font-semibold text-slate-900 dark:text-white truncate">
+                              {item.nome}
+                            </p>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 tabular-nums">
                               {formatCurrency(item.preco_venda)} un.
                             </p>
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0">
-                            <div className="flex items-center gap-1 bg-white border border-slate-200 rounded px-1 py-0.5">
+                            <div className="flex items-center gap-1 bg-white dark:bg-[#0A1328] border border-slate-200 dark:border-[#1A294A] rounded-lg px-1.5 py-0.5">
                               <button
                                 type="button"
                                 onClick={() => alterarQuantidade(item.produto_id, -1)}
-                                className="w-5 h-5 text-slate-500 hover:text-slate-900 flex items-center justify-center"
+                                className="w-5 h-5 text-slate-600 dark:text-slate-300 hover:text-[#0066FF] dark:hover:text-[#3B82F6] flex items-center justify-center font-bold"
                               >
                                 -
                               </button>
@@ -1260,25 +1290,25 @@ export default function VendasPage() {
                                 onChange={(e) =>
                                   setQuantidadeItem(item.produto_id, parseInt(e.target.value, 10))
                                 }
-                                className="w-8 text-center text-xs font-bold text-slate-800 bg-transparent border-0 focus:outline-none p-0"
+                                className="w-8 text-center text-xs font-bold text-slate-900 dark:text-white bg-transparent border-0 focus:outline-none p-0 tabular-nums"
                               />
                               <button
                                 type="button"
                                 onClick={() => alterarQuantidade(item.produto_id, 1)}
-                                className="w-5 h-5 text-slate-500 hover:text-slate-900 flex items-center justify-center"
+                                className="w-5 h-5 text-slate-600 dark:text-slate-300 hover:text-[#0066FF] dark:hover:text-[#3B82F6] flex items-center justify-center font-bold"
                               >
                                 +
                               </button>
                             </div>
 
-                            <span className="font-bold text-slate-900 tabular-nums w-16 text-right">
+                            <span className="font-bold text-slate-900 dark:text-white tabular-nums w-18 text-right">
                               {formatCurrency(item.quantidade * item.preco_venda)}
                             </span>
 
                             <button
                               type="button"
                               onClick={() => removerDoCarrinho(item.produto_id)}
-                              className="text-slate-400 hover:text-rose-600 transition-colors p-1"
+                              className="text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors p-1"
                               title="Remover item"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -1291,16 +1321,18 @@ export default function VendasPage() {
                 </div>
 
                 {/* TOTAIS E DESCONTO */}
-                <div className="space-y-2 pt-3 border-t border-slate-200 text-xs">
-                  <div className="flex justify-between text-slate-600">
-                    <span>Subtotal</span>
-                    <span className="font-semibold text-slate-900 tabular-nums">
+                <div className="space-y-2.5 pt-3 border-t border-slate-200/80 dark:border-[#1A294A] text-xs">
+                  <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
+                    <span className="font-medium">Subtotal</span>
+                    <span className="font-bold text-slate-900 dark:text-slate-200 tabular-nums">
                       {formatCurrency(subtotalVisual)}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-slate-600">Desconto (R$)</span>
+                    <span className="text-slate-600 dark:text-slate-400 font-medium">
+                      Desconto (R$)
+                    </span>
                     <div className="w-28">
                       <Input
                         type="number"
@@ -1309,48 +1341,64 @@ export default function VendasPage() {
                         placeholder="0.00"
                         value={descontoInput}
                         onChange={(e) => handleDescontoChange(e.target.value)}
-                        className="h-8 text-xs text-right font-medium border-slate-200"
+                        className="h-8 text-xs text-right font-semibold bg-white dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-lg focus:ring-1 focus:ring-[#0066FF]"
                       />
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center pt-2 border-t border-slate-200">
-                    <span className="text-sm font-bold text-slate-900">Total a Pagar</span>
-                    <span className="text-xl font-black text-teal-700 tabular-nums">
+                  <div className="flex justify-between items-center p-3 rounded-xl bg-[#0066FF]/10 dark:bg-[#0066FF]/15 border border-[#0066FF]/30 mt-2">
+                    <span className="text-xs font-extrabold uppercase tracking-wider text-[#0066FF] dark:text-[#3B82F6]">
+                      Total a Pagar
+                    </span>
+                    <span className="text-xl font-black text-[#0066FF] dark:text-white tabular-nums">
                       {formatCurrency(totalVisual)}
                     </span>
                   </div>
                 </div>
 
                 {/* FORMA DE PAGAMENTO */}
-                <div className="space-y-1.5 pt-2 border-t border-slate-100">
-                  <Label className="text-xs font-semibold text-slate-700">Forma de Pagamento</Label>
+                <div className="space-y-1.5 pt-3 border-t border-slate-200/80 dark:border-[#1A294A]">
+                  <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Forma de Pagamento
+                  </Label>
                   <Select value={formaPagamento} onValueChange={(val) => setFormaPagamento(val)}>
-                    <SelectTrigger className="text-xs h-9 bg-white border-slate-200">
+                    <SelectTrigger className="text-xs h-9 bg-white dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] rounded-xl">
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pix">
+                    <SelectContent className="bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
+                      <SelectItem
+                        value="pix"
+                        className="text-xs text-slate-800 dark:text-slate-200"
+                      >
                         <div className="flex items-center gap-2">
-                          <QrCode className="w-4 h-4 text-blue-600" />
+                          <QrCode className="w-4 h-4 text-blue-500" />
                           <span>PIX (À vista)</span>
                         </div>
                       </SelectItem>
-                      <SelectItem value="dinheiro">
+                      <SelectItem
+                        value="dinheiro"
+                        className="text-xs text-slate-800 dark:text-slate-200"
+                      >
                         <div className="flex items-center gap-2">
-                          <Banknote className="w-4 h-4 text-emerald-600" />
+                          <Banknote className="w-4 h-4 text-emerald-500" />
                           <span>Dinheiro (À vista)</span>
                         </div>
                       </SelectItem>
-                      <SelectItem value="cartao">
+                      <SelectItem
+                        value="cartao"
+                        className="text-xs text-slate-800 dark:text-slate-200"
+                      >
                         <div className="flex items-center gap-2">
-                          <CreditCard className="w-4 h-4 text-purple-600" />
+                          <CreditCard className="w-4 h-4 text-purple-500" />
                           <span>Cartão Débito / Crédito</span>
                         </div>
                       </SelectItem>
-                      <SelectItem value="fiado">
+                      <SelectItem
+                        value="fiado"
+                        className="text-xs text-slate-800 dark:text-slate-200"
+                      >
                         <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-amber-600" />
+                          <Clock className="w-4 h-4 text-amber-500" />
                           <span>Fiado / A Prazo (Gera a Receber)</span>
                         </div>
                       </SelectItem>
@@ -1360,19 +1408,19 @@ export default function VendasPage() {
 
                 {/* VENCIMENTO (CONDICIONAL FIADO) */}
                 {formaPagamento === 'fiado' && (
-                  <div className="space-y-1.5 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs animate-in fade-in">
-                    <Label className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-amber-700" />
+                  <div className="space-y-1.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs animate-in fade-in">
+                    <Label className="text-xs font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                       Data de Vencimento do Fiado *
                     </Label>
                     <Input
                       type="date"
                       value={vencimento}
                       onChange={(e) => setVencimento(e.target.value)}
-                      className="text-xs h-8 bg-white border-amber-300"
+                      className="text-xs h-8 bg-white dark:bg-[#071126] border-amber-500/40 text-slate-900 dark:text-slate-100 rounded-lg"
                       required
                     />
-                    <p className="text-[10px] text-amber-700">
+                    <p className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">
                       Um registro de contas a receber será gerado no nome do cliente selecionado.
                     </p>
                   </div>
@@ -1380,7 +1428,7 @@ export default function VendasPage() {
 
                 {/* OBSERVAÇÕES */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-slate-700">
+                  <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                     Observações (opcional)
                   </Label>
                   <Textarea
@@ -1388,17 +1436,17 @@ export default function VendasPage() {
                     value={observacoes}
                     onChange={(e) => setObservacoes(e.target.value)}
                     rows={2}
-                    className="text-xs border-slate-200 resize-none"
+                    className="text-xs bg-white dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl resize-none focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF]"
                   />
                 </div>
 
                 {/* FEEDBACK DE ERRO */}
                 {erroVenda && (
-                  <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-400 text-xs flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
                     <div>
-                      <p className="font-semibold">Erro na validação da venda</p>
-                      <p className="mt-0.5">{erroVenda}</p>
+                      <p className="font-bold">Erro na validação da venda</p>
+                      <p className="mt-0.5 font-medium">{erroVenda}</p>
                     </div>
                   </div>
                 )}
@@ -1407,7 +1455,11 @@ export default function VendasPage() {
                 <Button
                   onClick={handleFinalizarVenda}
                   disabled={carrinho.length === 0 || submetendoVenda}
-                  className="w-full bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold h-11 text-sm shadow-md transition-all flex items-center justify-center gap-2 rounded-xl"
+                  className={`w-full font-bold h-11 text-sm shadow-md transition-all flex items-center justify-center gap-2 rounded-xl ${
+                    carrinho.length === 0 || submetendoVenda
+                      ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-300 dark:border-slate-700 cursor-not-allowed opacity-70'
+                      : 'bg-[#0066FF] hover:bg-[#0052CC] text-white shadow-lg shadow-[#0066FF]/20 active:scale-[0.99]'
+                  }`}
                 >
                   {submetendoVenda ? (
                     <>
@@ -1440,50 +1492,54 @@ export default function VendasPage() {
           }
         }}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
           <DialogHeader>
-            <div className="mx-auto w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2">
+            <div className="mx-auto w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
               <CheckCircle2 className="w-7 h-7" />
             </div>
-            <DialogTitle className="text-center text-lg font-bold text-slate-900">
+            <DialogTitle className="text-center text-lg font-bold text-slate-900 dark:text-white">
               Venda #{resultadoModal.dados?.numero} finalizada com sucesso!
             </DialogTitle>
-            <DialogDescription className="text-center text-xs text-slate-500">
+            <DialogDescription className="text-center text-xs text-slate-500 dark:text-[#C0C6CF]/80">
               A venda foi registrada atomicamente no banco, os itens foram baixados do estoque e os
               lançamentos foram gerados.
             </DialogDescription>
           </DialogHeader>
 
           {resultadoModal.dados && (
-            <div className="space-y-2 py-3 border-y border-slate-100 text-xs">
-              <div className="flex justify-between text-slate-600">
+            <div className="space-y-2 py-3 border-y border-slate-200/80 dark:border-[#1A294A] text-xs">
+              <div className="flex justify-between text-slate-600 dark:text-slate-400">
                 <span>Subtotal dos Itens:</span>
-                <span className="font-medium text-slate-900">
+                <span className="font-semibold text-slate-900 dark:text-slate-200 tabular-nums">
                   {formatCurrency(resultadoModal.dados.subtotal)}
                 </span>
               </div>
               {resultadoModal.dados.desconto > 0 && (
-                <div className="flex justify-between text-rose-600">
+                <div className="flex justify-between text-rose-600 dark:text-rose-400">
                   <span>Desconto Aplicado:</span>
-                  <span className="font-medium">
+                  <span className="font-semibold tabular-nums">
                     - {formatCurrency(resultadoModal.dados.desconto)}
                   </span>
                 </div>
               )}
-              <div className="flex justify-between text-slate-900 font-bold text-sm pt-1 border-t border-slate-100">
+              <div className="flex justify-between text-slate-900 dark:text-white font-bold text-sm pt-1.5 border-t border-slate-100 dark:border-[#1A294A]">
                 <span>Total Final:</span>
-                <span className="text-teal-700">{formatCurrency(resultadoModal.dados.total)}</span>
+                <span className="text-[#0066FF] dark:text-[#3B82F6] font-black tabular-nums">
+                  {formatCurrency(resultadoModal.dados.total)}
+                </span>
               </div>
-              <div className="flex justify-between text-slate-600 pt-1">
+              <div className="flex justify-between text-slate-600 dark:text-slate-400 pt-1">
                 <span>Forma de Pagamento:</span>
-                <span className="font-semibold uppercase">
+                <span className="font-bold uppercase text-slate-900 dark:text-slate-200">
                   {resultadoModal.dados.forma_pagamento}
                 </span>
               </div>
               {resultadoModal.dados.comissao > 0 && (
-                <div className="flex justify-between text-emerald-700 bg-emerald-50 p-2 rounded border border-emerald-200 mt-2">
-                  <span>Comissão do Vendedor:</span>
-                  <span className="font-bold">{formatCurrency(resultadoModal.dados.comissao)}</span>
+                <div className="flex justify-between text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/30 mt-2">
+                  <span className="font-medium">Comissão do Vendedor:</span>
+                  <span className="font-bold tabular-nums">
+                    {formatCurrency(resultadoModal.dados.comissao)}
+                  </span>
                 </div>
               )}
             </div>
@@ -1501,9 +1557,9 @@ export default function VendasPage() {
                   abrirImpressaoVenda(vendaId)
                 }
               }}
-              className="w-full sm:w-auto text-xs flex items-center justify-center gap-1.5"
+              className="w-full sm:w-auto text-xs flex items-center justify-center gap-1.5 border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1A294A] rounded-xl"
             >
-              <Printer className="w-3.5 h-3.5 text-teal-700" />
+              <Printer className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
               Imprimir Venda
             </Button>
             <Button
@@ -1513,7 +1569,7 @@ export default function VendasPage() {
                 limparNovaVenda()
                 setModo('listagem')
               }}
-              className="w-full sm:w-auto text-xs"
+              className="w-full sm:w-auto text-xs border-slate-200 dark:border-[#1A294A] text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#1A294A] rounded-xl"
             >
               Ver Listagem
             </Button>
@@ -1523,7 +1579,7 @@ export default function VendasPage() {
                 limparNovaVenda()
                 setModo('nova')
               }}
-              className="w-full sm:w-auto bg-teal-700 hover:bg-teal-800 text-white text-xs"
+              className="w-full sm:w-auto bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-semibold rounded-xl"
             >
               Realizar Outra Venda
             </Button>
