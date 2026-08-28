@@ -230,6 +230,18 @@ export interface AdminHistoricoItem {
   created_at: string
 }
 
+export interface AdminUsuarioItem {
+  id: string
+  empresa_id: string
+  auth_user_id: string
+  nome: string
+  email: string
+  telefone?: string | null
+  perfil: string
+  ativo: boolean
+  created_at: string
+}
+
 export interface CreatePlanoInput {
   nome: string
   slug: string
@@ -478,9 +490,7 @@ export const AdminService = {
   /**
    * Criação manual completa e transacional de Empresa + Assinatura + Master
    */
-  async criarEmpresaManual(
-    input: CadastroManualEmpresaInput,
-  ): Promise<{
+  async criarEmpresaManual(input: CadastroManualEmpresaInput): Promise<{
     data: { success: boolean; empresa_id?: string; message?: string } | null
     error: any
   }> {
