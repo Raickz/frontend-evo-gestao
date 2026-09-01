@@ -357,7 +357,10 @@ export default function DashboardPage() {
       sevenDaysAgo.setHours(0, 0, 0, 0)
       const sevenDaysAgoIso = sevenDaysAgo.toISOString()
 
-      let queryVendasHoje = supabase.from('vendas').select(`
+      let queryVendasHoje = supabase
+        .from('vendas')
+        .select(
+          `
           id,
           total,
           created_at,
@@ -371,8 +374,12 @@ export default function DashboardPage() {
               preco_custo
             )
           )
-        `)
-
+        `
+        )
+        .eq('empresa_id', empresaId)
+        .eq('status', 'finalizada')
+        .gte('created_at', startOfTodayIso)
+      
       if (resolvedVendedorId) {
         queryVendasHoje = queryVendasHoje.eq('vendedor_id', resolvedVendedorId)
       }
