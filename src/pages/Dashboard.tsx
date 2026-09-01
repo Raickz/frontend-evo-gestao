@@ -359,9 +359,7 @@ export default function DashboardPage() {
 
       let queryVendasHoje = supabase
         .from('vendas')
-        .select(
-          'id, total, created_at, itens_venda(quantidade, preco_unitario, subtotal, produto_id, produto:produtos(nome, preco_custo, categoria))',
-        )
+        .select('id, total, created_at')
         .eq('empresa_id', empresaId)
         .eq('status', 'finalizada')
         .gte('created_at', startOfTodayIso)
@@ -418,6 +416,8 @@ export default function DashboardPage() {
       if (produtosCountRes.error) throw produtosCountRes.error
       if (estoqueBaixoRes.error) throw estoqueBaixoRes.error
       if (vendasRecentesRes.error) throw vendasRecentesRes.error
+      if (vendasHojeRes.error) throw vendasHojeRes.error
+      if (vendas7DiasRes.error) throw vendas7DiasRes.error
 
       const totalFaturadoMes = (faturamentoMesRes.data || []).reduce(
         (acc: number, curr: { total: number }) => acc + (curr.total || 0),
