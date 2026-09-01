@@ -371,7 +371,7 @@ export default function DashboardPage() {
       let queryVendas7Dias = supabase
         .from('vendas')
         .select(
-          'id, total, created_at, forma_pagamento, items_venda(quantidade, preco_unitario, subtotal, produto_id, produto:produtos(nome))',
+          'id, total, created_at, forma_pagamento, itens_venda(quantidade, preco_unitario, subtotal, produto_id, produto:produtos(nome))',
         )
         .eq('empresa_id', empresaId)
         .eq('status', 'finalizada')
