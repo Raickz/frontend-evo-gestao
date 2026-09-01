@@ -454,9 +454,14 @@ export default function DashboardPage() {
             const vendaItem = Number(
               it.subtotal || Number(it.quantidade || 0) * Number(it.preco_unitario || 0) || 0,
             )
-            const custoUnitario = Number(it.produto?.preco_custo || 0)
-            const custoTotal = custoUnitario * Number(it.quantidade || 1)
-            lucroHojeTotal += Math.max(0, vendaItem - custoTotal)
+            const quantidade = Number(it.quantidade || 0)
+            const precoVenda = Number(it.preco_unitario || 0)
+            const custoUnitario = Number(it.custo_unitario || 0)
+            
+            const receita = precoVenda * quantidade
+            const custoTotal = custoUnitario * quantidade
+            
+            lucroHojeTotal += receita - custoTotal
           })
         }
       })
