@@ -359,10 +359,21 @@ export default function DashboardPage() {
 
       let queryVendasHoje = supabase
         .from('vendas')
-        .select('id, total, created_at')
-        .eq('empresa_id', empresaId)
-        .eq('status', 'finalizada')
-        .gte('created_at', startOfTodayIso)
+        .select(`
+          id,
+          total,
+          created_at,
+          itens_venda(
+            quantidade,
+            preco_unitario,
+            subtotal,
+            produto_id,
+            produto:produtos(
+              nome,
+              preco_custo
+            )
+          )
+        `)
 
       if (resolvedVendedorId) {
         queryVendasHoje = queryVendasHoje.eq('vendedor_id', resolvedVendedorId)
