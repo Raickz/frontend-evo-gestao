@@ -1077,7 +1077,9 @@ export default function DashboardPage() {
                     Vendas nos últimos 7 dias
                   </h3>
                   <p className="text-xs text-[#6E7785] dark:text-[#C0C6CF] mt-0.5">
-                    Período de 21/08 a 27/08 · Faturamento diário e volume de pedidos
+                    {sales7DaysData.length > 0
+                      ? `Período de ${sales7DaysData[0].data} a ${sales7DaysData[sales7DaysData.length - 1].data} · Faturamento diário e volume de pedidos`
+                      : 'Período sem dados · Faturamento diário e volume de pedidos'}
                   </p>
                 </div>
 
