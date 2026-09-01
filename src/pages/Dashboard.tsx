@@ -357,9 +357,7 @@ export default function DashboardPage() {
       sevenDaysAgo.setHours(0, 0, 0, 0)
       const sevenDaysAgoIso = sevenDaysAgo.toISOString()
 
-      let queryVendasHoje = supabase
-        .from('vendas')
-        .select(`
+      let queryVendasHoje = supabase.from('vendas').select(`
           id,
           total,
           created_at,
