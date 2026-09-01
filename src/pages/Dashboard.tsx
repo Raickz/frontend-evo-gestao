@@ -374,7 +374,9 @@ export default function DashboardPage() {
             )
           )
         `)
-
+        .eq('empresa_id', empresaId)
+        .eq('status', 'finalizada')
+      
       if (resolvedVendedorId) {
         queryVendasHoje = queryVendasHoje.eq('vendedor_id', resolvedVendedorId)
       }
