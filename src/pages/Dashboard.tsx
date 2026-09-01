@@ -368,13 +368,13 @@ export default function DashboardPage() {
             quantidade,
             preco_unitario,
             subtotal,
+            custo_unitario,
             produto_id,
             produto:produtos(
-              nome,
-              preco_custo
+              nome
             )
           )
-        `
+          `
         )
         .eq('empresa_id', empresaId)
         .eq('status', 'finalizada')
