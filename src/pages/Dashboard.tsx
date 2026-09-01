@@ -374,12 +374,12 @@ export default function DashboardPage() {
               preco_custo
             )
           )
-        `
+        `,
         )
         .eq('empresa_id', empresaId)
         .eq('status', 'finalizada')
         .gte('created_at', startOfTodayIso)
-      
+
       if (resolvedVendedorId) {
         queryVendasHoje = queryVendasHoje.eq('vendedor_id', resolvedVendedorId)
       }
