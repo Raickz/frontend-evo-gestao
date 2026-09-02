@@ -352,10 +352,32 @@ export default function DashboardPage() {
       startOfToday.setHours(0, 0, 0, 0)
       const startOfTodayIso = startOfToday.toISOString()
 
-      const sevenDaysAgo = new Date()
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
-      sevenDaysAgo.setHours(0, 0, 0, 0)
-      const sevenDaysAgoIso = sevenDaysAgo.toISOString()
+      // Período selecionado para o gráfico
+      const hoje = new Date()
+      hoje.setHours(23, 59, 59, 999)
+      
+      const inicioPeriodo = new Date()
+      
+      if (chartPeriod === '7d') {
+        inicioPeriodo.setDate(inicioPeriodo.getDate() - 6)
+      } else if (chartPeriod === '30d') {
+        inicioPeriodo.setDate(inicioPeriodo.getDate() - 29)
+      } else {
+        // Mês atual
+        inicioPeriodo.setDate(1)
+      }
+      
+      inicioPeriodo.setHours(0, 0, 0, 0)
+      
+      const inicioPeriodoIso = inicioPeriodo.toISOString()
+      const fimPeriodoIso = hoje.toISOString()
+      
+      const quantidadeDias =
+        chartPeriod === '7d'
+          ? 7
+          : chartPeriod === '30d'
+            ? 30
+            : hoje.getDate()
 
       let queryVendasHoje = supabase
         .from('vendas')
