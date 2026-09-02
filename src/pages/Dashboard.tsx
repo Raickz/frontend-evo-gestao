@@ -352,10 +352,32 @@ export default function DashboardPage() {
       startOfToday.setHours(0, 0, 0, 0)
       const startOfTodayIso = startOfToday.toISOString()
 
-      const sevenDaysAgo = new Date()
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
-      sevenDaysAgo.setHours(0, 0, 0, 0)
-      const sevenDaysAgoIso = sevenDaysAgo.toISOString()
+      // Período selecionado para o gráfico
+      const hoje = new Date()
+      hoje.setHours(23, 59, 59, 999)
+      
+      const inicioPeriodo = new Date()
+      
+      if (chartPeriod === '7d') {
+        inicioPeriodo.setDate(inicioPeriodo.getDate() - 6)
+      } else if (chartPeriod === '30d') {
+        inicioPeriodo.setDate(inicioPeriodo.getDate() - 29)
+      } else {
+        // Mês atual
+        inicioPeriodo.setDate(1)
+      }
+      
+      inicioPeriodo.setHours(0, 0, 0, 0)
+      
+      const inicioPeriodoIso = inicioPeriodo.toISOString()
+      const fimPeriodoIso = hoje.toISOString()
+      
+      const quantidadeDias =
+        chartPeriod === '7d'
+          ? 7
+          : chartPeriod === '30d'
+            ? 30
+            : hoje.getDate()
 
       let queryVendasHoje = supabase
         .from('vendas')
@@ -391,7 +413,8 @@ export default function DashboardPage() {
         )
         .eq('empresa_id', empresaId)
         .eq('status', 'finalizada')
-        .gte('created_at', sevenDaysAgoIso)
+        .gte('created_at', inicioPeriodoIso)
+        .lte('created_at', fimPeriodoIso)
         .order('created_at', { ascending: true })
 
       if (resolvedVendedorId) {
@@ -484,36 +507,52 @@ export default function DashboardPage() {
         estoqueBaixoItens: estoqueBaixoList,
       })
 
-      // Montar dados reais dos 7 dias
-      const dias7Map: Record<string, { valor: number; pedidos: number }> = {}
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date()
+     // Montar dados reais conforme o período selecionado
+      const diasPeriodoMap: Record<string, { valor: number; pedidos: number }> = {}
+      
+      for (let i = quantidadeDias - 1; i >= 0; i--) {
+        const d = new Date(hoje)
+        d.setHours(0, 0, 0, 0)
         d.setDate(d.getDate() - i)
-        const diaStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`
-        dias7Map[diaStr] = { valor: 0, pedidos: 0 }
+      
+        const diaStr = `${String(d.getDate()).padStart(2, '0')}/${String(
+          d.getMonth() + 1,
+        ).padStart(2, '0')}`
+      
+        diasPeriodoMap[diaStr] = {
+          valor: 0,
+          pedidos: 0,
+        }
       }
-
-      const vendas7List = vendas7DiasRes.data || []
-      vendas7List.forEach((v: any) => {
+      
+      const vendasPeriodoList = vendas7DiasRes.data || []
+      
+      vendasPeriodoList.forEach((v: any) => {
         if (v.created_at) {
           const vd = new Date(v.created_at)
-          const key = `${String(vd.getDate()).padStart(2, '0')}/${String(vd.getMonth() + 1).padStart(2, '0')}`
-          if (dias7Map[key]) {
-            dias7Map[key].valor += Number(v.total || 0)
-            dias7Map[key].pedidos += 1
+      
+          const key = `${String(vd.getDate()).padStart(2, '0')}/${String(
+            vd.getMonth() + 1,
+            ).padStart(2, '0')}`
+      
+          if (diasPeriodoMap[key]) {
+            diasPeriodoMap[key].valor += Number(v.total || 0)
+            diasPeriodoMap[key].pedidos += 1
           }
         }
       })
-
-      const chart7Dias = Object.keys(dias7Map).map((k) => ({
+      
+      const chartPeriodo = Object.keys(diasPeriodoMap).map((k) => ({
         data: k,
-        valor: dias7Map[k].valor,
-        pedidos: dias7Map[k].pedidos,
-        display: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-          dias7Map[k].valor,
-        ),
+        valor: diasPeriodoMap[k].valor,
+        pedidos: diasPeriodoMap[k].pedidos,
+        display: new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        }).format(diasPeriodoMap[k].valor),
       }))
-      setSales7DaysRealData(chart7Dias)
+      
+      setSales7DaysRealData(chartPeriodo)
 
       // Montar Top Produtos reais
       const prodMap: Record<
@@ -600,7 +639,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [empresaId, usuario?.perfil, usuario?.id])
+  }, [empresaId, usuario?.perfil, usuario?.id, chartPeriod])
 
   useEffect(() => {
     loadDashboardData()
