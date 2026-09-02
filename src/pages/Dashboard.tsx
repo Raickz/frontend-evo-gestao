@@ -355,9 +355,9 @@ export default function DashboardPage() {
       // Período selecionado para o gráfico
       const hoje = new Date()
       hoje.setHours(23, 59, 59, 999)
-      
+
       const inicioPeriodo = new Date()
-      
+
       if (chartPeriod === '7d') {
         inicioPeriodo.setDate(inicioPeriodo.getDate() - 6)
       } else if (chartPeriod === '30d') {
@@ -366,18 +366,13 @@ export default function DashboardPage() {
         // Mês atual
         inicioPeriodo.setDate(1)
       }
-      
+
       inicioPeriodo.setHours(0, 0, 0, 0)
-      
+
       const inicioPeriodoIso = inicioPeriodo.toISOString()
       const fimPeriodoIso = hoje.toISOString()
-      
-      const quantidadeDias =
-        chartPeriod === '7d'
-          ? 7
-          : chartPeriod === '30d'
-            ? 30
-            : hoje.getDate()
+
+      const quantidadeDias = chartPeriod === '7d' ? 7 : chartPeriod === '30d' ? 30 : hoje.getDate()
 
       let queryVendasHoje = supabase
         .from('vendas')
@@ -507,41 +502,42 @@ export default function DashboardPage() {
         estoqueBaixoItens: estoqueBaixoList,
       })
 
-     // Montar dados reais conforme o período selecionado
+      // Montar dados reais conforme o período selecionado
       const diasPeriodoMap: Record<string, { valor: number; pedidos: number }> = {}
-      
+
       for (let i = quantidadeDias - 1; i >= 0; i--) {
         const d = new Date(hoje)
         d.setHours(0, 0, 0, 0)
         d.setDate(d.getDate() - i)
-      
-        const diaStr = `${String(d.getDate()).padStart(2, '0')}/${String(
-          d.getMonth() + 1,
-        ).padStart(2, '0')}`
-      
+
+        const diaStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(
+          2,
+          '0',
+        )}`
+
         diasPeriodoMap[diaStr] = {
           valor: 0,
           pedidos: 0,
         }
       }
-      
+
       const vendasPeriodoList = vendas7DiasRes.data || []
-      
+
       vendasPeriodoList.forEach((v: any) => {
         if (v.created_at) {
           const vd = new Date(v.created_at)
-      
+
           const key = `${String(vd.getDate()).padStart(2, '0')}/${String(
             vd.getMonth() + 1,
-            ).padStart(2, '0')}`
-      
+          ).padStart(2, '0')}`
+
           if (diasPeriodoMap[key]) {
             diasPeriodoMap[key].valor += Number(v.total || 0)
             diasPeriodoMap[key].pedidos += 1
           }
         }
       })
-      
+
       const chartPeriodo = Object.keys(diasPeriodoMap).map((k) => ({
         data: k,
         valor: diasPeriodoMap[k].valor,
@@ -551,7 +547,7 @@ export default function DashboardPage() {
           currency: 'BRL',
         }).format(diasPeriodoMap[k].valor),
       }))
-      
+
       setSales7DaysRealData(chartPeriodo)
 
       // Montar Top Produtos reais
