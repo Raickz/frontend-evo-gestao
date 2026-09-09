@@ -525,7 +525,7 @@ export default function DashboardPage() {
         }
       }
       
-      const vendasPeriodoList = vendas7DiasRes.data || []
+      const vendas7List = vendas7DiasRes.data || []
       
       vendasPeriodoList.forEach((v: any) => {
         if (v.created_at) {
