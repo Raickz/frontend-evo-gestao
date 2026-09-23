@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/dialog'
 import { useEmpresa } from '@/hooks/use-empresa'
 import { useAuth } from '@/hooks/use-auth'
+import { supabase } from '@/lib/supabase/client'
 import {
   ComprasService,
   ComprasIndicadores,

@@ -69,6 +69,7 @@ export default function EstoquePage() {
     total: 0,
     zerados: 0,
     abaixoMinimo: 0,
+    noLimite: 0,
     normal: 0,
   })
   const [loadingIndicadores, setLoadingIndicadores] = useState(true)
@@ -307,7 +308,7 @@ export default function EstoquePage() {
       precoCusto?: string
     } = {}
 
-    if (!selectedFornecedorId) {
+    if (listaFornecedores.length > 0 && !selectedFornecedorId) {
       errors.fornecedor = 'Selecione um fornecedor.'
     }
 
@@ -825,30 +826,32 @@ export default function EstoquePage() {
                 </Select>
               </div>
 
-              {/* Filtro por Fornecedor */}
-              <div className="w-full sm:w-48">
-                <Select
-                  value={fornecedorFilterMov}
-                  onValueChange={(val: string) => {
-                    setFornecedorFilterMov(val)
-                    setPageMov(1)
-                  }}
-                >
-                  <SelectTrigger className="h-10 text-xs bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] rounded-xl">
-                    <SelectValue placeholder="Fornecedor" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60">
-                    <SelectItem value="todos" className="text-xs">
-                      Todos os Fornecedores
-                    </SelectItem>
-                    {listaFornecedores.map((f) => (
-                      <SelectItem key={f.id} value={f.id} className="text-xs">
-                        {f.nome}
+              {/* Filtro por Fornecedor (oculto se o perfil não tiver permissão de fornecedores) */}
+              {listaFornecedores.length > 0 && (
+                <div className="w-full sm:w-48">
+                  <Select
+                    value={fornecedorFilterMov}
+                    onValueChange={(val: string) => {
+                      setFornecedorFilterMov(val)
+                      setPageMov(1)
+                    }}
+                  >
+                    <SelectTrigger className="h-10 text-xs bg-slate-50/70 dark:bg-[#0A1328]/50 border-slate-200 dark:border-[#1A294A] rounded-xl">
+                      <SelectValue placeholder="Fornecedor" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      <SelectItem value="todos" className="text-xs">
+                        Todos os Fornecedores
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                      {listaFornecedores.map((f) => (
+                        <SelectItem key={f.id} value={f.id} className="text-xs">
+                          {f.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <div className="flex items-center gap-1.5 w-full sm:w-auto">
                 <div className="relative flex-1 sm:w-36">
@@ -1096,76 +1099,79 @@ export default function EstoquePage() {
 
           <form onSubmit={handleSubmitEntrada} className="space-y-4 py-2">
             {/* Campo 1: Fornecedor */}
-            <div className="space-y-1.5">
-              <Label
-                htmlFor="fornecedor-select"
-                className="text-xs font-bold text-slate-700 dark:text-slate-300"
-              >
-                Fornecedor <span className="text-rose-500">*</span>
-              </Label>
+            {listaFornecedores.length > 0 && (
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="fornecedor-select"
+                  className="text-xs font-bold text-slate-700 dark:text-slate-300"
+                >
+                  Fornecedor <span className="text-rose-500">*</span>
+                </Label>
 
-              {loadingModalData ? (
-                <div className="flex items-center gap-2 h-9 px-3 border border-slate-200 dark:border-[#1A294A] rounded-xl bg-slate-50 dark:bg-[#071126] text-xs text-slate-500 dark:text-slate-400">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0066FF] dark:text-[#3B82F6]" />
-                  Carregando fornecedores...
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
-                    <Input
-                      placeholder="Buscar fornecedor por nome..."
-                      value={filtroFornecedorEntrada}
-                      onChange={(e) => setFiltroFornecedorEntrada(e.target.value)}
-                      className="pl-8 h-8 text-xs bg-slate-50 dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-lg"
-                    />
+                {loadingModalData ? (
+                  <div className="flex items-center gap-2 h-9 px-3 border border-slate-200 dark:border-[#1A294A] rounded-xl bg-slate-50 dark:bg-[#071126] text-xs text-slate-500 dark:text-slate-400">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0066FF] dark:text-[#3B82F6]" />
+                    Carregando fornecedores...
                   </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400" />
+                      <Input
+                        placeholder="Buscar fornecedor por nome..."
+                        value={filtroFornecedorEntrada}
+                        onChange={(e) => setFiltroFornecedorEntrada(e.target.value)}
+                        className="pl-8 h-8 text-xs bg-slate-50 dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-lg"
+                      />
+                    </div>
 
-                  <Select
-                    value={selectedFornecedorId}
-                    onValueChange={(val) => {
-                      setSelectedFornecedorId(val)
-                      if (entradaErrors.fornecedor) {
-                        setEntradaErrors((prev) => ({ ...prev, fornecedor: undefined }))
-                      }
-                    }}
-                  >
-                    <SelectTrigger
-                      id="fornecedor-select"
-                      className={`h-9 text-xs bg-white dark:bg-[#071126] rounded-xl text-slate-900 dark:text-slate-100 ${
-                        entradaErrors.fornecedor
-                          ? 'border-rose-500'
-                          : 'border-slate-200 dark:border-[#1A294A]'
-                      }`}
+                    <Select
+                      value={selectedFornecedorId}
+                      onValueChange={(val) => {
+                        setSelectedFornecedorId(val)
+                        if (entradaErrors.fornecedor) {
+                          setEntradaErrors((prev) => ({ ...prev, fornecedor: undefined }))
+                        }
+                      }}
                     >
-                      <SelectValue placeholder="Selecione o fornecedor..." />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-56 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
-                      {fornecedoresEntradaFiltrados.length === 0 ? (
-                        <div className="p-3 text-xs text-center text-slate-400 dark:text-slate-500">
-                          Nenhum fornecedor ativo encontrado
-                        </div>
-                      ) : (
-                        fornecedoresEntradaFiltrados.map((f) => (
-                          <SelectItem
-                            key={f.id}
-                            value={f.id}
-                            className="text-xs py-2 text-slate-700 dark:text-slate-200"
-                          >
-                            <span className="font-semibold">{f.nome}</span>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+                      <SelectTrigger
+                        id="fornecedor-select"
+                        className={`h-9 text-xs bg-white dark:bg-[#071126] rounded-xl text-slate-900 dark:text-slate-100 ${
+                          entradaErrors.fornecedor
+                            ? 'border-rose-500'
+                            : 'border-slate-200 dark:border-[#1A294A]'
+                        }`}
+                      >
+                        <SelectValue placeholder="Selecione o fornecedor..." />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-56 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
+                        {fornecedoresEntradaFiltrados.length === 0 ? (
+                          <div className="p-3 text-xs text-center text-slate-400 dark:text-slate-500">
+                            Nenhum fornecedor ativo encontrado
+                          </div>
+                        ) : (
+                          fornecedoresEntradaFiltrados.map((f) => (
+                            <SelectItem
+                              key={f.id}
+                              value={f.id}
+                              className="text-xs py-2 text-slate-700 dark:text-slate-200"
+                            >
+                              <span className="font-semibold">{f.nome}</span>
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
-              {entradaErrors.fornecedor && (
-                <p className="text-[11px] text-rose-500 font-medium">{entradaErrors.fornecedor}</p>
-              )}
-            </div>
-
+                {entradaErrors.fornecedor && (
+                  <p className="text-[11px] text-rose-500 font-medium">
+                    {entradaErrors.fornecedor}
+                  </p>
+                )}
+              </div>
+            )}
             {/* Campo 2: Produto */}
             <div className="space-y-1.5">
               <Label
