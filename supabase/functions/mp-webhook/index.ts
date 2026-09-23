@@ -5,15 +5,34 @@ import { corsHeaders } from '../_shared/cors.ts'
 /**
  * Validação de Assinatura x-signature do Mercado Pago
  */
+/**
+ * Comparação em tempo constante para evitar timing attacks
+ */
+function constantTimeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false
+  }
+  let result = 0
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  }
+  return result === 0
+}
+
+/**
+ * Validação de Assinatura x-signature do Mercado Pago (Fail-Closed)
+ */
 async function verifyMercadoPagoSignature(
   xSignature: string | null,
   dataId: string,
   secret: string | null,
 ): Promise<boolean> {
-  if (!secret) {
-    // Se não houver secret configurado (ambiente dev), aceita com warning
-    console.warn('mp-webhook: MP_WEBHOOK_SECRET ausente, ignorando validação HMAC em dev.')
-    return true
+  // Fail-closed: se o secret não estiver configurado, REJEITAR imediatamente
+  if (!secret || secret.trim() === '') {
+    console.error(
+      'mp-webhook: MP_WEBHOOK_SECRET não configurado. Rejeitando requisição (fail-closed).',
+    )
+    return false
   }
 
   if (!xSignature) {
@@ -54,7 +73,8 @@ async function verifyMercadoPagoSignature(
       .map((b) => b.toString(16).padStart(2, '0'))
       .join('')
 
-    return hashHex === hash
+    // Usar comparação em tempo constante
+    return constantTimeEqual(hashHex, hash)
   } catch (err) {
     console.error('mp-webhook: Erro ao calcular HMAC signature', err)
     return false
@@ -127,7 +147,7 @@ Deno.serve(async (req: Request) => {
 
     const strPaymentId = String(paymentId)
 
-    // Validação de assinatura HMAC
+    // Validação de assinatura HMAC (Fail-Closed -> 401 Unauthorized)
     const xSignature = req.headers.get('x-signature')
     const isValidSignature = await verifyMercadoPagoSignature(
       xSignature,
@@ -135,12 +155,14 @@ Deno.serve(async (req: Request) => {
       mpWebhookSecret,
     )
     if (!isValidSignature) {
-      console.warn('mp-webhook: Assinatura inválida para paymentId:', strPaymentId)
-      // MP recomenda retornar 200 mesmo se ignorar para evitar retentativas desnecessárias
-      return new Response(JSON.stringify({ received: true, ignored: 'invalid_signature' }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      })
+      console.warn('mp-webhook: Assinatura ausente ou inválida para paymentId:', strPaymentId)
+      return new Response(
+        JSON.stringify({ error: 'Assinatura inválida ou ausente.', code: 'unauthorized' }),
+        {
+          status: 401,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        },
+      )
     }
 
     // IDEMPOTÊNCIA: Verificar se já existe transação processada para este gateway_id com status final

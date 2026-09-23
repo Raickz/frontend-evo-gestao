@@ -119,6 +119,7 @@ Deno.serve(async (req: Request) => {
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
 
   if (!supabaseUrl || !supabaseServiceKey) {
     return new Response(
@@ -133,12 +134,82 @@ Deno.serve(async (req: Request) => {
     )
   }
 
+  // EXIGIR AUTENTICAÇÃO COM platform_admin (Bloqueio total de acesso não autorizado)
+  const authHeader = req.headers.get('Authorization') || req.headers.get('authorization')
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return new Response(
+      JSON.stringify({
+        sucesso: false,
+        erro: 'Acesso negado: Autenticação obrigatória.',
+      }),
+      {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      },
+    )
+  }
+
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim()
+  const clientKey = supabaseAnonKey || supabaseServiceKey
+  const supabaseUserClient = createClient(supabaseUrl, clientKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+    global: {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  })
+
+  const {
+    data: { user: callerUser },
+    error: userAuthError,
+  } = await supabaseUserClient.auth.getUser(token)
+
+  if (userAuthError || !callerUser) {
+    return new Response(
+      JSON.stringify({
+        sucesso: false,
+        erro: 'Sessão inválida ou expirada.',
+      }),
+      {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      },
+    )
+  }
+
   const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
     },
   })
+
+  // Validar se o chamador possui perfil 'platform_admin'
+  const { data: usuarioCaller, error: callerFetchError } = await supabaseAdmin
+    .from('usuarios')
+    .select('id, perfil, ativo')
+    .eq('auth_user_id', callerUser.id)
+    .single()
+
+  if (
+    callerFetchError ||
+    !usuarioCaller ||
+    !usuarioCaller.ativo ||
+    usuarioCaller.perfil !== 'platform_admin'
+  ) {
+    return new Response(
+      JSON.stringify({
+        sucesso: false,
+        erro: 'Acesso negado: apenas platform_admin pode executar a inicialização demo.',
+      }),
+      {
+        status: 403,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      },
+    )
+  }
 
   try {
     const summary = {

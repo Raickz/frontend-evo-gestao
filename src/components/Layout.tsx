@@ -383,11 +383,7 @@ export default function Layout() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Global Search Bar mockup */}
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-[#0E1A33] border border-slate-200 dark:border-[#1A2C50] rounded-lg text-xs text-slate-500 dark:text-[#C0C6CF]">
-              <Search className="w-3.5 h-3.5 text-slate-400 dark:text-[#6E7785]" />
-              <span>Buscar vendas, clientes ou produtos...</span>
-            </div>
+            {/* Global Search Bar mockup — oculto temporariamente conforme auditoria de segurança v0.0.106 */}
 
             {/* Theme Toggle Button (Requirement #4, #15, #16) */}
             <Button
