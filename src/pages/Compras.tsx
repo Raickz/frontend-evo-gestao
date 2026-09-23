@@ -700,7 +700,7 @@ export default function ComprasPage() {
   }
 
   const handleExecutarConfirmacao = async () => {
-    if (!compraParaConfirmar?.id) return
+    if (!compraParaConfirmar?.id || submittingConfirmar) return
     setSubmittingConfirmar(true)
     try {
       const { data, error } = await ComprasService.confirmarCompra(compraParaConfirmar.id)

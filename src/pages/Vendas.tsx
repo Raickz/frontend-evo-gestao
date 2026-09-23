@@ -466,6 +466,7 @@ export default function VendasPage() {
 
   // Finalização de venda chamando a RPC
   const handleFinalizarVenda = async () => {
+    if (submetendoVenda) return
     setErroVenda(null)
 
     // Validações locais amigáveis

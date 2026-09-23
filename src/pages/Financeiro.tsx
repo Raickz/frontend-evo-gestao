@@ -282,7 +282,7 @@ export default function FinanceiroPage() {
   // Submissão de Recebimento
   const handleConfirmarRecebimento = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!empresaId || !contaReceberSelecionada) return
+    if (!empresaId || !contaReceberSelecionada || submittingRecebimento) return
 
     const valor = parseFloat(valorRecebimento)
     const saldoRestante = Math.max(
@@ -351,7 +351,7 @@ export default function FinanceiroPage() {
   // Submissão de Pagamento
   const handleConfirmarPagamento = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!empresaId || !contaPagarSelecionada) return
+    if (!empresaId || !contaPagarSelecionada || submittingPagamento) return
 
     const valor = parseFloat(valorPagamento)
     const saldoRestante = Math.max(

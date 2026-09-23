@@ -646,7 +646,7 @@ export default function PedidosPage() {
   }
 
   const handleExecutarConversao = async () => {
-    if (!pedidoParaConverter?.id) return
+    if (!pedidoParaConverter?.id || convertendo) return
     setConvertendo(true)
     try {
       const { data, error: errRpc } = await PedidosService.converterEmVenda(
