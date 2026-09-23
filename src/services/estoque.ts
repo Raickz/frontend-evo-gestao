@@ -8,6 +8,7 @@ export interface EstoqueIndicadores {
   total: number
   zerados: number
   abaixoMinimo: number
+  noLimite: number
   normal: number
 }
 
@@ -96,7 +97,7 @@ export const EstoqueService = {
   async listMovimentacoes(empresaId: string) {
     return supabase
       .from('movimentacoes_estoque')
-      .select('*, produtos(nome, codigo), usuarios(nome), fornecedores(nome)')
+      .select('*, produtos(nome, codigo), usuarios(nome), fornecedores!left(nome)')
       .eq('empresa_id', empresaId)
       .order('created_at', { ascending: false })
       .limit(100)
@@ -172,6 +173,7 @@ export const EstoqueService = {
 
     let zerados = 0
     let abaixoMinimo = 0
+    let noLimite = 0
     let normal = 0
 
     const total = data?.length || 0
@@ -183,8 +185,10 @@ export const EstoqueService = {
 
       if (qtd === 0) {
         zerados++
-      } else if (qtd > 0 && qtd <= min) {
+      } else if (qtd > 0 && qtd < min) {
         abaixoMinimo++
+      } else if (min > 0 && qtd === min) {
+        noLimite++
       } else if (qtd > min) {
         normal++
       }
@@ -195,6 +199,7 @@ export const EstoqueService = {
         total,
         zerados,
         abaixoMinimo,
+        noLimite,
         normal,
       },
       error: null,
@@ -259,7 +264,7 @@ export const EstoqueService = {
         const qtd = Number(item.quantidade) || 0
         const min = Number(item.produtos?.estoque_minimo) || 0
         if (statusFilter === 'abaixo_minimo') {
-          return qtd > 0 && qtd <= min
+          return qtd > 0 && qtd < min
         }
         if (statusFilter === 'normal') {
           return qtd > min
@@ -332,7 +337,7 @@ export const EstoqueService = {
         const qtd = Number(item.quantidade) || 0
         const prod = item.produtos as { estoque_minimo: number } | null
         const min = Number(prod?.estoque_minimo) || 0
-        if (statusFilter === 'abaixo_minimo' && qtd > 0 && qtd <= min) {
+        if (statusFilter === 'abaixo_minimo' && qtd > 0 && qtd < min) {
           count++
         } else if (statusFilter === 'normal' && qtd > min) {
           count++
@@ -355,7 +360,7 @@ export const EstoqueService = {
     let query = supabase
       .from('movimentacoes_estoque')
       .select(
-        'id, empresa_id, produto_id, fornecedor_id, tipo, quantidade, motivo, referencia_id, usuario_id, created_at, produtos!inner(nome, codigo), usuarios(nome), fornecedores(nome)',
+        'id, empresa_id, produto_id, fornecedor_id, tipo, quantidade, motivo, referencia_id, usuario_id, created_at, produtos!inner(nome, codigo), usuarios(nome), fornecedores!left(nome)',
         { count: 'exact' },
       )
       .eq('empresa_id', empresaId)

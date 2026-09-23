@@ -213,7 +213,7 @@ export const FinanceiroService = {
 
     const todayStr = new Date().toISOString().split('T')[0]
 
-    let total = 0
+    let totalSaldoAberto = 0
     let recebido = 0
     let vencido = 0
     let aVencer = 0
@@ -225,20 +225,22 @@ export const FinanceiroService = {
       const vencimento = item.vencimento ? item.vencimento.split('T')[0] : ''
 
       if (item.status !== 'cancelado') {
-        total += valor
+        totalSaldoAberto += saldo
       }
 
       recebido += valorPago
 
-      if (item.status === 'atrasado' || (item.status === 'pendente' && vencimento < todayStr)) {
-        vencido += saldo
-      } else if (item.status === 'pendente' && vencimento >= todayStr) {
-        aVencer += saldo
+      if (item.status !== 'cancelado') {
+        if (item.status === 'atrasado' || (item.status === 'pendente' && vencimento < todayStr)) {
+          vencido += saldo
+        } else if (item.status === 'pendente' && vencimento >= todayStr) {
+          aVencer += saldo
+        }
       }
     }
 
     return {
-      total,
+      total: totalSaldoAberto,
       recebidoOuPago: recebido,
       vencido,
       aVencer,
@@ -377,7 +379,7 @@ export const FinanceiroService = {
 
     const todayStr = new Date().toISOString().split('T')[0]
 
-    let total = 0
+    let totalSaldoAberto = 0
     let pago = 0
     let vencido = 0
     let aVencer = 0
@@ -389,20 +391,22 @@ export const FinanceiroService = {
       const vencimento = item.vencimento ? item.vencimento.split('T')[0] : ''
 
       if (item.status !== 'cancelado') {
-        total += valor
+        totalSaldoAberto += saldo
       }
 
       pago += valorPago
 
-      if (item.status === 'atrasado' || (item.status === 'pendente' && vencimento < todayStr)) {
-        vencido += saldo
-      } else if (item.status === 'pendente' && vencimento >= todayStr) {
-        aVencer += saldo
+      if (item.status !== 'cancelado') {
+        if (item.status === 'atrasado' || (item.status === 'pendente' && vencimento < todayStr)) {
+          vencido += saldo
+        } else if (item.status === 'pendente' && vencimento >= todayStr) {
+          aVencer += saldo
+        }
       }
     }
 
     return {
-      total,
+      total: totalSaldoAberto,
       recebidoOuPago: pago,
       vencido,
       aVencer,

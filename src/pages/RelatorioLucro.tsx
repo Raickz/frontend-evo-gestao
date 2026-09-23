@@ -41,18 +41,11 @@ import {
 import { useEmpresa } from '@/hooks/use-empresa'
 import { RelatorioLucroService, LucroResumo, LucroPorVendedor } from '@/services/relatorio-lucro'
 import { ComissoesService } from '@/services/comissoes'
+import { formatCurrency } from '@/lib/utils'
 
 interface VendedorOption {
   id: string
   nome: string
-}
-
-const formatCurrency = (val: number | null | undefined): string => {
-  if (val === null || val === undefined || isNaN(val)) return 'R$ 0,00'
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(val)
 }
 
 type PeriodoPredefinido =
@@ -363,7 +356,7 @@ export default function RelatorioLucroPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <MetricCard
             title="Faturamento"
-            value={resumo.faturamento}
+            value={formatCurrency(resumo.faturamento)}
             subtitle="Total de vendas finalizadas"
             icon={DollarSign}
             loading={loading}
@@ -372,7 +365,7 @@ export default function RelatorioLucroPage() {
 
           <MetricCard
             title="Custo dos Produtos"
-            value={resumo.custoProdutos}
+            value={formatCurrency(resumo.custoProdutos)}
             subtitle="Custo histórico registrado na venda"
             icon={ShoppingCart}
             loading={loading}
@@ -381,7 +374,7 @@ export default function RelatorioLucroPage() {
 
           <MetricCard
             title="Lucro Bruto"
-            value={resumo.lucroBruto}
+            value={formatCurrency(resumo.lucroBruto)}
             subtitle={lucroPositivo ? 'Faturamento - Custo' : 'Resultado negativo'}
             icon={TrendingUp}
             variant={lucroPositivo ? 'success' : 'danger'}
@@ -401,7 +394,11 @@ export default function RelatorioLucroPage() {
           <MetricCard
             title="Número de Vendas"
             value={resumo.numeroVendas}
-            subtitle="Vendas no período"
+            subtitle={
+              resumo.numeroVendas === 1
+                ? '1 venda no período'
+                : `${resumo.numeroVendas} vendas no período`
+            }
             icon={Receipt}
             loading={loading}
             animate={true}
@@ -409,7 +406,7 @@ export default function RelatorioLucroPage() {
 
           <MetricCard
             title="Ticket Médio"
-            value={resumo.ticketMedio}
+            value={formatCurrency(resumo.ticketMedio)}
             subtitle="Faturamento por venda"
             icon={Activity}
             loading={loading}

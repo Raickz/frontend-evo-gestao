@@ -207,15 +207,30 @@ export default function ComprasPage() {
         pageSize: PAGE_SIZE,
       }
 
-      const [listRes, countRes] = await Promise.all([
+      const [listRes, countRes, contasRes] = await Promise.all([
         ComprasService.list(empresaId, filters),
         ComprasService.count(empresaId, filters),
+        supabase
+          .from('contas_pagar')
+          .select('id, descricao, valor, valor_pago, status, data_pagamento')
+          .eq('empresa_id', empresaId),
       ])
 
       if (listRes.error) throw listRes.error
       if (countRes.error) throw countRes.error
 
-      setCompras(listRes.data || [])
+      const contasPagar = contasRes.data || []
+      const comprasComContas = (listRes.data || []).map((c: any) => {
+        const cp = contasPagar.find(
+          (p) => p.descricao && p.descricao.includes(`Compra #${c.numero}`),
+        )
+        return {
+          ...c,
+          contaPagar: cp || null,
+        }
+      })
+
+      setCompras(comprasComContas)
       setTotalComprasCount(countRes.count || 0)
     } catch (e: any) {
       if (import.meta.env.DEV) {
@@ -865,14 +880,18 @@ export default function ComprasPage() {
             <MetricCard
               title="Compras no Período"
               value={indicadores.totalCompras}
-              subtitle="Total de registros de compras"
+              subtitle={
+                indicadores.totalCompras === 1
+                  ? '1 registro de compra'
+                  : `${indicadores.totalCompras} registros de compras`
+              }
               icon={ShoppingCart}
               animate={true}
             />
 
             <MetricCard
               title="Valor Comprado"
-              value={indicadores.valorCompras}
+              value={formatCurrency(indicadores.valorCompras)}
               subtitle="Soma total das compras"
               icon={DollarSign}
               animate={true}
@@ -1046,8 +1065,17 @@ export default function ComprasPage() {
               <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                 {compras.map((compra) => {
                   const isRascunho = compra.status === 'rascunho'
-                  const formaPagtoLabel =
-                    compra.forma_pagamento === 'pago' ? 'À Vista / Pago' : 'A Prazo'
+                  const totalCompra = Number(compra.total) || 0
+                  const cp = compra.contaPagar
+                  const valorPagoReal = cp
+                    ? Number(cp.valor_pago) || 0
+                    : Number(compra.valor_pago) || 0
+                  const isQuitado =
+                    (cp && cp.status === 'pago') ||
+                    (totalCompra > 0 && valorPagoReal >= totalCompra) ||
+                    compra.forma_pagamento === 'pago'
+                  const dataPagamentoReal =
+                    cp?.data_pagamento || compra.data_compra || compra.created_at
 
                   return (
                     <tr
@@ -1078,18 +1106,36 @@ export default function ComprasPage() {
                       <td className="py-3.5 px-4 text-center">{getStatusBadge(compra.status)}</td>
 
                       <td className="py-3.5 px-4 text-xs">
-                        <div className="font-medium text-slate-800 dark:text-slate-200">
-                          {formaPagtoLabel}
-                        </div>
-                        {compra.forma_pagamento === 'a_prazo' && compra.vencimento && (
-                          <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                            Venc: {formatDate(compra.vencimento)}
-                          </div>
-                        )}
-                        {compra.forma_pagamento === 'pago' && compra.valor_pago > 0 && (
-                          <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
-                            Pago: {formatCurrency(compra.valor_pago)}
-                          </div>
+                        {isQuitado ? (
+                          <>
+                            <div className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                              <span>Pago</span>
+                              {dataPagamentoReal && (
+                                <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400">
+                                  ({formatDate(dataPagamentoReal)})
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                              {compra.forma_pagamento === 'pago' ? 'À Vista' : 'A Prazo (Quitado)'}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="font-medium text-slate-800 dark:text-slate-200">
+                              A Prazo
+                            </div>
+                            {compra.vencimento && (
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                                Venc: {formatDate(compra.vencimento)}
+                              </div>
+                            )}
+                            {valorPagoReal > 0 && (
+                              <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                                Pago parc.: {formatCurrency(valorPagoReal)}
+                              </div>
+                            )}
+                          </>
                         )}
                       </td>
 

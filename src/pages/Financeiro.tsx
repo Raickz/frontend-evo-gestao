@@ -435,28 +435,28 @@ export default function FinanceiroPage() {
           <>
             <MetricCard
               title="Total a Receber"
-              value={currentIndicadores.total}
-              subtitle="Soma de títulos ativos"
+              value={formatCurrency(currentIndicadores.total)}
+              subtitle="Saldo em aberto"
               icon={TrendingUp}
               animate={true}
             />
             <MetricCard
               title="Total Recebido"
-              value={currentIndicadores.recebidoOuPago}
+              value={formatCurrency(currentIndicadores.recebidoOuPago)}
               subtitle="Valores liquidados"
               icon={CheckCircle2}
               animate={true}
             />
             <MetricCard
               title="Vencidos"
-              value={currentIndicadores.vencido}
+              value={formatCurrency(currentIndicadores.vencido)}
               subtitle="Saldo devedor vencido"
               icon={AlertTriangle}
               animate={true}
             />
             <MetricCard
               title="A Vencer"
-              value={currentIndicadores.aVencer}
+              value={formatCurrency(currentIndicadores.aVencer)}
               subtitle="Saldo com prazo vigente"
               icon={Calendar}
               animate={true}
@@ -466,28 +466,28 @@ export default function FinanceiroPage() {
           <>
             <MetricCard
               title="Total a Pagar"
-              value={currentIndicadores.total}
-              subtitle="Soma de títulos ativos"
+              value={formatCurrency(currentIndicadores.total)}
+              subtitle="Saldo em aberto"
               icon={TrendingDown}
               animate={true}
             />
             <MetricCard
               title="Total Pago"
-              value={currentIndicadores.recebidoOuPago}
+              value={formatCurrency(currentIndicadores.recebidoOuPago)}
               subtitle="Valores liquidados"
               icon={CheckCircle2}
               animate={true}
             />
             <MetricCard
               title="Vencidos"
-              value={currentIndicadores.vencido}
+              value={formatCurrency(currentIndicadores.vencido)}
               subtitle="Saldo devedor vencido"
               icon={AlertTriangle}
               animate={true}
             />
             <MetricCard
               title="A Vencer"
-              value={currentIndicadores.aVencer}
+              value={formatCurrency(currentIndicadores.aVencer)}
               subtitle="Saldo com prazo vigente"
               icon={Calendar}
               animate={true}

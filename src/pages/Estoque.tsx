@@ -663,7 +663,8 @@ export default function EstoquePage() {
                       const unidade = prod?.unidade || 'UN'
 
                       const isZerado = qtd === 0
-                      const isAbaixoMinimo = qtd > 0 && qtd <= min
+                      const isAbaixoMinimo = qtd > 0 && qtd < min
+                      const isNoLimite = min > 0 && qtd === min
                       const isNormal = qtd > min
 
                       return (
@@ -700,12 +701,17 @@ export default function EstoquePage() {
                           <td className="py-3.5 px-4">
                             {isZerado && (
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/25">
-                                Zerado
+                                Sem estoque
                               </span>
                             )}
                             {isAbaixoMinimo && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/25">
+                                Abaixo do mínimo
+                              </span>
+                            )}
+                            {isNoLimite && (
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/25">
-                                Abaixo do mín.
+                                No limite
                               </span>
                             )}
                             {isNormal && (
