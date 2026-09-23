@@ -188,64 +188,39 @@ export const ComprasService = {
   },
 
   /**
-   * Atualiza compra em rascunho (cabeçalho e itens se fornecidos)
+   * Atualiza compra em rascunho via RPC `atualizar_compra_rascunho`
    */
-  async update(empresaId: string, id: string, data: UpdateCompraData) {
-    // 1. Atualiza cabeçalho
-    const updatePayload: TablesUpdate<'compras'> = {
-      updated_at: new Date().toISOString(),
-    }
+  async update(_empresaId: string, id: string, data: UpdateCompraData) {
+    const itensRpc = data.itens?.map((it) => ({
+      produto_id: it.produto_id,
+      quantidade: it.quantidade,
+      preco_unitario: it.preco_unitario,
+    }))
 
-    if (data.fornecedor_id !== undefined) updatePayload.fornecedor_id = data.fornecedor_id
-    if (data.observacoes !== undefined) updatePayload.observacoes = data.observacoes
-    if (data.data_compra !== undefined) updatePayload.data_compra = data.data_compra
-    if (data.forma_pagamento !== undefined) updatePayload.forma_pagamento = data.forma_pagamento
-    if (data.vencimento !== undefined) updatePayload.vencimento = data.vencimento
-    if (data.valor_pago !== undefined) updatePayload.valor_pago = data.valor_pago
+    const { data: res, error } = await (supabase.rpc as any)('atualizar_compra_rascunho', {
+      p_compra_id: id,
+      p_fornecedor_id: data.fornecedor_id,
+      p_itens: itensRpc || null,
+      p_observacoes: data.observacoes || null,
+      p_data_compra: data.data_compra || new Date().toISOString().split('T')[0],
+      p_forma_pagamento: data.forma_pagamento || 'a_prazo',
+      p_vencimento: data.vencimento || null,
+      p_valor_pago: data.valor_pago || 0,
+    })
 
-    // Se itens foram fornecidos, recalcula total e atualiza itens_compra
-    if (data.itens && data.itens.length > 0) {
-      let novoTotal = 0
-      const itensComSubtotal: TablesInsert<'itens_compra'>[] = data.itens.map((it) => {
-        const sub = Math.round(it.quantidade * it.preco_unitario * 100) / 100
-        novoTotal += sub
-        return {
-          empresa_id: empresaId,
-          compra_id: id,
-          produto_id: it.produto_id,
-          quantidade: it.quantidade,
-          preco_unitario: it.preco_unitario,
-          subtotal: sub,
-        }
-      })
-      updatePayload.total = novoTotal
-
-      // Deletar itens antigos e inserir novos
-      await supabase.from('itens_compra').delete().eq('compra_id', id).eq('empresa_id', empresaId)
-      const { error: insError } = await supabase.from('itens_compra').insert(itensComSubtotal)
-      if (insError) throw insError
-    }
-
-    return supabase
-      .from('compras')
-      .update(updatePayload)
-      .eq('empresa_id', empresaId)
-      .eq('id', id)
-      .select()
-      .single()
+    if (error) throw error
+    return { data: res, error: null }
   },
 
   /**
-   * Cancela uma compra em rascunho (direto no banco)
+   * Cancela uma compra com estorno seguro de estoque e financeiro via RPC `cancelar_compra`
    */
-  async cancelar(empresaId: string, id: string) {
-    return supabase
-      .from('compras')
-      .update({ status: 'cancelada', updated_at: new Date().toISOString() })
-      .eq('empresa_id', empresaId)
-      .eq('id', id)
-      .select()
-      .single()
+  async cancelar(_empresaId: string, id: string) {
+    const { data: res, error } = await (supabase.rpc as any)('cancelar_compra', {
+      p_compra_id: id,
+    })
+    if (error) return { data: null, error }
+    return { data: res, error: null }
   },
 
   /**

@@ -260,41 +260,40 @@ export const PedidosService = {
   },
 
   /**
-   * Atualiza dados de um pedido (somente campos de cabeçalho permitidos: cliente, vendedor, observações).
+   * Atualiza dados de um pedido via RPC `atualizar_pedido`
    */
-  async update(empresaId: string, id: string, data: UpdatePedidoData) {
-    return supabase
-      .from('pedidos')
-      .update({
-        cliente_id: data.cliente_id !== undefined ? data.cliente_id : undefined,
-        vendedor_id: data.vendedor_id !== undefined ? data.vendedor_id : undefined,
-        observacoes: data.observacoes !== undefined ? data.observacoes : undefined,
-        total: data.total !== undefined ? data.total : undefined,
-      })
-      .eq('empresa_id', empresaId)
-      .eq('id', id)
-      .select()
-      .single()
+  async update(_empresaId: string, id: string, data: UpdatePedidoData) {
+    const { data: res, error } = await (supabase.rpc as any)('atualizar_pedido', {
+      p_pedido_id: id,
+      p_cliente_id: data.cliente_id || null,
+      p_vendedor_id: data.vendedor_id || null,
+      p_observacoes: data.observacoes || null,
+    })
+    if (error) return { data: null, error }
+    return { data: res, error: null }
   },
 
   /**
-   * Exclui um pedido pelo ID (ex: cleanup em falhas).
+   * Exclui um pedido pelo ID via RPC `excluir_pedido`
    */
-  async delete(empresaId: string, id: string) {
-    return supabase.from('pedidos').delete().eq('empresa_id', empresaId).eq('id', id)
+  async delete(_empresaId: string, id: string) {
+    const { data: res, error } = await (supabase.rpc as any)('excluir_pedido', {
+      p_pedido_id: id,
+    })
+    if (error) return { data: null, error }
+    return { data: res, error: null }
   },
 
   /**
-   * Atualiza o status do pedido (ex: 'pendente', 'confirmado', 'faturado', 'cancelado').
+   * Atualiza o status do pedido via RPC `atualizar_status_pedido`
    */
-  async updateStatus(empresaId: string, id: string, status: string) {
-    return supabase
-      .from('pedidos')
-      .update({ status })
-      .eq('empresa_id', empresaId)
-      .eq('id', id)
-      .select()
-      .single()
+  async updateStatus(_empresaId: string, id: string, status: string) {
+    const { data: res, error } = await (supabase.rpc as any)('atualizar_status_pedido', {
+      p_pedido_id: id,
+      p_status: status,
+    })
+    if (error) return { data: null, error }
+    return { data: res, error: null }
   },
 
   /**

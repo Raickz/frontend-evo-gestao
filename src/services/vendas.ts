@@ -254,4 +254,13 @@ export const VendasService = {
       p_observacoes: params.observacoes || undefined,
     })
   },
+
+  /**
+   * Cancelamento atômico de venda com estorno de estoque, contas a receber e comissões via RPC `cancelar_venda`
+   */
+  async cancelarVenda(_empresaId: string, vendaId: string) {
+    return (supabase.rpc as any)('cancelar_venda', {
+      p_venda_id: vendaId,
+    })
+  },
 }

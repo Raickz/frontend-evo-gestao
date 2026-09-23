@@ -70,45 +70,63 @@ export const FinanceiroService = {
   },
 
   async createContaReceber(
-    empresaId: string,
+    _empresaId: string,
     data: Omit<TablesInsert<'contas_receber'>, 'empresa_id'>,
   ) {
-    return supabase
-      .from('contas_receber')
-      .insert({ ...data, empresa_id: empresaId })
-      .select()
-      .single()
+    const { data: res, error } = await (supabase.rpc as any)('criar_titulo_receber', {
+      p_descricao: data.descricao,
+      p_valor: data.valor,
+      p_vencimento: data.vencimento,
+      p_cliente_id: data.cliente_id || null,
+    })
+    if (error) return { data: null, error }
+    return { data: res, error: null }
   },
 
   async createContaPagar(
-    empresaId: string,
+    _empresaId: string,
     data: Omit<TablesInsert<'contas_pagar'>, 'empresa_id'>,
   ) {
-    return supabase
-      .from('contas_pagar')
-      .insert({ ...data, empresa_id: empresaId })
-      .select()
-      .single()
+    const { data: res, error } = await (supabase.rpc as any)('criar_titulo_pagar', {
+      p_descricao: data.descricao,
+      p_valor: data.valor,
+      p_vencimento: data.vencimento,
+      p_fornecedor_id: data.fornecedor_id || null,
+    })
+    if (error) return { data: null, error }
+    return { data: res, error: null }
   },
 
-  async updateContaReceber(empresaId: string, id: string, data: TablesUpdate<'contas_receber'>) {
-    return supabase
-      .from('contas_receber')
-      .update(data)
-      .eq('empresa_id', empresaId)
-      .eq('id', id)
-      .select()
-      .single()
+  async updateContaReceber(_empresaId: string, id: string, data: TablesUpdate<'contas_receber'>) {
+    const { data: res, error } = await (supabase.rpc as any)('atualizar_titulo_receber', {
+      p_id: id,
+      p_descricao: data.descricao || '',
+      p_valor: data.valor || 0,
+      p_vencimento: data.vencimento || null,
+      p_cliente_id: data.cliente_id || null,
+    })
+    if (error) return { data: null, error }
+    return { data: res, error: null }
   },
 
-  async updateContaPagar(empresaId: string, id: string, data: TablesUpdate<'contas_pagar'>) {
-    return supabase
-      .from('contas_pagar')
-      .update(data)
-      .eq('empresa_id', empresaId)
-      .eq('id', id)
-      .select()
-      .single()
+  async updateContaPagar(_empresaId: string, id: string, data: TablesUpdate<'contas_pagar'>) {
+    const { data: res, error } = await (supabase.rpc as any)('atualizar_titulo_pagar', {
+      p_id: id,
+      p_descricao: data.descricao || '',
+      p_valor: data.valor || 0,
+      p_vencimento: data.vencimento || null,
+      p_fornecedor_id: data.fornecedor_id || null,
+    })
+    if (error) return { data: null, error }
+    return { data: res, error: null }
+  },
+
+  async cancelarContaPagar(_empresaId: string, id: string) {
+    return (supabase.rpc as any)('cancelar_titulo_pagar', { p_id: id })
+  },
+
+  async cancelarContaReceber(_empresaId: string, id: string) {
+    return (supabase.rpc as any)('cancelar_titulo_receber', { p_id: id })
   },
 
   // Contas a Receber Filtradas e Paginadas

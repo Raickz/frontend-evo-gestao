@@ -141,14 +141,15 @@ export const EstoqueService = {
   },
 
   async registrarMovimentacaoManual(
-    empresaId: string,
+    _empresaId: string,
     data: Omit<TablesInsert<'movimentacoes_estoque'>, 'empresa_id'>,
   ) {
-    return supabase
-      .from('movimentacoes_estoque')
-      .insert({ ...data, empresa_id: empresaId })
-      .select()
-      .single()
+    return (supabase.rpc as any)('ajustar_estoque_manual', {
+      p_produto_id: data.produto_id,
+      p_tipo: data.tipo,
+      p_quantidade: data.quantidade,
+      p_motivo: data.motivo || 'Ajuste manual de estoque',
+    })
   },
 
   /**
