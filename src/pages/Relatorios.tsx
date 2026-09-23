@@ -36,6 +36,7 @@ import {
 } from 'lucide-react'
 
 import { useEmpresa } from '@/hooks/use-empresa'
+import { formatCurrency } from '@/lib/utils'
 import {
   PageHeader,
   MetricCard,
@@ -288,10 +289,6 @@ export default function RelatoriosPage() {
   }, [carregarItensEstoque])
 
   // Formatações
-  const formatCurrency = (val: number | undefined | null) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0)
-  }
-
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return '-'
     const parts = dateStr.split('T')[0].split('-')
@@ -648,40 +645,76 @@ export default function RelatoriosPage() {
             </div>
 
             {/* 6. Receber Aberto */}
-            <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 transition-all">
-              <div className="flex items-center justify-between pb-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
-                  Receber Aberto
-                </span>
-                <div className="h-7 w-7 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
-                  <ArrowUpCircle className="w-4 h-4" />
+            {(() => {
+              const valorReceber = Number(resumoGeral?.contasReceberAberto) || 0
+              const hasAlert = valorReceber > 0
+              return (
+                <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 transition-all">
+                  <div className="flex items-center justify-between pb-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
+                      Receber Aberto
+                    </span>
+                    <div
+                      className={`h-7 w-7 rounded-lg flex items-center justify-center ${
+                        hasAlert
+                          ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                          : 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                      }`}
+                    >
+                      <ArrowUpCircle className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div
+                    className={`text-lg font-black tracking-tight tabular-nums ${
+                      hasAlert
+                        ? 'text-rose-600 dark:text-rose-400'
+                        : 'text-slate-900 dark:text-white'
+                    }`}
+                  >
+                    <AnimatedNumber value={formatCurrency(resumoGeral?.contasReceberAberto)} />
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Saldo pendente atual
+                  </p>
                 </div>
-              </div>
-              <div className="text-lg font-black tracking-tight text-rose-600 dark:text-rose-400 tabular-nums">
-                <AnimatedNumber value={formatCurrency(resumoGeral?.contasReceberAberto)} />
-              </div>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-                Saldo pendente atual
-              </p>
-            </div>
+              )
+            })()}
 
             {/* 7. Pagar Aberto */}
-            <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 transition-all">
-              <div className="flex items-center justify-between pb-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
-                  Pagar Aberto
-                </span>
-                <div className="h-7 w-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                  <ArrowDownCircle className="w-4 h-4" />
+            {(() => {
+              const valorPagar = Number(resumoGeral?.contasPagarAberto) || 0
+              const hasAlert = valorPagar > 0
+              return (
+                <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] p-4 transition-all">
+                  <div className="flex items-center justify-between pb-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#C0C6CF]">
+                      Pagar Aberto
+                    </span>
+                    <div
+                      className={`h-7 w-7 rounded-lg flex items-center justify-center ${
+                        hasAlert
+                          ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                          : 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                      }`}
+                    >
+                      <ArrowDownCircle className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div
+                    className={`text-lg font-black tracking-tight tabular-nums ${
+                      hasAlert
+                        ? 'text-rose-600 dark:text-rose-400'
+                        : 'text-slate-900 dark:text-white'
+                    }`}
+                  >
+                    <AnimatedNumber value={formatCurrency(resumoGeral?.contasPagarAberto)} />
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Compromissos atuais
+                  </p>
                 </div>
-              </div>
-              <div className="text-lg font-black tracking-tight text-amber-600 dark:text-amber-400 tabular-nums">
-                <AnimatedNumber value={formatCurrency(resumoGeral?.contasPagarAberto)} />
-              </div>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-                Compromissos atuais
-              </p>
-            </div>
+              )
+            })()}
           </div>
         )}
       </section>

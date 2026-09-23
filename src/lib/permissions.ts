@@ -124,6 +124,8 @@ export function normalizeRole(perfil: string | null | undefined): UserRole | nul
   ) {
     return normalized as UserRole
   }
+  // Mapeamentos comuns / aliases
+  if (normalized === 'administrador') return 'admin'
   return null
 }
 
