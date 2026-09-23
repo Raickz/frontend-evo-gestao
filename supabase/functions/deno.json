@@ -1,9 +1,9 @@
 {
   "_versions": {
-    "admin-create-user": 91,
-    "bootstrap-install": 90,
-    "seed-demo": 58,
-    "mp-checkout": 47,
-    "mp-webhook": 47
+    "admin-create-user": 92,
+    "bootstrap-install": 91,
+    "seed-demo": 59,
+    "mp-checkout": 48,
+    "mp-webhook": 48
   }
 }

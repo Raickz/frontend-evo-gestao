@@ -555,7 +555,7 @@ export default function DashboardPage() {
         string,
         { nome: string; categoria: string; qtd: number; valor: number }
       > = {}
-      vendas7List.forEach((v: any) => {
+      vendasPeriodoList.forEach((v: any) => {
         if (Array.isArray(v.itens_venda)) {
           v.itens_venda.forEach((it: any) => {
             const nomeProd = it.produto?.nome || 'Produto'
@@ -586,7 +586,7 @@ export default function DashboardPage() {
       // Formas de Pagamento reais
       const formasCount: Record<string, number> = {}
       let totalFormas = 0
-      vendas7List.forEach((v: any) => {
+      vendasPeriodoList.forEach((v: any) => {
         const fp = v.forma_pagamento ? String(v.forma_pagamento).toLowerCase() : 'outros'
         formasCount[fp] = (formasCount[fp] || 0) + Number(v.total || 0)
         totalFormas += Number(v.total || 0)
