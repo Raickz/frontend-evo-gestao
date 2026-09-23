@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase/client'
+import { getHojeSaoPaulo, RegrasCalculo } from '@/services/regras-calculo'
 import type { Tables, TablesInsert, TablesUpdate } from '@/lib/supabase/types'
 
 export type ContaReceber = Tables<'contas_receber'>
@@ -229,7 +230,7 @@ export const FinanceiroService = {
       return { total: 0, recebidoOuPago: 0, vencido: 0, aVencer: 0 }
     }
 
-    const todayStr = new Date().toISOString().split('T')[0]
+    const todayStr = getHojeSaoPaulo()
 
     let totalSaldoAberto = 0
     let recebido = 0
@@ -239,7 +240,7 @@ export const FinanceiroService = {
     for (const item of data) {
       const valor = Number(item.valor) || 0
       const valorPago = Number(item.valor_pago) || 0
-      const saldo = Math.max(0, valor - valorPago)
+      const saldo = RegrasCalculo.saldoEmAberto(valor, valorPago)
       const vencimento = item.vencimento ? item.vencimento.split('T')[0] : ''
 
       if (item.status !== 'cancelado') {
@@ -395,7 +396,7 @@ export const FinanceiroService = {
       return { total: 0, recebidoOuPago: 0, vencido: 0, aVencer: 0 }
     }
 
-    const todayStr = new Date().toISOString().split('T')[0]
+    const todayStr = getHojeSaoPaulo()
 
     let totalSaldoAberto = 0
     let pago = 0
@@ -405,7 +406,7 @@ export const FinanceiroService = {
     for (const item of data) {
       const valor = Number(item.valor) || 0
       const valorPago = Number(item.valor_pago) || 0
-      const saldo = Math.max(0, valor - valorPago)
+      const saldo = RegrasCalculo.saldoEmAberto(valor, valorPago)
       const vencimento = item.vencimento ? item.vencimento.split('T')[0] : ''
 
       if (item.status !== 'cancelado') {

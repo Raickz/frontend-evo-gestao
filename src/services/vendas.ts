@@ -1,4 +1,9 @@
 import { supabase } from '@/lib/supabase/client'
+import {
+  converterDiaSaoPauloParaIsoUtc,
+  converterPeriodoSaoPauloParaIsoUtc,
+  getPresetPeriodoSaoPaulo,
+} from '@/services/regras-calculo'
 import type { Tables } from '@/lib/supabase/types'
 
 export type Venda = Tables<'vendas'>
@@ -58,14 +63,16 @@ export const VendasService = {
       query = query.eq('forma_pagamento', formaPagamento)
     }
 
-    if (dataInicio) {
-      // Começo do dia
-      query = query.gte('created_at', new Date(`${dataInicio}T00:00:00`).toISOString())
-    }
-
-    if (dataFim) {
-      // Fim do dia
-      query = query.lte('created_at', new Date(`${dataFim}T23:59:59.999`).toISOString())
+    if (dataInicio && dataFim) {
+      const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc({
+        inicio: dataInicio,
+        fim: dataFim,
+      })
+      query = query.gte('created_at', inicioIso).lte('created_at', fimIso)
+    } else if (dataInicio) {
+      query = query.gte('created_at', converterDiaSaoPauloParaIsoUtc(dataInicio).inicioIso)
+    } else if (dataFim) {
+      query = query.lte('created_at', converterDiaSaoPauloParaIsoUtc(dataFim).fimIso)
     }
 
     if (search && search.trim()) {
@@ -104,12 +111,16 @@ export const VendasService = {
       query = query.eq('forma_pagamento', formaPagamento)
     }
 
-    if (dataInicio) {
-      query = query.gte('created_at', new Date(`${dataInicio}T00:00:00`).toISOString())
-    }
-
-    if (dataFim) {
-      query = query.lte('created_at', new Date(`${dataFim}T23:59:59.999`).toISOString())
+    if (dataInicio && dataFim) {
+      const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc({
+        inicio: dataInicio,
+        fim: dataFim,
+      })
+      query = query.gte('created_at', inicioIso).lte('created_at', fimIso)
+    } else if (dataInicio) {
+      query = query.gte('created_at', converterDiaSaoPauloParaIsoUtc(dataInicio).inicioIso)
+    } else if (dataFim) {
+      query = query.lte('created_at', converterDiaSaoPauloParaIsoUtc(dataFim).fimIso)
     }
 
     if (search && search.trim()) {
@@ -175,16 +186,16 @@ export const VendasService = {
   },
 
   async getFaturamentoMensal(empresaId: string, vendedorId?: string | null) {
-    const inicioMes = new Date()
-    inicioMes.setDate(1)
-    inicioMes.setHours(0, 0, 0, 0)
+    const mesAtual = getPresetPeriodoSaoPaulo('mes_atual')
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(mesAtual)
 
     let query = supabase
       .from('vendas')
       .select('total')
       .eq('empresa_id', empresaId)
       .eq('status', 'finalizada')
-      .gte('created_at', inicioMes.toISOString())
+      .gte('created_at', inicioIso)
+      .lte('created_at', fimIso)
 
     if (vendedorId) {
       query = query.eq('vendedor_id', vendedorId)
@@ -194,16 +205,16 @@ export const VendasService = {
   },
 
   async getCountMensal(empresaId: string, vendedorId?: string | null) {
-    const inicioMes = new Date()
-    inicioMes.setDate(1)
-    inicioMes.setHours(0, 0, 0, 0)
+    const mesAtual = getPresetPeriodoSaoPaulo('mes_atual')
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(mesAtual)
 
     let query = supabase
       .from('vendas')
       .select('id', { count: 'exact' })
       .eq('empresa_id', empresaId)
       .eq('status', 'finalizada')
-      .gte('created_at', inicioMes.toISOString())
+      .gte('created_at', inicioIso)
+      .lte('created_at', fimIso)
 
     if (vendedorId) {
       query = query.eq('vendedor_id', vendedorId)

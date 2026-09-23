@@ -1,4 +1,8 @@
 import { supabase } from '@/lib/supabase/client'
+import {
+  converterDiaSaoPauloParaIsoUtc,
+  converterPeriodoSaoPauloParaIsoUtc,
+} from '@/services/regras-calculo'
 import type { Tables, TablesInsert } from '@/lib/supabase/types'
 
 export type Estoque = Tables<'estoques'>
@@ -379,12 +383,16 @@ export const EstoqueService = {
       query = (query as any).eq('fornecedor_id', fornecedorId)
     }
 
-    if (dataInicio) {
-      query = query.gte('created_at', new Date(`${dataInicio}T00:00:00`).toISOString())
-    }
-
-    if (dataFim) {
-      query = query.lte('created_at', new Date(`${dataFim}T23:59:59.999`).toISOString())
+    if (dataInicio && dataFim) {
+      const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc({
+        inicio: dataInicio,
+        fim: dataFim,
+      })
+      query = query.gte('created_at', inicioIso).lte('created_at', fimIso)
+    } else if (dataInicio) {
+      query = query.gte('created_at', converterDiaSaoPauloParaIsoUtc(dataInicio).inicioIso)
+    } else if (dataFim) {
+      query = query.lte('created_at', converterDiaSaoPauloParaIsoUtc(dataFim).fimIso)
     }
 
     const from = (page - 1) * pageSize
@@ -428,12 +436,16 @@ export const EstoqueService = {
       query = (query as any).eq('fornecedor_id', fornecedorId)
     }
 
-    if (dataInicio) {
-      query = query.gte('created_at', new Date(`${dataInicio}T00:00:00`).toISOString())
-    }
-
-    if (dataFim) {
-      query = query.lte('created_at', new Date(`${dataFim}T23:59:59.999`).toISOString())
+    if (dataInicio && dataFim) {
+      const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc({
+        inicio: dataInicio,
+        fim: dataFim,
+      })
+      query = query.gte('created_at', inicioIso).lte('created_at', fimIso)
+    } else if (dataInicio) {
+      query = query.gte('created_at', converterDiaSaoPauloParaIsoUtc(dataInicio).inicioIso)
+    } else if (dataFim) {
+      query = query.lte('created_at', converterDiaSaoPauloParaIsoUtc(dataFim).fimIso)
     }
 
     const { count, error } = await query

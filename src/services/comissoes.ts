@@ -1,4 +1,8 @@
 import { supabase } from '@/lib/supabase/client'
+import {
+  converterPeriodoSaoPauloParaIsoUtc,
+  converterDiaSaoPauloParaIsoUtc,
+} from '@/services/regras-calculo'
 import type { Tables } from '@/lib/supabase/types'
 
 export type ComissaoRow = Tables<'comissoes'>
@@ -67,13 +71,16 @@ export const ComissoesService = {
     }
 
     // Filtro por período
-    if (options.dataInicio) {
-      // Início do dia
-      query = query.gte('created_at', new Date(`${options.dataInicio}T00:00:00`).toISOString())
-    }
-    if (options.dataFim) {
-      // Final do dia
-      query = query.lte('created_at', new Date(`${options.dataFim}T23:59:59.999`).toISOString())
+    if (options.dataInicio && options.dataFim) {
+      const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc({
+        inicio: options.dataInicio,
+        fim: options.dataFim,
+      })
+      query = query.gte('created_at', inicioIso).lte('created_at', fimIso)
+    } else if (options.dataInicio) {
+      query = query.gte('created_at', converterDiaSaoPauloParaIsoUtc(options.dataInicio).inicioIso)
+    } else if (options.dataFim) {
+      query = query.lte('created_at', converterDiaSaoPauloParaIsoUtc(options.dataFim).fimIso)
     }
 
     query = query.order('created_at', { ascending: false }).range(from, to)
@@ -108,11 +115,16 @@ export const ComissoesService = {
       query = query.eq('vendedor_id', options.vendedorId)
     }
 
-    if (options.dataInicio) {
-      query = query.gte('created_at', new Date(`${options.dataInicio}T00:00:00`).toISOString())
-    }
-    if (options.dataFim) {
-      query = query.lte('created_at', new Date(`${options.dataFim}T23:59:59.999`).toISOString())
+    if (options.dataInicio && options.dataFim) {
+      const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc({
+        inicio: options.dataInicio,
+        fim: options.dataFim,
+      })
+      query = query.gte('created_at', inicioIso).lte('created_at', fimIso)
+    } else if (options.dataInicio) {
+      query = query.gte('created_at', converterDiaSaoPauloParaIsoUtc(options.dataInicio).inicioIso)
+    } else if (options.dataFim) {
+      query = query.lte('created_at', converterDiaSaoPauloParaIsoUtc(options.dataFim).fimIso)
     }
 
     const { count, error } = await query

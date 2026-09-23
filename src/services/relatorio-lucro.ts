@@ -1,4 +1,9 @@
 import { supabase } from '@/lib/supabase/client'
+import {
+  converterPeriodoSaoPauloParaIsoUtc,
+  RegrasCalculo,
+  PeriodoDatas,
+} from '@/services/regras-calculo'
 
 export interface PeriodoFiltro {
   inicio: string // YYYY-MM-DD
@@ -60,8 +65,7 @@ export const RelatorioLucroService = {
     periodo: PeriodoFiltro,
     vendedorId?: string | null,
   ): Promise<LucroResumo> {
-    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
-    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(periodo)
 
     let query = supabase
       .from('itens_venda')
@@ -70,8 +74,8 @@ export const RelatorioLucroService = {
       )
       .eq('empresa_id', empresaId)
       .eq('vendas.status', 'finalizada')
-      .gte('vendas.created_at', inicioTs)
-      .lte('vendas.created_at', fimTs)
+      .gte('vendas.created_at', inicioIso)
+      .lte('vendas.created_at', fimIso)
 
     if (vendedorId && vendedorId !== 'todos') {
       query = query.eq('vendas.vendedor_id', vendedorId)
@@ -102,13 +106,15 @@ export const RelatorioLucroService = {
     }
 
     const numeroVendas = vendasUnicas.size
-    const lucroBruto = faturamento - custoProdutos
-    const margemPercentual = faturamento > 0 ? (lucroBruto / faturamento) * 100 : 0
-    const ticketMedio = numeroVendas > 0 ? faturamento / numeroVendas : 0
+    const faturamentoArredondado = Math.round(faturamento * 100) / 100
+    const custoArredondado = Math.round(custoProdutos * 100) / 100
+    const lucroBruto = RegrasCalculo.lucroBruto(faturamentoArredondado, custoArredondado)
+    const margemPercentual = RegrasCalculo.margemLucro(faturamentoArredondado, custoArredondado)
+    const ticketMedio = RegrasCalculo.ticketMedio(faturamentoArredondado, numeroVendas)
 
     return {
-      faturamento,
-      custoProdutos,
+      faturamento: faturamentoArredondado,
+      custoProdutos: custoArredondado,
       lucroBruto,
       margemPercentual,
       numeroVendas,
@@ -117,8 +123,7 @@ export const RelatorioLucroService = {
   },
 
   async getPorVendedor(empresaId: string, periodo: PeriodoFiltro): Promise<LucroPorVendedor[]> {
-    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
-    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(periodo)
 
     const query = supabase
       .from('itens_venda')
@@ -127,8 +132,8 @@ export const RelatorioLucroService = {
       )
       .eq('empresa_id', empresaId)
       .eq('vendas.status', 'finalizada')
-      .gte('vendas.created_at', inicioTs)
-      .lte('vendas.created_at', fimTs)
+      .gte('vendas.created_at', inicioIso)
+      .lte('vendas.created_at', fimIso)
 
     const { data, error } = await query
 
@@ -179,15 +184,17 @@ export const RelatorioLucroService = {
 
     const resultado: LucroPorVendedor[] = Array.from(grouped.values()).map((g) => {
       const numeroVendas = g.vendasSet.size
-      const lucro = g.faturamento - g.custo
-      const margem = g.faturamento > 0 ? (lucro / g.faturamento) * 100 : 0
+      const faturamento = Math.round(g.faturamento * 100) / 100
+      const custo = Math.round(g.custo * 100) / 100
+      const lucro = RegrasCalculo.lucroBruto(faturamento, custo)
+      const margem = RegrasCalculo.margemLucro(faturamento, custo)
 
       return {
         vendedorId: g.vendedorId,
         nome: g.nome,
         numeroVendas,
-        faturamento: g.faturamento,
-        custo: g.custo,
+        faturamento,
+        custo,
         lucro,
         margem,
       }

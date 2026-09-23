@@ -75,6 +75,7 @@ import {
   FluxoFinanceiroItem,
   PedidosIndicadores,
 } from '@/services/relatorios'
+import { getPresetPeriodoSaoPaulo } from '@/services/regras-calculo'
 
 type PresetPeriodo =
   | 'hoje'
@@ -93,41 +94,10 @@ function formatDateToIso(d: Date): string {
 }
 
 function getPeriodoFromPreset(preset: PresetPeriodo): { inicio: string; fim: string } {
-  const today = new Date()
-  const fim = formatDateToIso(today)
-
-  switch (preset) {
-    case 'hoje':
-      return { inicio: fim, fim }
-    case '7dias': {
-      const d = new Date()
-      d.setDate(d.getDate() - 6)
-      return { inicio: formatDateToIso(d), fim }
-    }
-    case 'mes_atual': {
-      const first = new Date(today.getFullYear(), today.getMonth(), 1)
-      return { inicio: formatDateToIso(first), fim }
-    }
-    case 'mes_anterior': {
-      const first = new Date(today.getFullYear(), today.getMonth() - 1, 1)
-      const last = new Date(today.getFullYear(), today.getMonth(), 0)
-      return { inicio: formatDateToIso(first), fim: formatDateToIso(last) }
-    }
-    case '30dias': {
-      const d = new Date()
-      d.setDate(d.getDate() - 29)
-      return { inicio: formatDateToIso(d), fim }
-    }
-    case 'ano_atual': {
-      const first = new Date(today.getFullYear(), 0, 1)
-      return { inicio: formatDateToIso(first), fim }
-    }
-    case 'personalizado':
-    default: {
-      const first = new Date(today.getFullYear(), today.getMonth(), 1)
-      return { inicio: formatDateToIso(first), fim }
-    }
+  if (preset === 'personalizado') {
+    return getPresetPeriodoSaoPaulo('mes_atual')
   }
+  return getPresetPeriodoSaoPaulo(preset)
 }
 
 const PIE_COLORS = ['#0d9488', '#0284c7', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981', '#64748b']

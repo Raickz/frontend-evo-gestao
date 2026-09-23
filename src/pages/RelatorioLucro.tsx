@@ -57,68 +57,13 @@ type PeriodoPredefinido =
   | 'ano_atual'
   | 'personalizado'
 
-function formatarDataLocal(date: Date): string {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
+import { getPresetPeriodoSaoPaulo } from '@/services/regras-calculo'
 
 function calcularDatas(tipo: PeriodoPredefinido): { inicio: string; fim: string } {
-  const hoje = new Date()
-
-  switch (tipo) {
-    case 'hoje': {
-      const dataStr = formatarDataLocal(hoje)
-      return { inicio: dataStr, fim: dataStr }
-    }
-    case '7dias': {
-      const dataInicio = new Date()
-      dataInicio.setDate(hoje.getDate() - 6)
-      return {
-        inicio: formatarDataLocal(dataInicio),
-        fim: formatarDataLocal(hoje),
-      }
-    }
-    case 'mes_atual': {
-      const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1)
-      return {
-        inicio: formatarDataLocal(primeiroDia),
-        fim: formatarDataLocal(hoje),
-      }
-    }
-    case 'mes_anterior': {
-      const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1)
-      const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth(), 0)
-      return {
-        inicio: formatarDataLocal(primeiroDia),
-        fim: formatarDataLocal(ultimoDia),
-      }
-    }
-    case '30dias': {
-      const dataInicio = new Date()
-      dataInicio.setDate(hoje.getDate() - 29)
-      return {
-        inicio: formatarDataLocal(dataInicio),
-        fim: formatarDataLocal(hoje),
-      }
-    }
-    case 'ano_atual': {
-      const primeiroDia = new Date(hoje.getFullYear(), 0, 1)
-      return {
-        inicio: formatarDataLocal(primeiroDia),
-        fim: formatarDataLocal(hoje),
-      }
-    }
-    case 'personalizado':
-    default: {
-      const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1)
-      return {
-        inicio: formatarDataLocal(primeiroDia),
-        fim: formatarDataLocal(hoje),
-      }
-    }
+  if (tipo === 'personalizado') {
+    return getPresetPeriodoSaoPaulo('mes_atual')
   }
+  return getPresetPeriodoSaoPaulo(tipo)
 }
 
 export default function RelatorioLucroPage() {

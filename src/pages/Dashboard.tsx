@@ -39,6 +39,15 @@ import { ClientesService } from '@/services/clientes'
 import { ProdutosService } from '@/services/produtos'
 import { EstoqueService } from '@/services/estoque'
 import {
+  getPresetPeriodoSaoPaulo,
+  converterPeriodoSaoPauloParaIsoUtc,
+  converterDiaSaoPauloParaIsoUtc,
+  extrairDataSaoPaulo,
+  getAgoraSaoPaulo,
+  formatAnoMesDia,
+  RegrasCalculo,
+} from '@/services/regras-calculo'
+import {
   ResponsiveContainer,
   AreaChart,
   Area,
@@ -348,31 +357,20 @@ export default function DashboardPage() {
         resolvedVendedorId = vendedorData?.id || '00000000-0000-0000-0000-000000000000'
       }
 
-      const startOfToday = new Date()
-      startOfToday.setHours(0, 0, 0, 0)
-      const startOfTodayIso = startOfToday.toISOString()
+      // Limite canônico de "Hoje" em America/Sao_Paulo
+      const hojePreset = getPresetPeriodoSaoPaulo('hoje')
+      const { inicioIso: startOfTodayIso, fimIso: endOfTodayIso } =
+        converterPeriodoSaoPauloParaIsoUtc(hojePreset)
 
-      // Período selecionado para o gráfico
-      const hoje = new Date()
-      hoje.setHours(23, 59, 59, 999)
+      // Período selecionado para o gráfico em America/Sao_Paulo
+      const presetChart =
+        chartPeriod === '7d' ? '7dias' : chartPeriod === '30d' ? '30dias' : 'mes_atual'
+      const periodoGrafico = getPresetPeriodoSaoPaulo(presetChart)
+      const { inicioIso: inicioPeriodoIso, fimIso: fimPeriodoIso } =
+        converterPeriodoSaoPauloParaIsoUtc(periodoGrafico)
 
-      const inicioPeriodo = new Date()
-
-      if (chartPeriod === '7d') {
-        inicioPeriodo.setDate(inicioPeriodo.getDate() - 6)
-      } else if (chartPeriod === '30d') {
-        inicioPeriodo.setDate(inicioPeriodo.getDate() - 29)
-      } else {
-        // Mês atual
-        inicioPeriodo.setDate(1)
-      }
-
-      inicioPeriodo.setHours(0, 0, 0, 0)
-
-      const inicioPeriodoIso = inicioPeriodo.toISOString()
-      const fimPeriodoIso = hoje.toISOString()
-
-      const quantidadeDias = chartPeriod === '7d' ? 7 : chartPeriod === '30d' ? 30 : hoje.getDate()
+      const agoraSp = getAgoraSaoPaulo()
+      const quantidadeDias = chartPeriod === '7d' ? 7 : chartPeriod === '30d' ? 30 : agoraSp.day
 
       let queryVendasHoje = supabase
         .from('vendas')
@@ -396,6 +394,7 @@ export default function DashboardPage() {
         .eq('empresa_id', empresaId)
         .eq('status', 'finalizada')
         .gte('created_at', startOfTodayIso)
+        .lte('created_at', endOfTodayIso)
 
       if (resolvedVendedorId) {
         queryVendasHoje = queryVendasHoje.eq('vendedor_id', resolvedVendedorId)
@@ -506,14 +505,10 @@ export default function DashboardPage() {
       const diasPeriodoMap: Record<string, { valor: number; pedidos: number }> = {}
 
       for (let i = quantidadeDias - 1; i >= 0; i--) {
-        const d = new Date(hoje)
-        d.setHours(0, 0, 0, 0)
-        d.setDate(d.getDate() - i)
-
-        const diaStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(
-          2,
-          '0',
-        )}`
+        const d = new Date(Date.UTC(agoraSp.year, agoraSp.month - 1, agoraSp.day - i))
+        const dDay = String(d.getUTCDate()).padStart(2, '0')
+        const dMonth = String(d.getUTCMonth() + 1).padStart(2, '0')
+        const diaStr = `${dDay}/${dMonth}`
 
         diasPeriodoMap[diaStr] = {
           valor: 0,
@@ -525,15 +520,16 @@ export default function DashboardPage() {
 
       vendasPeriodoList.forEach((v: any) => {
         if (v.created_at) {
-          const vd = new Date(v.created_at)
+          // Extrair a data exata no fuso America/Sao_Paulo (YYYY-MM-DD)
+          const dataSp = extrairDataSaoPaulo(v.created_at)
+          if (dataSp) {
+            const parts = dataSp.split('-')
+            const key = `${parts[2]}/${parts[1]}`
 
-          const key = `${String(vd.getDate()).padStart(2, '0')}/${String(
-            vd.getMonth() + 1,
-          ).padStart(2, '0')}`
-
-          if (diasPeriodoMap[key]) {
-            diasPeriodoMap[key].valor += Number(v.total || 0)
-            diasPeriodoMap[key].pedidos += 1
+            if (diasPeriodoMap[key]) {
+              diasPeriodoMap[key].valor += Number(v.total || 0)
+              diasPeriodoMap[key].pedidos += 1
+            }
           }
         }
       })

@@ -1,8 +1,16 @@
 import { supabase } from '@/lib/supabase/client'
+import {
+  converterPeriodoSaoPauloParaIsoUtc,
+  extrairDataSaoPaulo,
+  getHojeSaoPaulo,
+  getPresetPeriodoSaoPaulo,
+  RegrasCalculo,
+  PeriodoDatas,
+} from '@/services/regras-calculo'
 
 export interface PeriodoFiltro {
-  inicio: string // YYYY-MM-DD
-  fim: string // YYYY-MM-DD
+  inicio: string // YYYY-MM-DD em America/Sao_Paulo
+  fim: string // YYYY-MM-DD em America/Sao_Paulo
 }
 
 export interface ResumoGeral {
@@ -126,8 +134,7 @@ export const RelatoriosService = {
    * - Contas a Pagar em aberto: status != 'pago' AND status != 'cancelado' (saldo atual)
    */
   async getResumoGeral(empresaId: string, periodo: PeriodoFiltro): Promise<ResumoGeral> {
-    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
-    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(periodo)
 
     const [vendasRes, comprasRes, recRes, pagRes] = await Promise.all([
       supabase
@@ -135,12 +142,13 @@ export const RelatoriosService = {
         .select('total')
         .eq('empresa_id', empresaId)
         .eq('status', 'finalizada')
-        .gte('created_at', inicioTs)
-        .lte('created_at', fimTs),
+        .gte('created_at', inicioIso)
+        .lte('created_at', fimIso),
       supabase
         .from('compras')
         .select('total')
         .eq('empresa_id', empresaId)
+        .neq('status', 'cancelada')
         .gte('data_compra', periodo.inicio)
         .lte('data_compra', periodo.fim),
       supabase
@@ -160,32 +168,28 @@ export const RelatoriosService = {
     const vendas = vendasRes.data || []
     const numeroVendas = vendas.length
     const faturamento = vendas.reduce((acc, v) => acc + (Number(v.total) || 0), 0)
-    const ticketMedio = numeroVendas > 0 ? faturamento / numeroVendas : 0
+    const ticketMedio = RegrasCalculo.ticketMedio(faturamento, numeroVendas)
 
     const compras = comprasRes.data || []
     const totalCompras = compras.length
     const valorCompras = compras.reduce((acc, c) => acc + (Number(c.total) || 0), 0)
 
     const contasReceberAberto = (recRes.data || []).reduce((acc, r) => {
-      const v = Number(r.valor) || 0
-      const p = Number(r.valor_pago) || 0
-      return acc + Math.max(0, v - p)
+      return acc + RegrasCalculo.saldoEmAberto(Number(r.valor), Number(r.valor_pago))
     }, 0)
 
     const contasPagarAberto = (pagRes.data || []).reduce((acc, p) => {
-      const v = Number(p.valor) || 0
-      const pg = Number(p.valor_pago) || 0
-      return acc + Math.max(0, v - pg)
+      return acc + RegrasCalculo.saldoEmAberto(Number(p.valor), Number(p.valor_pago))
     }, 0)
 
     return {
-      faturamento,
+      faturamento: Math.round(faturamento * 100) / 100,
       numeroVendas,
       ticketMedio,
       totalCompras,
-      valorCompras,
-      contasReceberAberto,
-      contasPagarAberto,
+      valorCompras: Math.round(valorCompras * 100) / 100,
+      contasReceberAberto: Math.round(contasReceberAberto * 100) / 100,
+      contasPagarAberto: Math.round(contasPagarAberto * 100) / 100,
     }
   },
 
@@ -193,22 +197,22 @@ export const RelatoriosService = {
    * 2. getVendasPorDia
    */
   async getVendasPorDia(empresaId: string, periodo: PeriodoFiltro): Promise<VendaPorDia[]> {
-    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
-    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(periodo)
 
     const { data } = await supabase
       .from('vendas')
       .select('created_at, total')
       .eq('empresa_id', empresaId)
       .eq('status', 'finalizada')
-      .gte('created_at', inicioTs)
-      .lte('created_at', fimTs)
+      .gte('created_at', inicioIso)
+      .lte('created_at', fimIso)
       .order('created_at', { ascending: true })
 
     const grouped: Record<string, { total: number; quantidade: number }> = {}
 
     for (const v of data || []) {
-      const dataStr = v.created_at ? v.created_at.split('T')[0] : ''
+      // Usar a data canônica de America/Sao_Paulo (não split('T')[0] que é UTC)
+      const dataStr = extrairDataSaoPaulo(v.created_at)
       if (!dataStr) continue
       if (!grouped[dataStr]) {
         grouped[dataStr] = { total: 0, quantidade: 0 }
@@ -220,7 +224,7 @@ export const RelatoriosService = {
     return Object.entries(grouped)
       .map(([dataKey, item]) => ({
         data: dataKey,
-        total: item.total,
+        total: Math.round(item.total * 100) / 100,
         quantidade: item.quantidade,
       }))
       .sort((a, b) => a.data.localeCompare(b.data))
@@ -235,8 +239,7 @@ export const RelatoriosService = {
     periodo: PeriodoFiltro,
     ordem: 'quantidade' | 'faturamento' = 'faturamento',
   ): Promise<ProdutoRanking[]> {
-    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
-    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(periodo)
 
     const { data } = await supabase
       .from('itens_venda')
@@ -245,8 +248,8 @@ export const RelatoriosService = {
       )
       .eq('empresa_id', empresaId)
       .eq('vendas.status', 'finalizada')
-      .gte('vendas.created_at', inicioTs)
-      .lte('vendas.created_at', fimTs)
+      .gte('vendas.created_at', inicioIso)
+      .lte('vendas.created_at', fimIso)
 
     const map = new Map<
       string,
@@ -303,8 +306,7 @@ export const RelatoriosService = {
     empresaId: string,
     periodo: PeriodoFiltro,
   ): Promise<VendedorDesempenho[]> {
-    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
-    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(periodo)
 
     const [vendasRes, comissoesRes] = await Promise.all([
       supabase
@@ -313,15 +315,16 @@ export const RelatoriosService = {
         .eq('empresa_id', empresaId)
         .eq('status', 'finalizada')
         .not('vendedor_id', 'is', null)
-        .gte('created_at', inicioTs)
-        .lte('created_at', fimTs),
+        .gte('created_at', inicioIso)
+        .lte('created_at', fimIso),
       supabase
         .from('comissoes')
-        .select('vendedor_id, valor_comissao, vendas!inner(created_at, status)')
+        .select('vendedor_id, valor_comissao, status, vendas!inner(created_at, status)')
         .eq('empresa_id', empresaId)
         .eq('vendas.status', 'finalizada')
-        .gte('vendas.created_at', inicioTs)
-        .lte('vendas.created_at', fimTs),
+        .neq('status', 'cancelada')
+        .gte('vendas.created_at', inicioIso)
+        .lte('vendas.created_at', fimIso),
     ])
 
     const mapVendedores = new Map<
@@ -381,16 +384,15 @@ export const RelatoriosService = {
     empresaId: string,
     periodo: PeriodoFiltro,
   ): Promise<FormaPagamentoResumo[]> {
-    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
-    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(periodo)
 
     const { data } = await supabase
       .from('vendas')
       .select('forma_pagamento, total')
       .eq('empresa_id', empresaId)
       .eq('status', 'finalizada')
-      .gte('created_at', inicioTs)
-      .lte('created_at', fimTs)
+      .gte('created_at', inicioIso)
+      .lte('created_at', fimIso)
 
     const map: Record<string, { quantidade: number; valor: number }> = {}
 
@@ -425,8 +427,7 @@ export const RelatoriosService = {
     novosNoPeriodo: number
     topCliente: string | null
   }> {
-    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
-    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(periodo)
 
     const [vendasRes, novosClientesRes] = await Promise.all([
       supabase
@@ -435,14 +436,14 @@ export const RelatoriosService = {
         .eq('empresa_id', empresaId)
         .eq('status', 'finalizada')
         .not('cliente_id', 'is', null)
-        .gte('created_at', inicioTs)
-        .lte('created_at', fimTs),
+        .gte('created_at', inicioIso)
+        .lte('created_at', fimIso),
       supabase
         .from('clientes')
         .select('id', { count: 'exact' })
         .eq('empresa_id', empresaId)
-        .gte('created_at', inicioTs)
-        .lte('created_at', fimTs),
+        .gte('created_at', inicioIso)
+        .lte('created_at', fimIso),
     ])
 
     const map = new Map<
@@ -683,15 +684,14 @@ export const RelatoriosService = {
     empresaId: string,
     periodo: PeriodoFiltro,
   ): Promise<MovimentacaoResumo> {
-    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
-    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(periodo)
 
     const { data } = await supabase
       .from('movimentacoes_estoque')
       .select('tipo, quantidade')
       .eq('empresa_id', empresaId)
-      .gte('created_at', inicioTs)
-      .lte('created_at', fimTs)
+      .gte('created_at', inicioIso)
+      .lte('created_at', fimIso)
 
     const resumo: MovimentacaoResumo = {
       entradas: 0,
@@ -721,7 +721,7 @@ export const RelatoriosService = {
     empresaId: string,
     _periodo?: PeriodoFiltro,
   ): Promise<FinanceiroResumo> {
-    const todayStr = new Date().toISOString().split('T')[0]
+    const todayStr = getHojeSaoPaulo()
 
     const [recRes, pagRes] = await Promise.all([
       supabase
@@ -743,7 +743,7 @@ export const RelatoriosService = {
       for (const row of rows || []) {
         const v = Number(row.valor) || 0
         const p = Number(row.valor_pago) || 0
-        const saldo = Math.max(0, v - p)
+        const saldo = RegrasCalculo.saldoEmAberto(v, p)
         const venc = row.vencimento ? row.vencimento.split('T')[0] : ''
 
         if (row.status !== 'cancelado') {
@@ -788,8 +788,7 @@ export const RelatoriosService = {
     empresaId: string,
     periodo: PeriodoFiltro,
   ): Promise<FluxoFinanceiroItem[]> {
-    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
-    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(periodo)
 
     const [recRes, pagRes] = await Promise.all([
       supabase
@@ -797,15 +796,15 @@ export const RelatoriosService = {
         .select('valor_pago, data_pagamento')
         .eq('empresa_id', empresaId)
         .gt('valor_pago', 0)
-        .gte('data_pagamento', inicioTs)
-        .lte('data_pagamento', fimTs),
+        .gte('data_pagamento', inicioIso)
+        .lte('data_pagamento', fimIso),
       supabase
         .from('contas_pagar')
         .select('valor_pago, data_pagamento')
         .eq('empresa_id', empresaId)
         .gt('valor_pago', 0)
-        .gte('data_pagamento', inicioTs)
-        .lte('data_pagamento', fimTs),
+        .gte('data_pagamento', inicioIso)
+        .lte('data_pagamento', fimIso),
     ])
 
     const mesesMap: Record<string, { recebimentos: number; pagamentos: number }> = {}
@@ -844,23 +843,22 @@ export const RelatoriosService = {
     empresaId: string,
     periodo: PeriodoFiltro,
   ): Promise<PedidosIndicadores> {
-    const inicioTs = new Date(`${periodo.inicio}T00:00:00`).toISOString()
-    const fimTs = new Date(`${periodo.fim}T23:59:59.999`).toISOString()
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(periodo)
 
     const [pedidosRes, vendasConvertidasRes] = await Promise.all([
       supabase
         .from('pedidos')
         .select('status')
         .eq('empresa_id', empresaId)
-        .gte('created_at', inicioTs)
-        .lte('created_at', fimTs),
+        .gte('created_at', inicioIso)
+        .lte('created_at', fimIso),
       supabase
         .from('vendas')
         .select('id, total, pedido_id, pedidos!inner(created_at)')
         .eq('empresa_id', empresaId)
         .not('pedido_id', 'is', null)
-        .gte('pedidos.created_at', inicioTs)
-        .lte('pedidos.created_at', fimTs),
+        .gte('pedidos.created_at', inicioIso)
+        .lte('pedidos.created_at', fimIso),
     ])
 
     const pedidos = pedidosRes.data || []
