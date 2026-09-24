@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useNavigate, Navigate, Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
 import { Building2, ArrowRight, Lock, Mail, Loader2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -165,10 +165,27 @@ export default function AuthPage() {
           </CardFooter>
         </Card>
 
-        {/* Footer info */}
-        <p className="text-center text-[11px] text-slate-500">
-          EVO Gestão © {new Date().getFullYear()} — Plataforma Multiempresa
-        </p>
+        {/* Footer links: Termos e Privacidade */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex items-center gap-3 text-xs text-slate-400">
+            <Link
+              to="/termos"
+              className="hover:text-teal-400 underline underline-offset-4 transition-colors"
+            >
+              Termos de Uso
+            </Link>
+            <span>•</span>
+            <Link
+              to="/privacidade"
+              className="hover:text-teal-400 underline underline-offset-4 transition-colors"
+            >
+              Política de Privacidade
+            </Link>
+          </div>
+          <p className="text-center text-[11px] text-slate-500">
+            EVO Gestão © {new Date().getFullYear()} — Plataforma Multiempresa
+          </p>
+        </div>
       </div>
     </div>
   )

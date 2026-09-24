@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import {
   Building2,
   ArrowRight,
@@ -650,10 +650,27 @@ export default function SetupPage() {
             </form>
           </CardContent>
 
-          <CardFooter className="flex flex-col border-t border-slate-800/80 pt-4 text-center">
+          <CardFooter className="flex flex-col border-t border-slate-800/80 pt-4 text-center space-y-2">
             <p className="text-xs text-slate-500">
               Esta etapa é executada uma única vez para inicializar o sistema.
             </p>
+            <div className="flex items-center justify-center gap-3 text-xs text-slate-400">
+              <Link
+                to="/termos"
+                target="_blank"
+                className="hover:text-teal-400 underline underline-offset-4 transition-colors"
+              >
+                Termos de Uso
+              </Link>
+              <span>•</span>
+              <Link
+                to="/privacidade"
+                target="_blank"
+                className="hover:text-teal-400 underline underline-offset-4 transition-colors"
+              >
+                Política de Privacidade
+              </Link>
+            </div>
           </CardFooter>
         </Card>
 

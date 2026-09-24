@@ -22,6 +22,8 @@ import AdminHistoricoPage from '@/pages/admin/Historico'
 import AdminTransacoesPage from '@/pages/admin/Transacoes'
 
 // Pages
+import TermosPage from '@/pages/Termos'
+import PrivacidadePage from '@/pages/Privacidade'
 import PlanosPage from '@/pages/Planos'
 import CheckoutPage from '@/pages/Checkout'
 import CheckoutSucessoPage from '@/pages/CheckoutSucesso'
@@ -149,6 +151,10 @@ const App = () => (
 
               {/* Setup público */}
               <Route path="/setup" element={<SetupPage />} />
+
+              {/* Páginas Públicas Institucionais / LGPD (acessíveis sem autenticação) */}
+              <Route path="/termos" element={<TermosPage />} />
+              <Route path="/privacidade" element={<PrivacidadePage />} />
 
               {/* Auth screen */}
               <Route path="/auth" element={<AuthPage />} />
