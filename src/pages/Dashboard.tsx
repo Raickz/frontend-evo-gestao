@@ -3,7 +3,6 @@ import { TableSkeleton, EmptyState, ErrorState } from '@/components/common/Commo
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { EvoHexagonLogo } from '@/components/common/EvoLogo'
 import { useEmpresa } from '@/hooks/use-empresa'
 import { useAuth } from '@/hooks/use-auth'
 import { useTheme } from '@/hooks/use-theme'
@@ -26,10 +25,10 @@ import {
   ShoppingBag,
   ChevronRight,
   Percent,
-  FileSpreadsheet,
   Zap,
   Calendar,
   Sparkles,
+  AlertCircle,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { canAccessPage } from '@/lib/permissions'
@@ -38,12 +37,15 @@ import { VendasService } from '@/services/vendas'
 import { ClientesService } from '@/services/clientes'
 import { ProdutosService } from '@/services/produtos'
 import { EstoqueService } from '@/services/estoque'
+import { FinanceiroService } from '@/services/financeiro'
+import { formatPlural, formatApiError } from '@/lib/utils'
 import {
   getPresetPeriodoSaoPaulo,
   converterPeriodoSaoPauloParaIsoUtc,
   converterDiaSaoPauloParaIsoUtc,
   extrairDataSaoPaulo,
   getAgoraSaoPaulo,
+  getHojeSaoPaulo,
   formatAnoMesDia,
   RegrasCalculo,
 } from '@/services/regras-calculo'
@@ -103,6 +105,11 @@ interface DashboardData {
   estoqueTotalQuantidade: number
   vendedoresAtivosCount: number
   estoqueBaixoCount: number
+  estoqueSemCount: number
+  estoqueAbaixoMinCount: number
+  estoqueNoLimiteCount: number
+  contasVencidasCount: number
+  contasVencendo7DiasCount: number
   vendasRecentes: VendaRecente[]
   estoqueBaixoItens: ItemEstoqueBaixo[]
 }
@@ -254,6 +261,11 @@ export default function DashboardPage() {
     estoqueTotalQuantidade: 0,
     vendedoresAtivosCount: 0,
     estoqueBaixoCount: 0,
+    estoqueSemCount: 0,
+    estoqueAbaixoMinCount: 0,
+    estoqueNoLimiteCount: 0,
+    contasVencidasCount: 0,
+    contasVencendo7DiasCount: 0,
     vendasRecentes: [],
     estoqueBaixoItens: [],
   })
@@ -426,6 +438,8 @@ export default function DashboardPage() {
         estoquesSomaRes,
         vendasHojeRes,
         vendas7DiasRes,
+        contasPagarRes,
+        contasReceberRes,
       ] = await Promise.all([
         VendasService.getFaturamentoMensal(empresaId, resolvedVendedorId),
         VendasService.getCountMensal(empresaId, resolvedVendedorId),
@@ -441,6 +455,8 @@ export default function DashboardPage() {
         supabase.from('estoques').select('quantidade').eq('empresa_id', empresaId),
         queryVendasHoje,
         queryVendas7Dias,
+        FinanceiroService.listContasPagar(empresaId),
+        FinanceiroService.listContasReceber(empresaId),
       ])
 
       if (faturamentoMesRes.error) throw faturamentoMesRes.error
@@ -486,6 +502,55 @@ export default function DashboardPage() {
       const estoqueBaixoList = (estoqueBaixoRes.data || []) as unknown as ItemEstoqueBaixo[]
       const vendasRecentesList = (vendasRecentesRes.data || []) as unknown as VendaRecente[]
 
+      // Segmentação de estoque baixo:
+      // sem estoque: quantidade === 0
+      // abaixo do mínimo: 0 < qtd < min
+      // no limite: qtd === min
+      let semEstoqueCount = 0
+      let abaixoMinimoCount = 0
+      let noLimiteCount = 0
+      estoqueBaixoList.forEach((it) => {
+        const qtd = Number(it.quantidade) || 0
+        const min = Number(it.produtos?.estoque_minimo) || 0
+        if (qtd === 0) {
+          semEstoqueCount++
+        } else if (qtd > 0 && qtd < min) {
+          abaixoMinimoCount++
+        } else if (qtd === min) {
+          noLimiteCount++
+        }
+      })
+
+      // Financeiro: contas vencidas e vencendo em até 7 dias
+      const hojeStr = getHojeSaoPaulo()
+      const dHoje = new Date(`${hojeStr}T00:00:00Z`)
+      const d7Dias = new Date(dHoje.getTime() + 7 * 24 * 60 * 60 * 1000)
+      const dataLimite7Str = d7Dias.toISOString().split('T')[0]
+
+      const todasContas = [
+        ...((contasPagarRes.data || []) as Array<{ status?: string; vencimento?: string | null }>),
+        ...((contasReceberRes.data || []) as Array<{
+          status?: string
+          vencimento?: string | null
+        }>),
+      ]
+
+      let vencidasCount = 0
+      let vencendo7DiasCount = 0
+
+      todasContas.forEach((conta) => {
+        const st = (conta.status || '').toLowerCase()
+        if (st === 'cancelado' || st === 'pago' || st === 'recebido') return
+        const venc = conta.vencimento ? conta.vencimento.split('T')[0] : ''
+        if (!venc) return
+
+        if (st === 'atrasado' || venc < hojeStr) {
+          vencidasCount++
+        } else if (venc >= hojeStr && venc <= dataLimite7Str) {
+          vencendo7DiasCount++
+        }
+      })
+
       setData({
         faturamentoHoje: faturamentoHojeTotal,
         pedidosHojeCount: pedidosHojeTotal,
@@ -497,6 +562,11 @@ export default function DashboardPage() {
         estoqueTotalQuantidade: estoqueTotalQtd,
         vendedoresAtivosCount: vendedoresCountRes.count ?? 0,
         estoqueBaixoCount: estoqueBaixoList.length,
+        estoqueSemCount: semEstoqueCount,
+        estoqueAbaixoMinCount: abaixoMinimoCount,
+        estoqueNoLimiteCount: noLimiteCount,
+        contasVencidasCount: vencidasCount,
+        contasVencendo7DiasCount: vencendo7DiasCount,
         vendasRecentes: vendasRecentesList,
         estoqueBaixoItens: estoqueBaixoList,
       })
@@ -626,7 +696,8 @@ export default function DashboardPage() {
         console.error('Erro ao carregar dados do dashboard:', err)
       }
       setError(
-        err?.message || 'Falha ao buscar dados do Supabase. Verifique sua conexão e permissões.',
+        formatApiError(err) ||
+          'Falha ao buscar dados do Supabase. Verifique sua conexão e permissões.',
       )
     } finally {
       setLoading(false)
@@ -741,7 +812,8 @@ export default function DashboardPage() {
   // Formas de Pagamento real
   const paymentMethodsData = paymentMethodsRealData
 
-  // Alertas Baseados em Dados Reais
+  // Alertas Baseados em Dados Reais:
+  // Somente estoque crítico segmentado e financeiro (vencidas e vencendo em até 7 dias)
   const alertsData: {
     type: 'critical' | 'warning' | 'info' | 'success'
     tag: string
@@ -753,12 +825,13 @@ export default function DashboardPage() {
     dotClass: string
   }[] = []
 
-  if (data.estoqueBaixoCount > 0) {
+  // 1. Estoque crítico: sem estoque (quantidade === 0)
+  if (data.estoqueSemCount > 0) {
     alertsData.push({
       type: 'critical',
-      tag: 'Estoque Baixo',
-      title: `${data.estoqueBaixoCount} ${data.estoqueBaixoCount === 1 ? 'item atingiu' : 'itens atingiram'} o nível de segurança`,
-      desc: 'Itens com estoque abaixo do mínimo exigem reposição ou pedido de compra.',
+      tag: 'Sem Estoque',
+      title: `${formatPlural(data.estoqueSemCount, 'produto está', 'produtos estão')} totalmente sem estoque`,
+      desc: 'Produtos com saldo zerado precisam de reposição imediata para evitar perda de vendas.',
       actionLink: '/app/estoque',
       actionText: 'Ver Estoque',
       badgeClass: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30',
@@ -766,40 +839,59 @@ export default function DashboardPage() {
     })
   }
 
-  if (data.clientesAtivosCount > 0) {
+  // 2. Estoque crítico: abaixo do mínimo (0 < qtd < min)
+  if (data.estoqueAbaixoMinCount > 0) {
     alertsData.push({
-      type: 'success',
-      tag: 'Clientes Ativos',
-      title: `${data.clientesAtivosCount} clientes ativos na base`,
-      desc: 'Carteira de clientes cadastrados e ativos no sistema da empresa.',
-      actionLink: '/app/clientes',
-      actionText: 'Ver Clientes',
-      badgeClass: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
-      dotClass: 'bg-emerald-500',
+      type: 'critical',
+      tag: 'Abaixo do Mínimo',
+      title: `${data.estoqueAbaixoMinCount} ${data.estoqueAbaixoMinCount === 1 ? 'item atingiu' : 'itens atingiram'} nível abaixo do mínimo`,
+      desc: 'Itens com estoque abaixo do mínimo exigem reposição ou pedido de compra urgente.',
+      actionLink: '/app/estoque',
+      actionText: 'Ver Estoque',
+      badgeClass: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30',
+      dotClass: 'bg-rose-500',
     })
   }
 
-  if (data.produtosAtivosCount === 0) {
+  // 3. Estoque crítico: no limite (qtd === min)
+  if (data.estoqueNoLimiteCount > 0) {
     alertsData.push({
       type: 'warning',
-      tag: 'Catálogo',
-      title: 'Nenhum produto cadastrado',
-      desc: 'Cadastre os primeiros produtos para começar a movimentar vendas e estoque.',
-      actionLink: '/app/produtos',
-      actionText: 'Cadastrar Produto',
+      tag: 'Estoque no Limite',
+      title: `${data.estoqueNoLimiteCount} ${data.estoqueNoLimiteCount === 1 ? 'item atingiu' : 'itens atingiram'} exatamente o estoque de segurança`,
+      desc: 'Itens na margem de segurança demandam acompanhamento preventivo.',
+      actionLink: '/app/estoque',
+      actionText: 'Ver Estoque',
       badgeClass: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
       dotClass: 'bg-amber-500',
     })
-  } else {
+  }
+
+  // 4. Financeiro: contas vencidas (vencimento < hoje, pendente/atrasado)
+  if (data.contasVencidasCount > 0) {
     alertsData.push({
-      type: 'info',
-      tag: 'Catálogo',
-      title: `${data.produtosAtivosCount} produtos ativos`,
-      desc: 'Produtos prontos para venda e movimentação de estoque.',
-      actionLink: '/app/produtos',
-      actionText: 'Ver Produtos',
-      badgeClass: 'bg-[#0066FF]/15 text-[#0066FF] dark:text-[#3385FF] border-[#0066FF]/30',
-      dotClass: 'bg-[#0066FF]',
+      type: 'critical',
+      tag: 'Contas Vencidas',
+      title: `${formatPlural(data.contasVencidasCount, 'título financeiro vencido', 'títulos financeiros vencidos')}`,
+      desc: 'Contas a pagar ou a receber com vencimento ultrapassado pendentes de baixa.',
+      actionLink: '/app/financeiro',
+      actionText: 'Ver Financeiro',
+      badgeClass: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30',
+      dotClass: 'bg-rose-500',
+    })
+  }
+
+  // 5. Financeiro: contas vencendo em até 7 dias
+  if (data.contasVencendo7DiasCount > 0) {
+    alertsData.push({
+      type: 'warning',
+      tag: 'Vencendo em Breve',
+      title: `${formatPlural(data.contasVencendo7DiasCount, 'título vence', 'títulos vencem')} nos próximos 7 dias`,
+      desc: 'Acompanhe os vencimentos da semana para manter o fluxo de caixa equilibrado.',
+      actionLink: '/app/financeiro',
+      actionText: 'Ver Financeiro',
+      badgeClass: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+      dotClass: 'bg-amber-500',
     })
   }
 
@@ -1379,36 +1471,50 @@ export default function DashboardPage() {
               </div>
 
               <div className="space-y-2.5 my-2">
-                {alertsData.map((al, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3 rounded-xl border border-slate-100 dark:border-[#18284B] bg-white/40 dark:bg-[#0E1A33]/40 flex items-start justify-between gap-3 backdrop-blur-sm hover:border-[#0066FF]/30 transition-all"
-                  >
-                    <div className="flex items-start gap-2.5 min-w-0">
-                      <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${al.dotClass}`} />
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-[#0A1328] dark:text-white">
-                            {al.title}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-[#6E7785] dark:text-[#C0C6CF] mt-0.5">
-                          {al.desc}
-                        </p>
-                      </div>
+                {alertsData.length === 0 ? (
+                  <div className="py-6 flex flex-col items-center justify-center text-center">
+                    <div className="h-10 w-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center mb-2">
+                      <CheckCircle2 className="w-5 h-5" />
                     </div>
-
-                    <Link to={al.actionLink} className="shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-[10px] text-[#0066FF] hover:text-[#0052CC] font-bold"
-                      >
-                        {al.actionText}
-                      </Button>
-                    </Link>
+                    <p className="text-xs font-bold text-[#0A1328] dark:text-white">
+                      Nenhum alerta no momento
+                    </p>
+                    <p className="text-[11px] text-[#6E7785] dark:text-[#C0C6CF] mt-0.5">
+                      Estoque e financeiro estão em dia e sem pendências críticas.
+                    </p>
                   </div>
-                ))}
+                ) : (
+                  alertsData.map((al, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 rounded-xl border border-slate-100 dark:border-[#18284B] bg-white/40 dark:bg-[#0E1A33]/40 flex items-start justify-between gap-3 backdrop-blur-sm hover:border-[#0066FF]/30 transition-all"
+                    >
+                      <div className="flex items-start gap-2.5 min-w-0">
+                        <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${al.dotClass}`} />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-[#0A1328] dark:text-white">
+                              {al.title}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-[#6E7785] dark:text-[#C0C6CF] mt-0.5">
+                            {al.desc}
+                          </p>
+                        </div>
+                      </div>
+
+                      <Link to={al.actionLink} className="shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-[10px] text-[#0066FF] hover:text-[#0052CC] font-bold"
+                        >
+                          {al.actionText}
+                        </Button>
+                      </Link>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -1501,83 +1607,6 @@ export default function DashboardPage() {
                   </tbody>
                 </table>
               )}
-            </div>
-          </div>
-
-          {/* 13. BLOCO DE MARCA EVO + 14. RELATÓRIOS INTELIGENTES (Lado a Lado) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* 13. Bloco Institucional de Marca EVO Gestão (Requirement #13) */}
-            <div className="glass-card rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between border-l-4 border-l-[#0066FF]">
-              <div className="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-[#0066FF]/10 rounded-full blur-2xl pointer-events-none" />
-
-              <div className="space-y-4 relative z-10">
-                <EvoHexagonLogo size={42} withText={true} subtitle="Tecnologia Corporativa" />
-                <p className="text-sm font-semibold text-[#0A1328] dark:text-white leading-relaxed">
-                  “Tecnologia que organiza. Gestão que faz crescer.”
-                </p>
-                <p className="text-xs text-[#6E7785] dark:text-[#C0C6CF]">
-                  Sistema integrado de alta performance com segurança corporativa e governança para
-                  sua distribuidora.
-                </p>
-              </div>
-
-              <div className="mt-5 pt-4 border-t border-slate-100 dark:border-[#18284B] flex items-center justify-between">
-                <span className="text-[11px] text-[#6E7785] dark:text-[#8E9AA8]">
-                  Versão 2.4 Enterprise
-                </span>
-                <Link to="/app/relatorios">
-                  <Button
-                    size="sm"
-                    className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold rounded-xl shadow-xs"
-                  >
-                    Ver relatórios
-                    <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            {/* 14. Relatórios Inteligentes (Requirement #14) */}
-            <div className="glass-card rounded-2xl p-6 relative overflow-hidden flex flex-col justify-between border-l-4 border-l-[#3385FF]">
-              <div className="space-y-3 relative z-10">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-10 w-10 rounded-xl bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3385FF] flex items-center justify-center">
-                    <FileSpreadsheet className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-[#0A1328] dark:text-white">
-                      Relatórios Inteligentes
-                    </h3>
-                    <span className="text-[10px] text-[#0066FF] dark:text-[#3385FF] font-semibold uppercase tracking-wider">
-                      Business Intelligence
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-xs text-[#6E7785] dark:text-[#C0C6CF] leading-relaxed">
-                  Acesse análises detalhadas e tome decisões mais estratégicas para o crescimento da
-                  sua empresa.
-                </p>
-              </div>
-
-              <div className="mt-5 pt-4 border-t border-slate-100 dark:border-[#18284B] flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
-                  <span className="text-[11px] text-[#6E7785] dark:text-[#8E9AA8]">
-                    Métricas consolidadas
-                  </span>
-                </div>
-                <Link to="/app/relatorio-lucro">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-[#0066FF]/30 text-[#0066FF] dark:text-[#3385FF] hover:bg-[#0066FF]/10 text-xs font-bold rounded-xl"
-                  >
-                    Ver relatórios
-                    <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                  </Button>
-                </Link>
-              </div>
             </div>
           </div>
 

@@ -38,6 +38,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { useEmpresa } from '@/hooks/use-empresa'
 import { ClientesService, Cliente } from '@/services/clientes'
+import { formatPlural, formatApiError } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
   Users,
@@ -157,7 +158,7 @@ export default function ClientesPage() {
         if (err) throw err
         setClientes((data as Cliente[]) || [])
       } catch (e: any) {
-        setError(e.message || 'Falha ao buscar clientes')
+        setError(formatApiError(e))
       } finally {
         setLoading(false)
       }
@@ -289,7 +290,7 @@ export default function ClientesPage() {
       setDialogOpen(false)
       await fetchClientes(search)
     } catch (err: any) {
-      toast.error(err.message || 'Erro ao salvar cliente. Verifique os dados e tente novamente.')
+      toast.error(formatApiError(err))
     } finally {
       setSubmitting(false)
     }
@@ -311,7 +312,7 @@ export default function ClientesPage() {
       setConfirmToggleCliente(null)
       await fetchClientes(search)
     } catch (err: any) {
-      toast.error(err.message || 'Erro ao alterar status do cliente.')
+      toast.error(formatApiError(err))
     } finally {
       setToggling(false)
     }
@@ -539,7 +540,9 @@ export default function ClientesPage() {
             <div>
               Mostrando{' '}
               <span className="font-semibold text-slate-900 dark:text-white">
-                {Math.min(filteredClientes.length, (currentPage - 1) * PAGE_SIZE + 1)}
+                {filteredClientes.length === 0
+                  ? 0
+                  : Math.min(filteredClientes.length, (currentPage - 1) * PAGE_SIZE + 1)}
               </span>{' '}
               a{' '}
               <span className="font-semibold text-slate-900 dark:text-white">
@@ -547,9 +550,8 @@ export default function ClientesPage() {
               </span>{' '}
               de{' '}
               <span className="font-semibold text-slate-900 dark:text-white">
-                {filteredClientes.length}
-              </span>{' '}
-              clientes
+                {formatPlural(filteredClientes.length, 'cliente', 'clientes')}
+              </span>
             </div>
             <div className="flex items-center gap-1.5">
               <Button

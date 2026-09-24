@@ -33,6 +33,7 @@ import {
   type ContasPagarItem,
   type FinanceiroIndicadores,
 } from '@/services/financeiro'
+import { formatPlural, formatApiError } from '@/lib/utils'
 import {
   TrendingUp,
   TrendingDown,
@@ -197,7 +198,7 @@ export default function FinanceiroPage() {
       if (import.meta.env.DEV) {
         console.error('Erro ao buscar lançamentos financeiros:', e)
       }
-      setError(e.message || 'Falha ao buscar dados financeiros.')
+      setError(formatApiError(e) || 'Falha ao buscar dados financeiros.')
     } finally {
       setLoading(false)
     }
@@ -316,7 +317,7 @@ export default function FinanceiroPage() {
       )
 
       if (rpcError) {
-        toast.error(rpcError.message || 'Falha ao registrar recebimento.')
+        toast.error(formatApiError(rpcError))
         return
       }
 
@@ -342,7 +343,7 @@ export default function FinanceiroPage() {
       if (import.meta.env.DEV) {
         console.error('Erro ao registrar recebimento:', err)
       }
-      toast.error(err.message || 'Erro inesperado ao registrar recebimento.')
+      toast.error(formatApiError(err))
     } finally {
       setSubmittingRecebimento(false)
     }
@@ -384,7 +385,7 @@ export default function FinanceiroPage() {
       )
 
       if (rpcError) {
-        toast.error(rpcError.message || 'Falha ao registrar pagamento.')
+        toast.error(formatApiError(rpcError))
         return
       }
 
@@ -410,7 +411,7 @@ export default function FinanceiroPage() {
       if (import.meta.env.DEV) {
         console.error('Erro ao registrar pagamento:', err)
       }
-      toast.error(err.message || 'Erro inesperado ao registrar pagamento.')
+      toast.error(formatApiError(err))
     } finally {
       setSubmittingPagamento(false)
     }
@@ -733,7 +734,9 @@ export default function FinanceiroPage() {
               <div>
                 Mostrando{' '}
                 <span className="font-semibold text-slate-900 dark:text-white">
-                  {Math.min((currentPage - 1) * pageSize + 1, totalContasReceber)}
+                  {totalContasReceber === 0
+                    ? 0
+                    : Math.min((currentPage - 1) * pageSize + 1, totalContasReceber)}
                 </span>{' '}
                 a{' '}
                 <span className="font-semibold text-slate-900 dark:text-white">
@@ -741,9 +744,8 @@ export default function FinanceiroPage() {
                 </span>{' '}
                 de{' '}
                 <span className="font-semibold text-slate-900 dark:text-white">
-                  {totalContasReceber}
-                </span>{' '}
-                títulos
+                  {formatPlural(totalContasReceber, 'título', 'títulos')}
+                </span>
               </div>
 
               <div className="flex items-center gap-1.5">
@@ -874,7 +876,9 @@ export default function FinanceiroPage() {
             <div>
               Mostrando{' '}
               <span className="font-semibold text-slate-900 dark:text-white">
-                {Math.min((currentPage - 1) * pageSize + 1, totalContasPagar)}
+                {totalContasPagar === 0
+                  ? 0
+                  : Math.min((currentPage - 1) * pageSize + 1, totalContasPagar)}
               </span>{' '}
               a{' '}
               <span className="font-semibold text-slate-900 dark:text-white">
@@ -882,9 +886,8 @@ export default function FinanceiroPage() {
               </span>{' '}
               de{' '}
               <span className="font-semibold text-slate-900 dark:text-white">
-                {totalContasPagar}
-              </span>{' '}
-              títulos
+                {formatPlural(totalContasPagar, 'título', 'títulos')}
+              </span>
             </div>
 
             <div className="flex items-center gap-1.5">

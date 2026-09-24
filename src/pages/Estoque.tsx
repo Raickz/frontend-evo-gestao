@@ -35,6 +35,7 @@ import {
   ProdutoParaEntrada,
   FornecedorAtivoItem,
 } from '@/services/estoque'
+import { formatPlural, formatApiError } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
   Boxes,
@@ -169,7 +170,7 @@ export default function EstoquePage() {
       setSaldos(data || [])
       setTotalSaldosCount(totalCount)
     } catch (e: any) {
-      setErrorSaldos(e.message || 'Falha ao carregar saldos de estoque')
+      setErrorSaldos(formatApiError(e))
     } finally {
       setLoadingSaldos(false)
     }
@@ -210,7 +211,7 @@ export default function EstoquePage() {
       setMovimentacoes(data || [])
       setTotalMovCount(totalCount)
     } catch (e: any) {
-      setErrorMov(e.message || 'Falha ao carregar histórico de movimentações')
+      setErrorMov(formatApiError(e))
     } finally {
       setLoadingMov(false)
     }
@@ -224,11 +225,23 @@ export default function EstoquePage() {
     pageMov,
   ])
 
+  // Buscar contagem inicial de movimentações para o badge mostrar o valor correto no primeiro render
+  const loadInitialMovCount = useCallback(async () => {
+    if (!empresaId) return
+    try {
+      const { count } = await EstoqueService.countMovimentacoesFiltered(empresaId, {})
+      setTotalMovCount(count || 0)
+    } catch {
+      // Ignora erro silencioso no badge inicial
+    }
+  }, [empresaId])
+
   // Efeitos de carregamento
   useEffect(() => {
     loadIndicadores()
     loadFornecedoresFiltro()
-  }, [loadIndicadores, loadFornecedoresFiltro])
+    loadInitialMovCount()
+  }, [loadIndicadores, loadFornecedoresFiltro, loadInitialMovCount])
 
   useEffect(() => {
     if (activeTab === 'saldos') {
@@ -260,8 +273,8 @@ export default function EstoquePage() {
       if (fornRes.data) {
         setListaFornecedores(fornRes.data)
       }
-    } catch {
-      toast.error('Erro ao carregar dados para entrada de estoque')
+    } catch (err) {
+      toast.error(formatApiError(err))
     } finally {
       setLoadingModalData(false)
     }
@@ -388,7 +401,7 @@ export default function EstoquePage() {
         loadMovimentacoes()
       }
     } catch (err: any) {
-      toast.error(err.message || 'Erro ao registrar entrada de estoque. Verifique os dados.')
+      toast.error(formatApiError(err))
     } finally {
       setSubmittingEntrada(false)
     }
@@ -741,9 +754,8 @@ export default function EstoquePage() {
                   </span>{' '}
                   de{' '}
                   <span className="font-semibold text-slate-900 dark:text-white">
-                    {totalSaldosCount}
-                  </span>{' '}
-                  itens
+                    {formatPlural(totalSaldosCount, 'item', 'itens')}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Button
@@ -1046,9 +1058,8 @@ export default function EstoquePage() {
                   </span>{' '}
                   de{' '}
                   <span className="font-semibold text-slate-900 dark:text-white">
-                    {totalMovCount}
-                  </span>{' '}
-                  registros
+                    {formatPlural(totalMovCount, 'registro', 'registros')}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Button

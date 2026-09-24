@@ -48,6 +48,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { supabase } from '@/lib/supabase/client'
 import { ConfiguracoesService, Usuario as UsuarioType } from '@/services/configuracoes'
 import { formatPerfilBadge } from '@/lib/permissions'
+import { validarCnpj, validarEmail, validarTelefone, formatApiError } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
   Building2,
@@ -132,18 +133,26 @@ export default function ConfiguracoesPage() {
       return
     }
 
+    // Validação de CNPJ se preenchido (14 dígitos limpos, sem repetidos, dígitos verificadores válidos)
+    if (empresaForm.cnpj.trim()) {
+      if (!validarCnpj(empresaForm.cnpj.trim())) {
+        toast.error('CNPJ inválido. Verifique os números informados.')
+        return
+      }
+    }
+
+    // Validação de E-mail se preenchido
     if (empresaForm.email.trim()) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(empresaForm.email.trim())) {
+      if (!validarEmail(empresaForm.email.trim())) {
         toast.error('Informe um e-mail com formato válido.')
         return
       }
     }
 
-    if (empresaForm.cnpj.trim()) {
-      const cnpjDigits = empresaForm.cnpj.replace(/\D/g, '')
-      if (cnpjDigits.length < 14) {
-        toast.error('CNPJ deve conter no mínimo 14 dígitos.')
+    // Validação de Telefone se preenchido (10 ou 11 dígitos limpos)
+    if (empresaForm.telefone.trim()) {
+      if (!validarTelefone(empresaForm.telefone.trim())) {
+        toast.error('Telefone inválido. Informe o DDD e o número (10 ou 11 dígitos).')
         return
       }
     }
@@ -167,7 +176,7 @@ export default function ConfiguracoesPage() {
       if (import.meta.env.DEV) {
         console.error('Erro ao atualizar empresa:', err)
       }
-      toast.error(err.message || 'Falha ao atualizar dados da empresa.')
+      toast.error(formatApiError(err) || 'Falha ao atualizar dados da empresa.')
     } finally {
       setSavingEmpresa(false)
     }
@@ -269,7 +278,7 @@ export default function ConfiguracoesPage() {
       if (import.meta.env.DEV) {
         console.error('Erro ao fazer upload da logo:', err)
       }
-      toast.error(err.message || 'Falha ao fazer upload da logo.')
+      toast.error(formatApiError(err) || 'Falha ao fazer upload da logo.')
     } finally {
       setUploadingLogo(false)
     }
@@ -315,7 +324,7 @@ export default function ConfiguracoesPage() {
       if (import.meta.env.DEV) {
         console.error('Erro ao remover logo:', err)
       }
-      toast.error(err.message || 'Falha ao remover logo.')
+      toast.error(formatApiError(err) || 'Falha ao remover logo.')
     } finally {
       setRemovingLogo(false)
     }
@@ -346,7 +355,7 @@ export default function ConfiguracoesPage() {
       if (import.meta.env.DEV) {
         console.error('Erro ao salvar URL da logo:', err)
       }
-      toast.error(err.message || 'Falha ao atualizar logo.')
+      toast.error(formatApiError(err) || 'Falha ao atualizar logo.')
     } finally {
       setSavingLogo(false)
     }
@@ -411,7 +420,7 @@ export default function ConfiguracoesPage() {
       if (import.meta.env.DEV) {
         console.error('Erro ao carregar usuários:', err)
       }
-      setErrorUsuarios(err.message || 'Falha ao carregar lista de usuários.')
+      setErrorUsuarios(formatApiError(err) || 'Falha ao carregar lista de usuários.')
     } finally {
       setLoadingUsuarios(false)
     }

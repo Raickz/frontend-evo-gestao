@@ -40,6 +40,7 @@ import { useEmpresa } from '@/hooks/use-empresa'
 import { useAuth } from '@/hooks/use-auth'
 import { supabase } from '@/lib/supabase/client'
 import { ProdutosService, Produto, Categoria, Fornecedor } from '@/services/produtos'
+import { formatPlural, formatApiError } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
   Package,
@@ -170,7 +171,7 @@ export default function ProdutosPage() {
         if (err) throw err
         setProdutos((data as ProdutoComRelacoes[]) || [])
       } catch (e: any) {
-        setError(e.message || 'Falha ao buscar produtos')
+        setError(formatApiError(e))
       } finally {
         setLoading(false)
       }
@@ -492,7 +493,7 @@ export default function ProdutosPage() {
       setDialogOpen(false)
       await fetchProdutos(search)
     } catch (err: any) {
-      toast.error(err.message || 'Erro ao salvar produto. Verifique os dados e tente novamente.')
+      toast.error(formatApiError(err))
     } finally {
       setSubmitting(false)
       setUploadingFoto(false)
@@ -515,7 +516,7 @@ export default function ProdutosPage() {
       setConfirmToggleProduto(null)
       await fetchProdutos(search)
     } catch (err: any) {
-      toast.error(err.message || 'Erro ao alterar status do produto.')
+      toast.error(formatApiError(err))
     } finally {
       setToggling(false)
     }
@@ -791,7 +792,9 @@ export default function ProdutosPage() {
             <div>
               Mostrando{' '}
               <span className="font-semibold text-slate-900 dark:text-white">
-                {Math.min(filteredProdutos.length, (currentPage - 1) * PAGE_SIZE + 1)}
+                {filteredProdutos.length === 0
+                  ? 0
+                  : Math.min(filteredProdutos.length, (currentPage - 1) * PAGE_SIZE + 1)}
               </span>{' '}
               a{' '}
               <span className="font-semibold text-slate-900 dark:text-white">
@@ -799,9 +802,8 @@ export default function ProdutosPage() {
               </span>{' '}
               de{' '}
               <span className="font-semibold text-slate-900 dark:text-white">
-                {filteredProdutos.length}
-              </span>{' '}
-              produtos
+                {formatPlural(filteredProdutos.length, 'produto', 'produtos')}
+              </span>
             </div>
             <div className="flex items-center gap-1.5">
               <Button

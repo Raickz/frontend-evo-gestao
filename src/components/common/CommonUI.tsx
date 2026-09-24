@@ -20,7 +20,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { cn } from '@/lib/utils'
+import { cn, formatPlural } from '@/lib/utils'
 import {
   AnimatedNumber,
   type AnimatedNumberProps,
@@ -885,8 +885,10 @@ export function GlassPagination({
             <span className="font-semibold text-slate-900 dark:text-white">
               {Math.min(totalItems, currentPage * pageSize)}
             </span>{' '}
-            de <span className="font-semibold text-slate-900 dark:text-white">{totalItems}</span>{' '}
-            registros
+            de{' '}
+            <span className="font-semibold text-slate-900 dark:text-white">
+              {formatPlural(totalItems, 'registro', 'registros')}
+            </span>
           </>
         ) : (
           <span>

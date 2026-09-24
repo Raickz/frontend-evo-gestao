@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { useEmpresa } from '@/hooks/use-empresa'
 import { VendedoresService, Vendedor } from '@/services/vendedores'
+import { formatPlural, formatApiError } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
   UserCheck,
@@ -113,7 +114,7 @@ export default function VendedoresPage() {
         if (err) throw err
         setVendedores((data as Vendedor[]) || [])
       } catch (e: any) {
-        setError(e.message || 'Falha ao buscar vendedores')
+        setError(formatApiError(e))
       } finally {
         setLoading(false)
       }
@@ -250,7 +251,7 @@ export default function VendedoresPage() {
       if (err.code === '23505' || err.message?.includes('idx_vendedores_usuario_unico')) {
         toast.error('Este usuário já está vinculado a outro vendedor.')
       } else {
-        toast.error(err.message || 'Erro ao salvar vendedor. Verifique os dados e tente novamente.')
+        toast.error(formatApiError(err))
       }
     } finally {
       setSubmitting(false)
@@ -275,7 +276,7 @@ export default function VendedoresPage() {
       setConfirmToggleVendedor(null)
       await fetchVendedores(search)
     } catch (err: any) {
-      toast.error(err.message || 'Erro ao alterar status do vendedor.')
+      toast.error(formatApiError(err))
     } finally {
       setToggling(false)
     }
@@ -286,11 +287,7 @@ export default function VendedoresPage() {
       <PageHeader
         title="Equipe de Vendedores"
         description="Gestão da equipe comercial, vínculos com usuários e percentuais padrão de comissão."
-        badge={
-          <span>
-            <AnimatedNumber value={vendedores.length} /> Vendedores
-          </span>
-        }
+        badge={<span>{formatPlural(vendedores.length, 'Vendedor', 'Vendedores')}</span>}
         actions={
           <Button
             onClick={handleOpenCreate}
@@ -488,7 +485,9 @@ export default function VendedoresPage() {
             <div>
               Mostrando{' '}
               <span className="font-semibold text-slate-900 dark:text-white">
-                {Math.min(filteredVendedores.length, (currentPage - 1) * PAGE_SIZE + 1)}
+                {filteredVendedores.length === 0
+                  ? 0
+                  : Math.min(filteredVendedores.length, (currentPage - 1) * PAGE_SIZE + 1)}
               </span>{' '}
               a{' '}
               <span className="font-semibold text-slate-900 dark:text-white">
@@ -496,9 +495,8 @@ export default function VendedoresPage() {
               </span>{' '}
               de{' '}
               <span className="font-semibold text-slate-900 dark:text-white">
-                {filteredVendedores.length}
-              </span>{' '}
-              vendedores
+                {formatPlural(filteredVendedores.length, 'vendedor', 'vendedores')}
+              </span>
             </div>
             <div className="flex items-center gap-1.5">
               <Button
