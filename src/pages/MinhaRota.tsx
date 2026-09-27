@@ -387,24 +387,63 @@ export default function MinhaRotaPage() {
               </span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {itensEstoque.map((it) => {
-                const disponivelCarro =
+                const aBordo =
                   it.quantidade_carregada -
                   (it.quantidade_vendida + it.quantidade_entregue + it.quantidade_devolvida)
+
+                // Soma das reservas para pedidos pendentes da rota deste produto
+                const reservadasPedidos = pedidosRota
+                  .filter(
+                    (ped) =>
+                      ped.status_entrega !== 'entregue' &&
+                      ped.pedidos?.status !== 'faturado' &&
+                      ped.pedidos?.status !== 'cancelado',
+                  )
+                  .reduce((acc, ped) => {
+                    const itensPed = ped.pedidos?.itens_pedido || []
+                    const somaItem = itensPed
+                      .filter((ip: any) => ip.produto_id === it.produto_id)
+                      .reduce((sub: number, ip: any) => sub + Number(ip.quantidade || 0), 0)
+                    return acc + somaItem
+                  }, 0)
+
+                const livresParaVenda = Math.max(0, aBordo - reservadasPedidos)
 
                 return (
                   <div
                     key={it.id}
-                    className="p-2.5 bg-slate-50 dark:bg-[#0E1A33] rounded-xl border border-slate-100 dark:border-[#1A2C50] text-center"
+                    className="p-3 bg-slate-50 dark:bg-[#0E1A33] rounded-xl border border-slate-100 dark:border-[#1A2C50] space-y-2"
                   >
-                    <p className="text-[11px] font-medium text-slate-600 dark:text-[#C0C6CF] truncate">
-                      {it.produtos?.nome || 'Cesta'}
-                    </p>
-                    <p className="text-lg font-black text-slate-900 dark:text-white font-mono mt-0.5">
-                      {disponivelCarro}
-                    </p>
-                    <p className="text-[10px] text-slate-400">a bordo</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                        {it.produtos?.nome || 'Cesta'}
+                      </p>
+                      <span className="text-[11px] font-mono text-slate-500 shrink-0">
+                        Total a bordo: <b>{aBordo}</b>
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200/60 dark:border-[#1A2C50]/80">
+                      <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40 text-center">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 block leading-tight">
+                          Livres para venda
+                        </span>
+                        <span className="text-base font-black text-emerald-800 dark:text-emerald-300 font-mono">
+                          {livresParaVenda}
+                        </span>
+                      </div>
+
+                      <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-900/40 text-center">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 block leading-tight">
+                          Reservadas para entregas
+                        </span>
+                        <span className="text-base font-black text-amber-800 dark:text-amber-300 font-mono">
+                          {reservadasPedidos}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 )
               })}
@@ -728,12 +767,30 @@ export default function MinhaRotaPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {itensEstoque.map((it) => {
-                    const disp =
+                    const aBordo =
                       it.quantidade_carregada -
                       (it.quantidade_vendida + it.quantidade_entregue + it.quantidade_devolvida)
+
+                    const reservadas = pedidosRota
+                      .filter(
+                        (ped) =>
+                          ped.status_entrega !== 'entregue' &&
+                          ped.pedidos?.status !== 'faturado' &&
+                          ped.pedidos?.status !== 'cancelado',
+                      )
+                      .reduce((acc, ped) => {
+                        const itensPed = ped.pedidos?.itens_pedido || []
+                        const somaItem = itensPed
+                          .filter((ip: any) => ip.produto_id === it.produto_id)
+                          .reduce((sub: number, ip: any) => sub + Number(ip.quantidade || 0), 0)
+                        return acc + somaItem
+                      }, 0)
+
+                    const livre = Math.max(0, aBordo - reservadas)
+
                     return (
-                      <SelectItem key={it.produto_id} value={it.produto_id} disabled={disp <= 0}>
-                        {it.produtos?.nome} ({disp} no carro) —{' '}
+                      <SelectItem key={it.produto_id} value={it.produto_id} disabled={livre <= 0}>
+                        {it.produtos?.nome} ({livre} livre{livre !== 1 ? 's' : ''} p/ venda) —{' '}
                         {formatCurrency(it.produtos?.preco_venda || 0)}
                       </SelectItem>
                     )
@@ -745,29 +802,53 @@ export default function MinhaRotaPage() {
                 <div className="space-y-2 pt-1">
                   {vendaItens.map((item) => {
                     const itEst = itensEstoque.find((i) => i.produto_id === item.produto_id)
-                    const disp =
+                    const aBordo =
                       (itEst?.quantidade_carregada || 0) -
                       ((itEst?.quantidade_vendida || 0) +
                         (itEst?.quantidade_entregue || 0) +
                         (itEst?.quantidade_devolvida || 0))
+
+                    const reservadas = pedidosRota
+                      .filter(
+                        (ped) =>
+                          ped.status_entrega !== 'entregue' &&
+                          ped.pedidos?.status !== 'faturado' &&
+                          ped.pedidos?.status !== 'cancelado',
+                      )
+                      .reduce((acc, ped) => {
+                        const itensPed = ped.pedidos?.itens_pedido || []
+                        const somaItem = itensPed
+                          .filter((ip: any) => ip.produto_id === item.produto_id)
+                          .reduce((sub: number, ip: any) => sub + Number(ip.quantidade || 0), 0)
+                        return acc + somaItem
+                      }, 0)
+
+                    const livre = Math.max(0, aBordo - reservadas)
 
                     return (
                       <div
                         key={item.produto_id}
                         className="p-2.5 bg-slate-50 dark:bg-[#0E1A33] rounded-xl border border-slate-200 dark:border-[#1A2C50] flex items-center justify-between text-xs"
                       >
-                        <span className="font-semibold truncate">{itEst?.produtos?.nome}</span>
-                        <div className="flex items-center gap-2">
+                        <div className="truncate mr-2">
+                          <span className="font-semibold block truncate">
+                            {itEst?.produtos?.nome}
+                          </span>
+                          <span className="text-[10px] text-slate-500">
+                            Livre: {livre} un (a bordo: {aBordo})
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
                           <Input
                             type="number"
                             inputMode="numeric"
                             min="1"
-                            max={disp}
+                            max={livre}
                             value={item.quantidade}
                             onChange={(e) =>
                               handleUpdateVendaItemQtd(item.produto_id, Number(e.target.value))
                             }
-                            className="w-16 min-h-[38px] text-center font-mono font-bold"
+                            className="w-16 min-h-[44px] text-center font-mono font-bold"
                           />
                           <Button
                             type="button"
