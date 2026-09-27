@@ -95,7 +95,7 @@ export default function DevedoresPage() {
     carregarDevedores()
   }, [carregarDevedores])
 
-  const abrirDetalheCliente = async (clienteId: string) => {
+  const abrirDetalheCliente = useCallback(async (clienteId: string) => {
     setLoadingDetalhes(true)
     setModalDetalheOpen(true)
     try {
@@ -152,8 +152,9 @@ export default function DevedoresPage() {
         descricao: parcelaSelecionada.descricao,
         parcela: parcelaSelecionada.numero_parcela,
         valor_recebido: valorReceber,
-        valor_pago_acumulado: data?.valor_pago || (parcelaSelecionada.valor_pago + valorReceber),
-        saldo_restante: data?.saldo_restante ?? Math.max(0, parcelaSelecionada.saldo - valorReceber),
+        valor_pago_acumulado: data?.valor_pago || parcelaSelecionada.valor_pago + valorReceber,
+        saldo_restante:
+          data?.saldo_restante ?? Math.max(0, parcelaSelecionada.saldo - valorReceber),
         forma_pagamento: formaRecebimento,
         data_pagamento: new Date().toLocaleDateString('pt-BR'),
         data_hora_emissao: new Date().toLocaleString('pt-BR'),
@@ -220,7 +221,8 @@ export default function DevedoresPage() {
           Módulo Crediário Desativado
         </h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md">
-          A gestão de Devedores e vendas a prazo (crediário de 30/60/90 dias) está disponível para empresas com o módulo Crediário ativado. Solicite ao administrador da plataforma.
+          A gestão de Devedores e vendas a prazo (crediário de 30/60/90 dias) está disponível para
+          empresas com o módulo Crediário ativado. Solicite ao administrador da plataforma.
         </p>
       </div>
     )
@@ -286,8 +288,8 @@ export default function DevedoresPage() {
               {filtro === 'todos'
                 ? 'Todos os devedores'
                 : filtro === 'vencidos'
-                ? 'Apenas parcelas vencidas'
-                : 'Vencendo em até 7 dias'}
+                  ? 'Apenas parcelas vencidas'
+                  : 'Vencendo em até 7 dias'}
             </p>
           </div>
           <Badge className="bg-[#0066FF]/10 text-[#0066FF] border-[#0066FF]/20">
@@ -533,8 +535,8 @@ export default function DevedoresPage() {
                           isPaga
                             ? 'bg-slate-50 dark:bg-[#081022]/60 border-slate-200 dark:border-slate-800 opacity-75'
                             : isAtrasada
-                            ? 'bg-rose-50/60 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/50'
-                            : 'bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#152342]'
+                              ? 'bg-rose-50/60 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/50'
+                              : 'bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#152342]'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">

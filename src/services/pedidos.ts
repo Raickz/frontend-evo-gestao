@@ -379,7 +379,7 @@ export const PedidosService = {
   async listClientesAtivos(empresaId: string, search?: string) {
     let query = supabase
       .from('clientes')
-      .select('id, nome, documento, limite_credito, telefone, email')
+      .select('id, nome, documento, limite_credito, telefone, email, endereco, numero, bairro, cidade, cep')
       .eq('empresa_id', empresaId)
       .eq('ativo', true)
 

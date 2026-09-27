@@ -78,6 +78,11 @@ interface ClienteOption {
   nome: string
   documento: string | null
   telefone?: string | null
+  endereco?: string | null
+  numero?: string | null
+  bairro?: string | null
+  cidade?: string | null
+  cep?: string | null
 }
 
 interface VendedorOption {
@@ -106,6 +111,7 @@ export default function PedidosPage() {
   // Permissões
   const perfil = usuario?.perfil?.toLowerCase()
   const podeGerenciar = perfil === 'master' || perfil === 'admin' || perfil === 'gerente'
+  const podeCriar = podeGerenciar || perfil === 'vendedor'
 
   // =========================================================================
   // ESTADO DA LISTAGEM & MAPA DE VENDAS
@@ -289,7 +295,7 @@ export default function PedidosPage() {
   const [submetendoNovo, setSubmetendoNovo] = useState(false)
 
   const abrirModalNovo = () => {
-    if (!podeGerenciar) {
+    if (!podeCriar) {
       toast.error('Você não tem permissão para criar pedidos.')
       return
     }
@@ -561,7 +567,7 @@ export default function PedidosPage() {
   const [modalConfirmarAcaoAberto, setModalConfirmarAcaoAberto] = useState(false)
   const [acaoPedido, setAcaoPedido] = useState<{
     pedido: any
-    acao: 'confirmar' | 'faturar'
+    acao: 'confirmar' | 'faturar' | 'cancelar'
   } | null>(null)
   const [executandoAcao, setExecutandoAcao] = useState(false)
 
@@ -575,20 +581,40 @@ export default function PedidosPage() {
     setModalConfirmarAcaoAberto(true)
   }
 
+  const abrirCancelarPedido = (ped: any) => {
+    if (!podeGerenciar) {
+      toast.error('Apenas gerentes ou administradores podem cancelar pedidos.')
+      return
+    }
+    setAcaoPedido({ pedido: ped, acao: 'cancelar' })
+    setModalConfirmarAcaoAberto(true)
+  }
+
   const handleExecutarAcao = async () => {
     if (!empresaId || !acaoPedido) return
     setExecutandoAcao(true)
     try {
-      const novoStatus = acaoPedido.acao === 'confirmar' ? 'confirmado' : 'faturado'
+      let novoStatus = 'confirmado'
+      if (acaoPedido.acao === 'faturar') novoStatus = 'faturado'
+      else if (acaoPedido.acao === 'cancelar') novoStatus = 'cancelado'
+
       const { error: err } = await PedidosService.updateStatus(
         empresaId,
         acaoPedido.pedido.id,
         novoStatus,
       )
       if (err) throw err
-      const label = acaoPedido.acao === 'confirmar' ? 'confirmado' : 'faturado'
+      const label =
+        acaoPedido.acao === 'confirmar'
+          ? 'confirmado (estoque reservado)'
+          : acaoPedido.acao === 'cancelar'
+            ? 'cancelado (reserva liberada)'
+            : 'faturado'
       toast.success(`Pedido #${acaoPedido.pedido.numero} ${label} com sucesso.`)
       setModalConfirmarAcaoAberto(false)
+      if (modalDetalhesAberto) {
+        setModalDetalhesAberto(false)
+      }
       loadPedidos()
     } catch (err: any) {
       toast.error(err.message || 'Falha ao atualizar o pedido.')
@@ -609,17 +635,11 @@ export default function PedidosPage() {
 
   const abrirModalConversao = (pedido: any) => {
     if (!podeGerenciar) {
-      toast.error('Você não tem permissão para converter pedidos em venda.')
+      toast.error('Apenas gerentes ou administradores podem converter pedidos em venda.')
       return
     }
-    if (
-      pedido.status !== 'faturado' &&
-      pedido.status !== 'confirmado' &&
-      pedido.status !== 'pendente'
-    ) {
-      toast.error(
-        'Apenas pedidos pendentes, confirmados ou faturados podem ser convertidos em venda.',
-      )
+    if (pedido.status === 'cancelado') {
+      toast.error('Pedidos cancelados não podem ser convertidos em venda.')
       return
     }
 
@@ -860,7 +880,7 @@ export default function PedidosPage() {
             ) : undefined
           }
           actions={
-            podeGerenciar && (
+            podeCriar && (
               <Button
                 onClick={abrirModalNovo}
                 className="bg-[#0066FF] hover:bg-[#0052CC] text-white flex items-center gap-1.5 shadow-sm font-medium rounded-xl"
@@ -967,9 +987,9 @@ export default function PedidosPage() {
                 : 'Crie orçamentos e pré-pedidos de clientes para aprovação comercial e acompanhamento.'
             }
             actionLabel={
-              temFiltroAtivo ? 'Limpar Filtros' : podeGerenciar ? 'Novo Pedido' : undefined
+              temFiltroAtivo ? 'Limpar Filtros' : podeCriar ? 'Novo Pedido' : undefined
             }
-            onAction={temFiltroAtivo ? limparFiltros : podeGerenciar ? abrirModalNovo : undefined}
+            onAction={temFiltroAtivo ? limparFiltros : podeCriar ? abrirModalNovo : undefined}
           />
         ) : (
           <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
@@ -1361,7 +1381,24 @@ export default function PedidosPage() {
                   </Label>
                   <Select
                     value={novoClienteId || 'sem_cliente'}
-                    onValueChange={(val) => setNovoClienteId(val === 'sem_cliente' ? null : val)}
+                    onValueChange={(val) => {
+                      const cid = val === 'sem_cliente' ? null : val
+                      setNovoClienteId(cid)
+                      if (cid) {
+                        const selecionado = clientes.find((c) => c.id === cid)
+                        if (selecionado) {
+                          const partes = [
+                            selecionado.endereco,
+                            selecionado.numero ? `nº ${selecionado.numero}` : '',
+                            selecionado.bairro,
+                            selecionado.cidade,
+                          ].filter(Boolean)
+                          if (partes.length > 0) {
+                            setNovoEnderecoEntrega(partes.join(', '))
+                          }
+                        }
+                      }
+                    }}
                   >
                     <SelectTrigger className="text-xs h-9 bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] rounded-xl dark:text-white">
                       <SelectValue placeholder="Selecione o cliente" />
@@ -1774,18 +1811,48 @@ export default function PedidosPage() {
                   Imprimir
                 </Button>
 
-                {/* Botão Converter em Venda no modal (Apenas status faturado, sem venda vinculada e podeGerenciar) */}
-                {podeGerenciar && pedidoDetalhe?.status === 'faturado' && !vendaRelacionada && (
+                {/* Botão Confirmar Pedido no modal */}
+                {podeGerenciar && pedidoDetalhe?.status === 'pendente' && (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => abrirModalConversao(pedidoDetalhe)}
+                    onClick={() => abrirConfirmarPedido(pedidoDetalhe)}
                     className="text-xs rounded-xl border-[#0066FF]/40 text-[#0066FF] dark:text-[#3B82F6] hover:bg-[#0066FF]/10 font-medium flex items-center gap-1.5"
                   >
-                    <ArrowRightCircle className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
-                    Converter em Venda
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
+                    Confirmar Pedido
                   </Button>
                 )}
+
+                {/* Botão Converter em Venda no modal (Apenas status pendente/confirmado/faturado, sem venda vinculada e podeGerenciar) */}
+                {podeGerenciar &&
+                  ['pendente', 'confirmado', 'faturado'].includes(pedidoDetalhe?.status) &&
+                  !vendaRelacionada && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => abrirModalConversao(pedidoDetalhe)}
+                      className="text-xs rounded-xl border-[#0066FF]/40 text-[#0066FF] dark:text-[#3B82F6] hover:bg-[#0066FF]/10 font-medium flex items-center gap-1.5"
+                    >
+                      <ArrowRightCircle className="w-3.5 h-3.5 text-[#0066FF] dark:text-[#3B82F6]" />
+                      Converter em Venda
+                    </Button>
+                  )}
+
+                {/* Botão Cancelar Pedido no modal */}
+                {podeGerenciar &&
+                  ['pendente', 'confirmado'].includes(pedidoDetalhe?.status) &&
+                  !vendaRelacionada && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => abrirCancelarPedido(pedidoDetalhe)}
+                      className="text-xs rounded-xl border-rose-300 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 font-medium flex items-center gap-1.5"
+                    >
+                      <X className="w-3.5 h-3.5 text-rose-600" />
+                      Cancelar Pedido
+                    </Button>
+                  )}
 
                 {/* Botão Editar se pendente */}
                 {podeGerenciar && pedidoDetalhe?.status === 'pendente' && (
@@ -1928,20 +1995,28 @@ export default function PedidosPage() {
         >
           <DialogContent className="max-w-md w-full bg-white dark:bg-[#0A1328]/95 dark:backdrop-blur-xl border border-slate-200/80 dark:border-[#1A294A] rounded-2xl p-6 shadow-2xl">
             <DialogHeader className="pb-3 border-b border-slate-100 dark:border-[#1A294A]">
-              <div className="flex items-center gap-2 text-[#0066FF] dark:text-[#3B82F6]">
+              <div className="flex items-center gap-2">
                 {acaoPedido?.acao === 'confirmar' ? (
-                  <CheckCircle2 className="w-5 h-5" />
+                  <CheckCircle2 className="w-5 h-5 text-[#0066FF] dark:text-[#3B82F6]" />
+                ) : acaoPedido?.acao === 'cancelar' ? (
+                  <AlertTriangle className="w-5 h-5 text-rose-600" />
                 ) : (
-                  <Receipt className="w-5 h-5" />
+                  <Receipt className="w-5 h-5 text-[#0066FF] dark:text-[#3B82F6]" />
                 )}
                 <DialogTitle className="text-base font-bold text-slate-900 dark:text-white">
-                  {acaoPedido?.acao === 'confirmar' ? 'Confirmar Pedido' : 'Faturar Pedido'}
+                  {acaoPedido?.acao === 'confirmar'
+                    ? 'Confirmar Pedido (Reservar Estoque)'
+                    : acaoPedido?.acao === 'cancelar'
+                      ? 'Cancelar Pedido (Liberar Reserva)'
+                      : 'Faturar Pedido'}
                 </DialogTitle>
               </div>
               <DialogDescription className="text-xs text-slate-500 dark:text-[#C0C6CF]/80 pt-2 leading-relaxed">
                 {acaoPedido?.acao === 'confirmar'
-                  ? 'Confirmar este pedido? O pedido será marcado como confirmado e poderá ser faturado em seguida.'
-                  : 'Faturar este pedido? O pedido ficará disponível para conversão em venda.'}
+                  ? 'Confirmar este pedido? Os itens entrarão em reserva de estoque para garantir a entrega.'
+                  : acaoPedido?.acao === 'cancelar'
+                    ? 'Tem certeza de que deseja cancelar este pedido? Se houver itens reservados, a reserva de estoque será liberada automaticamente.'
+                    : 'Faturar este pedido? O pedido ficará disponível para conversão em venda.'}
               </DialogDescription>
             </DialogHeader>
 
@@ -1982,17 +2057,30 @@ export default function PedidosPage() {
                 type="button"
                 disabled={executandoAcao}
                 onClick={handleExecutarAcao}
-                className="bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold flex items-center gap-2 rounded-xl px-4 shadow-sm"
+                className={`text-white text-xs font-bold flex items-center gap-2 rounded-xl px-4 shadow-sm ${
+                  acaoPedido?.acao === 'cancelar'
+                    ? 'bg-rose-600 hover:bg-rose-700'
+                    : 'bg-[#0066FF] hover:bg-[#0052CC]'
+                }`}
               >
                 {executandoAcao ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    {acaoPedido?.acao === 'confirmar' ? 'Confirmando...' : 'Faturando...'}
+                    {acaoPedido?.acao === 'confirmar'
+                      ? 'Confirmando...'
+                      : acaoPedido?.acao === 'cancelar'
+                        ? 'Cancelando...'
+                        : 'Faturando...'}
                   </>
                 ) : acaoPedido?.acao === 'confirmar' ? (
                   <>
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Confirmar Pedido
+                  </>
+                ) : acaoPedido?.acao === 'cancelar' ? (
+                  <>
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    Confirmar Cancelamento
                   </>
                 ) : (
                   <>

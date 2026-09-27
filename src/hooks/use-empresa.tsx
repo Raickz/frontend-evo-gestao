@@ -9,6 +9,7 @@ export type EmpresaData = Omit<Tables<'empresas'>, 'modulos'> & {
     | {
         modulo_cestas?: boolean
         modulo_entregas?: boolean
+        modulo_crediario?: boolean
         [key: string]: any
       }
     | any
@@ -25,6 +26,7 @@ interface EmpresaContextType {
   refreshStatus: () => Promise<void>
   moduloCestas: boolean
   moduloEntregas: boolean
+  moduloCrediario: boolean
   temModulo: (modulo: string) => boolean
 }
 
@@ -111,6 +113,7 @@ export function EmpresaProvider({ children }: { children: ReactNode }) {
   const modulosObj = (empresa?.modulos || {}) as Record<string, boolean>
   const moduloCestas = Boolean(modulosObj?.modulo_cestas)
   const moduloEntregas = Boolean(modulosObj?.modulo_entregas)
+  const moduloCrediario = Boolean(modulosObj?.modulo_crediario)
   const temModulo = useCallback(
     (modulo: string) => Boolean((empresa?.modulos as any)?.[modulo]),
     [empresa?.modulos],
@@ -130,6 +133,7 @@ export function EmpresaProvider({ children }: { children: ReactNode }) {
         refreshStatus: fetchStatusAssinatura,
         moduloCestas,
         moduloEntregas,
+        moduloCrediario,
         temModulo,
       }}
     >
