@@ -1,4 +1,11 @@
-export type UserRole = 'master' | 'admin' | 'gerente' | 'vendedor' | 'operador' | 'platform_admin'
+export type UserRole =
+  | 'master'
+  | 'admin'
+  | 'gerente'
+  | 'vendedor'
+  | 'operador'
+  | 'entregador'
+  | 'platform_admin'
 
 export type AppPage =
   | 'dashboard'
@@ -18,6 +25,9 @@ export type AppPage =
   | 'vendedores'
   | 'comissoes'
   | 'configuracoes'
+  | 'minha_rota'
+  | 'veiculos'
+  | 'rotas'
 
 /**
  * Mapeamento estrito de quais páginas cada papel pode acessar.
@@ -102,6 +112,9 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'financeiro',
     'vendedores',
     'comissoes',
+    'minha_rota',
+    'veiculos',
+    'rotas',
   ],
   operador: ['produtos', 'cestas', 'ordens_montagem', 'estoque'],
   vendedor: [
@@ -113,7 +126,9 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'vendas',
     'pedidos',
     'comissoes',
+    'minha_rota',
   ],
+  entregador: ['minha_rota', 'devedores', 'clientes'],
 }
 
 /**
@@ -138,6 +153,9 @@ export const PATH_TO_PAGE_MAP: Record<string, AppPage> = {
   '/app/vendedores': 'vendedores',
   '/app/comissoes': 'comissoes',
   '/app/configuracoes': 'configuracoes',
+  '/app/minha-rota': 'minha_rota',
+  '/app/veiculos': 'veiculos',
+  '/app/rotas': 'rotas',
 }
 
 /**
@@ -147,7 +165,9 @@ export function normalizeRole(perfil: string | null | undefined): UserRole | nul
   if (!perfil) return null
   const normalized = perfil.toLowerCase().trim()
   if (
-    ['master', 'admin', 'gerente', 'vendedor', 'operador', 'platform_admin'].includes(normalized)
+    ['master', 'admin', 'gerente', 'vendedor', 'operador', 'entregador', 'platform_admin'].includes(
+      normalized,
+    )
   ) {
     return normalized as UserRole
   }
@@ -201,6 +221,8 @@ export function formatPerfilBadge(perfil?: string | null): { label: string; colo
       return { label: 'Operador', color: 'bg-amber-100 text-amber-700 border-amber-200' }
     case 'vendedor':
       return { label: 'Vendedor', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' }
+    case 'entregador':
+      return { label: 'Entregador', color: 'bg-teal-100 text-teal-700 border-teal-200' }
     default:
       return { label: perfil || 'Usuário', color: 'bg-slate-100 text-slate-700 border-slate-200' }
   }

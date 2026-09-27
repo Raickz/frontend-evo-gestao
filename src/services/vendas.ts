@@ -280,7 +280,7 @@ export const VendasService = {
       p_entrada_forma: params.entradaForma || 'pix',
       p_num_parcelas: params.numParcelas || 1,
       p_intervalo_dias: params.intervaloDias || 30,
-      p_autorizador_id: params.autorizadorId || null,
+      p_autorizador_id: null, // Segurança Andrade: p_autorizador_id de terceiros ignorado; autorização é pelo usuário autenticado
     })
   },
 

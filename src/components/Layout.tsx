@@ -32,6 +32,8 @@ import {
   CreditCard,
   ShoppingBag,
   Hammer,
+  Navigation,
+  MapPin,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useEmpresa } from '@/hooks/use-empresa'
@@ -84,6 +86,13 @@ const ALL_NAV_SECTIONS: NavSection[] = [
   {
     title: 'Comercial',
     items: [
+      {
+        title: 'Minha Rota',
+        href: '/app/minha-rota',
+        icon: Navigation,
+        page: 'minha_rota',
+        modulo: 'modulo_entregas',
+      },
       { title: 'Clientes', href: '/app/clientes', icon: Users, page: 'clientes' },
       { title: 'Vendas', href: '/app/vendas', icon: ShoppingCart, page: 'vendas' },
       { title: 'Pedidos', href: '/app/pedidos', icon: ClipboardList, page: 'pedidos' },
@@ -93,6 +102,25 @@ const ALL_NAV_SECTIONS: NavSection[] = [
         icon: UserCheck,
         page: 'devedores',
         modulo: 'modulo_crediario',
+      },
+    ],
+  },
+  {
+    title: 'Entregas & Frota',
+    items: [
+      {
+        title: 'Gestão de Rotas',
+        href: '/app/rotas',
+        icon: MapPin,
+        page: 'rotas',
+        modulo: 'modulo_entregas',
+      },
+      {
+        title: 'Veículos / Frota',
+        href: '/app/veiculos',
+        icon: Truck,
+        page: 'veiculos',
+        modulo: 'modulo_entregas',
       },
     ],
   },

@@ -1668,6 +1668,12 @@ export default function ConfiguracoesPage() {
                     >
                       Vendedor (Vendas & Carteira)
                     </SelectItem>
+                    <SelectItem
+                      value="entregador"
+                      className="text-xs font-semibold text-teal-600 dark:text-teal-400"
+                    >
+                      Entregador (Minha Rota & Entregas)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1863,6 +1869,12 @@ export default function ConfiguracoesPage() {
                       className="text-xs font-semibold text-emerald-600 dark:text-emerald-400"
                     >
                       Vendedor (Vendas & Carteira)
+                    </SelectItem>
+                    <SelectItem
+                      value="entregador"
+                      className="text-xs font-semibold text-teal-600 dark:text-teal-400"
+                    >
+                      Entregador (Minha Rota & Entregas)
                     </SelectItem>
                   </SelectContent>
                 </Select>

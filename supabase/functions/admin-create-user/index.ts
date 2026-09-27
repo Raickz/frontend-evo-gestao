@@ -2,7 +2,7 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 
-const PERFIS_PERMITIDOS = ['master', 'admin', 'gerente', 'vendedor', 'operador']
+const PERFIS_PERMITIDOS = ['master', 'admin', 'gerente', 'vendedor', 'operador', 'entregador']
 
 Deno.serve(async (req: Request) => {
   // Tratar requisições OPTIONS para CORS preflight

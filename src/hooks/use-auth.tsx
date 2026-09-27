@@ -9,6 +9,7 @@ export type UsuarioPerfil =
   | 'gerente'
   | 'vendedor'
   | 'operador'
+  | 'entregador'
   | 'platform_admin'
   | string
 

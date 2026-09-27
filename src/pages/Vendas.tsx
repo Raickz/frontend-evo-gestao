@@ -69,6 +69,9 @@ interface ClienteOption {
   id: string
   nome: string
   documento: string | null
+  limite_credito?: number | null
+  telefone?: string | null
+  whatsapp?: string | null
 }
 
 interface VendedorOption {

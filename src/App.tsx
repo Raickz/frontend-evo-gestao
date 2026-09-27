@@ -46,6 +46,9 @@ import RelatoriosPage from '@/pages/Relatorios'
 import RelatorioLucroPage from '@/pages/RelatorioLucro'
 import CestasPage from '@/pages/Cestas'
 import OrdensMontagemPage from '@/pages/OrdensMontagem'
+import MinhaRotaPage from '@/pages/MinhaRota'
+import RotasPage from '@/pages/Rotas'
+import VeiculosPage from '@/pages/Veiculos'
 import NotFound from '@/pages/NotFound'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
@@ -196,6 +199,30 @@ const App = () => (
                 }
               >
                 <Route index element={<Navigate to="/app/dashboard" replace />} />
+                <Route
+                  path="minha-rota"
+                  element={
+                    <RoleRouteGuard page="minha_rota">
+                      <MinhaRotaPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="rotas"
+                  element={
+                    <RoleRouteGuard page="rotas">
+                      <RotasPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="veiculos"
+                  element={
+                    <RoleRouteGuard page="veiculos">
+                      <VeiculosPage />
+                    </RoleRouteGuard>
+                  }
+                />
                 <Route
                   path="dashboard"
                   element={
