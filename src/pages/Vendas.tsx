@@ -91,7 +91,7 @@ interface ProdutoOption {
 }
 
 export default function VendasPage() {
-  const { empresaId, empresa } = useEmpresa()
+  const { empresaId, empresa, moduloCestas } = useEmpresa()
   const { usuario } = useAuth()
 
   // Resolução do vendedor_id quando perfil for 'vendedor'
@@ -257,7 +257,11 @@ export default function VendasPage() {
     if (!empresaId) return
     setLoadingProdutos(true)
     try {
-      const { data, error } = await VendasService.listProdutosDisponiveis(empresaId, search)
+      const { data, error } = await VendasService.listProdutosDisponiveis(
+        empresaId,
+        search,
+        moduloCestas,
+      )
       if (error) throw error
       setProdutosDisponiveis((data as unknown as ProdutoOption[]) || [])
     } catch (e: any) {

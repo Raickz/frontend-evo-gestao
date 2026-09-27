@@ -4,7 +4,13 @@ import { supabase } from '@/lib/supabase/client'
 import type { Tables } from '@/lib/supabase/types'
 import { AssinaturasService, StatusAssinatura } from '@/services/assinaturas'
 
-export interface EmpresaData extends Tables<'empresas'> {}
+export interface EmpresaData extends Tables<'empresas'> {
+  modulos?: {
+    modulo_cestas?: boolean
+    modulo_entregas?: boolean
+    [key: string]: any
+  } | null
+}
 
 interface EmpresaContextType {
   empresa: EmpresaData | null
@@ -16,6 +22,9 @@ interface EmpresaContextType {
   loadingStatus: boolean
   acessoPermitido: boolean
   refreshStatus: () => Promise<void>
+  moduloCestas: boolean
+  moduloEntregas: boolean
+  temModulo: (modulo: string) => boolean
 }
 
 const EmpresaContext = createContext<EmpresaContextType | undefined>(undefined)
@@ -98,6 +107,14 @@ export function EmpresaProvider({ children }: { children: ReactNode }) {
   // Acesso permitido padrão é true se ainda não carregou, ou avaliado pelo status
   const acessoPermitido = statusAssinatura ? statusAssinatura.acesso_permitido : true
 
+  const modulosObj = (empresa?.modulos || {}) as Record<string, boolean>
+  const moduloCestas = Boolean(modulosObj?.modulo_cestas)
+  const moduloEntregas = Boolean(modulosObj?.modulo_entregas)
+  const temModulo = useCallback(
+    (modulo: string) => Boolean((empresa?.modulos as any)?.[modulo]),
+    [empresa?.modulos],
+  )
+
   return (
     <EmpresaContext.Provider
       value={{
@@ -110,6 +127,9 @@ export function EmpresaProvider({ children }: { children: ReactNode }) {
         loadingStatus,
         acessoPermitido,
         refreshStatus: fetchStatusAssinatura,
+        moduloCestas,
+        moduloEntregas,
+        temModulo,
       }}
     >
       {children}

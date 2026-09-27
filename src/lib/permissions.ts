@@ -6,6 +6,8 @@ export type AppPage =
   | 'relatorio_lucro'
   | 'clientes'
   | 'produtos'
+  | 'cestas'
+  | 'ordens_montagem'
   | 'fornecedores'
   | 'compras'
   | 'estoque'
@@ -32,6 +34,8 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'relatorio_lucro',
     'clientes',
     'produtos',
+    'cestas',
+    'ordens_montagem',
     'fornecedores',
     'compras',
     'estoque',
@@ -48,6 +52,8 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'relatorio_lucro',
     'clientes',
     'produtos',
+    'cestas',
+    'ordens_montagem',
     'fornecedores',
     'compras',
     'estoque',
@@ -64,6 +70,8 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'relatorio_lucro',
     'clientes',
     'produtos',
+    'cestas',
+    'ordens_montagem',
     'fornecedores',
     'compras',
     'estoque',
@@ -79,6 +87,8 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'relatorios',
     'clientes',
     'produtos',
+    'cestas',
+    'ordens_montagem',
     'fornecedores',
     'compras',
     'estoque',
@@ -88,8 +98,8 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'vendedores',
     'comissoes',
   ],
-  operador: ['produtos', 'estoque'],
-  vendedor: ['dashboard', 'clientes', 'produtos', 'vendas', 'pedidos', 'comissoes'],
+  operador: ['produtos', 'cestas', 'ordens_montagem', 'estoque'],
+  vendedor: ['dashboard', 'clientes', 'produtos', 'cestas', 'vendas', 'pedidos', 'comissoes'],
 }
 
 /**
@@ -102,6 +112,8 @@ export const PATH_TO_PAGE_MAP: Record<string, AppPage> = {
   '/app/relatorio-lucro': 'relatorio_lucro',
   '/app/clientes': 'clientes',
   '/app/produtos': 'produtos',
+  '/app/cestas': 'cestas',
+  '/app/ordens-montagem': 'ordens_montagem',
   '/app/fornecedores': 'fornecedores',
   '/app/compras': 'compras',
   '/app/estoque': 'estoque',

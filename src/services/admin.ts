@@ -72,6 +72,11 @@ export interface AdminEmpresaItem {
   vencimento: string | null
   fim_periodo_teste: string | null
   total_usuarios: number
+  modulos?: {
+    modulo_cestas?: boolean
+    modulo_entregas?: boolean
+    [key: string]: any
+  }
 }
 
 export interface AdminAssinaturaItem {

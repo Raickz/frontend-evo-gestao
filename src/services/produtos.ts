@@ -44,6 +44,7 @@ export const ProdutosService = {
     estoqueMinimo?: number
     estoqueInicial?: number
     descricao?: string
+    tipoItem?: 'padrao' | 'cesta' | 'componente'
   }) {
     return supabase.rpc('criar_produto', {
       p_nome: params.nome,
@@ -56,7 +57,8 @@ export const ProdutosService = {
       p_estoque_minimo: params.estoqueMinimo || 0,
       p_estoque_inicial: params.estoqueInicial || 0,
       p_descricao: params.descricao,
-    })
+      p_tipo_item: params.tipoItem || 'padrao',
+    } as any)
   },
 
   async update(empresaId: string, id: string, data: ProdutoUpdate) {

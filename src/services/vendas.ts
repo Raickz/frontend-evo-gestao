@@ -166,14 +166,18 @@ export const VendasService = {
     return query.order('nome', { ascending: true })
   },
 
-  async listProdutosDisponiveis(empresaId: string, search?: string) {
+  async listProdutosDisponiveis(empresaId: string, search?: string, apenasCestas = false) {
     let query = supabase
       .from('produtos')
       .select(
-        'id, nome, codigo, codigo_barras, preco_venda, preco_custo, unidade, estoque_minimo, foto_url, estoques(quantidade)',
+        'id, nome, codigo, codigo_barras, preco_venda, preco_custo, unidade, estoque_minimo, foto_url, tipo_item, estoques(quantidade)',
       )
       .eq('empresa_id', empresaId)
       .eq('ativo', true)
+
+    if (apenasCestas) {
+      query = query.eq('tipo_item', 'cesta')
+    }
 
     if (search && search.trim()) {
       const cleanTerm = search.trim()

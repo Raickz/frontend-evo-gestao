@@ -29,6 +29,8 @@ import {
   Moon,
   HelpCircle,
   CreditCard,
+  ShoppingBag,
+  Hammer,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useEmpresa } from '@/hooks/use-empresa'
@@ -61,6 +63,7 @@ interface NavItem {
   icon: React.ElementType
   page: AppPage
   badge?: string
+  modulo?: string
 }
 
 interface NavSection {
@@ -89,10 +92,29 @@ const ALL_NAV_SECTIONS: NavSection[] = [
     title: 'Cadastros',
     items: [
       { title: 'Produtos', href: '/app/produtos', icon: Package, page: 'produtos' },
+      {
+        title: 'Cestas',
+        href: '/app/cestas',
+        icon: ShoppingBag,
+        page: 'cestas',
+        modulo: 'modulo_cestas',
+      },
       { title: 'Fornecedores', href: '/app/fornecedores', icon: Truck, page: 'fornecedores' },
       { title: 'Compras', href: '/app/compras', icon: ShoppingCart, page: 'compras' },
       { title: 'Estoque', href: '/app/estoque', icon: Layers, page: 'estoque' },
       { title: 'Vendedores', href: '/app/vendedores', icon: Briefcase, page: 'vendedores' },
+    ],
+  },
+  {
+    title: 'Produção',
+    items: [
+      {
+        title: 'Montagem de Cestas',
+        href: '/app/ordens-montagem',
+        icon: Hammer,
+        page: 'ordens_montagem',
+        modulo: 'modulo_cestas',
+      },
     ],
   },
   {
@@ -126,13 +148,17 @@ export default function Layout() {
 
   const roleInfo = formatPerfilBadge(usuario?.perfil)
 
-  // Filtragem das seções e itens conforme perfil do usuário
+  // Filtragem das seções e itens conforme perfil do usuário e módulos habilitados
   const visibleNavSections = useMemo(() => {
     return ALL_NAV_SECTIONS.map((section) => ({
       ...section,
-      items: section.items.filter((item) => canAccessPage(usuario?.perfil, item.page)),
+      items: section.items.filter((item) => {
+        if (!canAccessPage(usuario?.perfil, item.page)) return false
+        if (item.modulo && !empresa?.modulos?.[item.modulo]) return false
+        return true
+      }),
     })).filter((section) => section.items.length > 0)
-  }, [usuario?.perfil])
+  }, [usuario?.perfil, empresa?.modulos])
 
   const canAccessSettings = useMemo(() => {
     return canAccessPage(usuario?.perfil, 'configuracoes')

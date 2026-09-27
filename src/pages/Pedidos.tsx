@@ -100,7 +100,7 @@ interface ProdutoOption {
 
 export default function PedidosPage() {
   const navigate = useNavigate()
-  const { empresaId, empresa } = useEmpresa()
+  const { empresaId, empresa, moduloCestas } = useEmpresa()
   const { usuario } = useAuth()
 
   // Permissões
@@ -257,7 +257,11 @@ export default function PedidosPage() {
     if (!empresaId) return
     setLoadingProdutos(true)
     try {
-      const { data, error: err } = await PedidosService.listProdutosDisponiveis(empresaId, search)
+      const { data, error: err } = await PedidosService.listProdutosDisponiveis(
+        empresaId,
+        search,
+        moduloCestas,
+      )
       if (err) throw err
       setProdutos((data as unknown as ProdutoOption[]) || [])
     } catch (e) {

@@ -81,6 +81,8 @@ export function EditarEmpresaModal({
     responsavel_telefone: '',
     responsavel_whatsapp: '',
     responsavel_cargo: '',
+    modulo_cestas: false,
+    modulo_entregas: false,
   })
 
   // Plano e assinatura
@@ -125,6 +127,8 @@ export function EditarEmpresaModal({
         responsavel_telefone: empresa.responsavel_telefone || '',
         responsavel_whatsapp: empresa.responsavel_whatsapp || '',
         responsavel_cargo: empresa.responsavel_cargo || '',
+        modulo_cestas: Boolean(empresa.modulos?.modulo_cestas),
+        modulo_entregas: Boolean(empresa.modulos?.modulo_entregas),
       })
 
       setPlanoForm({
@@ -167,7 +171,14 @@ export function EditarEmpresaModal({
 
     try {
       setSaving(true)
-      const { error } = await AdminService.editarEmpresaCadastral(empresa.id, cadastral)
+      const { modulo_cestas, modulo_entregas, ...dadosCadastrais } = cadastral
+      const { error } = await AdminService.editarEmpresaCadastral(empresa.id, {
+        ...dadosCadastrais,
+        modulos: {
+          modulo_cestas,
+          modulo_entregas,
+        },
+      } as any)
       if (error) throw error
       toast.success('Dados cadastrais atualizados com sucesso!')
       onSuccess()
@@ -410,6 +421,58 @@ export function EditarEmpresaModal({
                       onChange={(e) => setCadastral({ ...cadastral, bairro: e.target.value })}
                       className="bg-slate-900 border-slate-800 text-slate-100"
                     />
+                  </div>
+                </div>
+              </div>
+
+              {/* Módulos Habilitados (Rodada Andrade 1) */}
+              <div className="pt-2 border-t border-slate-800/80">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-bold text-slate-400 uppercase text-[10px] flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    Módulos da Empresa (Somente Platform Admin)
+                  </h4>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-slate-200 text-xs">Cestas e Montagem</p>
+                      <p className="text-[11px] text-slate-400">
+                        Ativa composição versionada, ordens de montagem e catálogo exclusivo de
+                        cestas
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer ml-3">
+                      <input
+                        type="checkbox"
+                        checked={cadastral.modulo_cestas}
+                        onChange={(e) =>
+                          setCadastral({ ...cadastral, modulo_cestas: e.target.checked })
+                        }
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
+                    </label>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-slate-200 text-xs">Entregas</p>
+                      <p className="text-[11px] text-slate-400">
+                        Ativa roteirização, frete e status de despacho/entrega
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer ml-3">
+                      <input
+                        type="checkbox"
+                        checked={cadastral.modulo_entregas}
+                        onChange={(e) =>
+                          setCadastral({ ...cadastral, modulo_entregas: e.target.checked })
+                        }
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
+                    </label>
                   </div>
                 </div>
               </div>

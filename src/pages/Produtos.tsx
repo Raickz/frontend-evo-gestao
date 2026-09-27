@@ -89,6 +89,7 @@ interface FormState {
   estoque_inicial: string
   descricao: string
   foto_url: string | null
+  tipo_item: 'padrao' | 'cesta' | 'componente'
 }
 
 const initialFormState: FormState = {
@@ -103,6 +104,7 @@ const initialFormState: FormState = {
   estoque_inicial: '0',
   descricao: '',
   foto_url: null,
+  tipo_item: 'padrao',
 }
 
 type StatusFilter = 'todos' | 'ativos' | 'inativos'
@@ -110,7 +112,7 @@ type StatusFilter = 'todos' | 'ativos' | 'inativos'
 const PAGE_SIZE = 20
 
 export default function ProdutosPage() {
-  const { empresaId } = useEmpresa()
+  const { empresaId, moduloCestas } = useEmpresa()
   const { usuario } = useAuth()
   const podeGerenciarProdutos = usuario?.perfil === 'master' || usuario?.perfil === 'admin'
 
@@ -216,7 +218,10 @@ export default function ProdutosPage() {
   // Open modal for create
   const handleOpenCreate = () => {
     setEditingProduto(null)
-    setFormData(initialFormState)
+    setFormData({
+      ...initialFormState,
+      tipo_item: moduloCestas ? 'cesta' : 'padrao',
+    })
     setFormErrors({})
     setSelectedFotoFile(null)
     setFotoPreviewUrl(null)
@@ -249,6 +254,7 @@ export default function ProdutosPage() {
       estoque_inicial: '0',
       descricao: produto.descricao || '',
       foto_url: produto.foto_url || null,
+      tipo_item: (produto.tipo_item as any) || 'padrao',
     })
     setSelectedFotoFile(null)
     setFotoPreviewUrl(produto.foto_url || null)
@@ -436,6 +442,7 @@ export default function ProdutosPage() {
           estoqueMinimo: parseFloat(formData.estoque_minimo) || 0,
           estoqueInicial: parseFloat(formData.estoque_inicial) || 0,
           descricao: descricaoVal,
+          tipoItem: moduloCestas ? formData.tipo_item : 'padrao',
         })
         if (err) throw err
 
@@ -854,6 +861,46 @@ export default function ProdutosPage() {
               <h4 className="text-xs font-bold uppercase tracking-wider text-[#0066FF] dark:text-[#3B82F6] pb-1 border-b border-slate-100 dark:border-[#1A294A]">
                 Identificação
               </h4>
+
+              {moduloCestas && (
+                <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-2">
+                  <Label className="text-xs font-bold text-amber-500 uppercase tracking-wide">
+                    Tipo de Item (Módulo Cestas Habilitado)
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, tipo_item: 'cesta' })}
+                      className={`p-2.5 rounded-lg border text-left text-xs transition-all ${
+                        formData.tipo_item === 'cesta'
+                          ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold'
+                          : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      <div className="font-semibold text-sm">Cesta Básica</div>
+                      <p className="text-[10px] text-slate-400 mt-0.5">
+                        Produto acabado que será vendido aos clientes
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, tipo_item: 'componente' })}
+                      className={`p-2.5 rounded-lg border text-left text-xs transition-all ${
+                        formData.tipo_item === 'componente'
+                          ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold'
+                          : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      <div className="font-semibold text-sm">Componente</div>
+                      <p className="text-[10px] text-slate-400 mt-0.5">
+                        Insumo para montagem (ex: arroz, feijão, embalagem)
+                      </p>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1 sm:col-span-2">
                   <Label

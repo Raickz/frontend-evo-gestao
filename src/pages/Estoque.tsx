@@ -60,10 +60,11 @@ type TipoFilterMov = 'todos' | 'entrada' | 'saida'
 const PAGE_SIZE = 20
 
 export default function EstoquePage() {
-  const { empresaId } = useEmpresa()
+  const { empresaId, moduloCestas } = useEmpresa()
 
   // Tab State
   const [activeTab, setActiveTab] = useState<'saldos' | 'movimentacoes'>('saldos')
+  const [visaoCestas, setVisaoCestas] = useState<'todos' | 'cesta' | 'componente'>('todos')
 
   // Indicadores KPI State
   const [indicadores, setIndicadores] = useState<EstoqueIndicadores>({
@@ -175,6 +176,12 @@ export default function EstoquePage() {
       setLoadingSaldos(false)
     }
   }, [empresaId, debouncedSearchSaldo, statusFilterSaldo, pageSaldo])
+
+  // Saldos filtrados pela visão dupla de Cestas (quando módulo ligado)
+  const saldosFiltradosVisao = useMemo(() => {
+    if (!moduloCestas || visaoCestas === 'todos') return saldos
+    return saldos.filter((s) => s.produtos?.tipo_item === visaoCestas)
+  }, [saldos, moduloCestas, visaoCestas])
 
   // Carregar lista de fornecedores da empresa para filtro do histórico
   const loadFornecedoresFiltro = useCallback(async () => {
@@ -600,6 +607,44 @@ export default function EstoquePage() {
               )}
             </div>
 
+            {moduloCestas && (
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/80 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setVisaoCestas('todos')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+                    visaoCestas === 'todos'
+                      ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs font-semibold'
+                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Tudo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVisaoCestas('cesta')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+                    visaoCestas === 'cesta'
+                      ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
+                      : 'text-amber-500 hover:text-amber-400'
+                  }`}
+                >
+                  Cestas Prontas
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVisaoCestas('componente')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
+                    visaoCestas === 'componente'
+                      ? 'bg-sky-500 text-slate-950 font-bold shadow-xs'
+                      : 'text-sky-400 hover:text-sky-300'
+                  }`}
+                >
+                  Componentes
+                </button>
+              </div>
+            )}
+
             <div className="w-full sm:w-56">
               <Select
                 value={statusFilterSaldo}
@@ -670,9 +715,11 @@ export default function EstoquePage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
-                    {saldos.map((item) => {
+                    {saldosFiltradosVisao.map((item) => {
                       const prod = item.produtos
                       const qtd = Number(item.quantidade) || 0
+                      const reservada = Number(item.quantidade_reservada) || 0
+                      const disponivel = qtd - reservada
                       const min = Number(prod?.estoque_minimo) || 0
                       const unidade = prod?.unidade || 'UN'
 
@@ -709,8 +756,15 @@ export default function EstoquePage() {
                           <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-slate-300 tabular-nums">
                             {min} {unidade}
                           </td>
-                          <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white tabular-nums text-sm">
-                            {qtd} {unidade}
+                          <td className="py-3.5 px-4 tabular-nums">
+                            <div className="font-bold text-slate-900 dark:text-white text-sm">
+                              {qtd} {unidade}
+                            </div>
+                            {reservada > 0 && (
+                              <div className="text-[10px] text-amber-500 font-mono">
+                                Disp: {disponivel} (Res: {reservada})
+                              </div>
+                            )}
                           </td>
                           <td className="py-3.5 px-4">
                             {isZerado && (

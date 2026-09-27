@@ -38,6 +38,7 @@ export interface ProdutoSaldoItem {
   empresa_id: string
   produto_id: string
   quantidade: number
+  quantidade_reservada?: number
   updated_at: string
   produtos: {
     id: string
@@ -46,6 +47,7 @@ export interface ProdutoSaldoItem {
     estoque_minimo: number
     unidade: string
     ativo: boolean
+    tipo_item?: 'padrao' | 'cesta' | 'componente'
     categorias: {
       nome: string
     } | null
@@ -226,7 +228,7 @@ export const EstoqueService = {
     let query = supabase
       .from('estoques')
       .select(
-        'id, empresa_id, produto_id, quantidade, updated_at, produtos!inner(id, nome, codigo, estoque_minimo, unidade, ativo, categorias(nome))',
+        'id, empresa_id, produto_id, quantidade, quantidade_reservada, updated_at, produtos!inner(id, nome, codigo, estoque_minimo, unidade, ativo, tipo_item, categorias(nome))',
         { count: 'exact' },
       )
       .eq('empresa_id', empresaId)
