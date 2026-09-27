@@ -161,6 +161,13 @@ const App = () => (
               {/* Auth screen */}
               <Route path="/auth" element={<AuthPage />} />
 
+              {/* Redirecionamentos de conveniência para rotas protegidas da rodada Andrade */}
+              <Route path="/cestas" element={<Navigate to="/app/cestas" replace />} />
+              <Route
+                path="/ordens-montagem"
+                element={<Navigate to="/app/ordens-montagem" replace />}
+              />
+
               {/* Rotas Administrativas da Plataforma (Platform Admin) */}
               <Route
                 path="/admin"

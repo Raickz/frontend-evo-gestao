@@ -43,10 +43,15 @@ interface PageAccessGuardProps {
 
 export function PageAccessGuard({ children, page }: PageAccessGuardProps) {
   const { usuario } = useAuth()
+  const { moduloCestas } = useEmpresa()
 
   const allowed = canAccessPage(usuario?.perfil, page)
 
   if (!allowed) {
+    return <Navigate to="/app/dashboard" replace />
+  }
+
+  if ((page === 'cestas' || page === 'ordens_montagem') && !moduloCestas) {
     return <Navigate to="/app/dashboard" replace />
   }
 
