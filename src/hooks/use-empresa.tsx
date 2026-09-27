@@ -4,14 +4,15 @@ import { supabase } from '@/lib/supabase/client'
 import type { Tables } from '@/lib/supabase/types'
 import { AssinaturasService, StatusAssinatura } from '@/services/assinaturas'
 
-export interface EmpresaData extends Tables<'empresas'> {
-  modulos?: {
-    modulo_cestas?: boolean
-    modulo_entregas?: boolean
-    [key: string]: any
-  } | null
+export type EmpresaData = Omit<Tables<'empresas'>, 'modulos'> & {
+  modulos?:
+    | {
+        modulo_cestas?: boolean
+        modulo_entregas?: boolean
+        [key: string]: any
+      }
+    | any
 }
-
 interface EmpresaContextType {
   empresa: EmpresaData | null
   empresaId: string | null
