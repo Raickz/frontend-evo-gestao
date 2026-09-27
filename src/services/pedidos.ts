@@ -337,13 +337,15 @@ export const PedidosService = {
     formaPagamento: string,
     vencimento?: string | null,
     pagamentos?: Array<{ forma: string; valor: number; data?: string; referencia?: string }> | null,
+    parcelas?: Array<{ numero: number; valor: number; vencimento: string }> | null,
   ) {
     return supabase.rpc('converter_pedido_em_venda', {
       p_pedido_id: pedidoId,
       p_forma_pagamento: formaPagamento,
       p_vencimento: vencimento || null,
       p_pagamentos: pagamentos || null,
-    })
+      p_parcelas: parcelas || null,
+    } as any)
   },
 
   /**
@@ -379,7 +381,9 @@ export const PedidosService = {
   async listClientesAtivos(empresaId: string, search?: string) {
     let query = supabase
       .from('clientes')
-      .select('id, nome, documento, limite_credito, telefone, email, endereco, numero, bairro, cidade, cep')
+      .select(
+        'id, nome, documento, limite_credito, telefone, email, endereco, numero, bairro, cidade, cep',
+      )
       .eq('empresa_id', empresaId)
       .eq('ativo', true)
 

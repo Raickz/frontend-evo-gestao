@@ -104,7 +104,16 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'comissoes',
   ],
   operador: ['produtos', 'cestas', 'ordens_montagem', 'estoque'],
-  vendedor: ['dashboard', 'clientes', 'devedores', 'produtos', 'cestas', 'vendas', 'pedidos', 'comissoes'],
+  vendedor: [
+    'dashboard',
+    'clientes',
+    'devedores',
+    'produtos',
+    'cestas',
+    'vendas',
+    'pedidos',
+    'comissoes',
+  ],
 }
 
 /**

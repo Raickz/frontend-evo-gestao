@@ -790,13 +790,10 @@ export default function DevedoresPage() {
             <Button
               size="sm"
               onClick={() => {
-                const text = `*COMPROVANTE DE PAGAMENTO*\n${
-                  empresa?.nome_fantasia || empresa?.nome
-                }\nCliente: ${comprovante?.cliente_nome}\nValor: R$ ${comprovante?.valor_recebido
-                  .toFixed(2)
-                  .replace('.', ',')}\nSaldo restante: R$ ${comprovante?.saldo_restante
-                  .toFixed(2)
-                  .replace('.', ',')}\nData: ${comprovante?.data_pagamento}`
+                const empresaTexto = empresa?.nome_fantasia || empresa?.nome || 'Andrade Alimentos'
+                const valRecebido = (comprovante?.valor_recebido ?? 0).toFixed(2).replace('.', ',')
+                const saldoRest = (comprovante?.saldo_restante ?? 0).toFixed(2).replace('.', ',')
+                const text = `*COMPROVANTE DE PAGAMENTO*\n${empresaTexto}\nCliente: ${comprovante?.cliente_nome}\nValor: R$ ${valRecebido}\nSaldo restante: R$ ${saldoRest}\nData: ${comprovante?.data_pagamento}`
                 navigator.clipboard?.writeText(text)
                 toast.success('Texto do comprovante copiado para o WhatsApp!')
               }}

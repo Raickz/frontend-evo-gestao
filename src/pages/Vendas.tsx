@@ -91,7 +91,7 @@ interface ProdutoOption {
 }
 
 export default function VendasPage() {
-  const { empresaId, empresa, moduloCestas } = useEmpresa()
+  const { empresaId, empresa, moduloCestas, moduloCrediario } = useEmpresa()
   const { usuario } = useAuth()
 
   // Resolução do vendedor_id quando perfil for 'vendedor'
@@ -164,6 +164,30 @@ export default function VendasPage() {
   const [formaPagamento, setFormaPagamento] = useState<string>('pix')
   const [vencimento, setVencimento] = useState<string>('')
   const [observacoes, setObservacoes] = useState<string>('')
+
+  // Estados de Pagamento Avançado (Crediário / Dividido / Parcelado)
+  const [tipoPagamento, setTipoPagamento] = useState<'simples' | 'dividido' | 'parcelado'>(
+    'simples',
+  )
+  const [pagamentosDivididos, setPagamentosDivididos] = useState<
+    Array<{ id: string; forma: string; valor: number; referencia?: string }>
+  >([
+    { id: '1', forma: 'dinheiro', valor: 0 },
+    { id: '2', forma: 'pix', valor: 0 },
+  ])
+  const [numParcelas, setNumParcelas] = useState<number>(3)
+  const [intervaloDias, setIntervaloDias] = useState<number>(30)
+  const [entradaValor, setEntradaValor] = useState<number>(0)
+  const [entradaForma, setEntradaForma] = useState<string>('dinheiro')
+  const [autorizadorId, setAutorizadorId] = useState<string | null>(null)
+  const [gerentesAutorizadores, setGerentesAutorizadores] = useState<
+    Array<{ id: string; nome: string }>
+  >([])
+  const [clienteAvisos, setClienteAvisos] = useState<{
+    limite?: number
+    temVencida?: boolean
+    saldoAberto?: number
+  } | null>(null)
 
   const [submetendoVenda, setSubmetendoVenda] = useState(false)
   const [erroVenda, setErroVenda] = useState<string | null>(null)
@@ -299,12 +323,70 @@ export default function VendasPage() {
     }
   }
 
+  // Carregar usuários gerentes/admins autorizadores para caso de estouro de limite
+  const carregarAutorizadores = async () => {
+    if (!empresaId) return
+    try {
+      const { data } = await supabase
+        .from('usuarios')
+        .select('id, nome, perfil')
+        .eq('empresa_id', empresaId)
+        .in('perfil', ['admin', 'gerente', 'master'])
+        .eq('ativo', true)
+      if (data) {
+        setGerentesAutorizadores(data.map((u) => ({ id: u.id, nome: u.nome })))
+      }
+    } catch (e) {
+      if (import.meta.env.DEV) console.error('Erro ao carregar autorizadores:', e)
+    }
+  }
+
+  // Verificar histórico financeiro do cliente selecionado (parcelas vencidas, saldo em aberto)
+  useEffect(() => {
+    async function checarCliente() {
+      if (!empresaId || !clienteSelecionadoId) {
+        setClienteAvisos(null)
+        return
+      }
+      try {
+        const cli = clientes.find((c) => c.id === clienteSelecionadoId)
+        const limite = cli?.limite_credito ?? 0
+
+        const { data: contas } = await supabase
+          .from('contas_receber')
+          .select('valor, saldo, vencimento, status')
+          .eq('empresa_id', empresaId)
+          .eq('cliente_id', clienteSelecionadoId)
+          .in('status', ['aberto', 'parcial'])
+
+        const hojeStr = new Date().toISOString().slice(0, 10)
+        let temVencida = false
+        let saldoAberto = 0
+
+        if (contas) {
+          for (const c of contas) {
+            saldoAberto += Number(c.saldo || 0)
+            if (c.vencimento < hojeStr) {
+              temVencida = true
+            }
+          }
+        }
+
+        setClienteAvisos({ limite, temVencida, saldoAberto })
+      } catch (e) {
+        if (import.meta.env.DEV) console.error('Erro ao checar cliente:', e)
+      }
+    }
+    checarCliente()
+  }, [empresaId, clienteSelecionadoId, clientes])
+
   // Efeito ao entrar no modo 'nova'
   useEffect(() => {
     if (modo === 'nova' && empresaId) {
       carregarProdutosDisponiveis(debouncedBuscaProduto)
       carregarClientes()
       carregarVendedores()
+      carregarAutorizadores()
     }
   }, [modo, empresaId, debouncedBuscaProduto])
 
@@ -377,6 +459,16 @@ export default function VendasPage() {
     setDesconto(0)
     setDescontoInput('0')
     setFormaPagamento('pix')
+    setTipoPagamento('simples')
+    setPagamentosDivididos([
+      { id: '1', forma: 'dinheiro', valor: 0 },
+      { id: '2', forma: 'pix', valor: 0 },
+    ])
+    setNumParcelas(3)
+    setIntervaloDias(30)
+    setEntradaValor(0)
+    setEntradaForma('dinheiro')
+    setAutorizadorId(null)
     setVencimento('')
     setObservacoes('')
     setErroVenda(null)
@@ -485,7 +577,29 @@ export default function VendasPage() {
       return
     }
 
-    if (formaPagamento === 'fiado') {
+    if (tipoPagamento === 'parcelado') {
+      if (!clienteSelecionadoId) {
+        setErroVenda('Para vendas parceladas, é obrigatório selecionar um cliente cadastrado.')
+        return
+      }
+      const cliSel = clientes.find((c) => c.id === clienteSelecionadoId)
+      if (!cliSel?.telefone && !cliSel?.whatsapp) {
+        setErroVenda('Venda parcelada exige cliente identificado COM TELEFONE para cobrança.')
+        return
+      }
+      if (numParcelas < 1) {
+        setErroVenda('O número de parcelas deve ser pelo menos 1.')
+        return
+      }
+    } else if (tipoPagamento === 'dividido') {
+      const somaDiv = pagamentosDivididos.reduce((acc, p) => acc + (Number(p.valor) || 0), 0)
+      if (Math.abs(somaDiv - totalVisual) > 0.01) {
+        setErroVenda(
+          `A soma dos pagamentos divididos (R$ ${somaDiv.toFixed(2)}) deve fechar com o total da venda (R$ ${totalVisual.toFixed(2)}).`,
+        )
+        return
+      }
+    } else if (formaPagamento === 'fiado') {
       if (!clienteSelecionadoId) {
         setErroVenda(
           'Para vendas na forma "Fiado", é obrigatório selecionar um cliente cadastrado.',
@@ -517,14 +631,35 @@ export default function VendasPage() {
         quantidade: item.quantidade,
       }))
 
+      // Preparar argumentos conforme o tipo de pagamento
+      let rpcPagamentos: Array<{ forma: string; valor: number; referencia?: string }> | null = null
+      let rpcCondicao: 'a_vista' | 'parcelado' = 'a_vista'
+
+      if (tipoPagamento === 'dividido') {
+        rpcPagamentos = pagamentosDivididos.map((p) => ({
+          forma: p.forma,
+          valor: Number(p.valor) || 0,
+          referencia: p.referencia || undefined,
+        }))
+      } else if (tipoPagamento === 'parcelado') {
+        rpcCondicao = 'parcelado'
+      }
+
       const { data, error } = await VendasService.finalizarVendaViaRpc({
         clienteId: clienteSelecionadoId,
         vendedorId: vendedorSelecionadoId,
         itens: payloadItens,
         desconto,
-        formaPagamento,
+        formaPagamento: tipoPagamento === 'parcelado' ? 'crediario' : formaPagamento,
         vencimento: formaPagamento === 'fiado' ? vencimento : null,
         observacoes: observacoes.trim() ? observacoes.trim() : null,
+        condicao: rpcCondicao,
+        pagamentos: rpcPagamentos,
+        entradaValor: tipoPagamento === 'parcelado' ? entradaValor : 0,
+        entradaForma: tipoPagamento === 'parcelado' ? entradaForma : 'dinheiro',
+        numParcelas: tipoPagamento === 'parcelado' ? numParcelas : 1,
+        intervaloDias: tipoPagamento === 'parcelado' ? intervaloDias : 30,
+        autorizadorId: autorizadorId || null,
       })
 
       if (error) {
@@ -564,6 +699,11 @@ export default function VendasPage() {
         msgAmigavel = 'Você não possui permissão para registrar vendas nesta empresa.'
       } else if (msgAmigavel.includes('Desconto não pode ser maior')) {
         msgAmigavel = 'O desconto aplicado é superior ao valor total dos produtos.'
+      } else if (msgAmigavel.includes('limite') || msgAmigavel.includes('Limite de crédito')) {
+        msgAmigavel =
+          'Limite de crédito do cliente ultrapassado. Selecione um Gerente ou Admin para autorizar a venda.'
+      } else if (msgAmigavel.includes('telefone')) {
+        msgAmigavel = 'Venda parcelada exige cliente identificado com telefone cadastrado.'
       }
 
       setErroVenda(msgAmigavel)
@@ -846,7 +986,58 @@ export default function VendasPage() {
             />
           ) : (
             <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-              <div className="overflow-x-auto">
+              {/* Visualização em Cartões Mobile (< 640px) */}
+              <div className="block sm:hidden divide-y divide-slate-100 dark:divide-[#1A294A] p-2 space-y-2">
+                {vendas.map((venda) => (
+                  <div
+                    key={venda.id}
+                    onClick={() => abrirImpressaoVenda(venda.id)}
+                    className="p-3.5 rounded-xl bg-white dark:bg-[#0A1328] border border-slate-200/80 dark:border-[#1A294A] space-y-2 shadow-xs cursor-pointer"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="font-mono font-bold text-xs text-[#0066FF] dark:text-[#3B82F6] bg-[#0066FF]/10 px-2 py-0.5 rounded">
+                          #{venda.numero}
+                        </span>
+                        <h4 className="font-bold text-slate-900 dark:text-white text-sm mt-1">
+                          {venda.clientes?.nome || 'Consumidor Final'}
+                        </h4>
+                        <p className="text-[11px] text-slate-500">
+                          {new Date(venda.created_at).toLocaleDateString('pt-BR')} •{' '}
+                          {venda.vendedores?.nome || 'Sem vendedor'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-black text-slate-900 dark:text-white text-base">
+                          {formatCurrency(venda.total || 0)}
+                        </p>
+                        <div className="mt-1 flex items-center justify-end gap-1">
+                          {getFormaPagamentoBadge(venda.forma_pagamento)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#1A294A]">
+                      {getStatusBadge(venda.status)}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          abrirImpressaoVenda(venda.id)
+                        }}
+                        className="h-10 min-h-[44px] text-xs font-semibold px-3 rounded-xl"
+                      >
+                        <Printer className="w-4 h-4 mr-1.5" />
+                        Imprimir
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* TABELA DE VENDAS DESKTOP (>= 640px) */}
+              <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
                   <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <tr>
@@ -1361,73 +1552,360 @@ export default function VendasPage() {
                   </div>
                 </div>
 
-                {/* FORMA DE PAGAMENTO */}
-                <div className="space-y-1.5 pt-3 border-t border-slate-200/80 dark:border-[#1A294A]">
+                {/* CONDICIONAL: AVISOS DO CLIENTE (Limite e Vencidas) */}
+                {clienteAvisos && (
+                  <div className="space-y-1.5 p-3 rounded-xl bg-slate-50 dark:bg-[#071126] border border-slate-200/80 dark:border-[#1A294A] text-xs">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-slate-500">Limite de Crédito:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {clienteAvisos.limite
+                          ? formatCurrency(clienteAvisos.limite)
+                          : 'Não definido'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-slate-500">Saldo em Aberto Atual:</span>
+                      <span className="font-bold text-amber-600">
+                        {formatCurrency(clienteAvisos.saldoAberto || 0)}
+                      </span>
+                    </div>
+                    {clienteAvisos.temVencida && (
+                      <div className="mt-1 p-2 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-400 flex items-center gap-1.5 text-[11px] font-bold">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                        <span>Atenção: Este cliente possui parcelas vencidas em atraso!</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* MODO DE CONDIÇÃO DE PAGAMENTO */}
+                <div className="space-y-2 pt-3 border-t border-slate-200/80 dark:border-[#1A294A]">
                   <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Forma de Pagamento
+                    Condição de Pagamento
                   </Label>
-                  <Select value={formaPagamento} onValueChange={(val) => setFormaPagamento(val)}>
-                    <SelectTrigger className="text-xs h-9 bg-white dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] rounded-xl">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
-                      <SelectItem
-                        value="pix"
-                        className="text-xs text-slate-800 dark:text-slate-200"
+                  <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-[#071126] rounded-xl text-xs font-medium">
+                    <button
+                      type="button"
+                      onClick={() => setTipoPagamento('simples')}
+                      className={`py-1.5 px-2 rounded-lg transition-all ${
+                        tipoPagamento === 'simples'
+                          ? 'bg-white dark:bg-[#0A1328] font-bold text-[#0066FF] shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                      }`}
+                    >
+                      À Vista
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTipoPagamento('dividido')}
+                      className={`py-1.5 px-2 rounded-lg transition-all ${
+                        tipoPagamento === 'dividido'
+                          ? 'bg-white dark:bg-[#0A1328] font-bold text-[#0066FF] shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                      }`}
+                    >
+                      Dividido
+                    </button>
+                    {moduloCrediario && (
+                      <button
+                        type="button"
+                        onClick={() => setTipoPagamento('parcelado')}
+                        className={`py-1.5 px-2 rounded-lg transition-all ${
+                          tipoPagamento === 'parcelado'
+                            ? 'bg-white dark:bg-[#0A1328] font-bold text-purple-600 shadow-xs'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                        }`}
                       >
-                        <div className="flex items-center gap-2">
-                          <QrCode className="w-4 h-4 text-blue-500" />
-                          <span>PIX (À vista)</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem
-                        value="dinheiro"
-                        className="text-xs text-slate-800 dark:text-slate-200"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Banknote className="w-4 h-4 text-emerald-500" />
-                          <span>Dinheiro (À vista)</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem
-                        value="cartao"
-                        className="text-xs text-slate-800 dark:text-slate-200"
-                      >
-                        <div className="flex items-center gap-2">
-                          <CreditCard className="w-4 h-4 text-purple-500" />
-                          <span>Cartão Débito / Crédito</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem
-                        value="fiado"
-                        className="text-xs text-slate-800 dark:text-slate-200"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-amber-500" />
-                          <span>Fiado / A Prazo (Gera a Receber)</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                        Parcelado
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                {/* VENCIMENTO (CONDICIONAL FIADO) */}
-                {formaPagamento === 'fiado' && (
-                  <div className="space-y-1.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs animate-in fade-in">
-                    <Label className="text-xs font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                      Data de Vencimento do Fiado *
+                {/* PAGAMENTO SIMPLES (À VISTA) */}
+                {tipoPagamento === 'simples' && (
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Forma de Pagamento
                     </Label>
-                    <Input
-                      type="date"
-                      value={vencimento}
-                      onChange={(e) => setVencimento(e.target.value)}
-                      className="text-xs h-8 bg-white dark:bg-[#071126] border-amber-500/40 text-slate-900 dark:text-slate-100 rounded-lg"
-                      required
-                    />
-                    <p className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">
-                      Um registro de contas a receber será gerado no nome do cliente selecionado.
-                    </p>
+                    <Select value={formaPagamento} onValueChange={(val) => setFormaPagamento(val)}>
+                      <SelectTrigger className="text-xs h-9 bg-white dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-[#0066FF]/20 focus:border-[#0066FF] rounded-xl">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A]">
+                        <SelectItem value="pix" className="text-xs">
+                          <div className="flex items-center gap-2">
+                            <QrCode className="w-4 h-4 text-blue-500" />
+                            <span>PIX (À vista)</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="dinheiro" className="text-xs">
+                          <div className="flex items-center gap-2">
+                            <Banknote className="w-4 h-4 text-emerald-500" />
+                            <span>Dinheiro (À vista)</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="cartao" className="text-xs">
+                          <div className="flex items-center gap-2">
+                            <CreditCard className="w-4 h-4 text-purple-500" />
+                            <span>Cartão Débito / Crédito</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="fiado" className="text-xs">
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-amber-500" />
+                            <span>Fiado / A Prazo (Gera a Receber)</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {formaPagamento === 'fiado' && (
+                      <div className="space-y-1.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs animate-in fade-in mt-2">
+                        <Label className="text-xs font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                          Data de Vencimento do Fiado *
+                        </Label>
+                        <Input
+                          type="date"
+                          value={vencimento}
+                          onChange={(e) => setVencimento(e.target.value)}
+                          className="text-xs h-8 bg-white dark:bg-[#071126] border-amber-500/40 text-slate-900 dark:text-slate-100 rounded-lg"
+                          required
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* PAGAMENTO DIVIDIDO (VÁRIAS FORMAS) */}
+                {tipoPagamento === 'dividido' && (
+                  <div className="space-y-2 p-3 bg-slate-50/80 dark:bg-[#071126]/60 rounded-xl border border-slate-200/80 dark:border-[#1A294A]">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        Divisão de Pagamentos
+                      </Label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          setPagamentosDivididos((prev) => [
+                            ...prev,
+                            { id: Date.now().toString(), forma: 'pix', valor: 0 },
+                          ])
+                        }
+                        className="h-7 text-[11px] text-[#0066FF] font-semibold"
+                      >
+                        + Adicionar Forma
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2">
+                      {pagamentosDivididos.map((pag, idx) => (
+                        <div key={pag.id} className="flex items-center gap-2">
+                          <Select
+                            value={pag.forma}
+                            onValueChange={(val) =>
+                              setPagamentosDivididos((prev) =>
+                                prev.map((p, i) => (i === idx ? { ...p, forma: val } : p)),
+                              )
+                            }
+                          >
+                            <SelectTrigger className="h-8 text-xs w-32 bg-white dark:bg-[#0A1328]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                              <SelectItem value="pix">PIX</SelectItem>
+                              <SelectItem value="cartao_debito">Débito</SelectItem>
+                              <SelectItem value="cartao_credito">Crédito</SelectItem>
+                              <SelectItem value="outra">Outra</SelectItem>
+                            </SelectContent>
+                          </Select>
+
+                          <div className="relative flex-1">
+                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] text-slate-400">
+                              R$
+                            </span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0,00"
+                              value={pag.valor || ''}
+                              onChange={(e) => {
+                                const v = parseFloat(e.target.value) || 0
+                                setPagamentosDivididos((prev) =>
+                                  prev.map((p, i) => (i === idx ? { ...p, valor: v } : p)),
+                                )
+                              }}
+                              className="h-8 pl-8 text-xs bg-white dark:bg-[#0A1328] font-bold"
+                            />
+                          </div>
+
+                          {pagamentosDivididos.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setPagamentosDivididos((prev) => prev.filter((_, i) => i !== idx))
+                              }
+                              className="text-slate-400 hover:text-rose-500 p-1"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Resumo da soma dividida */}
+                    {(() => {
+                      const soma = pagamentosDivididos.reduce(
+                        (acc, p) => acc + (Number(p.valor) || 0),
+                        0,
+                      )
+                      const diff = totalVisual - soma
+                      const fecha = Math.abs(diff) < 0.01
+                      return (
+                        <div
+                          className={`p-2 rounded-lg text-[11px] flex items-center justify-between font-semibold ${
+                            fecha
+                              ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20'
+                              : 'bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/20'
+                          }`}
+                        >
+                          <span>Soma informada: {formatCurrency(soma)}</span>
+                          <span>
+                            {fecha
+                              ? '✓ Total fechado'
+                              : `Falta: ${formatCurrency(Math.max(0, diff))}`}
+                          </span>
+                        </div>
+                      )
+                    })()}
+                  </div>
+                )}
+
+                {/* PAGAMENTO PARCELADO (CREDIÁRIO) */}
+                {tipoPagamento === 'parcelado' && (
+                  <div className="space-y-3 p-3 bg-purple-500/5 dark:bg-purple-950/20 rounded-xl border border-purple-500/25">
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="w-4 h-4 text-purple-600" />
+                      <span className="text-xs font-bold text-purple-900 dark:text-purple-300">
+                        Plano de Parcelamento (Crediário)
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <Label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                          Valor da Entrada (opcional)
+                        </Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0,00"
+                          value={entradaValor || ''}
+                          onChange={(e) => setEntradaValor(parseFloat(e.target.value) || 0)}
+                          className="h-8 text-xs bg-white dark:bg-[#0A1328] font-semibold"
+                        />
+                      </div>
+                      {entradaValor > 0 && (
+                        <div>
+                          <Label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                            Forma da Entrada
+                          </Label>
+                          <Select value={entradaForma} onValueChange={setEntradaForma}>
+                            <SelectTrigger className="h-8 text-xs bg-white dark:bg-[#0A1328]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                              <SelectItem value="pix">PIX</SelectItem>
+                              <SelectItem value="cartao">Cartão</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <Label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                          Nº de Parcelas
+                        </Label>
+                        <Select
+                          value={String(numParcelas)}
+                          onValueChange={(val) => setNumParcelas(parseInt(val, 10))}
+                        >
+                          <SelectTrigger className="h-8 text-xs bg-white dark:bg-[#0A1328]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">1x (30 dias)</SelectItem>
+                            <SelectItem value="2">2x (30/60 dias)</SelectItem>
+                            <SelectItem value="3">3x (30/60/90 dias)</SelectItem>
+                            <SelectItem value="4">4x</SelectItem>
+                            <SelectItem value="5">5x</SelectItem>
+                            <SelectItem value="6">6x</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                          Intervalo (dias)
+                        </Label>
+                        <Input
+                          type="number"
+                          value={intervaloDias}
+                          onChange={(e) => setIntervaloDias(parseInt(e.target.value, 10) || 30)}
+                          className="h-8 text-xs bg-white dark:bg-[#0A1328]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Estimativa de parcelas */}
+                    {(() => {
+                      const valorFinanc = Math.max(0, totalVisual - entradaValor)
+                      const valorBase = Math.floor((valorFinanc / numParcelas) * 100) / 100
+                      return (
+                        <div className="p-2.5 rounded-lg bg-white/80 dark:bg-[#0A1328]/80 border border-purple-500/20 text-[11px] space-y-1">
+                          <p className="font-bold text-purple-900 dark:text-purple-300">
+                            Previsão: {numParcelas}x de ~{formatCurrency(valorBase)}
+                          </p>
+                          <p className="text-slate-500 text-[10px]">
+                            * A RPC distribuirá os centavos na última parcela gerando os títulos em
+                            contas_receber.
+                          </p>
+                        </div>
+                      )
+                    })()}
+
+                    {/* Autorização de Limite (Gerente/Admin) */}
+                    {gerentesAutorizadores.length > 0 && (
+                      <div className="space-y-1 pt-2 border-t border-purple-500/20 text-xs">
+                        <Label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                          Autorização de Gerente (se estourar limite)
+                        </Label>
+                        <Select
+                          value={autorizadorId || 'nenhum'}
+                          onValueChange={(val) => setAutorizadorId(val === 'nenhum' ? null : val)}
+                        >
+                          <SelectTrigger className="h-8 text-xs bg-white dark:bg-[#0A1328]">
+                            <SelectValue placeholder="Selecione o autorizador" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="nenhum">Nenhum autorizador</SelectItem>
+                            {gerentesAutorizadores.map((g) => (
+                              <SelectItem key={g.id} value={g.id}>
+                                {g.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
                 )}
 

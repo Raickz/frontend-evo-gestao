@@ -57,6 +57,7 @@ import {
   ExternalLink,
   Loader2,
   Printer,
+  X,
 } from 'lucide-react'
 import { PrintPreviewDialog } from '@/components/print/PrintPreviewDialog'
 import { PedidoPrintDocument } from '@/components/print/PedidoPrintDocument'
@@ -986,14 +987,106 @@ export default function PedidosPage() {
                 ? 'Nenhum pedido corresponde aos filtros informados. Tente ajustar os termos de busca.'
                 : 'Crie orçamentos e pré-pedidos de clientes para aprovação comercial e acompanhamento.'
             }
-            actionLabel={
-              temFiltroAtivo ? 'Limpar Filtros' : podeCriar ? 'Novo Pedido' : undefined
-            }
+            actionLabel={temFiltroAtivo ? 'Limpar Filtros' : podeCriar ? 'Novo Pedido' : undefined}
             onAction={temFiltroAtivo ? limparFiltros : podeCriar ? abrirModalNovo : undefined}
           />
         ) : (
           <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-            <div className="overflow-x-auto">
+            {/* Visualização em Cartões Mobile (telas < 640px) */}
+            <div className="block sm:hidden divide-y divide-slate-100 dark:divide-[#1A294A] p-2 space-y-2">
+              {pedidos.map((ped) => {
+                const isPendente = ped.status === 'pendente'
+                return (
+                  <div
+                    key={ped.id}
+                    onClick={() => abrirDetalhes(ped.id)}
+                    className="p-3.5 rounded-xl bg-white dark:bg-[#0A1328] border border-slate-200/80 dark:border-[#1A294A] space-y-2.5 shadow-xs cursor-pointer"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="font-mono font-bold text-sm text-[#0066FF] dark:text-[#3B82F6]">
+                          #{ped.numero}
+                        </span>
+                        <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+                          {ped.clientes?.nome || 'Cliente não informado'}
+                        </h4>
+                        <p className="text-[11px] text-slate-500">
+                          {formatDate(ped.created_at)} • {ped.vendedores?.nome || 'Sem vendedor'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        {getStatusBadge(ped.status)}
+                        <p className="font-black text-slate-900 dark:text-white text-base mt-1">
+                          {formatCurrency(ped.total || 0)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-[#1A294A]"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => abrirDetalhes(ped.id)}
+                        className="h-11 min-h-[44px] text-xs font-semibold rounded-xl"
+                      >
+                        <Eye className="w-4 h-4 mr-1.5" />
+                        Detalhes
+                      </Button>
+
+                      {podeGerenciar && isPendente && (
+                        <Button
+                          size="sm"
+                          onClick={() => abrirConfirmarPedido(ped)}
+                          className="h-11 min-h-[44px] bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold rounded-xl"
+                        >
+                          <CheckCircle2 className="w-4 h-4 mr-1.5" />
+                          Confirmar
+                        </Button>
+                      )}
+
+                      {podeGerenciar && ped.status === 'confirmado' && (
+                        <Button
+                          size="sm"
+                          onClick={() => abrirFaturarPedido(ped)}
+                          className="h-11 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl"
+                        >
+                          <Receipt className="w-4 h-4 mr-1.5" />
+                          Faturar
+                        </Button>
+                      )}
+
+                      {podeGerenciar && ped.status === 'faturado' && !vendasMap[ped.id] && (
+                        <Button
+                          size="sm"
+                          onClick={() => abrirModalConversao(ped)}
+                          className="h-11 min-h-[44px] bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold rounded-xl"
+                        >
+                          <ArrowRightCircle className="w-4 h-4 mr-1.5" />
+                          Converter Venda
+                        </Button>
+                      )}
+
+                      {ped.status === 'faturado' && vendasMap[ped.id] && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate('/app/vendas')}
+                          className="h-11 min-h-[44px] text-xs font-semibold rounded-xl text-emerald-600 border-emerald-500/30"
+                        >
+                          Ver Venda #{vendasMap[ped.id].numero}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Visualização em Tabela Desktop (telas >= 640px) */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
                 <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <tr>
