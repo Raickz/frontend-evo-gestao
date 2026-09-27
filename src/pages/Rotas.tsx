@@ -41,7 +41,7 @@ export default function RotasPage() {
   const { usuario } = useAuth()
   const { empresa } = useEmpresa()
 
-  const [rotas, setRotas] = useState<Rota[]>([])
+  const [rotas, setRotas] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   // Criar Rota

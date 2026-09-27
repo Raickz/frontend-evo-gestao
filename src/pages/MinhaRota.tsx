@@ -46,9 +46,9 @@ export default function MinhaRotaPage() {
   const navigate = useNavigate()
 
   const [loading, setLoading] = useState(true)
-  const [rotaAtiva, setRotaAtiva] = useState<Rota | null>(null)
-  const [itensEstoque, setItensEstoque] = useState<RotaItemEstoque[]>([])
-  const [pedidosRota, setPedidosRota] = useState<RotaPedido[]>([])
+  const [rotaAtiva, setRotaAtiva] = useState<any | null>(null)
+  const [itensEstoque, setItensEstoque] = useState<any[]>([])
+  const [pedidosRota, setPedidosRota] = useState<any[]>([])
 
   // Modal Conclusão Entrega
   const [modalEntregaOpen, setModalEntregaOpen] = useState(false)

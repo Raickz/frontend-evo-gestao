@@ -357,10 +357,10 @@ export default function VendasPage() {
 
         const { data: contas } = await supabase
           .from('contas_receber')
-          .select('valor, saldo, vencimento, status')
+          .select('valor, valor_pago, vencimento, status')
           .eq('empresa_id', empresaId)
           .eq('cliente_id', clienteSelecionadoId)
-          .in('status', ['aberto', 'parcial'])
+          .in('status', ['pendente', 'atrasado'])
 
         const hojeStr = new Date().toISOString().slice(0, 10)
         let temVencida = false
@@ -368,8 +368,9 @@ export default function VendasPage() {
 
         if (contas) {
           for (const c of contas) {
-            saldoAberto += Number(c.saldo || 0)
-            if (c.vencimento < hojeStr) {
+            const saldoItem = (c.valor || 0) - (c.valor_pago || 0)
+            saldoAberto += Number(saldoItem > 0 ? saldoItem : 0)
+            if (c.vencimento && c.vencimento < hojeStr) {
               temVencida = true
             }
           }

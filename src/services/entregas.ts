@@ -12,6 +12,9 @@ export interface Veiculo {
   updated_at: string
 }
 
+export type RotaStatus = 'aberta' | 'em_andamento' | 'finalizada' | string
+export type RotaPedidoStatus = 'pendente' | 'entregue' | 'nao_entregue' | string
+
 export interface Rota {
   id: string
   empresa_id: string
@@ -19,7 +22,7 @@ export interface Rota {
   data: string
   veiculo_id: string
   responsavel_usuario_id: string
-  status: 'aberta' | 'em_andamento' | 'finalizada'
+  status: RotaStatus
   horario_saida?: string | null
   horario_fechamento?: string | null
   observacoes?: string | null
@@ -51,7 +54,7 @@ export interface RotaPedido {
   rota_id: string
   pedido_id: string
   ordem_entrega: number
-  status_entrega: 'pendente' | 'entregue' | 'nao_entregue'
+  status_entrega: RotaPedidoStatus
   motivo_nao_entrega?: string | null
   venda_id?: string | null
   horario_conclusao?: string | null
@@ -170,31 +173,25 @@ export const EntregasService = {
     observacoes?: string
     created_by?: string
   }) {
-    // Buscar próximo número
-    const { data: maxRota } = await supabase
-      .from('rotas')
-      .select('numero')
-      .eq('empresa_id', dados.empresa_id)
-      .order('numero', { ascending: false })
-      .limit(1)
-      .maybeSingle()
+    // Invoca RPC criar_rota com numeração sequencial por empresa e trava no banco
+    const { data: resData, error: rpcError } = await (supabase.rpc as any)('criar_rota', {
+      p_veiculo_id: dados.veiculo_id,
+      p_responsavel_usuario_id: dados.responsavel_usuario_id,
+      p_data: dados.data || new Date().toISOString().split('T')[0],
+      p_observacoes: dados.observacoes || null,
+    })
 
-    const proximoNumero = (maxRota?.numero || 0) + 1
+    if (rpcError) {
+      return { data: null, error: rpcError }
+    }
 
-    return supabase
-      .from('rotas')
-      .insert({
-        empresa_id: dados.empresa_id,
-        numero: proximoNumero,
-        veiculo_id: dados.veiculo_id,
-        responsavel_usuario_id: dados.responsavel_usuario_id,
-        data: dados.data || new Date().toISOString().split('T')[0],
-        status: 'aberta',
-        observacoes: dados.observacoes || null,
-        created_by: dados.created_by || null,
-      })
-      .select('*, veiculos(*), usuarios:responsavel_usuario_id(id, nome, email, perfil)')
-      .single()
+    const rotaId = resData?.rota_id
+    if (!rotaId) {
+      return { data: resData, error: null }
+    }
+
+    // Retorna a rota com relacionamentos
+    return EntregasService.obterRota(rotaId, dados.empresa_id)
   },
 
   async listarItensEstoqueRota(rotaId: string) {
