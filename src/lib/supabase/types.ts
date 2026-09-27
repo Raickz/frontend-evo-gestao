@@ -131,6 +131,57 @@ export type Database = {
           },
         ]
       }
+      auditoria_operacoes: {
+        Row: {
+          created_at: string
+          detalhes: Json | null
+          empresa_id: string
+          id: string
+          motivo: string | null
+          referencia_id: string
+          tabela_referencia: string
+          tipo_operacao: string
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          detalhes?: Json | null
+          empresa_id: string
+          id?: string
+          motivo?: string | null
+          referencia_id: string
+          tabela_referencia: string
+          tipo_operacao: string
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string
+          detalhes?: Json | null
+          empresa_id?: string
+          id?: string
+          motivo?: string | null
+          referencia_id?: string
+          tabela_referencia?: string
+          tipo_operacao?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auditoria_operacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auditoria_operacoes_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categorias: {
         Row: {
           ativo: boolean
@@ -550,12 +601,15 @@ export type Database = {
       }
       contas_receber: {
         Row: {
+          autorizador_id: string | null
           cliente_id: string | null
           created_at: string
           data_pagamento: string | null
           descricao: string
           empresa_id: string
+          forma_pagamento_baixa: string | null
           id: string
+          numero_parcela: string | null
           status: string
           updated_at: string
           valor: number
@@ -564,12 +618,15 @@ export type Database = {
           venda_id: string | null
         }
         Insert: {
+          autorizador_id?: string | null
           cliente_id?: string | null
           created_at?: string
           data_pagamento?: string | null
           descricao: string
           empresa_id: string
+          forma_pagamento_baixa?: string | null
           id?: string
+          numero_parcela?: string | null
           status?: string
           updated_at?: string
           valor: number
@@ -578,12 +635,15 @@ export type Database = {
           venda_id?: string | null
         }
         Update: {
+          autorizador_id?: string | null
           cliente_id?: string | null
           created_at?: string
           data_pagamento?: string | null
           descricao?: string
           empresa_id?: string
+          forma_pagamento_baixa?: string | null
           id?: string
+          numero_parcela?: string | null
           status?: string
           updated_at?: string
           valor?: number
@@ -592,6 +652,13 @@ export type Database = {
           venda_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "contas_receber_autorizador_id_fkey"
+            columns: ["autorizador_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "contas_receber_cliente_id_fkey"
             columns: ["cliente_id"]
@@ -1210,9 +1277,12 @@ export type Database = {
       }
       pedidos: {
         Row: {
+          canal: string | null
           cliente_id: string | null
           created_at: string
+          data_entrega_prevista: string | null
           empresa_id: string
+          endereco_entrega: string | null
           id: string
           numero: number
           observacoes: string | null
@@ -1222,9 +1292,12 @@ export type Database = {
           vendedor_id: string | null
         }
         Insert: {
+          canal?: string | null
           cliente_id?: string | null
           created_at?: string
+          data_entrega_prevista?: string | null
           empresa_id: string
+          endereco_entrega?: string | null
           id?: string
           numero?: number
           observacoes?: string | null
@@ -1234,9 +1307,12 @@ export type Database = {
           vendedor_id?: string | null
         }
         Update: {
+          canal?: string | null
           cliente_id?: string | null
           created_at?: string
+          data_entrega_prevista?: string | null
           empresa_id?: string
+          endereco_entrega?: string | null
           id?: string
           numero?: number
           observacoes?: string | null
@@ -1528,6 +1604,57 @@ export type Database = {
           },
         ]
       }
+      venda_pagamentos: {
+        Row: {
+          created_at: string
+          data: string
+          empresa_id: string
+          forma: string
+          id: string
+          referencia: string | null
+          status: string
+          valor: number
+          venda_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: string
+          empresa_id: string
+          forma: string
+          id?: string
+          referencia?: string | null
+          status?: string
+          valor: number
+          venda_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          empresa_id?: string
+          forma?: string
+          id?: string
+          referencia?: string | null
+          status?: string
+          valor?: number
+          venda_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venda_pagamentos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venda_pagamentos_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "vendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendas: {
         Row: {
           cliente_id: string | null
@@ -1724,10 +1851,12 @@ export type Database = {
         }
         Returns: Json
       }
-      atualizar_status_pedido: {
-        Args: { p_pedido_id: string; p_status: string }
-        Returns: Json
-      }
+      atualizar_status_pedido:
+        | { Args: { p_pedido_id: string; p_status: string }; Returns: Json }
+        | {
+            Args: { p_motivo?: string; p_pedido_id: string; p_status: string }
+            Returns: Json
+          }
       atualizar_titulo_pagar: {
         Args: {
           p_descricao: string
@@ -1754,16 +1883,29 @@ export type Database = {
       cancelar_ordem_montagem: { Args: { p_ordem_id: string }; Returns: Json }
       cancelar_titulo_pagar: { Args: { p_id: string }; Returns: Json }
       cancelar_titulo_receber: { Args: { p_id: string }; Returns: Json }
-      cancelar_venda: { Args: { p_venda_id: string }; Returns: Json }
+      cancelar_venda:
+        | { Args: { p_venda_id: string }; Returns: Json }
+        | { Args: { p_motivo?: string; p_venda_id: string }; Returns: Json }
       confirmar_compra: { Args: { p_compra_id: string }; Returns: Json }
-      converter_pedido_em_venda: {
-        Args: {
-          p_forma_pagamento?: string
-          p_pedido_id: string
-          p_vencimento?: string
-        }
-        Returns: Json
-      }
+      converter_pedido_em_venda:
+        | {
+            Args: {
+              p_forma_pagamento?: string
+              p_pedido_id: string
+              p_vencimento?: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_forma_pagamento?: string
+              p_pagamentos?: Json
+              p_parcelas?: Json
+              p_pedido_id: string
+              p_vencimento?: string
+            }
+            Returns: Json
+          }
       criar_checkout: { Args: { p_plano_slug: string }; Returns: Json }
       criar_cliente: {
         Args: {
@@ -1815,15 +1957,28 @@ export type Database = {
         }
         Returns: Json
       }
-      criar_pedido: {
-        Args: {
-          p_cliente_id?: string
-          p_itens?: Json
-          p_observacoes?: string
-          p_vendedor_id?: string
-        }
-        Returns: Json
-      }
+      criar_pedido:
+        | {
+            Args: {
+              p_cliente_id?: string
+              p_itens?: Json
+              p_observacoes?: string
+              p_vendedor_id?: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_canal?: string
+              p_cliente_id?: string
+              p_data_entrega_prevista?: string
+              p_endereco_entrega?: string
+              p_itens?: Json
+              p_observacoes?: string
+              p_vendedor_id?: string
+            }
+            Returns: Json
+          }
       criar_plano_admin: {
         Args: {
           p_ativo: boolean
@@ -1901,6 +2056,10 @@ export type Database = {
         Returns: Json
       }
       desbloquear_empresa: { Args: { p_empresa_id: string }; Returns: Json }
+      detalhar_devedor_cliente: {
+        Args: { p_cliente_id: string }
+        Returns: Json
+      }
       editar_empresa_cadastral_admin: {
         Args: { p_dados: Json; p_empresa_id: string }
         Returns: Json
@@ -1930,18 +2089,38 @@ export type Database = {
         Args: { p_ordem_id: string; p_quantidade_produzida?: number }
         Returns: Json
       }
-      finalizar_venda: {
-        Args: {
-          p_cliente_id: string
-          p_desconto?: number
-          p_forma_pagamento?: string
-          p_itens: Json
-          p_observacoes?: string
-          p_vencimento?: string
-          p_vendedor_id: string
-        }
-        Returns: Json
-      }
+      finalizar_venda:
+        | {
+            Args: {
+              p_cliente_id: string
+              p_desconto?: number
+              p_forma_pagamento?: string
+              p_itens: Json
+              p_observacoes?: string
+              p_vencimento?: string
+              p_vendedor_id: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_autorizador_id?: string
+              p_cliente_id: string
+              p_condicao?: string
+              p_desconto?: number
+              p_entrada_forma?: string
+              p_entrada_valor?: number
+              p_forma_pagamento?: string
+              p_intervalo_dias?: number
+              p_itens: Json
+              p_num_parcelas?: number
+              p_observacoes?: string
+              p_pagamentos?: Json
+              p_vencimento?: string
+              p_vendedor_id: string
+            }
+            Returns: Json
+          }
       get_admin_dashboard: { Args: never; Returns: Json }
       get_historico_financeiro_admin: { Args: never; Returns: Json }
       get_kpis_assinaturas_admin: { Args: never; Returns: Json }
@@ -1960,6 +2139,10 @@ export type Database = {
       is_platform_admin: { Args: never; Returns: boolean }
       is_vendedor_or_above: { Args: never; Returns: boolean }
       listar_assinaturas_admin: { Args: never; Returns: Json }
+      listar_devedores: {
+        Args: { p_busca?: string; p_filtro?: string }
+        Returns: Json
+      }
       listar_empresas_admin: { Args: never; Returns: Json }
       listar_historico_admin: { Args: never; Returns: Json }
       listar_historico_empresa_admin: {
@@ -2002,14 +2185,24 @@ export type Database = {
         }
         Returns: Json
       }
-      registrar_recebimento: {
-        Args: {
-          p_conta_id: string
-          p_data_pagamento?: string
-          p_valor_recebido: number
-        }
-        Returns: Json
-      }
+      registrar_recebimento:
+        | {
+            Args: {
+              p_conta_id: string
+              p_data_pagamento?: string
+              p_valor_recebido: number
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_conta_id: string
+              p_data_pagamento?: string
+              p_forma_pagamento?: string
+              p_valor_recebido: number
+            }
+            Returns: Json
+          }
       rollback_empresa_manual_admin: {
         Args: { p_empresa_id: string }
         Returns: Json
