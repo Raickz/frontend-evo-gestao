@@ -88,6 +88,9 @@ export interface CriarPedidoRpcData {
   vendedor_id?: string | null
   itens: CriarPedidoRpcItem[]
   observacoes?: string | null
+  canal?: string
+  endereco_entrega?: string | null
+  data_entrega_prevista?: string | null
 }
 
 export interface UpdatePedidoData {
@@ -217,6 +220,9 @@ export const PedidosService = {
         desconto: item.desconto || 0,
       })),
       p_observacoes: data.observacoes || null,
+      p_canal: data.canal || 'presencial',
+      p_endereco_entrega: data.endereco_entrega || null,
+      p_data_entrega_prevista: data.data_entrega_prevista || null,
     })
   },
 
@@ -299,10 +305,11 @@ export const PedidosService = {
   /**
    * Atualiza o status do pedido via RPC `atualizar_status_pedido`
    */
-  async updateStatus(_empresaId: string, id: string, status: string) {
+  async updateStatus(_empresaId: string, id: string, status: string, motivo?: string) {
     const { data: res, error } = await (supabase.rpc as any)('atualizar_status_pedido', {
       p_pedido_id: id,
       p_status: status,
+      p_motivo: motivo || null,
     })
     if (error) return { data: null, error }
     return { data: res, error: null }
@@ -325,11 +332,17 @@ export const PedidosService = {
   /**
    * Converte um pedido em venda através da RPC `converter_pedido_em_venda`.
    */
-  async converterEmVenda(pedidoId: string, formaPagamento: string, vencimento?: string | null) {
+  async converterEmVenda(
+    pedidoId: string,
+    formaPagamento: string,
+    vencimento?: string | null,
+    pagamentos?: Array<{ forma: string; valor: number; data?: string; referencia?: string }> | null,
+  ) {
     return supabase.rpc('converter_pedido_em_venda', {
       p_pedido_id: pedidoId,
       p_forma_pagamento: formaPagamento,
       p_vencimento: vencimento || null,
+      p_pagamentos: pagamentos || null,
     })
   },
 

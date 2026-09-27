@@ -279,6 +279,9 @@ export default function PedidosPage() {
   const [modalNovoAberto, setModalNovoAberto] = useState(false)
   const [novoClienteId, setNovoClienteId] = useState<string | null>(null)
   const [novoVendedorId, setNovoVendedorId] = useState<string | null>(null)
+  const [novoCanal, setNovoCanal] = useState<string>('presencial')
+  const [novoEnderecoEntrega, setNovoEnderecoEntrega] = useState<string>('')
+  const [novoDataEntregaPrevista, setNovoDataEntregaPrevista] = useState<string>('')
   const [novoObservacoes, setNovoObservacoes] = useState('')
   const [carrinho, setCarrinho] = useState<CartItem[]>([])
   const [descontoTotal, setDescontoTotal] = useState<number>(0)
@@ -292,6 +295,9 @@ export default function PedidosPage() {
     }
     setNovoClienteId(null)
     setNovoVendedorId(null)
+    setNovoCanal('presencial')
+    setNovoEnderecoEntrega('')
+    setNovoDataEntregaPrevista('')
     setNovoObservacoes('')
     setCarrinho([])
     setDescontoTotal(0)
@@ -414,6 +420,9 @@ export default function PedidosPage() {
       const payload = {
         cliente_id: novoClienteId,
         vendedor_id: novoVendedorId,
+        canal: novoCanal,
+        endereco_entrega: novoEnderecoEntrega.trim() || null,
+        data_entrega_prevista: novoDataEntregaPrevista || null,
         itens: carrinho.map((c) => ({
           produto_id: c.produto_id,
           quantidade: c.quantidade,
@@ -603,14 +612,19 @@ export default function PedidosPage() {
       toast.error('Você não tem permissão para converter pedidos em venda.')
       return
     }
-    if (pedido.status !== 'faturado') {
-      toast.error('Apenas pedidos com status "faturado" podem ser convertidos em venda.')
+    if (
+      pedido.status !== 'faturado' &&
+      pedido.status !== 'confirmado' &&
+      pedido.status !== 'pendente'
+    ) {
+      toast.error(
+        'Apenas pedidos pendentes, confirmados ou faturados podem ser convertidos em venda.',
+      )
       return
     }
 
     setPedidoParaConverter(pedido)
     setFormaPagamentoConversao('pix')
-    // Data default para fiado: hoje
     const hojeStr = new Date().toISOString().split('T')[0]
     setVencimentoConversao(hojeStr)
     setModalConversaoAberto(true)
@@ -1274,6 +1288,51 @@ export default function PedidosPage() {
                         )
                       })
                     )}
+                  </div>
+                </div>
+
+                {/* Canal de Venda e Endereço de Entrega */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-3 rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border border-slate-200/80 dark:border-[#1A294A]">
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                      Canal de Atendimento
+                    </Label>
+                    <Select value={novoCanal} onValueChange={setNovoCanal}>
+                      <SelectTrigger className="h-9 text-xs bg-white dark:bg-[#0A1328]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="presencial">Presencial / Porta a Porta</SelectItem>
+                        <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                        <SelectItem value="telefone">Telefone</SelectItem>
+                        <SelectItem value="instagram">Instagram</SelectItem>
+                        <SelectItem value="outro">Outro canal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                      Data Prevista de Entrega
+                    </Label>
+                    <Input
+                      type="date"
+                      value={novoDataEntregaPrevista}
+                      onChange={(e) => setNovoDataEntregaPrevista(e.target.value)}
+                      className="h-9 text-xs bg-white dark:bg-[#0A1328]"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-1">
+                    <Label className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                      Endereço de Entrega
+                    </Label>
+                    <Input
+                      placeholder="Rua, número, bairro e cidade de entrega..."
+                      value={novoEnderecoEntrega}
+                      onChange={(e) => setNovoEnderecoEntrega(e.target.value)}
+                      className="h-9 text-xs bg-white dark:bg-[#0A1328]"
+                    />
                   </div>
                 </div>
 

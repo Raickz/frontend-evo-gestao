@@ -37,6 +37,7 @@ import ComprasPage from '@/pages/Compras'
 import EstoquePage from '@/pages/Estoque'
 import VendasPage from '@/pages/Vendas'
 import PedidosPage from '@/pages/Pedidos'
+import DevedoresPage from '@/pages/Devedores'
 import FinanceiroPage from '@/pages/Financeiro'
 import VendedoresPage from '@/pages/Vendedores'
 import ComissoesPage from '@/pages/Comissoes'
@@ -288,6 +289,14 @@ const App = () => (
                   element={
                     <RoleRouteGuard page="pedidos">
                       <PedidosPage />
+                    </RoleRouteGuard>
+                  }
+                />
+                <Route
+                  path="devedores"
+                  element={
+                    <RoleRouteGuard page="devedores">
+                      <DevedoresPage />
                     </RoleRouteGuard>
                   }
                 />

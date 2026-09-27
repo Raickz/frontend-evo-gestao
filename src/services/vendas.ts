@@ -258,24 +258,39 @@ export const VendasService = {
     formaPagamento?: string
     vencimento?: string | null
     observacoes?: string | null
+    pagamentos?: Array<{ forma: string; valor: number; data?: string; referencia?: string }> | null
+    condicao?: 'a_vista' | 'parcelado'
+    entradaValor?: number
+    entradaForma?: string
+    numParcelas?: number
+    intervaloDias?: number
+    autorizadorId?: string | null
   }) {
-    return supabase.rpc('finalizar_venda', {
-      p_cliente_id: params.clienteId as string,
-      p_vendedor_id: params.vendedorId as string,
+    return (supabase.rpc as any)('finalizar_venda', {
+      p_cliente_id: params.clienteId || null,
+      p_vendedor_id: params.vendedorId || null,
       p_itens: params.itens as any,
       p_desconto: params.desconto || 0,
       p_forma_pagamento: params.formaPagamento || 'pix',
-      p_vencimento: params.vencimento || undefined,
-      p_observacoes: params.observacoes || undefined,
+      p_vencimento: params.vencimento || null,
+      p_observacoes: params.observacoes || null,
+      p_pagamentos: params.pagamentos || null,
+      p_condicao: params.condicao || 'a_vista',
+      p_entrada_valor: params.entradaValor || 0,
+      p_entrada_forma: params.entradaForma || 'pix',
+      p_num_parcelas: params.numParcelas || 1,
+      p_intervalo_dias: params.intervaloDias || 30,
+      p_autorizador_id: params.autorizadorId || null,
     })
   },
 
   /**
    * Cancelamento atômico de venda com estorno de estoque, contas a receber e comissões via RPC `cancelar_venda`
    */
-  async cancelarVenda(_empresaId: string, vendaId: string) {
+  async cancelarVenda(_empresaId: string, vendaId: string, motivo?: string) {
     return (supabase.rpc as any)('cancelar_venda', {
       p_venda_id: vendaId,
+      p_motivo: motivo || null,
     })
   },
 }

@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   BarChart3,
   Users,
+  UserCheck,
   ShoppingCart,
   ClipboardList,
   Package,
@@ -86,6 +87,13 @@ const ALL_NAV_SECTIONS: NavSection[] = [
       { title: 'Clientes', href: '/app/clientes', icon: Users, page: 'clientes' },
       { title: 'Vendas', href: '/app/vendas', icon: ShoppingCart, page: 'vendas' },
       { title: 'Pedidos', href: '/app/pedidos', icon: ClipboardList, page: 'pedidos' },
+      {
+        title: 'Devedores',
+        href: '/app/devedores',
+        icon: UserCheck,
+        page: 'devedores',
+        modulo: 'modulo_crediario',
+      },
     ],
   },
   {

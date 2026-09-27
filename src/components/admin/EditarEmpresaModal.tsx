@@ -83,6 +83,7 @@ export function EditarEmpresaModal({
     responsavel_cargo: '',
     modulo_cestas: false,
     modulo_entregas: false,
+    modulo_crediario: false,
   })
 
   // Plano e assinatura
@@ -129,6 +130,7 @@ export function EditarEmpresaModal({
         responsavel_cargo: empresa.responsavel_cargo || '',
         modulo_cestas: Boolean(empresa.modulos?.modulo_cestas),
         modulo_entregas: Boolean(empresa.modulos?.modulo_entregas),
+        modulo_crediario: Boolean(empresa.modulos?.modulo_crediario),
       })
 
       setPlanoForm({
@@ -171,12 +173,13 @@ export function EditarEmpresaModal({
 
     try {
       setSaving(true)
-      const { modulo_cestas, modulo_entregas, ...dadosCadastrais } = cadastral
+      const { modulo_cestas, modulo_entregas, modulo_crediario, ...dadosCadastrais } = cadastral
       const { error } = await AdminService.editarEmpresaCadastral(empresa.id, {
         ...dadosCadastrais,
         modulos: {
           modulo_cestas,
           modulo_entregas,
+          modulo_crediario,
         },
       } as any)
       if (error) throw error
@@ -468,6 +471,27 @@ export function EditarEmpresaModal({
                         checked={cadastral.modulo_entregas}
                         onChange={(e) =>
                           setCadastral({ ...cadastral, modulo_entregas: e.target.checked })
+                        }
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
+                    </label>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-slate-200 text-xs">Crediário</p>
+                      <p className="text-[11px] text-slate-400">
+                        Vendas a prazo (30/60/90 dias), pagamentos divididos, limites de crédito e
+                        Devedores
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer ml-3">
+                      <input
+                        type="checkbox"
+                        checked={cadastral.modulo_crediario}
+                        onChange={(e) =>
+                          setCadastral({ ...cadastral, modulo_crediario: e.target.checked })
                         }
                         className="sr-only peer"
                       />
