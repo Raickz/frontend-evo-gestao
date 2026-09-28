@@ -40,6 +40,8 @@ import { useAuth } from '@/hooks/use-auth'
 import { useEmpresa } from '@/hooks/use-empresa'
 import { FornecedoresService, Fornecedor } from '@/services/fornecedores'
 import { toast } from 'sonner'
+import { MobileFab } from '@/components/common/MobileFab'
+import { ResponsiveList } from '@/components/common/ResponsiveList'
 import {
   Truck,
   Plus,
@@ -296,6 +298,15 @@ export default function FornecedoresPage() {
 
   return (
     <div className="space-y-6">
+      {canManage && (
+        <MobileFab
+          label="Novo Fornecedor"
+          onClick={handleOpenCreate}
+          icon={Plus}
+          variant="primary"
+        />
+      )}
+
       <PageHeader
         title="Gestão de Fornecedores"
         description="Gerencie os parceiros comerciais, contatos e fornecedores da distribuidora."
@@ -405,115 +416,214 @@ export default function FornecedoresPage() {
         />
       ) : (
         <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
-              <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                <tr>
-                  <th className="py-3.5 px-4">Nome / Fornecedor</th>
-                  <th className="py-3.5 px-4">Documento</th>
-                  <th className="py-3.5 px-4">Contato</th>
-                  <th className="py-3.5 px-4">Cidade / Estado</th>
-                  <th className="py-3.5 px-4">Status</th>
-                  <th className="py-3.5 px-4 text-right">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
-                {paginatedFornecedores.map((fornecedor) => (
-                  <tr
-                    key={fornecedor.id}
-                    className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
+          <ResponsiveList
+            items={paginatedFornecedores}
+            renderCard={(fornecedor) => ({
+              id: fornecedor.id,
+              title: fornecedor.nome,
+              subtitle: fornecedor.documento ? `Doc: ${fornecedor.documento}` : undefined,
+              badge: (
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
+                    fornecedor.ativo
+                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
+                      : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25'
+                  }`}
+                >
+                  {fornecedor.ativo ? 'Ativo' : 'Inativo'}
+                </span>
+              ),
+              infoRows: [
+                ...(fornecedor.telefone
+                  ? [
+                      {
+                        label: 'Telefone',
+                        value: (
+                          <a
+                            href={`tel:${fornecedor.telefone.replace(/\D/g, '')}`}
+                            className="text-[#0066FF] dark:text-[#3B82F6] font-medium"
+                          >
+                            {fornecedor.telefone}
+                          </a>
+                        ),
+                      },
+                    ]
+                  : []),
+                ...(fornecedor.email
+                  ? [
+                      {
+                        label: 'E-mail',
+                        value: (
+                          <a
+                            href={`mailto:${fornecedor.email}`}
+                            className="text-slate-700 dark:text-slate-300 truncate max-w-[180px] inline-block"
+                          >
+                            {fornecedor.email}
+                          </a>
+                        ),
+                      },
+                    ]
+                  : []),
+                ...([fornecedor.cidade, fornecedor.estado].filter(Boolean).length > 0
+                  ? [
+                      {
+                        label: 'Local',
+                        value: [fornecedor.cidade, fornecedor.estado].filter(Boolean).join(' - '),
+                      },
+                    ]
+                  : []),
+              ],
+              actions: canManage ? (
+                <div className="flex items-center gap-1.5 w-full">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleOpenEdit(fornecedor)}
+                    className="min-h-[44px] flex-1 text-xs font-semibold rounded-xl"
                   >
-                    <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
-                      <div>{fornecedor.nome}</div>
-                      {fornecedor.observacoes && (
-                        <p
-                          className="text-[11px] font-normal text-slate-500 dark:text-slate-400 truncate max-w-xs mt-0.5"
-                          title={fornecedor.observacoes}
-                        >
-                          {fornecedor.observacoes}
-                        </p>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-slate-300">
-                      {fornecedor.documento || '-'}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex flex-col gap-0.5">
-                        {fornecedor.telefone && (
-                          <span className="flex items-center gap-1 text-slate-700 dark:text-slate-300">
-                            <Phone className="w-3 h-3 text-[#0066FF]" /> {fornecedor.telefone}
-                          </span>
-                        )}
-                        {fornecedor.email && (
-                          <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
-                            <Mail className="w-3 h-3 text-slate-400" /> {fornecedor.email}
-                          </span>
-                        )}
-                        {!fornecedor.telefone && !fornecedor.email && '-'}
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      {fornecedor.cidade || fornecedor.estado ? (
-                        <span className="flex items-center gap-1 text-slate-700 dark:text-slate-300">
-                          <MapPin className="w-3 h-3 text-[#0066FF]" />
-                          {[fornecedor.cidade, fornecedor.estado].filter(Boolean).join(' - ')}
-                        </span>
-                      ) : (
-                        '-'
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-                          fornecedor.ativo
-                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
-                            : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25'
-                        }`}
+                    <Edit2 className="w-3.5 h-3.5 mr-1" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setConfirmToggleFornecedor(fornecedor)}
+                    className={`min-h-[44px] px-3 text-xs font-semibold rounded-xl ${
+                      fornecedor.ativo
+                        ? 'text-rose-600 border-rose-200 dark:border-rose-900/50'
+                        : 'text-emerald-600 border-emerald-200 dark:border-emerald-900/50'
+                    }`}
+                  >
+                    {fornecedor.ativo ? (
+                      <>
+                        <PowerOff className="w-3.5 h-3.5 mr-1" />
+                        Inativar
+                      </>
+                    ) : (
+                      <>
+                        <Power className="w-3.5 h-3.5 mr-1" />
+                        Ativar
+                      </>
+                    )}
+                  </Button>
+                </div>
+              ) : undefined,
+              onClick: canManage ? () => handleOpenEdit(fornecedor) : undefined,
+            })}
+            renderTable={() => (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                  <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <tr>
+                      <th className="py-3.5 px-4">Nome / Fornecedor</th>
+                      <th className="py-3.5 px-4">Documento</th>
+                      <th className="py-3.5 px-4">Contato</th>
+                      <th className="py-3.5 px-4">Cidade / Estado</th>
+                      <th className="py-3.5 px-4">Status</th>
+                      <th className="py-3.5 px-4 text-right">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
+                    {paginatedFornecedores.map((fornecedor) => (
+                      <tr
+                        key={fornecedor.id}
+                        className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
                       >
-                        {fornecedor.ativo ? 'Ativo' : 'Inativo'}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      {canManage ? (
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenEdit(fornecedor)}
-                            className="h-8 w-8 p-0 text-slate-600 dark:text-slate-300 hover:text-[#0066FF] hover:bg-[#0066FF]/10 rounded-lg"
-                            title="Editar fornecedor"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setConfirmToggleFornecedor(fornecedor)}
-                            className={`h-8 w-8 p-0 rounded-lg ${
-                              fornecedor.ativo
-                                ? 'text-rose-600 hover:text-rose-700 hover:bg-rose-500/10'
-                                : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10'
-                            }`}
-                            title={fornecedor.ativo ? 'Inativar fornecedor' : 'Ativar fornecedor'}
-                          >
-                            {fornecedor.ativo ? (
-                              <PowerOff className="w-3.5 h-3.5" />
-                            ) : (
-                              <Power className="w-3.5 h-3.5" />
+                        <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
+                          <div>{fornecedor.nome}</div>
+                          {fornecedor.observacoes && (
+                            <p
+                              className="text-[11px] font-normal text-slate-500 dark:text-slate-400 truncate max-w-xs mt-0.5"
+                              title={fornecedor.observacoes}
+                            >
+                              {fornecedor.observacoes}
+                            </p>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-slate-300">
+                          {fornecedor.documento || '-'}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex flex-col gap-0.5">
+                            {fornecedor.telefone && (
+                              <span className="flex items-center gap-1 text-slate-700 dark:text-slate-300">
+                                <Phone className="w-3 h-3 text-[#0066FF]" /> {fornecedor.telefone}
+                              </span>
                             )}
-                          </Button>
-                        </div>
-                      ) : (
-                        <span className="text-slate-400 dark:text-slate-500 text-[11px]">
-                          Visualização
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                            {fornecedor.email && (
+                              <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+                                <Mail className="w-3 h-3 text-slate-400" /> {fornecedor.email}
+                              </span>
+                            )}
+                            {!fornecedor.telefone && !fornecedor.email && '-'}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          {fornecedor.cidade || fornecedor.estado ? (
+                            <span className="flex items-center gap-1 text-slate-700 dark:text-slate-300">
+                              <MapPin className="w-3 h-3 text-[#0066FF]" />
+                              {[fornecedor.cidade, fornecedor.estado].filter(Boolean).join(' - ')}
+                            </span>
+                          ) : (
+                            '-'
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                              fornecedor.ativo
+                                ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
+                                : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25'
+                            }`}
+                          >
+                            {fornecedor.ativo ? 'Ativo' : 'Inativo'}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          {canManage ? (
+                            <div className="flex items-center justify-end gap-1.5">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleOpenEdit(fornecedor)}
+                                className="h-8 w-8 p-0 text-slate-600 dark:text-slate-300 hover:text-[#0066FF] hover:bg-[#0066FF]/10 rounded-lg"
+                                title="Editar fornecedor"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setConfirmToggleFornecedor(fornecedor)}
+                                className={`h-8 w-8 p-0 rounded-lg ${
+                                  fornecedor.ativo
+                                    ? 'text-rose-600 hover:text-rose-700 hover:bg-rose-500/10'
+                                    : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10'
+                                }`}
+                                title={
+                                  fornecedor.ativo ? 'Inativar fornecedor' : 'Ativar fornecedor'
+                                }
+                              >
+                                {fornecedor.ativo ? (
+                                  <PowerOff className="w-3.5 h-3.5" />
+                                ) : (
+                                  <Power className="w-3.5 h-3.5" />
+                                )}
+                              </Button>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 dark:text-slate-500 text-[11px]">
+                              Visualização
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          />
 
           {/* Pagination bar */}
           <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200/80 dark:border-[#1A294A] bg-slate-50/50 dark:bg-[#0A1328]/50 text-xs text-slate-600 dark:text-[#C0C6CF]">
@@ -614,6 +724,7 @@ export default function FornecedoresPage() {
                   </Label>
                   <Input
                     id="documento"
+                    inputMode="numeric"
                     value={formData.documento}
                     onChange={(e) => setFormData({ ...formData, documento: e.target.value })}
                     placeholder="CNPJ ou CPF do fornecedor"
@@ -638,6 +749,8 @@ export default function FornecedoresPage() {
                   </Label>
                   <Input
                     id="telefone"
+                    type="tel"
+                    inputMode="tel"
                     value={formData.telefone}
                     onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
                     placeholder="(00) 0000-0000"

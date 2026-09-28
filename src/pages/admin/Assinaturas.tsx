@@ -49,6 +49,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { AnimatedNumber } from '@/components/common/AnimatedNumber'
+import { ResponsiveList } from '@/components/common/ResponsiveList'
 import { RegistrarPagamentoManualModal } from '@/components/admin/RegistrarPagamentoManualModal'
 import { AcoesAssinaturaModal } from '@/components/admin/AcoesAssinaturaModal'
 import { EditarEmpresaModal } from '@/components/admin/EditarEmpresaModal'
@@ -462,244 +463,322 @@ export default function AdminAssinaturasPage() {
       {/* Tabela de Assinaturas */}
       <Card className="bg-slate-900/90 border-slate-800 shadow-sm overflow-hidden text-slate-100">
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-950/80 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
-                <tr>
-                  <th className="py-3.5 px-4 font-semibold">Empresa</th>
-                  <th className="py-3.5 px-4 font-semibold">Plano</th>
-                  <th className="py-3.5 px-4 font-semibold">Status</th>
-                  <th className="py-3.5 px-4 font-semibold">Valor Mensal</th>
-                  <th className="py-3.5 px-4 font-semibold">Início / Contrato</th>
-                  <th className="py-3.5 px-4 font-semibold">Próximo Vencimento</th>
-                  <th className="py-3.5 px-4 font-semibold">Forma / Origem</th>
-                  <th className="py-3.5 px-4 font-semibold">Último Pagamento</th>
-                  <th className="py-3.5 px-4 font-semibold text-right">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/80">
-                {loading ? (
-                  <tr>
-                    <td colSpan={9} className="py-12 text-center text-slate-400">
-                      <RefreshCw className="w-6 h-6 animate-spin mx-auto text-sky-400 mb-2" />
-                      Carregando central de assinaturas...
-                    </td>
-                  </tr>
-                ) : filteredAssinaturas.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="py-12 text-center text-slate-400">
-                      Nenhuma assinatura encontrada para os filtros aplicados.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredAssinaturas.map((ass) => {
-                    const isManual = ass.gateway === 'manual'
-                    return (
-                      <tr key={ass.id} className="hover:bg-slate-800/50 transition-colors">
-                        {/* Empresa */}
-                        <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-2.5">
-                            <div className="h-8 w-8 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs shrink-0">
-                              <Building2 className="w-4 h-4" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="font-bold text-white leading-tight truncate">
-                                {ass.empresa_nome_fantasia || ass.empresa_nome}
-                              </p>
-                              <p className="text-[11px] text-slate-400 truncate">
-                                {ass.empresa_cnpj ? `CNPJ: ${ass.empresa_cnpj}` : ass.empresa_nome}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Plano */}
-                        <td className="py-3.5 px-4">
-                          <span className="font-semibold text-slate-200">{ass.plano_nome}</span>
-                          <span className="block text-[11px] text-slate-400 capitalize">
-                            {ass.periodicidade || 'mensal'}
-                          </span>
-                        </td>
-
-                        {/* Status */}
-                        <td className="py-3.5 px-4">
-                          {getStatusBadge(ass.status, ass.vencimento)}
-                        </td>
-
-                        {/* Valor Mensal */}
-                        <td className="py-3.5 px-4 font-mono font-medium text-emerald-400">
-                          {formatCurrency(ass.valor)}
-                        </td>
-
-                        {/* Início */}
-                        <td className="py-3.5 px-4 text-xs text-slate-300">
-                          {formatDate(ass.inicio || ass.data_contratacao)}
-                        </td>
-
-                        {/* Próximo Vencimento */}
-                        <td className="py-3.5 px-4 text-xs">
-                          {ass.status === 'trial' ? (
-                            <span className="text-amber-300 font-semibold flex items-center gap-1">
-                              <Clock className="w-3.5 h-3.5" />
-                              {formatDate(ass.fim_periodo_teste || ass.vencimento)} (Trial)
-                            </span>
-                          ) : (
-                            <span className="text-slate-200 font-mono">
-                              {formatDate(ass.vencimento)}
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Forma / Gateway */}
-                        <td className="py-3.5 px-4 text-xs">
-                          <span className="capitalize text-slate-200 block">
-                            {ass.metodo_pagamento || 'PIX'}
-                          </span>
-                          <span className="text-[10px] text-slate-400 font-mono">
-                            {isManual ? 'Origem Manual' : 'Mercado Pago'}
-                          </span>
-                        </td>
-
-                        {/* Último Pagamento */}
-                        <td className="py-3.5 px-4 text-xs">
-                          {ass.ultimo_pagamento ? (
-                            <div>
-                              <span className="font-mono font-bold text-emerald-400 block">
-                                {formatCurrency(ass.ultimo_pagamento.valor)}
-                              </span>
-                              <span className="text-[10px] text-slate-400">
-                                {formatDate(ass.ultimo_pagamento.data)}
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="text-slate-500">Nenhum</span>
-                          )}
-                        </td>
-
-                        {/* Ações */}
-                        <td className="py-3.5 px-4 text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800"
-                              >
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="w-52 bg-slate-900 border-slate-800 text-slate-200"
-                            >
-                              <DropdownMenuLabel className="text-xs text-slate-400">
-                                Gestão da Assinatura
-                              </DropdownMenuLabel>
-                              <DropdownMenuSeparator className="bg-slate-800" />
-
-                              {/* Registrar Pagamento */}
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setSelectedAssinatura(ass)
-                                  setPagamentoModalOpen(true)
-                                }}
-                                className="cursor-pointer hover:bg-slate-800 text-emerald-400 font-medium"
-                              >
-                                <DollarSign className="w-4 h-4 mr-2" />+ Registrar Pagamento
-                              </DropdownMenuItem>
-
-                              {/* Editar / Condições */}
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setEmpresaParaEditar({
-                                    id: ass.empresa_id,
-                                    nome: ass.empresa_nome,
-                                    nome_fantasia: ass.empresa_nome_fantasia,
-                                    cnpj: ass.empresa_cnpj,
-                                    email: ass.empresa_email,
-                                    telefone: ass.empresa_telefone,
-                                    status: ass.empresa_status,
-                                    plano_slug: ass.plano_slug,
-                                    valor_assinatura: ass.valor,
-                                    vencimento: ass.vencimento,
-                                    fim_periodo_teste: ass.fim_periodo_teste,
-                                  })
-                                  setEditEmpresaModalOpen(true)
-                                }}
-                                className="cursor-pointer hover:bg-slate-800 text-sky-400 font-medium"
-                              >
-                                <Edit className="w-4 h-4 mr-2" />
-                                Editar Plano / Valores
-                              </DropdownMenuItem>
-
-                              {ass.status === 'trial' && (
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedAssinatura(ass)
-                                    setAcaoTipo('estender_teste')
-                                    setAcaoModalOpen(true)
-                                  }}
-                                  className="cursor-pointer hover:bg-slate-800 text-amber-300"
-                                >
-                                  <Clock className="w-4 h-4 mr-2" />
-                                  Estender Período de Teste
-                                </DropdownMenuItem>
-                              )}
-
-                              <DropdownMenuSeparator className="bg-slate-800" />
-
-                              {ass.status !== 'suspensa' && ass.status !== 'bloqueada' ? (
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedAssinatura(ass)
-                                    setAcaoTipo('suspender')
-                                    setAcaoModalOpen(true)
-                                  }}
-                                  className="cursor-pointer hover:bg-slate-800 text-rose-400"
-                                >
-                                  <ShieldAlert className="w-4 h-4 mr-2" />
-                                  Suspender Assinatura
-                                </DropdownMenuItem>
-                              ) : (
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedAssinatura(ass)
-                                    setAcaoTipo('reativar')
-                                    setAcaoModalOpen(true)
-                                  }}
-                                  className="cursor-pointer hover:bg-slate-800 text-emerald-400"
-                                >
-                                  <ShieldCheck className="w-4 h-4 mr-2" />
-                                  Reativar Assinatura
-                                </DropdownMenuItem>
-                              )}
-
-                              {ass.status !== 'cancelada' && (
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedAssinatura(ass)
-                                    setAcaoTipo('cancelar')
-                                    setAcaoModalOpen(true)
-                                  }}
-                                  className="cursor-pointer hover:bg-slate-800 text-slate-400"
-                                >
-                                  <XCircle className="w-4 h-4 mr-2" />
-                                  Cancelar Assinatura
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+          <ResponsiveList
+            items={filteredAssinaturas}
+            renderCard={(ass) => {
+              const isManual = ass.gateway === 'manual'
+              return {
+                id: ass.id,
+                title: ass.empresa_nome_fantasia || ass.empresa_nome,
+                subtitle: `${ass.plano_nome} • ${ass.metodo_pagamento || 'PIX'} (${isManual ? 'Manual' : 'Gateway'})`,
+                badge: getStatusBadge(ass.status, ass.vencimento),
+                infoRows: [
+                  {
+                    label: 'Vencimento',
+                    value:
+                      ass.status === 'trial'
+                        ? `${formatDate(ass.fim_periodo_teste || ass.vencimento)} (Trial)`
+                        : formatDate(ass.vencimento),
+                  },
+                  ...(ass.ultimo_pagamento
+                    ? [
+                        {
+                          label: 'Último Pagamento',
+                          value: `${formatCurrency(ass.ultimo_pagamento.valor)} em ${formatDate(ass.ultimo_pagamento.data)}`,
+                        },
+                      ]
+                    : []),
+                ],
+                valueHighlight: (
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase font-bold text-slate-400">Valor</span>
+                    <span className="font-mono font-bold text-emerald-400 text-sm">
+                      {formatCurrency(ass.valor)}
+                    </span>
+                  </div>
+                ),
+                actions: (
+                  <div className="flex items-center gap-2 w-full">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedAssinatura(ass)
+                        setPagamentoModalOpen(true)
+                      }}
+                      className="min-h-[44px] flex-1 text-xs font-semibold rounded-xl text-emerald-400 border-emerald-500/30"
+                    >
+                      <DollarSign className="w-3.5 h-3.5 mr-1" />
+                      Registrar Pagamento
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEmpresaParaEditar({
+                          id: ass.empresa_id,
+                          nome: ass.empresa_nome,
+                          nome_fantasia: ass.empresa_nome_fantasia,
+                          cnpj: ass.empresa_cnpj,
+                          email: ass.empresa_email,
+                          telefone: ass.empresa_telefone,
+                          status: ass.empresa_status,
+                          plano_slug: ass.plano_slug,
+                          valor_assinatura: ass.valor,
+                          vencimento: ass.vencimento,
+                          fim_periodo_teste: ass.fim_periodo_teste,
+                        })
+                        setEditEmpresaModalOpen(true)
+                      }}
+                      className="min-h-[44px] px-3 text-xs font-semibold rounded-xl text-sky-400 border-sky-500/30"
+                    >
+                      <Edit className="w-3.5 h-3.5 mr-1" />
+                      Editar
+                    </Button>
+                  </div>
+                ),
+              }
+            }}
+            renderTable={() => (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-950/80 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+                    <tr>
+                      <th className="py-3.5 px-4 font-semibold">Empresa</th>
+                      <th className="py-3.5 px-4 font-semibold">Plano</th>
+                      <th className="py-3.5 px-4 font-semibold">Status</th>
+                      <th className="py-3.5 px-4 font-semibold">Valor Mensal</th>
+                      <th className="py-3.5 px-4 font-semibold">Início / Contrato</th>
+                      <th className="py-3.5 px-4 font-semibold">Próximo Vencimento</th>
+                      <th className="py-3.5 px-4 font-semibold">Forma / Origem</th>
+                      <th className="py-3.5 px-4 font-semibold">Último Pagamento</th>
+                      <th className="py-3.5 px-4 font-semibold text-right">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/80">
+                    {loading ? (
+                      <tr>
+                        <td colSpan={9} className="py-12 text-center text-slate-400">
+                          <RefreshCw className="w-6 h-6 animate-spin mx-auto text-sky-400 mb-2" />
+                          Carregando central de assinaturas...
                         </td>
                       </tr>
-                    )
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                    ) : filteredAssinaturas.length === 0 ? (
+                      <tr>
+                        <td colSpan={9} className="py-12 text-center text-slate-400">
+                          Nenhuma assinatura encontrada para os filtros aplicados.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredAssinaturas.map((ass) => {
+                        const isManual = ass.gateway === 'manual'
+                        return (
+                          <tr key={ass.id} className="hover:bg-slate-800/50 transition-colors">
+                            {/* Empresa */}
+                            <td className="py-3.5 px-4">
+                              <div className="flex items-center gap-2.5">
+                                <div className="h-8 w-8 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs shrink-0">
+                                  <Building2 className="w-4 h-4" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="font-bold text-white leading-tight truncate">
+                                    {ass.empresa_nome_fantasia || ass.empresa_nome}
+                                  </p>
+                                  <p className="text-[11px] text-slate-400 truncate">
+                                    {ass.empresa_cnpj ? `CNPJ: ${ass.empresa_cnpj}` : ass.empresa_nome}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Plano */}
+                            <td className="py-3.5 px-4">
+                              <span className="font-semibold text-slate-200">{ass.plano_nome}</span>
+                              <span className="block text-[11px] text-slate-400 capitalize">
+                                {ass.periodicidade || 'mensal'}
+                              </span>
+                            </td>
+
+                            {/* Status */}
+                            <td className="py-3.5 px-4">
+                              {getStatusBadge(ass.status, ass.vencimento)}
+                            </td>
+
+                            {/* Valor Mensal */}
+                            <td className="py-3.5 px-4 font-mono font-medium text-emerald-400">
+                              {formatCurrency(ass.valor)}
+                            </td>
+
+                            {/* Início */}
+                            <td className="py-3.5 px-4 text-xs text-slate-300">
+                              {formatDate(ass.inicio || ass.data_contratacao)}
+                            </td>
+
+                            {/* Próximo Vencimento */}
+                            <td className="py-3.5 px-4 text-xs">
+                              {ass.status === 'trial' ? (
+                                <span className="text-amber-300 font-semibold flex items-center gap-1">
+                                  <Clock className="w-3.5 h-3.5" />
+                                  {formatDate(ass.fim_periodo_teste || ass.vencimento)} (Trial)
+                                </span>
+                              ) : (
+                                <span className="text-slate-200 font-mono">
+                                  {formatDate(ass.vencimento)}
+                                </span>
+                              )}
+                            </td>
+
+                            {/* Forma / Gateway */}
+                            <td className="py-3.5 px-4 text-xs">
+                              <span className="capitalize text-slate-200 block">
+                                {ass.metodo_pagamento || 'PIX'}
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-mono">
+                                {isManual ? 'Origem Manual' : 'Mercado Pago'}
+                              </span>
+                            </td>
+
+                            {/* Último Pagamento */}
+                            <td className="py-3.5 px-4 text-xs">
+                              {ass.ultimo_pagamento ? (
+                                <div>
+                                  <span className="font-mono font-bold text-emerald-400 block">
+                                    {formatCurrency(ass.ultimo_pagamento.valor)}
+                                  </span>
+                                  <span className="text-[10px] text-slate-400">
+                                    {formatDate(ass.ultimo_pagamento.data)}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-slate-500">Nenhum</span>
+                              )}
+                            </td>
+
+                            {/* Ações */}
+                            <td className="py-3.5 px-4 text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800"
+                                  >
+                                    <MoreVertical className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="w-52 bg-slate-900 border-slate-800 text-slate-200"
+                                >
+                                  <DropdownMenuLabel className="text-xs text-slate-400">
+                                    Gestão da Assinatura
+                                  </DropdownMenuLabel>
+                                  <DropdownMenuSeparator className="bg-slate-800" />
+
+                                  {/* Registrar Pagamento */}
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setSelectedAssinatura(ass)
+                                      setPagamentoModalOpen(true)
+                                    }}
+                                    className="cursor-pointer hover:bg-slate-800 text-emerald-400 font-medium"
+                                  >
+                                    <DollarSign className="w-4 h-4 mr-2" />+ Registrar Pagamento
+                                  </DropdownMenuItem>
+
+                                  {/* Editar / Condições */}
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setEmpresaParaEditar({
+                                        id: ass.empresa_id,
+                                        nome: ass.empresa_nome,
+                                        nome_fantasia: ass.empresa_nome_fantasia,
+                                        cnpj: ass.empresa_cnpj,
+                                        email: ass.empresa_email,
+                                        telefone: ass.empresa_telefone,
+                                        status: ass.empresa_status,
+                                        plano_slug: ass.plano_slug,
+                                        valor_assinatura: ass.valor,
+                                        vencimento: ass.vencimento,
+                                        fim_periodo_teste: ass.fim_periodo_teste,
+                                      })
+                                      setEditEmpresaModalOpen(true)
+                                    }}
+                                    className="cursor-pointer hover:bg-slate-800 text-sky-400 font-medium"
+                                  >
+                                    <Edit className="w-4 h-4 mr-2" />
+                                    Editar Plano / Valores
+                                  </DropdownMenuItem>
+
+                                  {ass.status === 'trial' && (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setSelectedAssinatura(ass)
+                                        setAcaoTipo('estender_teste')
+                                        setAcaoModalOpen(true)
+                                      }}
+                                      className="cursor-pointer hover:bg-slate-800 text-amber-300"
+                                    >
+                                      <Clock className="w-4 h-4 mr-2" />
+                                      Estender Período de Teste
+                                    </DropdownMenuItem>
+                                  )}
+
+                                  <DropdownMenuSeparator className="bg-slate-800" />
+
+                                  {ass.status !== 'suspensa' && ass.status !== 'bloqueada' ? (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setSelectedAssinatura(ass)
+                                        setAcaoTipo('suspender')
+                                        setAcaoModalOpen(true)
+                                      }}
+                                      className="cursor-pointer hover:bg-slate-800 text-rose-400"
+                                    >
+                                      <ShieldAlert className="w-4 h-4 mr-2" />
+                                      Suspender Assinatura
+                                    </DropdownMenuItem>
+                                  ) : (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setSelectedAssinatura(ass)
+                                        setAcaoTipo('reativar')
+                                        setAcaoModalOpen(true)
+                                      }}
+                                      className="cursor-pointer hover:bg-slate-800 text-emerald-400"
+                                    >
+                                      <ShieldCheck className="w-4 h-4 mr-2" />
+                                      Reativar Assinatura
+                                    </DropdownMenuItem>
+                                  )}
+
+                                  {ass.status !== 'cancelada' && (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setSelectedAssinatura(ass)
+                                        setAcaoTipo('cancelar')
+                                        setAcaoModalOpen(true)
+                                      }}
+                                      className="cursor-pointer hover:bg-slate-800 text-rose-400"
+                                    >
+                                      <XCircle className="w-4 h-4 mr-2" />
+                                      Cancelar Assinatura
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </td>
+                          </tr>
+                        )
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          />
         </CardContent>
       </Card>
-
       {/* MODAL 1: REGISTRAR PAGAMENTO MANUAL */}
       <RegistrarPagamentoManualModal
         open={pagamentoModalOpen}

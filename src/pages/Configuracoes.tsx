@@ -50,6 +50,7 @@ import { ConfiguracoesService, Usuario as UsuarioType } from '@/services/configu
 import { formatPerfilBadge } from '@/lib/permissions'
 import { validarCnpj, validarEmail, validarTelefone, formatApiError } from '@/lib/utils'
 import { toast } from 'sonner'
+import { ResponsiveList } from '@/components/common/ResponsiveList'
 import {
   Building2,
   Palette,
@@ -738,11 +739,12 @@ export default function ConfiguracoesPage() {
                       </Label>
                       <Input
                         id="empresa-cnpj"
+                        inputMode="numeric"
                         value={empresaForm.cnpj}
                         onChange={(e) => setEmpresaForm({ ...empresaForm, cnpj: e.target.value })}
                         placeholder="00.000.000/0000-00"
                         disabled={!isMasterOrAdmin || savingEmpresa}
-                        className={`${glassInputClass} font-mono`}
+                        className={`${glassInputClass} font-mono min-h-[44px] sm:min-h-0`}
                       />
                     </div>
 
@@ -757,11 +759,12 @@ export default function ConfiguracoesPage() {
                       <Input
                         id="empresa-email"
                         type="email"
+                        inputMode="email"
                         value={empresaForm.email}
                         onChange={(e) => setEmpresaForm({ ...empresaForm, email: e.target.value })}
                         placeholder="contato@empresa.com.br"
                         disabled={!isMasterOrAdmin || savingEmpresa}
-                        className={glassInputClass}
+                        className={`${glassInputClass} min-h-[44px] sm:min-h-0`}
                       />
                     </div>
 
@@ -775,13 +778,15 @@ export default function ConfiguracoesPage() {
                       </Label>
                       <Input
                         id="empresa-telefone"
+                        type="tel"
+                        inputMode="tel"
                         value={empresaForm.telefone}
                         onChange={(e) =>
                           setEmpresaForm({ ...empresaForm, telefone: e.target.value })
                         }
                         placeholder="(00) 00000-0000"
                         disabled={!isMasterOrAdmin || savingEmpresa}
-                        className={glassInputClass}
+                        className={`${glassInputClass} min-h-[44px] sm:min-h-0`}
                       />
                     </div>
                   </div>
@@ -1202,142 +1207,239 @@ export default function ConfiguracoesPage() {
                   />
                 ) : (
                   <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
-                        <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                          <tr>
-                            <th className="py-3.5 px-4">Nome</th>
-                            <th className="py-3.5 px-4">E-mail</th>
-                            <th className="py-3.5 px-4">Telefone</th>
-                            <th className="py-3.5 px-4">Perfil</th>
-                            <th className="py-3.5 px-4 text-center">Status</th>
-                            <th className="py-3.5 px-4">Criado em</th>
-                            <th className="py-3.5 px-4 text-right">Ações</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]/60">
-                          {usuarios.map((usr) => {
-                            const badgeInfo = formatPerfilBadge(usr.perfil)
-                            const isSelf = usr.id === usuarioLogado?.id
-                            const usrPerfil = (usr.perfil || '').toLowerCase()
-                            const isTargetMaster = usrPerfil === 'master'
-                            const podeEditarPerfil =
-                              isMasterOrAdmin && !isSelf && (isMaster || !isTargetMaster)
-                            const podeToggleStatus =
-                              isMasterOrAdmin && !isSelf && (isMaster || !isTargetMaster)
+                    <ResponsiveList
+                      items={usuarios}
+                      renderCard={(usr) => {
+                        const badgeInfo = formatPerfilBadge(usr.perfil)
+                        const isSelf = usr.id === usuarioLogado?.id
+                        const usrPerfil = (usr.perfil || '').toLowerCase()
+                        const isTargetMaster = usrPerfil === 'master'
+                        const podeEditarPerfil =
+                          isMasterOrAdmin && !isSelf && (isMaster || !isTargetMaster)
+                        const podeToggleStatus =
+                          isMasterOrAdmin && !isSelf && (isMaster || !isTargetMaster)
 
-                            return (
-                              <tr
-                                key={usr.id}
-                                className="hover:bg-slate-50/70 dark:hover:bg-white/[0.03] transition-colors"
+                        return {
+                          id: usr.id,
+                          title: usr.nome,
+                          subtitle: usr.email,
+                          badge: (
+                            <div className="flex items-center gap-1">
+                              {isSelf && (
+                                <GlassBadge variant="blue" className="text-[9px] py-0">
+                                  Você
+                                </GlassBadge>
+                              )}
+                              <Badge
+                                variant="outline"
+                                className={`font-semibold text-[10px] uppercase tracking-wider ${badgeInfo.color}`}
                               >
-                                <td className="py-3 px-4">
-                                  <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
-                                    {usr.nome}
-                                    {isSelf && (
-                                      <GlassBadge variant="blue" className="text-[9px] py-0">
-                                        Você
-                                      </GlassBadge>
-                                    )}
-                                  </div>
-                                </td>
-
-                                <td className="py-3 px-4 font-mono text-slate-600 dark:text-[#C0C6CF]">
-                                  {usr.email}
-                                </td>
-
-                                <td className="py-3 px-4 text-slate-600 dark:text-[#C0C6CF]">
-                                  {usr.telefone || '-'}
-                                </td>
-
-                                <td className="py-3 px-4">
-                                  <Badge
+                                {badgeInfo.label}
+                              </Badge>
+                            </div>
+                          ),
+                          infoRows: [
+                            ...(usr.telefone
+                              ? [
+                                  {
+                                    label: 'Telefone',
+                                    value: usr.telefone,
+                                  },
+                                ]
+                              : []),
+                            {
+                              label: 'Status',
+                              value: (
+                                <GlassBadge variant={usr.ativo ? 'green' : 'red'}>
+                                  {usr.ativo ? 'Ativo' : 'Inativo'}
+                                </GlassBadge>
+                              ),
+                            },
+                            {
+                              label: 'Criado em',
+                              value: formatDate(usr.created_at),
+                            },
+                          ],
+                          actions:
+                            podeEditarPerfil || podeToggleStatus ? (
+                              <div className="flex items-center gap-2 w-full">
+                                {podeEditarPerfil && (
+                                  <Button
                                     variant="outline"
-                                    className={`font-semibold text-[10px] uppercase tracking-wider ${badgeInfo.color}`}
+                                    size="sm"
+                                    onClick={() => handleOpenDialogPerfil(usr)}
+                                    className="min-h-[44px] flex-1 text-xs font-semibold rounded-xl"
                                   >
-                                    {badgeInfo.label}
-                                  </Badge>
-                                </td>
-
-                                <td className="py-3 px-4 text-center">
-                                  <GlassBadge variant={usr.ativo ? 'green' : 'red'}>
-                                    {usr.ativo ? 'Ativo' : 'Inativo'}
-                                  </GlassBadge>
-                                </td>
-
-                                <td className="py-3 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                                  {formatDate(usr.created_at)}
-                                </td>
-
-                                <td className="py-3 px-4 text-right">
-                                  <div className="flex items-center justify-end gap-1.5">
-                                    {/* Alterar Perfil */}
-                                    {podeEditarPerfil && (
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleOpenDialogPerfil(usr)}
-                                        className="h-7 text-[11px] px-2 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-[#1A294A] hover:bg-slate-50 dark:hover:bg-[#1A294A] cursor-pointer"
-                                        title="Alterar Perfil de Acesso"
-                                      >
-                                        Alterar Perfil
-                                      </Button>
+                                    Alterar Perfil
+                                  </Button>
+                                )}
+                                {podeToggleStatus && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setDialogToggleUser(usr)}
+                                    className={`min-h-[44px] px-4 text-xs font-semibold rounded-xl ${
+                                      usr.ativo
+                                        ? 'text-rose-600 border-rose-200 dark:border-rose-900/50'
+                                        : 'text-emerald-600 border-emerald-200 dark:border-emerald-900/50'
+                                    }`}
+                                  >
+                                    {usr.ativo ? (
+                                      <>
+                                        <XCircle className="w-3.5 h-3.5 mr-1" />
+                                        Inativar
+                                      </>
+                                    ) : (
+                                      <>
+                                        <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                                        Ativar
+                                      </>
                                     )}
-
-                                    {/* Toggle Ativo/Inativo */}
-                                    {podeToggleStatus && (
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setDialogToggleUser(usr)}
-                                        className={`h-7 text-[11px] px-2 flex items-center gap-1 cursor-pointer ${
-                                          usr.ativo
-                                            ? 'text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950'
-                                            : 'text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-50 dark:hover:bg-emerald-950'
-                                        }`}
-                                      >
-                                        {usr.ativo ? (
-                                          <>
-                                            <XCircle className="w-3.5 h-3.5" />
-                                            Inativar
-                                          </>
-                                        ) : (
-                                          <>
-                                            <CheckCircle2 className="w-3.5 h-3.5" />
-                                            Ativar
-                                          </>
-                                        )}
-                                      </Button>
-                                    )}
-
-                                    {/* Reenviar Senha (Disabled com Tooltip) */}
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <span tabIndex={0}>
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            disabled
-                                            className="h-7 w-7 p-0 text-slate-400 cursor-not-allowed opacity-60"
-                                          >
-                                            <Key className="w-3.5 h-3.5" />
-                                          </Button>
-                                        </span>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p className="text-xs">
-                                          Funcionalidade disponível em breve.
-                                        </p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </div>
-                                </td>
+                                  </Button>
+                                )}
+                              </div>
+                            ) : undefined,
+                        }
+                      }}
+                      renderTable={() => (
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                            <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                              <tr>
+                                <th className="py-3.5 px-4">Nome</th>
+                                <th className="py-3.5 px-4">E-mail</th>
+                                <th className="py-3.5 px-4">Telefone</th>
+                                <th className="py-3.5 px-4">Perfil</th>
+                                <th className="py-3.5 px-4 text-center">Status</th>
+                                <th className="py-3.5 px-4">Criado em</th>
+                                <th className="py-3.5 px-4 text-right">Ações</th>
                               </tr>
-                            )
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]/60">
+                              {usuarios.map((usr) => {
+                                const badgeInfo = formatPerfilBadge(usr.perfil)
+                                const isSelf = usr.id === usuarioLogado?.id
+                                const usrPerfil = (usr.perfil || '').toLowerCase()
+                                const isTargetMaster = usrPerfil === 'master'
+                                const podeEditarPerfil =
+                                  isMasterOrAdmin && !isSelf && (isMaster || !isTargetMaster)
+                                const podeToggleStatus =
+                                  isMasterOrAdmin && !isSelf && (isMaster || !isTargetMaster)
+
+                                return (
+                                  <tr
+                                    key={usr.id}
+                                    className="hover:bg-slate-50/70 dark:hover:bg-white/[0.03] transition-colors"
+                                  >
+                                    <td className="py-3 px-4">
+                                      <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                        {usr.nome}
+                                        {isSelf && (
+                                          <GlassBadge variant="blue" className="text-[9px] py-0">
+                                            Você
+                                          </GlassBadge>
+                                        )}
+                                      </div>
+                                    </td>
+
+                                    <td className="py-3 px-4 font-mono text-slate-600 dark:text-[#C0C6CF]">
+                                      {usr.email}
+                                    </td>
+
+                                    <td className="py-3 px-4 text-slate-600 dark:text-[#C0C6CF]">
+                                      {usr.telefone || '-'}
+                                    </td>
+
+                                    <td className="py-3 px-4">
+                                      <Badge
+                                        variant="outline"
+                                        className={`font-semibold text-[10px] uppercase tracking-wider ${badgeInfo.color}`}
+                                      >
+                                        {badgeInfo.label}
+                                      </Badge>
+                                    </td>
+
+                                    <td className="py-3 px-4 text-center">
+                                      <GlassBadge variant={usr.ativo ? 'green' : 'red'}>
+                                        {usr.ativo ? 'Ativo' : 'Inativo'}
+                                      </GlassBadge>
+                                    </td>
+
+                                    <td className="py-3 px-4 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                                      {formatDate(usr.created_at)}
+                                    </td>
+
+                                    <td className="py-3 px-4 text-right">
+                                      <div className="flex items-center justify-end gap-1.5">
+                                        {/* Alterar Perfil */}
+                                        {podeEditarPerfil && (
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleOpenDialogPerfil(usr)}
+                                            className="h-7 text-[11px] px-2 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-[#1A294A] hover:bg-slate-50 dark:hover:bg-[#1A294A] cursor-pointer"
+                                            title="Alterar Perfil de Acesso"
+                                          >
+                                            Alterar Perfil
+                                          </Button>
+                                        )}
+
+                                        {/* Toggle Ativo/Inativo */}
+                                        {podeToggleStatus && (
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setDialogToggleUser(usr)}
+                                            className={`h-7 text-[11px] px-2 flex items-center gap-1 cursor-pointer ${
+                                              usr.ativo
+                                                ? 'text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950'
+                                                : 'text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50 hover:bg-emerald-50 dark:hover:bg-emerald-950'
+                                            }`}
+                                          >
+                                            {usr.ativo ? (
+                                              <>
+                                                <XCircle className="w-3.5 h-3.5" />
+                                                Inativar
+                                              </>
+                                            ) : (
+                                              <>
+                                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                                Ativar
+                                              </>
+                                            )}
+                                          </Button>
+                                        )}
+
+                                        {/* Reenviar Senha (Disabled com Tooltip) */}
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <span tabIndex={0}>
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                disabled
+                                                className="h-7 w-7 p-0 text-slate-400 cursor-not-allowed opacity-60"
+                                              >
+                                                <Key className="w-3.5 h-3.5" />
+                                              </Button>
+                                            </span>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            <p className="text-xs">
+                                              Funcionalidade disponível em breve.
+                                            </p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    />
 
                     {/* Paginação */}
                     <GlassPagination

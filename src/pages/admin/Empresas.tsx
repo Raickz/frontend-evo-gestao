@@ -24,6 +24,8 @@ import {
 import { NovaEmpresaWizardModal } from '@/components/admin/NovaEmpresaWizardModal'
 import { EditarEmpresaModal } from '@/components/admin/EditarEmpresaModal'
 import { AdminService, AdminEmpresaItem, AdminPlanoItem } from '@/services/admin'
+import { ResponsiveList } from '@/components/common/ResponsiveList'
+import { MobileFab } from '@/components/common/MobileFab'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -245,6 +247,13 @@ export default function AdminEmpresasPage() {
 
   return (
     <div className="space-y-6">
+      <MobileFab
+        label="Nova Empresa"
+        onClick={() => setWizardOpen(true)}
+        icon={Plus}
+        variant="primary"
+      />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
         <div>
@@ -315,179 +324,266 @@ export default function AdminEmpresasPage() {
       {/* Tabela de Empresas */}
       <Card className="bg-slate-900/90 border-slate-800 shadow-sm overflow-hidden text-slate-100">
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-950/80 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
-                <tr>
-                  <th className="py-3.5 px-4 font-semibold">Empresa / CNPJ</th>
-                  <th className="py-3.5 px-4 font-semibold">Plano Atual</th>
-                  <th className="py-3.5 px-4 font-semibold">Status Assinatura</th>
-                  <th className="py-3.5 px-4 font-semibold">Valor Mensal</th>
-                  <th className="py-3.5 px-4 font-semibold">Vigência / Trial</th>
-                  <th className="py-3.5 px-4 font-semibold text-center">Usuários</th>
-                  <th className="py-3.5 px-4 font-semibold text-right">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/80">
-                {loading ? (
-                  <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400">
-                      <RefreshCw className="w-6 h-6 animate-spin mx-auto text-sky-400 mb-2" />
-                      Carregando empresas da plataforma...
-                    </td>
-                  </tr>
-                ) : filteredEmpresas.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400">
-                      Nenhuma empresa encontrada com os filtros selecionados.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredEmpresas.map((emp) => {
-                    const isBloqueada = emp.status_assinatura === 'bloqueada'
-                    const vigenciaDisplay =
-                      emp.status_assinatura === 'trial'
-                        ? `Fim Trial: ${formatDate(emp.fim_periodo_teste)}`
-                        : emp.vencimento
-                          ? `Vence: ${formatDate(emp.vencimento)}`
-                          : `Início: ${formatDate(emp.inicio)}`
+          <ResponsiveList
+            items={filteredEmpresas}
+            renderCard={(emp) => {
+              const isBloqueada = emp.status_assinatura === 'bloqueada'
+              const vigenciaDisplay =
+                emp.status_assinatura === 'trial'
+                  ? `Fim Trial: ${formatDate(emp.fim_periodo_teste)}`
+                  : emp.vencimento
+                    ? `Vence: ${formatDate(emp.vencimento)}`
+                    : `Início: ${formatDate(emp.inicio)}`
 
-                    return (
-                      <tr key={emp.id} className="hover:bg-slate-800/50 transition-colors group">
-                        {/* Nome / CNPJ */}
-                        <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs shrink-0">
-                              <Building2 className="w-4 h-4" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="font-bold text-white leading-tight truncate">
-                                {emp.nome_fantasia || emp.nome}
-                              </p>
-                              <p className="text-xs text-slate-400 truncate">
-                                {emp.cnpj ? `CNPJ: ${emp.cnpj}` : emp.nome}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Plano */}
-                        <td className="py-3.5 px-4">
-                          <span className="font-semibold text-slate-200">
-                            {emp.plano_nome || 'Nenhum'}
-                          </span>
-                          {emp.plano_slug && (
-                            <span className="block text-[11px] font-mono text-slate-400">
-                              {emp.plano_slug}
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Status */}
-                        <td className="py-3.5 px-4">{getStatusBadge(emp.status_assinatura)}</td>
-
-                        {/* Valor Mensal */}
-                        <td className="py-3.5 px-4 font-mono font-medium text-slate-200">
-                          {formatCurrency(emp.valor_assinatura)}
-                        </td>
-
-                        {/* Vigência / Trial */}
-                        <td className="py-3.5 px-4 text-xs text-slate-300">
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                            <span>{vigenciaDisplay}</span>
-                          </div>
-                        </td>
-
-                        {/* Usuários Ativos */}
-                        <td className="py-3.5 px-4 text-center">
-                          <Badge className="bg-slate-800 text-slate-300 border-slate-700 text-xs">
-                            <Users className="w-3 h-3 mr-1 text-slate-400" />
-                            {emp.total_usuarios}
-                          </Badge>
-                        </td>
-
-                        {/* Ações */}
-                        <td className="py-3.5 px-4 text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800"
-                              >
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="w-48 bg-slate-900 border-slate-800 text-slate-200"
-                            >
-                              <DropdownMenuLabel className="text-xs text-slate-400">
-                                Ações Administrativas
-                              </DropdownMenuLabel>
-                              <DropdownMenuSeparator className="bg-slate-800" />
-
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setSelectedEmpresaParaEditar(emp)
-                                  setEditModalOpen(true)
-                                }}
-                                className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 text-sky-400 font-medium"
-                              >
-                                <Edit className="w-4 h-4 mr-2 text-sky-400" />
-                                Gerenciar / Editar
-                              </DropdownMenuItem>
-
-                              <DropdownMenuItem
-                                onClick={() => setDetalhesEmpresa(emp)}
-                                className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 text-slate-200"
-                              >
-                                <Info className="w-4 h-4 mr-2 text-slate-400" />
-                                Ver Detalhes
-                              </DropdownMenuItem>
-
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setAlterarPlanoEmpresa(emp)
-                                  setSelectedNovoPlano(emp.plano_slug || '')
-                                }}
-                                className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 text-slate-200"
-                              >
-                                <Edit3 className="w-4 h-4 mr-2 text-indigo-400" />
-                                Alterar Plano
-                              </DropdownMenuItem>
-
-                              <DropdownMenuSeparator className="bg-slate-800" />
-
-                              {isBloqueada ? (
-                                <DropdownMenuItem
-                                  onClick={() => setDesbloquearTarget(emp)}
-                                  className="cursor-pointer hover:bg-emerald-950/50 focus:bg-emerald-950/50 text-emerald-400 font-semibold"
-                                >
-                                  <Unlock className="w-4 h-4 mr-2 text-emerald-400" />
-                                  Desbloquear Acesso
-                                </DropdownMenuItem>
-                              ) : (
-                                <DropdownMenuItem
-                                  onClick={() => setBloquearTarget(emp)}
-                                  className="cursor-pointer hover:bg-rose-950/50 focus:bg-rose-950/50 text-rose-400 font-semibold"
-                                >
-                                  <Lock className="w-4 h-4 mr-2 text-rose-400" />
-                                  Bloquear Empresa
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+              return {
+                id: emp.id,
+                title: emp.nome_fantasia || emp.nome,
+                subtitle: emp.cnpj ? `CNPJ: ${emp.cnpj}` : emp.nome,
+                badge: getStatusBadge(emp.status_assinatura),
+                infoRows: [
+                  {
+                    label: 'Plano',
+                    value: emp.plano_nome || 'Nenhum',
+                  },
+                  {
+                    label: 'Valor Mensal',
+                    value: (
+                      <span className="font-mono font-medium text-slate-200">
+                        {formatCurrency(emp.valor_assinatura)}
+                      </span>
+                    ),
+                  },
+                  {
+                    label: 'Vigência',
+                    value: vigenciaDisplay,
+                  },
+                  {
+                    label: 'Usuários',
+                    value: `${emp.total_usuarios} ativos`,
+                  },
+                ],
+                actions: (
+                  <div className="flex items-center gap-2 w-full">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedEmpresaParaEditar(emp)
+                        setEditModalOpen(true)
+                      }}
+                      className="min-h-[44px] flex-1 text-xs font-semibold rounded-xl text-sky-400 border-sky-500/30"
+                    >
+                      <Edit className="w-3.5 h-3.5 mr-1" />
+                      Gerenciar
+                    </Button>
+                    {isBloqueada ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDesbloquearTarget(emp)}
+                        className="min-h-[44px] px-4 text-xs font-semibold rounded-xl text-emerald-400 border-emerald-500/30"
+                      >
+                        <Unlock className="w-3.5 h-3.5 mr-1" />
+                        Desbloquear
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setBloquearTarget(emp)}
+                        className="min-h-[44px] px-4 text-xs font-semibold rounded-xl text-rose-400 border-rose-500/30"
+                      >
+                        <Lock className="w-3.5 h-3.5 mr-1" />
+                        Bloquear
+                      </Button>
+                    )}
+                  </div>
+                ),
+                onClick: () => {
+                  setSelectedEmpresaParaEditar(emp)
+                  setEditModalOpen(true)
+                },
+              }
+            }}
+            renderTable={() => (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm text-slate-300">
+                  <thead className="bg-slate-950/80 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+                    <tr>
+                      <th className="py-3.5 px-4 font-semibold">Empresa / CNPJ</th>
+                      <th className="py-3.5 px-4 font-semibold">Plano Atual</th>
+                      <th className="py-3.5 px-4 font-semibold">Status Assinatura</th>
+                      <th className="py-3.5 px-4 font-semibold">Valor Mensal</th>
+                      <th className="py-3.5 px-4 font-semibold">Vigência / Trial</th>
+                      <th className="py-3.5 px-4 font-semibold text-center">Usuários</th>
+                      <th className="py-3.5 px-4 font-semibold text-right">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/80">
+                    {loading ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-slate-400">
+                          <RefreshCw className="w-6 h-6 animate-spin mx-auto text-sky-400 mb-2" />
+                          Carregando empresas da plataforma...
                         </td>
                       </tr>
-                    )
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
+                    ) : filteredEmpresas.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-slate-400">
+                          Nenhuma empresa encontrada com os filtros selecionados.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredEmpresas.map((emp) => {
+                        const isBloqueada = emp.status_assinatura === 'bloqueada'
+                        const vigenciaDisplay =
+                          emp.status_assinatura === 'trial'
+                            ? `Fim Trial: ${formatDate(emp.fim_periodo_teste)}`
+                            : emp.vencimento
+                              ? `Vence: ${formatDate(emp.vencimento)}`
+                              : `Início: ${formatDate(emp.inicio)}`
+
+                        return (
+                          <tr
+                            key={emp.id}
+                            className="hover:bg-slate-800/50 transition-colors group"
+                          >
+                            {/* Nome / CNPJ */}
+                            <td className="py-3.5 px-4">
+                              <div className="flex items-center gap-3">
+                                <div className="h-9 w-9 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs shrink-0">
+                                  <Building2 className="w-4 h-4" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="font-bold text-white leading-tight truncate">
+                                    {emp.nome_fantasia || emp.nome}
+                                  </p>
+                                  <p className="text-xs text-slate-400 truncate">
+                                    {emp.cnpj ? `CNPJ: ${emp.cnpj}` : emp.nome}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Plano */}
+                            <td className="py-3.5 px-4">
+                              <span className="font-semibold text-slate-200">
+                                {emp.plano_nome || 'Nenhum'}
+                              </span>
+                              {emp.plano_slug && (
+                                <span className="block text-[11px] font-mono text-slate-400">
+                                  {emp.plano_slug}
+                                </span>
+                              )}
+                            </td>
+
+                            {/* Status */}
+                            <td className="py-3.5 px-4">{getStatusBadge(emp.status_assinatura)}</td>
+
+                            {/* Valor Mensal */}
+                            <td className="py-3.5 px-4 font-mono font-medium text-slate-200">
+                              {formatCurrency(emp.valor_assinatura)}
+                            </td>
+
+                            {/* Vigência / Trial */}
+                            <td className="py-3.5 px-4 text-xs text-slate-300">
+                              <div className="flex items-center gap-1.5">
+                                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                                <span>{vigenciaDisplay}</span>
+                              </div>
+                            </td>
+
+                            {/* Usuários Ativos */}
+                            <td className="py-3.5 px-4 text-center">
+                              <Badge className="bg-slate-800 text-slate-300 border-slate-700 text-xs">
+                                <Users className="w-3 h-3 mr-1 text-slate-400" />
+                                {emp.total_usuarios}
+                              </Badge>
+                            </td>
+
+                            {/* Ações */}
+                            <td className="py-3.5 px-4 text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800"
+                                  >
+                                    <MoreVertical className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="w-48 bg-slate-900 border-slate-800 text-slate-200"
+                                >
+                                  <DropdownMenuLabel className="text-xs text-slate-400">
+                                    Ações Administrativas
+                                  </DropdownMenuLabel>
+                                  <DropdownMenuSeparator className="bg-slate-800" />
+
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setSelectedEmpresaParaEditar(emp)
+                                      setEditModalOpen(true)
+                                    }}
+                                    className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 text-sky-400 font-medium"
+                                  >
+                                    <Edit className="w-4 h-4 mr-2 text-sky-400" />
+                                    Gerenciar / Editar
+                                  </DropdownMenuItem>
+
+                                  <DropdownMenuItem
+                                    onClick={() => setDetalhesEmpresa(emp)}
+                                    className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 text-slate-200"
+                                  >
+                                    <Info className="w-4 h-4 mr-2 text-slate-400" />
+                                    Ver Detalhes
+                                  </DropdownMenuItem>
+
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setAlterarPlanoEmpresa(emp)
+                                      setSelectedNovoPlano(emp.plano_slug || '')
+                                    }}
+                                    className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 text-slate-200"
+                                  >
+                                    <Edit3 className="w-4 h-4 mr-2 text-indigo-400" />
+                                    Alterar Plano
+                                  </DropdownMenuItem>
+
+                                  <DropdownMenuSeparator className="bg-slate-800" />
+
+                                  {isBloqueada ? (
+                                    <DropdownMenuItem
+                                      onClick={() => setDesbloquearTarget(emp)}
+                                      className="cursor-pointer hover:bg-emerald-950/50 focus:bg-emerald-950/50 text-emerald-400 font-semibold"
+                                    >
+                                      <Unlock className="w-4 h-4 mr-2 text-emerald-400" />
+                                      Desbloquear Acesso
+                                    </DropdownMenuItem>
+                                  ) : (
+                                    <DropdownMenuItem
+                                      onClick={() => setBloquearTarget(emp)}
+                                      className="cursor-pointer hover:bg-rose-950/50 focus:bg-rose-950/50 text-rose-400 font-semibold"
+                                    >
+                                      <Lock className="w-4 h-4 mr-2 text-rose-400" />
+                                      Bloquear Empresa
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </td>
+                          </tr>
+                        )
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          />
+        </CardContent>{' '}
       </Card>
 
       {/* MODAL WIZARD: CADASTRO MANUAL DE EMPRESA */}

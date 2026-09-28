@@ -42,6 +42,7 @@ import { useEmpresa } from '@/hooks/use-empresa'
 import { RelatorioLucroService, LucroResumo, LucroPorVendedor } from '@/services/relatorio-lucro'
 import { ComissoesService } from '@/services/comissoes'
 import { formatCurrency } from '@/lib/utils'
+import { ResponsiveList } from '@/components/common/ResponsiveList'
 
 interface VendedorOption {
   id: string
@@ -392,68 +393,118 @@ export default function RelatorioLucroPage() {
                 />
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-slate-50/80 dark:bg-[#0A1328]/80 hover:bg-slate-50/80 border-b border-slate-200/80 dark:border-[#1A294A]">
-                      <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-xs">
-                        Vendedor
-                      </TableHead>
-                      <TableHead className="text-center font-semibold text-slate-700 dark:text-slate-300 text-xs">
-                        Vendas
-                      </TableHead>
-                      <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 text-xs">
-                        Faturamento
-                      </TableHead>
-                      <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 text-xs">
-                        Custo
-                      </TableHead>
-                      <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 text-xs">
-                        Lucro
-                      </TableHead>
-                      <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 text-xs">
-                        Margem
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
-                    {porVendedor.map((item) => {
-                      const lucroVendedorPositivo = item.lucro >= 0
-                      return (
-                        <TableRow
-                          key={item.vendedorId}
-                          className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03]"
+              <ResponsiveList
+                items={porVendedor}
+                renderCard={(item) => {
+                  const lucroVendedorPositivo = item.lucro >= 0
+                  return {
+                    id: item.vendedorId,
+                    title: item.nome,
+                    subtitle: `${item.numeroVendas} ${item.numeroVendas === 1 ? 'venda' : 'vendas'}`,
+                    badge: (
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
+                          lucroVendedorPositivo
+                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
+                            : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25'
+                        }`}
+                      >
+                        Margem: {item.margem.toFixed(1)}%
+                      </span>
+                    ),
+                    infoRows: [
+                      {
+                        label: 'Faturamento',
+                        value: formatCurrency(item.faturamento),
+                      },
+                      {
+                        label: 'Custo',
+                        value: formatCurrency(item.custo),
+                      },
+                    ],
+                    valueHighlight: (
+                      <div className="flex flex-col">
+                        <span className="text-[10px] uppercase font-bold text-slate-400">
+                          Lucro
+                        </span>
+                        <span
+                          className={`font-black text-sm ${
+                            lucroVendedorPositivo
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-rose-600 dark:text-rose-400'
+                          }`}
                         >
-                          <TableCell className="font-medium text-slate-900 dark:text-white text-xs">
-                            {item.nome}
-                          </TableCell>
-                          <TableCell className="text-center text-xs text-slate-600 dark:text-slate-400">
-                            {item.numeroVendas}
-                          </TableCell>
-                          <TableCell className="text-right font-medium text-slate-800 dark:text-slate-200 text-xs">
-                            {formatCurrency(item.faturamento)}
-                          </TableCell>
-                          <TableCell className="text-right text-slate-600 dark:text-slate-400 text-xs">
-                            {formatCurrency(item.custo)}
-                          </TableCell>
-                          <TableCell
-                            className={`text-right font-semibold text-xs ${
-                              lucroVendedorPositivo
-                                ? 'text-emerald-600 dark:text-emerald-400'
-                                : 'text-rose-600 dark:text-rose-400'
-                            }`}
-                          >
-                            {formatCurrency(item.lucro)}
-                          </TableCell>
-                          <TableCell className="text-right font-medium text-xs text-slate-700 dark:text-slate-300">
-                            {item.margem.toFixed(1)}%
-                          </TableCell>
+                          {formatCurrency(item.lucro)}
+                        </span>
+                      </div>
+                    ),
+                  }
+                }}
+                renderTable={() => (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-slate-50/80 dark:bg-[#0A1328]/80 hover:bg-slate-50/80 border-b border-slate-200/80 dark:border-[#1A294A]">
+                          <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-xs">
+                            Vendedor
+                          </TableHead>
+                          <TableHead className="text-center font-semibold text-slate-700 dark:text-slate-300 text-xs">
+                            Vendas
+                          </TableHead>
+                          <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 text-xs">
+                            Faturamento
+                          </TableHead>
+                          <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 text-xs">
+                            Custo
+                          </TableHead>
+                          <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 text-xs">
+                            Lucro
+                          </TableHead>
+                          <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300 text-xs">
+                            Margem
+                          </TableHead>
                         </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
+                      </TableHeader>
+                      <TableBody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
+                        {porVendedor.map((item) => {
+                          const lucroVendedorPositivo = item.lucro >= 0
+                          return (
+                            <TableRow
+                              key={item.vendedorId}
+                              className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03]"
+                            >
+                              <TableCell className="font-medium text-slate-900 dark:text-white text-xs">
+                                {item.nome}
+                              </TableCell>
+                              <TableCell className="text-center text-xs text-slate-600 dark:text-slate-400">
+                                {item.numeroVendas}
+                              </TableCell>
+                              <TableCell className="text-right font-medium text-slate-800 dark:text-slate-200 text-xs">
+                                {formatCurrency(item.faturamento)}
+                              </TableCell>
+                              <TableCell className="text-right text-slate-600 dark:text-slate-400 text-xs">
+                                {formatCurrency(item.custo)}
+                              </TableCell>
+                              <TableCell
+                                className={`text-right font-semibold text-xs ${
+                                  lucroVendedorPositivo
+                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    : 'text-rose-600 dark:text-rose-400'
+                                }`}
+                              >
+                                {formatCurrency(item.lucro)}
+                              </TableCell>
+                              <TableCell className="text-right font-medium text-xs text-slate-700 dark:text-slate-300">
+                                {item.margem.toFixed(1)}%
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              />
             )}
           </div>
         </div>

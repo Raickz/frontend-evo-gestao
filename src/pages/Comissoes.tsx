@@ -21,6 +21,7 @@ import { useEmpresa } from '@/hooks/use-empresa'
 import { useAuth } from '@/hooks/use-auth'
 import { supabase } from '@/lib/supabase/client'
 import { ComissoesService, Comissao, IndicadoresComissoes } from '@/services/comissoes'
+import { ResponsiveList } from '@/components/common/ResponsiveList'
 import {
   Percent,
   DollarSign,
@@ -469,60 +470,97 @@ export default function ComissoesPage() {
         />
       ) : (
         <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
-              <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                <tr>
-                  <th className="py-3.5 px-4">Vendedor</th>
-                  <th className="py-3.5 px-4">Venda Ref.</th>
-                  <th className="py-3.5 px-4">Valor da Venda</th>
-                  <th className="py-3.5 px-4">Alíquota (%)</th>
-                  <th className="py-3.5 px-4">Valor Comissão</th>
-                  <th className="py-3.5 px-4">Status</th>
-                  <th className="py-3.5 px-4">Data Apuração</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
-                {comissoes.map((c) => (
-                  <tr
-                    key={c.id}
-                    className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
-                  >
-                    <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] flex items-center justify-center font-bold text-[11px]">
-                          {c.vendedores?.nome ? c.vendedores.nome.charAt(0).toUpperCase() : 'V'}
-                        </div>
-                        <span>{c.vendedores?.nome || 'Vendedor não identificado'}</span>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-slate-300">
-                      {c.vendas?.numero ? (
-                        <span className="inline-flex items-center gap-1 font-semibold text-slate-800 dark:text-slate-200">
-                          <Receipt className="w-3 h-3 text-[#0066FF]" />#{c.vendas.numero}
-                        </span>
-                      ) : (
-                        <span className="text-slate-400">—</span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4 tabular-nums text-slate-700 dark:text-slate-300">
-                      {formatCurrency(c.valor_venda)}
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-[#0066FF] dark:text-[#3B82F6] font-bold">
+          <ResponsiveList
+            items={comissoes}
+            renderCard={(c) => ({
+              id: c.id,
+              title: c.vendedores?.nome || 'Vendedor não identificado',
+              subtitle: c.vendas?.numero ? `Venda #${c.vendas.numero}` : undefined,
+              badge: renderStatusBadge(c.status),
+              infoRows: [
+                {
+                  label: 'Valor Venda',
+                  value: formatCurrency(c.valor_venda),
+                },
+                {
+                  label: 'Alíquota',
+                  value: (
+                    <span className="font-bold text-[#0066FF] dark:text-[#3B82F6]">
                       {formatPercent(c.percentual)}
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white tabular-nums">
-                      {formatCurrency(c.valor_comissao)}
-                    </td>
-                    <td className="py-3.5 px-4">{renderStatusBadge(c.status)}</td>
-                    <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
-                      {formatDate(c.created_at)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </span>
+                  ),
+                },
+                {
+                  label: 'Data Apuração',
+                  value: formatDate(c.created_at),
+                },
+              ],
+              valueHighlight: (
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Comissão</span>
+                  <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm">
+                    {formatCurrency(c.valor_comissao)}
+                  </span>
+                </div>
+              ),
+            })}
+            renderTable={() => (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
+                  <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    <tr>
+                      <th className="py-3.5 px-4">Vendedor</th>
+                      <th className="py-3.5 px-4">Venda Ref.</th>
+                      <th className="py-3.5 px-4">Valor da Venda</th>
+                      <th className="py-3.5 px-4">Alíquota (%)</th>
+                      <th className="py-3.5 px-4">Valor Comissão</th>
+                      <th className="py-3.5 px-4">Status</th>
+                      <th className="py-3.5 px-4">Data Apuração</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
+                    {comissoes.map((c) => (
+                      <tr
+                        key={c.id}
+                        className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
+                      >
+                        <td className="py-3.5 px-4 font-semibold text-slate-900 dark:text-white">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-[#0066FF]/10 text-[#0066FF] dark:text-[#3B82F6] flex items-center justify-center font-bold text-[11px]">
+                              {c.vendedores?.nome ? c.vendedores.nome.charAt(0).toUpperCase() : 'V'}
+                            </div>
+                            <span>{c.vendedores?.nome || 'Vendedor não identificado'}</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-slate-600 dark:text-slate-300">
+                          {c.vendas?.numero ? (
+                            <span className="inline-flex items-center gap-1 font-semibold text-slate-800 dark:text-slate-200">
+                              <Receipt className="w-3 h-3 text-[#0066FF]" />#{c.vendas.numero}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400">—</span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 tabular-nums text-slate-700 dark:text-slate-300">
+                          {formatCurrency(c.valor_venda)}
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-[#0066FF] dark:text-[#3B82F6] font-bold">
+                          {formatPercent(c.percentual)}
+                        </td>
+                        <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white tabular-nums">
+                          {formatCurrency(c.valor_comissao)}
+                        </td>
+                        <td className="py-3.5 px-4">{renderStatusBadge(c.status)}</td>
+                        <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
+                          {formatDate(c.created_at)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          />
 
           {/* Paginação */}
           <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200/80 dark:border-[#1A294A] bg-slate-50/50 dark:bg-[#0A1328]/50 text-xs text-slate-600 dark:text-[#C0C6CF]">
