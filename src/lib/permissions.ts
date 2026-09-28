@@ -57,6 +57,9 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'vendedores',
     'comissoes',
     'configuracoes',
+    'minha_rota',
+    'veiculos',
+    'rotas',
   ],
   master: [
     'dashboard',
@@ -76,6 +79,9 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'vendedores',
     'comissoes',
     'configuracoes',
+    'minha_rota',
+    'veiculos',
+    'rotas',
   ],
   admin: [
     'dashboard',
@@ -95,6 +101,9 @@ export const ROLE_PAGES: Record<UserRole, readonly AppPage[]> = {
     'vendedores',
     'comissoes',
     'configuracoes',
+    'minha_rota',
+    'veiculos',
+    'rotas',
   ],
   gerente: [
     'dashboard',
