@@ -661,11 +661,10 @@ export default function DevedoresPage() {
               </Label>
               <Input
                 id="valor_recebimento"
-                type="number"
-                step="0.01"
+                type="text"
                 inputMode="decimal"
                 value={valorReceber || ''}
-                onChange={(e) => setValorReceber(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setValorReceber(parseFloat(e.target.value.replace(',', '.')) || 0)}
                 className="h-12 text-lg font-black bg-slate-50 dark:bg-[#081022] border-slate-200 dark:border-[#152342] font-mono"
               />
               <div className="flex gap-2 mt-1">

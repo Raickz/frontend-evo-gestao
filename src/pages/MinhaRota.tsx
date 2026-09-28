@@ -333,7 +333,25 @@ export default function MinhaRotaPage() {
   }
 
   return (
-    <div className="p-3 sm:p-6 max-w-4xl mx-auto space-y-4 pb-24">
+    <div className="p-3 sm:p-6 max-w-4xl mx-auto space-y-4 pb-28">
+      {/* Botão Fixo no Rodapé: "Vender aqui" no celular */}
+      {rotaAtiva && (
+        <div
+          className="lg:hidden fixed left-4 right-4 z-40 animate-fade-in-up"
+          style={{
+            bottom: 'calc(4.5rem + max(env(safe-area-inset-bottom, 0px), 8px))',
+          }}
+        >
+          <Button
+            onClick={abrirModalVenda}
+            className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-xl flex items-center justify-center gap-2 text-sm tracking-wide active:scale-95 transition-transform"
+          >
+            <ShoppingCart className="w-5 h-5 shrink-0" />
+            <span>Vender aqui (Estoque a bordo)</span>
+          </Button>
+        </div>
+      )}
+
       {/* Cabeçalho Minha Rota */}
       <div className="flex items-center justify-between gap-3">
         <div>
@@ -907,10 +925,8 @@ export default function MinhaRotaPage() {
                 <div>
                   <Label className="text-xs font-semibold">Entrada (R$)</Label>
                   <Input
-                    type="number"
-                    inputMode="numeric"
-                    min="0"
-                    step="0.01"
+                    type="text"
+                    inputMode="decimal"
                     value={vendaEntrada}
                     onChange={(e) => setVendaEntrada(e.target.value)}
                     className="mt-1 min-h-[40px] font-mono"
@@ -919,10 +935,8 @@ export default function MinhaRotaPage() {
                 <div>
                   <Label className="text-xs font-semibold">Nº Parcelas</Label>
                   <Input
-                    type="number"
+                    type="text"
                     inputMode="numeric"
-                    min="1"
-                    max="12"
                     value={vendaParcelas}
                     onChange={(e) => setVendaParcelas(e.target.value)}
                     className="mt-1 min-h-[40px] font-mono text-center"
@@ -998,6 +1012,8 @@ export default function MinhaRotaPage() {
             <div>
               <Label className="text-xs font-semibold">Telefone / WhatsApp</Label>
               <Input
+                type="tel"
+                inputMode="tel"
                 value={clienteTelefone}
                 onChange={(e) => setClienteTelefone(e.target.value)}
                 placeholder="(00) 00000-0000"

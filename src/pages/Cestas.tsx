@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { formatCurrency, formatApiError } from '@/lib/utils'
+import { MobileFab } from '@/components/common/MobileFab'
 import { toast } from 'sonner'
 import {
   ShoppingBag,
@@ -248,6 +249,14 @@ export default function CestasPage() {
 
   return (
     <div className="space-y-6 pb-20 sm:pb-6">
+      {/* FAB Mobile Nova Cesta */}
+      <MobileFab
+        label="Nova Cesta"
+        onClick={() => navigate('/app/produtos')}
+        icon={Plus}
+        variant="amber"
+      />
+
       <PageHeader
         title="Catálogo de Cestas"
         description="Gestão de cestas básicas prontas, fichas técnicas de composição versionadas e margens de venda."

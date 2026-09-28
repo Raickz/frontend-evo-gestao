@@ -41,6 +41,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { supabase } from '@/lib/supabase/client'
 import { ProdutosService, Produto, Categoria, Fornecedor } from '@/services/produtos'
 import { formatPlural, formatApiError } from '@/lib/utils'
+import { MobileFab } from '@/components/common/MobileFab'
 import { toast } from 'sonner'
 import {
   Package,
@@ -531,6 +532,11 @@ export default function ProdutosPage() {
 
   return (
     <div className="space-y-6">
+      {/* FAB Mobile Novo Produto */}
+      {podeGerenciarProdutos && (
+        <MobileFab label="Novo Produto" onClick={handleOpenCreate} icon={Plus} variant="primary" />
+      )}
+
       <PageHeader
         title="Catálogo de Produtos"
         description="Gestão de itens, tabela de preços, estoque mínimo e categorias."
@@ -644,35 +650,136 @@ export default function ProdutosPage() {
         />
       ) : (
         <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Visualização em Cartões Mobile (< 768px) */}
+          <div className="block md:hidden p-2 space-y-3">
+            {paginatedProdutos.map((produto) => {
+              const saldo = produto.estoque?.[0]?.quantidade || 0
+              const estoqueMin = produto.estoque_minimo || 0
+              const isZerado = saldo <= 0
+              const isAbaixoMinimo = saldo < estoqueMin
+
+              return (
+                <div
+                  key={produto.id}
+                  onClick={() => podeGerenciarProdutos && handleOpenEdit(produto)}
+                  className={`p-4 rounded-2xl bg-white dark:bg-[#0A1328] border border-slate-200/80 dark:border-[#1A294A] space-y-2.5 shadow-xs ${
+                    podeGerenciarProdutos
+                      ? 'cursor-pointer hover:border-[#0066FF]/40 active:scale-[0.99]'
+                      : ''
+                  } transition-all`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-[#1A294A] border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
+                        {produto.foto_url ? (
+                          <img
+                            src={produto.foto_url}
+                            alt={produto.nome}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <Package className="w-5 h-5 text-slate-400" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">
+                          {produto.nome}
+                        </h4>
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-[#8E99A8] mt-0.5">
+                          {produto.codigo && (
+                            <span className="font-mono bg-slate-100 dark:bg-[#1A294A] px-1.5 py-0.2 rounded text-[10px]">
+                              {produto.codigo}
+                            </span>
+                          )}
+                          <span>{produto.categorias?.nome || 'Geral'}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border shrink-0 ${
+                        produto.ativo
+                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
+                          : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25'
+                      }`}
+                    >
+                      {produto.ativo ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-slate-400">Saldo:</span>
+                      <span
+                        className={`font-semibold px-2 py-0.5 rounded-md text-xs ${
+                          isZerado
+                            ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                            : isAbaixoMinimo
+                              ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                        }`}
+                      >
+                        {saldo} {produto.unidade || 'UN'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-black text-slate-900 dark:text-white text-base">
+                        {formatCurrency(produto.preco_venda)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {podeGerenciarProdutos && (
+                    <div
+                      className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-[#1A294A]"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenEdit(produto)}
+                        className="min-h-[44px] text-xs font-semibold px-3 rounded-xl"
+                      >
+                        <Edit2 className="w-3.5 h-3.5 mr-1.5" />
+                        Editar
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Visualização em Tabela Desktop (>= 768px) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
               <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 <tr>
-                  <th className="py-3.5 px-3 w-14 text-center">Foto</th>
+                  <th className="py-3.5 px-4 w-12">Foto</th>
                   <th className="py-3.5 px-4">Código</th>
                   <th className="py-3.5 px-4">Produto</th>
                   <th className="py-3.5 px-4">Unidade</th>
                   <th className="py-3.5 px-4">Preço Venda</th>
-                  <th className="py-3.5 px-4">Estoque Atual</th>
-                  <th className="py-3.5 px-4">Estoque Mínimo</th>
+                  <th className="py-3.5 px-4">Saldo Estoque</th>
+                  <th className="py-3.5 px-4">Mínimo</th>
                   <th className="py-3.5 px-4">Status</th>
                   <th className="py-3.5 px-4 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                 {paginatedProdutos.map((produto) => {
-                  const saldo = produto.estoques?.[0]?.quantidade ?? 0
+                  const saldo = produto.estoque?.[0]?.quantidade || 0
                   const estoqueMin = produto.estoque_minimo || 0
                   const isZerado = saldo <= 0
-                  const isAbaixoMinimo = saldo > 0 && saldo <= estoqueMin
+                  const isAbaixoMinimo = saldo < estoqueMin
 
                   return (
                     <tr
                       key={produto.id}
                       className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
                     >
-                      <td className="py-2.5 px-3 text-center align-middle">
-                        <div className="w-10 h-10 mx-auto rounded-xl border border-slate-200/80 dark:border-[#1A294A] bg-slate-50 dark:bg-[#0A1328] overflow-hidden flex items-center justify-center">
+                      <td className="py-3.5 px-4">
+                        <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-[#1A294A] border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
                           {produto.foto_url ? (
                             <img
                               src={produto.foto_url}
@@ -793,7 +900,6 @@ export default function ProdutosPage() {
               </tbody>
             </table>
           </div>
-
           {/* Pagination bar */}
           <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200/80 dark:border-[#1A294A] bg-slate-50/50 dark:bg-[#0A1328]/50 text-xs text-slate-600 dark:text-[#C0C6CF]">
             <div>
@@ -1113,9 +1219,8 @@ export default function ProdutosPage() {
                   </Label>
                   <Input
                     id="preco_custo"
-                    type="number"
-                    min="0"
-                    step="0.01"
+                    type="text"
+                    inputMode="decimal"
                     value={formData.preco_custo}
                     onChange={(e) => {
                       setFormData({ ...formData, preco_custo: e.target.value })
@@ -1140,9 +1245,8 @@ export default function ProdutosPage() {
                   </Label>
                   <Input
                     id="preco_venda"
-                    type="number"
-                    min="0"
-                    step="0.01"
+                    type="text"
+                    inputMode="decimal"
                     value={formData.preco_venda}
                     onChange={(e) => {
                       setFormData({ ...formData, preco_venda: e.target.value })
@@ -1169,19 +1273,12 @@ export default function ProdutosPage() {
                   </Label>
                   <Input
                     id="estoque_minimo"
-                    type="number"
-                    min="0"
-                    step="1"
+                    type="text"
+                    inputMode="numeric"
                     value={formData.estoque_minimo}
-                    onChange={(e) => {
-                      setFormData({ ...formData, estoque_minimo: e.target.value })
-                      if (formErrors.estoque_minimo)
-                        setFormErrors({ ...formErrors, estoque_minimo: '' })
-                    }}
+                    onChange={(e) => setFormData({ ...formData, estoque_minimo: e.target.value })}
                     placeholder="0"
-                    className={`h-9 text-xs font-mono rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white ${
-                      formErrors.estoque_minimo ? 'border-red-500' : ''
-                    }`}
+                    className="h-9 text-xs font-mono rounded-xl bg-slate-50/80 dark:bg-[#071126]/60 border-slate-200 dark:border-[#1A294A] dark:text-white"
                   />
                   {formErrors.estoque_minimo && (
                     <p className="text-[11px] text-red-500">{formErrors.estoque_minimo}</p>
@@ -1198,9 +1295,8 @@ export default function ProdutosPage() {
                     </Label>
                     <Input
                       id="estoque_inicial"
-                      type="number"
-                      min="0"
-                      step="1"
+                      type="text"
+                      inputMode="numeric"
                       value={formData.estoque_inicial}
                       onChange={(e) => {
                         setFormData({ ...formData, estoque_inicial: e.target.value })

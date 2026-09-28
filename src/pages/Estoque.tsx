@@ -36,6 +36,7 @@ import {
   FornecedorAtivoItem,
 } from '@/services/estoque'
 import { formatPlural, formatApiError } from '@/lib/utils'
+import { MobileFab } from '@/components/common/MobileFab'
 import { toast } from 'sonner'
 import {
   Boxes,
@@ -455,6 +456,16 @@ export default function EstoquePage() {
 
   return (
     <div className="space-y-6">
+      {/* FAB Mobile Nova Entrada */}
+      {podeEditar && (
+        <MobileFab
+          label="Nova Entrada"
+          onClick={handleOpenModalEntrada}
+          icon={Plus}
+          variant="primary"
+        />
+      )}
+
       <PageHeader
         title="Controle de Estoque"
         description="Acompanhamento de posições de saldo, controle de níveis mínimos e histórico de movimentações."
@@ -703,19 +714,97 @@ export default function EstoquePage() {
             />
           ) : (
             <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-              <div className="overflow-x-auto">
+              {/* Visualização Cartões Mobile Saldos (< 768px) */}
+              <div className="block md:hidden p-2 space-y-3">
+                {saldos.map((item) => {
+                  const prod = item.produtos
+                  const qtd = Number(item.quantidade) || 0
+                  const reservada = Number(item.quantidade_reservada) || 0
+                  const disponivel = qtd - reservada
+                  const min = Number(prod?.estoque_minimo) || 0
+                  const unidade = prod?.unidade || 'UN'
+
+                  const isZerado = qtd === 0
+                  const isAbaixoMinimo = qtd > 0 && qtd < min
+                  const isNoLimite = min > 0 && qtd === min
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="p-4 rounded-2xl bg-white dark:bg-[#0A1328] border border-slate-200/80 dark:border-[#1A294A] space-y-2 shadow-xs"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">
+                            {prod?.nome || 'Produto sem nome'}
+                          </h4>
+                          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-[#8E99A8] mt-0.5">
+                            {prod?.codigo && (
+                              <span className="font-mono bg-slate-100 dark:bg-[#1A294A] px-1.5 py-0.2 rounded text-[10px]">
+                                #{prod.codigo}
+                              </span>
+                            )}
+                            <span>{prod?.categorias?.nome || 'Geral'}</span>
+                          </div>
+                        </div>
+                        <div>
+                          {isZerado && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/25">
+                              Sem estoque
+                            </span>
+                          )}
+                          {isAbaixoMinimo && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/25">
+                              Abaixo mín.
+                            </span>
+                          )}
+                          {isNoLimite && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/25">
+                              No limite
+                            </span>
+                          )}
+                          {!isZerado && !isAbaixoMinimo && !isNoLimite && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
+                              Normal
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#1A294A] text-xs">
+                        <span className="text-slate-500 dark:text-[#8E99A8]">
+                          Mínimo: {min} {unidade}
+                        </span>
+                        <div className="text-right">
+                          <span className="font-bold text-slate-900 dark:text-white text-sm tabular-nums">
+                            {qtd} {unidade}
+                          </span>
+                          {reservada > 0 && (
+                            <div className="text-[10px] text-amber-500 font-mono">
+                              Disp: {disponivel} (Res: {reservada})
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Tabela de Saldos Desktop (>= 768px) */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
                   <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <tr>
                       <th className="py-3.5 px-4">Produto</th>
                       <th className="py-3.5 px-4">Unidade</th>
                       <th className="py-3.5 px-4">Estoque Mínimo</th>
-                      <th className="py-3.5 px-4">Estoque Atual</th>
-                      <th className="py-3.5 px-4">Status</th>
+                      <th className="py-3.5 px-4">Saldo Físico</th>
+                      <th className="py-3.5 px-4">Situação</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
-                    {saldosFiltradosVisao.map((item) => {
+                    {saldos.map((item) => {
                       const prod = item.produtos
                       const qtd = Number(item.quantidade) || 0
                       const reservada = Number(item.quantidade_reservada) || 0
@@ -794,7 +883,6 @@ export default function EstoquePage() {
                   </tbody>
                 </table>
               </div>
-
               {/* Paginação Saldos */}
               <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-slate-200/80 dark:border-[#1A294A] bg-slate-50/50 dark:bg-[#0A1328]/50 text-xs text-slate-600 dark:text-[#C0C6CF] gap-3">
                 <div>
@@ -1015,7 +1103,61 @@ export default function EstoquePage() {
             />
           ) : (
             <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-              <div className="overflow-x-auto">
+              {/* Visualização Cartões Mobile Movimentações (< 768px) */}
+              <div className="block md:hidden p-2 space-y-3">
+                {movimentacoes.map((mov) => {
+                  const isEntrada = mov.tipo === 'entrada'
+                  const dataFormatada = mov.created_at
+                    ? new Date(mov.created_at).toLocaleString('pt-BR')
+                    : '-'
+                  const nomeFornecedor = mov.fornecedores?.nome || '-'
+
+                  return (
+                    <div
+                      key={mov.id}
+                      className="p-4 rounded-2xl bg-white dark:bg-[#0A1328] border border-slate-200/80 dark:border-[#1A294A] space-y-2 shadow-xs"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">
+                            {mov.produtos?.nome || 'Produto'}
+                          </h4>
+                          <p className="text-[11px] text-slate-500 dark:text-[#8E99A8] mt-0.5">
+                            {dataFormatada} • {mov.usuarios?.nome || 'Sistema'}
+                          </p>
+                        </div>
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border shrink-0 ${
+                            isEntrada
+                              ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
+                              : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/25'
+                          }`}
+                        >
+                          <span className="capitalize">{mov.tipo}</span>
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#1A294A] text-xs">
+                        <span className="text-slate-500 dark:text-[#8E99A8] truncate max-w-[200px]">
+                          {nomeFornecedor !== '-' ? nomeFornecedor : mov.motivo || 'Sem motivo'}
+                        </span>
+                        <span
+                          className={`font-black text-sm tabular-nums ${
+                            isEntrada
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-amber-600 dark:text-amber-400'
+                          }`}
+                        >
+                          {isEntrada ? `+${mov.quantidade}` : `-${mov.quantidade}`}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Tabela de Movimentações Desktop (>= 768px) */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
                   <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <tr>
@@ -1346,9 +1488,8 @@ export default function EstoquePage() {
                 </Label>
                 <Input
                   id="quantidade"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={quantidadeEntrada}
                   onChange={(e) => {
                     setQuantidadeEntrada(e.target.value)
@@ -1381,9 +1522,8 @@ export default function EstoquePage() {
                 </Label>
                 <Input
                   id="preco-custo"
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
                   value={precoCustoEntrada}
                   onChange={(e) => {
                     setPrecoCustoEntrada(e.target.value)

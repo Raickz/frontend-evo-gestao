@@ -640,7 +640,64 @@ export default function FinanceiroPage() {
           />
         ) : (
           <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-            <div className="overflow-x-auto">
+            {/* Visualização Cartões Mobile Contas a Receber (< 768px) */}
+            <div className="block md:hidden p-2 space-y-3">
+              {contasReceber.map((item) => {
+                const valor = Number(item.valor) || 0
+                const valorPago = Number(item.valor_pago) || 0
+                const saldo = Math.max(0, valor - valorPago)
+                const podeBaixarLinha =
+                  podeFazerBaixa &&
+                  saldo > 0 &&
+                  item.status !== 'cancelado' &&
+                  item.status !== 'pago'
+
+                return (
+                  <div
+                    key={item.id}
+                    className="p-4 rounded-2xl bg-white dark:bg-[#0A1328] border border-slate-200/80 dark:border-[#1A294A] space-y-2.5 shadow-xs"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">
+                          {item.clientes?.nome || item.descricao}
+                        </h4>
+                        <p className="text-xs text-slate-500 dark:text-[#8E99A8] mt-0.5">
+                          Venc: {formatDate(item.vencimento)}
+                          {item.vendas?.numero ? ` • Venda #${item.vendas.numero}` : ''}
+                        </p>
+                      </div>
+                      <div className="shrink-0">{getStatusBadge(item.status)}</div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#1A294A] text-xs">
+                      <div>
+                        <span className="text-[10px] text-slate-400 uppercase font-semibold">
+                          Saldo
+                        </span>
+                        <p className="font-black text-amber-600 dark:text-amber-400 text-base tabular-nums">
+                          {formatCurrency(saldo)}
+                        </p>
+                      </div>
+
+                      {podeBaixarLinha && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleOpenRecebimento(item)}
+                          className="min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl px-4"
+                        >
+                          <Banknote className="w-4 h-4 mr-1.5" />
+                          Receber
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Tabela Desktop Contas a Receber (>= 768px) */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
                 <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <tr>
@@ -728,7 +785,6 @@ export default function FinanceiroPage() {
                 </tbody>
               </table>
             </div>
-
             {/* Paginação */}
             <div className="py-3 px-4 bg-slate-50/50 dark:bg-[#0A1328]/50 border-t border-slate-200/80 dark:border-[#1A294A] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 dark:text-[#C0C6CF]">
               <div>
@@ -792,7 +848,61 @@ export default function FinanceiroPage() {
         />
       ) : (
         <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Visualização Cartões Mobile Contas a Pagar (< 768px) */}
+          <div className="block md:hidden p-2 space-y-3">
+            {contasPagar.map((item) => {
+              const valor = Number(item.valor) || 0
+              const valorPago = Number(item.valor_pago) || 0
+              const saldo = Math.max(0, valor - valorPago)
+              const podeBaixarLinha =
+                podeFazerBaixa && saldo > 0 && item.status !== 'cancelado' && item.status !== 'pago'
+
+              return (
+                <div
+                  key={item.id}
+                  className="p-4 rounded-2xl bg-white dark:bg-[#0A1328] border border-slate-200/80 dark:border-[#1A294A] space-y-2.5 shadow-xs"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">
+                        {item.fornecedores?.nome || item.descricao}
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-[#8E99A8] mt-0.5">
+                        Venc: {formatDate(item.vencimento)}
+                        {item.descricao ? ` • ${item.descricao}` : ''}
+                      </p>
+                    </div>
+                    <div className="shrink-0">{getStatusBadge(item.status)}</div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#1A294A] text-xs">
+                    <div>
+                      <span className="text-[10px] text-slate-400 uppercase font-semibold">
+                        Saldo
+                      </span>
+                      <p className="font-black text-rose-600 dark:text-rose-400 text-base tabular-nums">
+                        {formatCurrency(saldo)}
+                      </p>
+                    </div>
+
+                    {podeBaixarLinha && (
+                      <Button
+                        size="sm"
+                        onClick={() => handleOpenPagamento(item)}
+                        className="min-h-[44px] bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold text-xs rounded-xl px-4"
+                      >
+                        <Banknote className="w-4 h-4 mr-1.5" />
+                        Pagar
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Tabela Desktop Contas a Pagar (>= 768px) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
               <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 <tr>
@@ -997,14 +1107,8 @@ export default function FinanceiroPage() {
                   </Label>
                   <Input
                     id="rec-valor"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    max={Math.max(
-                      0,
-                      (Number(contaReceberSelecionada.valor) || 0) -
-                        (Number(contaReceberSelecionada.valor_pago) || 0),
-                    )}
+                    type="text"
+                    inputMode="decimal"
                     required
                     value={valorRecebimento}
                     onChange={(e) => setValorRecebimento(e.target.value)}
@@ -1145,14 +1249,8 @@ export default function FinanceiroPage() {
                   </Label>
                   <Input
                     id="pag-valor"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    max={Math.max(
-                      0,
-                      (Number(contaPagarSelecionada.valor) || 0) -
-                        (Number(contaPagarSelecionada.valor_pago) || 0),
-                    )}
+                    type="text"
+                    inputMode="decimal"
                     required
                     value={valorPagamento}
                     onChange={(e) => setValorPagamento(e.target.value)}

@@ -53,6 +53,7 @@ import {
 } from 'lucide-react'
 import { PrintPreviewDialog } from '@/components/print/PrintPreviewDialog'
 import { VendaPrintDocument } from '@/components/print/VendaPrintDocument'
+import { MobileFab } from '@/components/common/MobileFab'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
@@ -805,6 +806,19 @@ export default function VendasPage() {
 
   return (
     <div className="space-y-6">
+      {/* FAB Mobile Nova Venda */}
+      {modo === 'listagem' && (
+        <MobileFab
+          label="Nova Venda"
+          onClick={() => {
+            limparNovaVenda()
+            setModo('nova')
+          }}
+          icon={Plus}
+          variant="primary"
+        />
+      )}
+
       {/* HEADER DINÂMICO */}
       {modo === 'listagem' ? (
         <PageHeader
@@ -990,28 +1004,28 @@ export default function VendasPage() {
             />
           ) : (
             <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-              {/* Visualização em Cartões Mobile (< 640px) */}
-              <div className="block sm:hidden divide-y divide-slate-100 dark:divide-[#1A294A] p-2 space-y-2">
+              {/* Visualização em Cartões Mobile (< 768px) */}
+              <div className="block md:hidden p-2 space-y-3">
                 {vendas.map((venda) => (
                   <div
                     key={venda.id}
                     onClick={() => abrirImpressaoVenda(venda.id)}
-                    className="p-3.5 rounded-xl bg-white dark:bg-[#0A1328] border border-slate-200/80 dark:border-[#1A294A] space-y-2 shadow-xs cursor-pointer"
+                    className="p-4 rounded-2xl bg-white dark:bg-[#0A1328] border border-slate-200/80 dark:border-[#1A294A] space-y-2.5 shadow-xs cursor-pointer hover:border-[#0066FF]/40 active:scale-[0.99] transition-all"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <span className="font-mono font-bold text-xs text-[#0066FF] dark:text-[#3B82F6] bg-[#0066FF]/10 px-2 py-0.5 rounded">
+                      <div className="min-w-0">
+                        <span className="font-mono font-bold text-xs text-[#0066FF] dark:text-[#3B82F6] bg-[#0066FF]/10 px-2 py-0.5 rounded-md border border-[#0066FF]/20">
                           #{venda.numero}
                         </span>
-                        <h4 className="font-bold text-slate-900 dark:text-white text-sm mt-1">
+                        <h4 className="font-bold text-slate-900 dark:text-white text-sm mt-1 truncate">
                           {venda.clientes?.nome || 'Consumidor Final'}
                         </h4>
-                        <p className="text-[11px] text-slate-500">
+                        <p className="text-xs text-slate-500 dark:text-[#8E99A8] mt-0.5">
                           {new Date(venda.created_at).toLocaleDateString('pt-BR')} •{' '}
                           {venda.vendedores?.nome || 'Sem vendedor'}
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right shrink-0">
                         <p className="font-black text-slate-900 dark:text-white text-base">
                           {formatCurrency(venda.total || 0)}
                         </p>
@@ -1030,7 +1044,7 @@ export default function VendasPage() {
                           e.stopPropagation()
                           abrirImpressaoVenda(venda.id)
                         }}
-                        className="h-10 min-h-[44px] text-xs font-semibold px-3 rounded-xl"
+                        className="min-h-[44px] text-xs font-semibold px-3 rounded-xl border-slate-200 dark:border-[#1A294A]"
                       >
                         <Printer className="w-4 h-4 mr-1.5" />
                         Imprimir
@@ -1040,8 +1054,8 @@ export default function VendasPage() {
                 ))}
               </div>
 
-              {/* TABELA DE VENDAS DESKTOP (>= 640px) */}
-              <div className="hidden sm:block overflow-x-auto">
+              {/* TABELA DE VENDAS DESKTOP (>= 768px) */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
                   <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <tr>

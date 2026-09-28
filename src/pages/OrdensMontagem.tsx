@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { formatCurrency, formatApiError } from '@/lib/utils'
+import { MobileFab } from '@/components/common/MobileFab'
 import { toast } from 'sonner'
 import {
   Hammer,
@@ -234,6 +235,16 @@ export default function OrdensMontagemPage() {
 
   return (
     <div className="space-y-6 pb-24 sm:pb-6">
+      {/* FAB Mobile Nova Ordem */}
+      {podeMontar && (
+        <MobileFab
+          label="Nova Montagem"
+          onClick={handleAbrirNovaOrdem}
+          icon={Plus}
+          variant="primary"
+        />
+      )}
+
       <PageHeader
         title="Ordens de Montagem"
         description="Planejamento e execução da montagem de cestas básicas prontas com baixa atômica de insumos."

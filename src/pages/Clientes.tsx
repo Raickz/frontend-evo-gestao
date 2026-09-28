@@ -39,6 +39,7 @@ import {
 import { useEmpresa } from '@/hooks/use-empresa'
 import { ClientesService, Cliente } from '@/services/clientes'
 import { formatPlural, formatApiError } from '@/lib/utils'
+import { MobileFab } from '@/components/common/MobileFab'
 import { toast } from 'sonner'
 import {
   Users,
@@ -320,6 +321,9 @@ export default function ClientesPage() {
 
   return (
     <div className="space-y-6">
+      {/* FAB Mobile Novo Cliente */}
+      <MobileFab label="Novo Cliente" onClick={handleOpenCreate} icon={Plus} variant="primary" />
+
       <PageHeader
         title="Gestão de Clientes"
         description="Consulte a carteira de clientes, limites de crédito e contatos da distribuidora."
@@ -425,7 +429,103 @@ export default function ClientesPage() {
         />
       ) : (
         <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Visualização em Cartões Mobile (< 768px) */}
+          <div className="block md:hidden p-2 space-y-3">
+            {paginatedClientes.map((cliente) => (
+              <div
+                key={cliente.id}
+                onClick={() => handleOpenEdit(cliente)}
+                className="p-4 rounded-2xl bg-white dark:bg-[#0A1328] border border-slate-200/80 dark:border-[#1A294A] space-y-2.5 shadow-xs cursor-pointer hover:border-[#0066FF]/40 active:scale-[0.99] transition-all"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate">
+                      {cliente.nome}
+                    </h4>
+                    {cliente.documento && (
+                      <p className="font-mono text-xs text-slate-500 dark:text-[#8E99A8] mt-0.5">
+                        {cliente.documento}
+                      </p>
+                    )}
+                  </div>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border shrink-0 ${
+                      cliente.ativo
+                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25'
+                        : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25'
+                    }`}
+                  >
+                    {cliente.ativo ? 'Ativo' : 'Inativo'}
+                  </span>
+                </div>
+
+                <div className="space-y-1.5 pt-1 text-xs text-slate-600 dark:text-[#C0C6CF]">
+                  {(cliente.telefone || cliente.whatsapp) && (
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <a
+                        href={`tel:${(cliente.telefone || cliente.whatsapp)?.replace(/\D/g, '')}`}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#0066FF] dark:text-[#3B82F6] font-semibold text-xs border border-blue-200/60 dark:border-blue-900/40 min-h-[44px]"
+                      >
+                        <Phone className="w-3.5 h-3.5" />
+                        Ligar: {cliente.telefone || cliente.whatsapp}
+                      </a>
+                      <a
+                        href={`https://wa.me/55${(cliente.whatsapp || cliente.telefone)?.replace(/\D/g, '')}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-200/60 dark:border-emerald-900/40 min-h-[44px] min-w-[44px]"
+                        title="WhatsApp"
+                      >
+                        WhatsApp
+                      </a>
+                    </div>
+                  )}
+
+                  {(cliente.cidade || cliente.estado) && (
+                    <div className="flex items-center gap-1 text-slate-500 dark:text-[#8E99A8]">
+                      <MapPin className="w-3.5 h-3.5 text-[#0066FF] shrink-0" />
+                      <span className="truncate">
+                        {[
+                          cliente.endereco,
+                          cliente.numero,
+                          cliente.bairro,
+                          cliente.cidade,
+                          cliente.estado,
+                        ]
+                          .filter(Boolean)
+                          .join(', ')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-[#1A294A]">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400">
+                      Limite Crédito
+                    </span>
+                    <p className="font-bold text-slate-900 dark:text-white text-sm tabular-nums">
+                      {formatCurrency(cliente.limite_credito)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenEdit(cliente)}
+                      className="min-h-[44px] text-xs font-semibold px-3 rounded-xl"
+                    >
+                      <Edit2 className="w-3.5 h-3.5 mr-1" />
+                      Editar
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Visualização em Tabela Desktop (>= 768px) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
               <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 <tr>
@@ -635,6 +735,7 @@ export default function ClientesPage() {
                   </Label>
                   <Input
                     id="documento"
+                    inputMode="numeric"
                     value={formData.documento}
                     onChange={(e) => setFormData({ ...formData, documento: e.target.value })}
                     placeholder="CPF ou CNPJ"
@@ -651,9 +752,8 @@ export default function ClientesPage() {
                   </Label>
                   <Input
                     id="limite_credito"
-                    type="number"
-                    min="0"
-                    step="0.01"
+                    type="text"
+                    inputMode="decimal"
                     value={formData.limite_credito}
                     onChange={(e) => {
                       setFormData({ ...formData, limite_credito: e.target.value })
@@ -687,6 +787,8 @@ export default function ClientesPage() {
                   </Label>
                   <Input
                     id="telefone"
+                    type="tel"
+                    inputMode="tel"
                     value={formData.telefone}
                     onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
                     placeholder="(00) 0000-0000"
@@ -703,6 +805,8 @@ export default function ClientesPage() {
                   </Label>
                   <Input
                     id="whatsapp"
+                    type="tel"
+                    inputMode="tel"
                     value={formData.whatsapp}
                     onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
                     placeholder="(00) 90000-0000"
@@ -752,6 +856,7 @@ export default function ClientesPage() {
                   </Label>
                   <Input
                     id="cep"
+                    inputMode="numeric"
                     value={formData.cep}
                     onChange={(e) => setFormData({ ...formData, cep: e.target.value })}
                     placeholder="00000-000"

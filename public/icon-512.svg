@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#081022" />
+      <stop offset="100%" stopColor="#0A1328" />
+    </linearGradient>
+    <linearGradient id="evoHexGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#0066FF" />
+      <stop offset="50%" stopColor="#0A1328" />
+      <stop offset="100%" stopColor="#0052CC" />
+    </linearGradient>
+    <linearGradient id="evoSilverGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#FFFFFF" />
+      <stop offset="30%" stopColor="#C0C6CF" />
+      <stop offset="70%" stopColor="#8E99A8" />
+      <stop offset="100%" stopColor="#E2E8F0" />
+    </linearGradient>
+    <radialGradient id="evoCenterGlow512" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stopColor="#0066FF" stopOpacity="0.8" />
+      <stop offset="100%" stopColor="#0066FF" stopOpacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad512)" />
+
+  <g transform="translate(106, 106) scale(3)">
+    <polygon
+      points="50,4 92,27 92,73 50,96 8,73 8,27"
+      fill="url(#evoHexGrad512)"
+      stroke="url(#evoSilverGrad512)"
+      stroke-width="3.5"
+      stroke-linejoin="round"
+    />
+    <circle cx="50" cy="50" r="30" fill="url(#evoCenterGlow512)" />
+    <path d="M 32 34 L 68 34 L 62 42 L 38 42 Z" fill="url(#evoSilverGrad512)" />
+    <path d="M 28 46 L 62 46 L 56 54 L 34 54 Z" fill="#0066FF" />
+    <path d="M 34 58 L 70 58 L 64 66 L 40 66 Z" fill="url(#evoSilverGrad512)" />
+    <circle cx="70" cy="50" r="3.5" fill="#00D2FF" />
+  </g>
+</svg>

@@ -61,6 +61,7 @@ import {
 } from 'lucide-react'
 import { PrintPreviewDialog } from '@/components/print/PrintPreviewDialog'
 import { PedidoPrintDocument } from '@/components/print/PedidoPrintDocument'
+import { MobileFab } from '@/components/common/MobileFab'
 
 interface CartItem {
   produto_id: string
@@ -840,6 +841,10 @@ export default function PedidosPage() {
   return (
     <TooltipProvider>
       <div className="space-y-6">
+        {podeCriar && (
+          <MobileFab label="Novo Pedido" onClick={abrirModalNovo} icon={Plus} variant="primary" />
+        )}
+
         {/* =========================================================================
             MODAL DE IMPRESSÃO DO PEDIDO
             ========================================================================= */}
@@ -992,29 +997,29 @@ export default function PedidosPage() {
           />
         ) : (
           <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-            {/* Visualização em Cartões Mobile (telas < 640px) */}
-            <div className="block sm:hidden divide-y divide-slate-100 dark:divide-[#1A294A] p-2 space-y-2">
+            {/* Visualização em Cartões Mobile (telas < 768px) */}
+            <div className="block md:hidden p-2 space-y-3">
               {pedidos.map((ped) => {
                 const isPendente = ped.status === 'pendente'
                 return (
                   <div
                     key={ped.id}
                     onClick={() => abrirDetalhes(ped.id)}
-                    className="p-3.5 rounded-xl bg-white dark:bg-[#0A1328] border border-slate-200/80 dark:border-[#1A294A] space-y-2.5 shadow-xs cursor-pointer"
+                    className="p-4 rounded-2xl bg-white dark:bg-[#0A1328] border border-slate-200/80 dark:border-[#1A294A] space-y-2.5 shadow-xs cursor-pointer hover:border-[#0066FF]/40 active:scale-[0.99] transition-all"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <div>
+                      <div className="min-w-0">
                         <span className="font-mono font-bold text-sm text-[#0066FF] dark:text-[#3B82F6]">
                           #{ped.numero}
                         </span>
-                        <h4 className="font-bold text-slate-900 dark:text-white text-sm">
+                        <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate mt-0.5">
                           {ped.clientes?.nome || 'Cliente não informado'}
                         </h4>
-                        <p className="text-[11px] text-slate-500">
+                        <p className="text-xs text-slate-500 dark:text-[#8E99A8] mt-0.5">
                           {formatDate(ped.created_at)} • {ped.vendedores?.nome || 'Sem vendedor'}
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right shrink-0">
                         {getStatusBadge(ped.status)}
                         <p className="font-black text-slate-900 dark:text-white text-base mt-1">
                           {formatCurrency(ped.total || 0)}
@@ -1085,8 +1090,8 @@ export default function PedidosPage() {
               })}
             </div>
 
-            {/* Visualização em Tabela Desktop (telas >= 640px) */}
-            <div className="hidden sm:block overflow-x-auto">
+            {/* Visualização em Tabela Desktop (telas >= 768px) */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
                 <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <tr>

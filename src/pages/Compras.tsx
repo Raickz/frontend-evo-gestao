@@ -60,6 +60,7 @@ import {
 } from 'lucide-react'
 import { PrintPreviewDialog } from '@/components/print/PrintPreviewDialog'
 import { CompraPrintDocument } from '@/components/print/CompraPrintDocument'
+import { MobileFab } from '@/components/common/MobileFab'
 
 type StatusFilter = 'todos' | 'rascunho' | 'confirmada' | 'cancelada'
 
@@ -842,6 +843,16 @@ export default function ComprasPage() {
 
   return (
     <div className="space-y-6">
+      {/* FAB Mobile Nova Compra */}
+      {podeCriar && (
+        <MobileFab
+          label="Nova Compra"
+          onClick={abrirModalNovaCompra}
+          icon={Plus}
+          variant="primary"
+        />
+      )}
+
       {/* 1. Page Header */}
       <PageHeader
         title="Gestão de Compras"
@@ -1050,7 +1061,79 @@ export default function ComprasPage() {
         />
       ) : (
         <div className="glass-card rounded-2xl border border-slate-200/80 dark:border-[#1A294A] overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Cartões Mobile de Compras (< 768px) */}
+          <div className="block md:hidden p-2 space-y-3">
+            {compras.map((compra) => {
+              const isRascunho = compra.status === 'rascunho'
+              return (
+                <div
+                  key={compra.id}
+                  onClick={() => abrirDetalhes(compra.id)}
+                  className="p-4 rounded-2xl bg-white dark:bg-[#0A1328] border border-slate-200/80 dark:border-[#1A294A] space-y-2.5 shadow-xs cursor-pointer hover:border-[#0066FF]/40 active:scale-[0.99] transition-all"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <span className="font-mono font-bold text-xs text-[#0066FF] dark:text-[#3B82F6] bg-[#0066FF]/10 px-2 py-0.5 rounded-md border border-[#0066FF]/20">
+                        #{compra.numero}
+                      </span>
+                      <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate mt-1">
+                        {compra.fornecedores?.nome || 'Fornecedor não informado'}
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-[#8E99A8] mt-0.5">
+                        {formatDate(compra.data_compra || compra.created_at)}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      {getStatusBadge(compra.status)}
+                      <p className="font-black text-slate-900 dark:text-white text-base mt-1">
+                        {formatCurrency(compra.total || 0)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div
+                    className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#1A294A]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => abrirDetalhes(compra.id)}
+                        className="min-h-[44px] text-xs font-semibold px-3 rounded-xl"
+                      >
+                        <Eye className="w-4 h-4 mr-1.5" />
+                        Ver
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => abrirImpressaoCompra(compra.id)}
+                        className="min-h-[44px] text-xs font-semibold px-3 rounded-xl"
+                      >
+                        <Printer className="w-4 h-4 mr-1.5" />
+                        Imprimir
+                      </Button>
+                    </div>
+
+                    {isRascunho && podeCriar && (
+                      <Button
+                        size="sm"
+                        onClick={() => abrirModalConfirmar(compra)}
+                        className="min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3 rounded-xl"
+                      >
+                        <CheckCircle2 className="w-4 h-4 mr-1" />
+                        Confirmar
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Tabela Desktop Compras (>= 768px) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600 dark:text-[#C0C6CF]">
               <thead className="bg-slate-50/80 dark:bg-[#0A1328]/80 border-b border-slate-200/80 dark:border-[#1A294A] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 <tr>
@@ -1384,9 +1467,8 @@ export default function ComprasPage() {
                       Valor Pago (R$)
                     </Label>
                     <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
+                      type="text"
+                      inputMode="decimal"
                       value={valorPago}
                       onChange={(e) => setValorPago(e.target.value)}
                       placeholder="0,00"

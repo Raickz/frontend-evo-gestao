@@ -39,7 +39,9 @@ import { useAuth } from '@/hooks/use-auth'
 import { useEmpresa } from '@/hooks/use-empresa'
 import { useTheme } from '@/hooks/use-theme'
 import { EvoHexagonLogo } from '@/components/common/EvoLogo'
-import { formatPerfilBadge, canAccessPage, AppPage } from '@/lib/permissions'
+import { formatPerfilBadge, canAccessPage, AppPage, normalizeRole } from '@/lib/permissions'
+import { MobileBottomNav } from '@/components/common/MobileBottomNav'
+import { PwaInstallPrompt } from '@/components/common/PwaInstallPrompt'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -176,6 +178,17 @@ export default function Layout() {
   const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  // Entregador cai direto em Minha Rota ao entrar
+  useEffect(() => {
+    const role = normalizeRole(usuario?.perfil)
+    if (
+      role === 'entregador' &&
+      (location.pathname === '/app' || location.pathname === '/app/dashboard')
+    ) {
+      navigate('/app/minha-rota', { replace: true })
+    }
+  }, [usuario?.perfil, location.pathname, navigate])
 
   const handleLogout = async () => {
     await logout()
@@ -548,10 +561,16 @@ export default function Layout() {
         </header>
 
         {/* Page Main Content with smooth fade */}
-        <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-7xl w-full mx-auto animate-fade-in-up">
+        <main className="flex-1 p-3 sm:p-6 md:p-8 max-w-7xl w-full mx-auto animate-fade-in-up pb-24 lg:pb-8">
           <Outlet />
         </main>
       </div>
+
+      {/* Barra de Navegação Inferior Móvel (< 1024px) */}
+      <MobileBottomNav onOpenMenu={() => setMobileOpen(true)} />
+
+      {/* Aviso discreto de instalação PWA */}
+      <PwaInstallPrompt />
 
       {/* Modal Informativo Global de Suporte EVO Gestão */}
       <Dialog open={modalSuporteOpen} onOpenChange={setModalSuporteOpen}>
