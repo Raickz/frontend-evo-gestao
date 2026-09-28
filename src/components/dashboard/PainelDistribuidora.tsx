@@ -310,7 +310,7 @@ export function PainelDistribuidora({ onRefresh }: PainelDistribuidoraProps) {
       setParcelasRecebidasTotal(Math.round(parcRecebidas * 100) / 100)
 
       // 4. INADIMPLÊNCIA / TOTAL A RECEBER E VENCIDO
-      const { data: inadData } = await supabase.rpc('get_relatorio_inadimplencia_faixas')
+      const { data: inadData } = await (supabase.rpc as any)('get_relatorio_inadimplencia_faixas')
       if (inadData) {
         setTotalAReceber(Number((inadData as any).total_geral_receber) || 0)
         setTotalVencido(Number((inadData as any).total_vencido) || 0)

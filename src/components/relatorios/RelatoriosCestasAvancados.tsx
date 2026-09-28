@@ -101,7 +101,7 @@ export function RelatoriosCestasAvancados({ periodo }: RelatoriosCestasAvancados
 
   // COMPARTILHAR WHATSAPP
   const compartilharResumoWhatsApp = () => {
-    const empNome = empresa?.nome_fantasia || empresa?.razao_social || 'Distribuidora'
+    const empNome = empresa?.nome_fantasia || (empresa as any)?.razao_social || 'Distribuidora'
     const totalCestasVendidas = cestasData.reduce((acc, c) => acc + c.quantidade_vendida, 0)
     const totalFatCestas = cestasData.reduce((acc, c) => acc + c.faturamento, 0)
     const totalMargem = cestasData.reduce((acc, c) => acc + c.margem_bruta, 0)

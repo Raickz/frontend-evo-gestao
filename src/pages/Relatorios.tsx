@@ -114,7 +114,8 @@ const FORMA_PAGTO_LABELS: Record<string, string> = {
 }
 
 export default function RelatoriosPage() {
-  const { empresaId } = useEmpresa()
+  const { empresaId, empresa } = useEmpresa()
+  const temModuloCestas = Boolean((empresa as any)?.modulo_cestas)
 
   // Filtros de Período
   const [preset, setPreset] = useState<PresetPeriodo>('mes_atual')

@@ -129,9 +129,9 @@ export const EstoqueService = {
    * Alertas de lotes vencidos e vencendo em 30 dias
    */
   async getAlertasLotes(diasAntecedencia = 30) {
-    const { data, error } = await supabase.rpc('get_alertas_lotes_componentes', {
+    const { data, error } = await (supabase.rpc as any)('get_alertas_lotes_componentes', {
       p_dias_antecedencia: diasAntecedencia,
-    } as any)
+    })
     if (error) throw error
     return data as {
       vencidos: Array<{
@@ -164,8 +164,7 @@ export const EstoqueService = {
    * Lista todos os lotes de um produto
    */
   async listLotesProduto(empresaId: string, produtoId: string) {
-    return supabase
-      .from('lotes')
+    return (supabase.from as any)('lotes')
       .select('*')
       .eq('empresa_id', empresaId)
       .eq('produto_id', produtoId)

@@ -245,6 +245,7 @@ function KpiCard({
 export default function DashboardPage() {
   const { empresaId, empresa } = useEmpresa()
   const { usuario } = useAuth()
+  const temModuloCestas = Boolean((empresa as any)?.modulo_cestas)
   const { theme } = useTheme()
 
   const [loading, setLoading] = useState(true)

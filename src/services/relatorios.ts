@@ -1117,10 +1117,9 @@ export const RelatoriosService = {
     const porForma: RecebimentosFormaItem[] = Object.entries(formasMap)
       .map(([forma, item]) => ({
         forma,
-        tipo:
-          forma === 'fiado' || forma === 'crediario' || forma === 'a_prazo'
-            ? 'parcelado'
-            : 'a_vista',
+        tipo: (forma === 'fiado' || forma === 'crediario' || forma === 'a_prazo'
+          ? 'parcelado'
+          : 'a_vista') as 'a_vista' | 'parcelado',
         quantidade: item.count,
         valor_total: Math.round(item.total * 100) / 100,
         percentual: totalGeral > 0 ? Math.round((item.total / totalGeral) * 10000) / 100 : 0,
@@ -1227,8 +1226,8 @@ export const RelatoriosService = {
    * 18. Relatório de Inadimplência por Faixas (RPC `get_relatorio_inadimplencia_faixas`)
    */
   async getInadimplenciaFaixas(): Promise<InadimplenciaFaixasData> {
-    const { data, error } = await supabase.rpc('get_relatorio_inadimplencia_faixas')
+    const { data, error } = await (supabase.rpc as any)('get_relatorio_inadimplencia_faixas')
     if (error) throw error
-    return data as InadimplenciaFaixasData
+    return data as unknown as InadimplenciaFaixasData
   },
 }
