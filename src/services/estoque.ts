@@ -113,12 +113,64 @@ export const EstoqueService = {
     produtoId: string,
     quantidade: number,
     motivo: string = 'Entrada de estoque',
+    numeroLote?: string,
+    dataValidade?: string,
   ) {
     return supabase.rpc('registrar_entrada_estoque', {
       p_produto_id: produtoId,
       p_quantidade: quantidade,
       p_motivo: motivo,
-    })
+      p_numero_lote: numeroLote?.trim() || null,
+      p_data_validade: dataValidade || null,
+    } as any)
+  },
+
+  /**
+   * Alertas de lotes vencidos e vencendo em 30 dias
+   */
+  async getAlertasLotes(diasAntecedencia = 30) {
+    const { data, error } = await supabase.rpc('get_alertas_lotes_componentes', {
+      p_dias_antecedencia: diasAntecedencia,
+    } as any)
+    if (error) throw error
+    return data as {
+      vencidos: Array<{
+        lote_id: string
+        produto_id: string
+        produto_nome: string
+        produto_unidade: string
+        numero_lote: string
+        data_validade: string
+        quantidade: number
+        dias_vencido: number
+      }>
+      total_vencidos: number
+      vencendo: Array<{
+        lote_id: string
+        produto_id: string
+        produto_nome: string
+        produto_unidade: string
+        numero_lote: string
+        data_validade: string
+        quantidade: number
+        dias_para_vencer: number
+      }>
+      total_vencendo: number
+      hoje: string
+    }
+  },
+
+  /**
+   * Lista todos os lotes de um produto
+   */
+  async listLotesProduto(empresaId: string, produtoId: string) {
+    return supabase
+      .from('lotes')
+      .select('*')
+      .eq('empresa_id', empresaId)
+      .eq('produto_id', produtoId)
+      .gt('quantidade', 0)
+      .order('data_validade', { ascending: true })
   },
 
   async registrarEntradaPorFornecedor(

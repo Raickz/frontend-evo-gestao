@@ -46,6 +46,8 @@ export interface ItemCompraInput {
   produto_id: string
   quantidade: number
   preco_unitario: number
+  numero_lote?: string
+  data_validade?: string
 }
 
 export interface CriarCompraData {
@@ -233,6 +235,8 @@ export const ComprasService = {
         produto_id: it.produto_id,
         quantidade: it.quantidade,
         preco_unitario: it.preco_unitario,
+        numero_lote: it.numero_lote?.trim() || null,
+        data_validade: it.data_validade || null,
       })),
       p_observacoes: data.observacoes || '',
       p_data_compra: data.data_compra || new Date().toISOString().split('T')[0],

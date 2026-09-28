@@ -125,6 +125,59 @@ export interface PedidosIndicadores {
   valorConvertido: number
 }
 
+export interface CestaRelatorioItem {
+  cesta_id: string
+  nome: string
+  codigo: string | null
+  quantidade_vendida: number
+  faturamento: number
+  custo_total: number
+  margem_bruta: number
+  margem_percentual: number
+}
+
+export interface CanalRelatorioItem {
+  canal: string
+  quantidade_vendas: number
+  faturamento: number
+  ticket_medio: number
+}
+
+export interface RecebimentosFormaItem {
+  forma: string
+  tipo: 'a_vista' | 'parcelado' | 'ambos'
+  quantidade: number
+  valor_total: number
+  percentual: number
+}
+
+export interface RotaRelatorioItem {
+  rota_id: string
+  numero: number
+  data: string
+  status: string
+  veiculo_nome: string
+  responsavel_nome: string
+  cestas_carregadas: number
+  cestas_vendidas: number
+  cestas_entregues: number
+  cestas_devolvidas: number
+  total_recebido: number
+  tem_divergencia: boolean
+  divergencia_detalhes: string | null
+}
+
+export interface InadimplenciaFaixasData {
+  a_vencer: { total: number; clientes_count: number; titulos_count: number }
+  dias_1_30: { total: number; clientes_count: number; titulos_count: number }
+  dias_31_60: { total: number; clientes_count: number; titulos_count: number }
+  dias_61_90: { total: number; clientes_count: number; titulos_count: number }
+  mais_90: { total: number; clientes_count: number; titulos_count: number }
+  total_vencido: number
+  clientes_inadimplentes_count: number
+  total_geral_receber: number
+}
+
 export const RelatoriosService = {
   /**
    * 1. getResumoGeral
@@ -886,7 +939,296 @@ export const RelatoriosService = {
       faturados,
       cancelados,
       convertidosEmVenda,
-      valorConvertido,
+      valorConvertido: Math.round(valorConvertido * 100) / 100,
     }
+  },
+
+  /**
+   * 14. Relatório por Cesta: quantidade, faturamento, custo histórico, margem bruta (preço - custo)
+   */
+  async getRelatorioPorCesta(
+    empresaId: string,
+    periodo: PeriodoFiltro,
+  ): Promise<CestaRelatorioItem[]> {
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(periodo)
+
+    const { data, error } = await supabase
+      .from('itens_venda')
+      .select(`
+        quantidade,
+        subtotal,
+        custo_unitario,
+        preco_unitario,
+        vendas!inner (status, created_at),
+        produtos!inner (id, nome, codigo, tipo_item, preco_custo)
+      `)
+      .eq('empresa_id', empresaId)
+      .eq('vendas.status', 'finalizada')
+      .eq('produtos.tipo_item', 'cesta')
+      .gte('vendas.created_at', inicioIso)
+      .lte('vendas.created_at', fimIso)
+
+    if (error) throw error
+
+    const map = new Map<string, CestaRelatorioItem>()
+
+    for (const row of (data as any[]) || []) {
+      const p = row.produtos
+      const pId = p.id
+      const qtd = Number(row.quantidade) || 0
+      const fat = Number(row.subtotal) || 0
+      const custoUnit = Number(row.custo_unitario || p.preco_custo || 0)
+      const custoTotal = Math.round(qtd * custoUnit * 100) / 100
+
+      const existing = map.get(pId)
+      if (existing) {
+        existing.quantidade_vendida += qtd
+        existing.faturamento += fat
+        existing.custo_total += custoTotal
+      } else {
+        map.set(pId, {
+          cesta_id: pId,
+          nome: p.nome,
+          codigo: p.codigo,
+          quantidade_vendida: qtd,
+          faturamento: fat,
+          custo_total: custoTotal,
+          margem_bruta: 0,
+          margem_percentual: 0,
+        })
+      }
+    }
+
+    const list = Array.from(map.values()).map((item) => {
+      const margem_bruta = RegrasCalculo.lucroBruto(item.faturamento, item.custo_total)
+      const margem_percentual = RegrasCalculo.margemLucro(item.faturamento, item.custo_total)
+      return {
+        ...item,
+        faturamento: Math.round(item.faturamento * 100) / 100,
+        custo_total: Math.round(item.custo_total * 100) / 100,
+        margem_bruta,
+        margem_percentual,
+      }
+    })
+
+    return list.sort((a, b) => b.faturamento - a.faturamento)
+  },
+
+  /**
+   * 15. Relatório por Canal de Venda
+   */
+  async getRelatorioPorCanal(
+    empresaId: string,
+    periodo: PeriodoFiltro,
+  ): Promise<CanalRelatorioItem[]> {
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(periodo)
+
+    // Busca vendas com join opcional em pedidos para obter o canal
+    const { data, error } = await supabase
+      .from('vendas')
+      .select('id, total, pedidos(canal)')
+      .eq('empresa_id', empresaId)
+      .eq('status', 'finalizada')
+      .gte('created_at', inicioIso)
+      .lte('created_at', fimIso)
+
+    if (error) throw error
+
+    const map: Record<string, { count: number; total: number }> = {
+      presencial: { count: 0, total: 0 },
+      whatsapp: { count: 0, total: 0 },
+      telefone: { count: 0, total: 0 },
+      instagram: { count: 0, total: 0 },
+      rua: { count: 0, total: 0 },
+      outro: { count: 0, total: 0 },
+    }
+
+    for (const v of (data as any[]) || []) {
+      const rawCanal = (v.pedidos?.canal || 'presencial').toLowerCase()
+      const canalNorm = map[rawCanal] ? rawCanal : rawCanal === 'venda_na_rua' ? 'rua' : 'outro'
+      const total = Number(v.total) || 0
+
+      map[canalNorm].count += 1
+      map[canalNorm].total += total
+    }
+
+    return Object.entries(map).map(([canal, val]) => ({
+      canal,
+      quantidade_vendas: val.count,
+      faturamento: Math.round(val.total * 100) / 100,
+      ticket_medio: RegrasCalculo.ticketMedio(val.total, val.count),
+    }))
+  },
+
+  /**
+   * 16. Relatório de Recebimentos por Forma e À Vista vs Parcelado
+   */
+  async getRelatorioRecebimentos(
+    empresaId: string,
+    periodo: PeriodoFiltro,
+  ): Promise<{
+    porForma: RecebimentosFormaItem[]
+    aVistaVsParcelado: { a_vista: number; parcelado: number; total: number }
+  }> {
+    const { inicioIso, fimIso } = converterPeriodoSaoPauloParaIsoUtc(periodo)
+
+    // Vendas e parcelas quitadas/geradas
+    const [vendasRes, parcelasPagasRes] = await Promise.all([
+      supabase
+        .from('vendas')
+        .select('id, total, forma_pagamento, created_at')
+        .eq('empresa_id', empresaId)
+        .eq('status', 'finalizada')
+        .gte('created_at', inicioIso)
+        .lte('created_at', fimIso),
+      supabase
+        .from('contas_receber')
+        .select('valor_pago, forma_pagamento_baixa, data_pagamento, status')
+        .eq('empresa_id', empresaId)
+        .not('data_pagamento', 'is', null)
+        .gte('data_pagamento', periodo.inicio)
+        .lte('data_pagamento', periodo.fim),
+    ])
+
+    const vendas = vendasRes.data || []
+    const parcelasPagas = parcelasPagasRes.data || []
+
+    let aVistaTotal = 0
+    let parceladoTotal = 0
+    const formasMap: Record<string, { count: number; total: number }> = {}
+
+    for (const v of vendas) {
+      const forma = (v.forma_pagamento || 'outros').toLowerCase()
+      const val = Number(v.total) || 0
+      const isParcelado = forma === 'fiado' || forma === 'crediario' || forma === 'a_prazo'
+
+      if (isParcelado) {
+        parceladoTotal += val
+      } else {
+        aVistaTotal += val
+      }
+
+      if (!formasMap[forma]) formasMap[forma] = { count: 0, total: 0 }
+      formasMap[forma].count += 1
+      formasMap[forma].total += val
+    }
+
+    const totalGeral = aVistaTotal + parceladoTotal
+    const porForma: RecebimentosFormaItem[] = Object.entries(formasMap)
+      .map(([forma, item]) => ({
+        forma,
+        tipo:
+          forma === 'fiado' || forma === 'crediario' || forma === 'a_prazo'
+            ? 'parcelado'
+            : 'a_vista',
+        quantidade: item.count,
+        valor_total: Math.round(item.total * 100) / 100,
+        percentual: totalGeral > 0 ? Math.round((item.total / totalGeral) * 10000) / 100 : 0,
+      }))
+      .sort((a, b) => b.valor_total - a.valor_total)
+
+    return {
+      porForma,
+      aVistaVsParcelado: {
+        a_vista: Math.round(aVistaTotal * 100) / 100,
+        parcelado: Math.round(parceladoTotal * 100) / 100,
+        total: Math.round(totalGeral * 100) / 100,
+      },
+    }
+  },
+
+  /**
+   * 17. Relatório de Rotas / Entregas
+   */
+  async getRelatorioRotas(empresaId: string, periodo: PeriodoFiltro): Promise<RotaRelatorioItem[]> {
+    const { data, error } = await supabase
+      .from('rotas')
+      .select(`
+        id,
+        numero,
+        data,
+        status,
+        divergencia_fechamento,
+        veiculos(modelo, placa),
+        usuarios!rotas_responsavel_usuario_id_fkey(nome),
+        rota_itens_estoque(
+          quantidade_carregada,
+          quantidade_vendida,
+          quantidade_entregue,
+          quantidade_devolvida
+        ),
+        rota_pedidos(
+          status_entrega,
+          vendas(total, status)
+        )
+      `)
+      .eq('empresa_id', empresaId)
+      .gte('data', periodo.inicio)
+      .lte('data', periodo.fim)
+      .order('data', { ascending: false })
+
+    if (error) {
+      if (import.meta.env.DEV) console.warn('Falha ao listar rotas ou módulo desligado:', error)
+      return []
+    }
+
+    return (data || []).map((r: any) => {
+      const itensEstoque = r.rota_itens_estoque || []
+      const carregadas = itensEstoque.reduce(
+        (acc: number, it: any) => acc + (Number(it.quantidade_carregada) || 0),
+        0,
+      )
+      const vendidas = itensEstoque.reduce(
+        (acc: number, it: any) => acc + (Number(it.quantidade_vendida) || 0),
+        0,
+      )
+      const entregues = itensEstoque.reduce(
+        (acc: number, it: any) => acc + (Number(it.quantidade_entregue) || 0),
+        0,
+      )
+      const devolvidas = itensEstoque.reduce(
+        (acc: number, it: any) => acc + (Number(it.quantidade_devolvida) || 0),
+        0,
+      )
+
+      let totalRecebido = 0
+      for (const rp of r.rota_pedidos || []) {
+        if (rp.vendas && rp.vendas.status === 'finalizada') {
+          totalRecebido += Number(rp.vendas.total) || 0
+        }
+      }
+
+      const div = r.divergencia_fechamento
+      const temDiv = Boolean(
+        div && (div.divergencias?.length > 0 || div.total_divergencia_valor > 0),
+      )
+
+      return {
+        rota_id: r.id,
+        numero: r.numero,
+        data: r.data,
+        status: r.status,
+        veiculo_nome: r.veiculos
+          ? `${r.veiculos.modelo} (${r.veiculos.placa})`
+          : 'Veículo não informado',
+        responsavel_nome: r.usuarios?.nome || 'Não atribuído',
+        cestas_carregadas: carregadas,
+        cestas_vendidas: vendidas,
+        cestas_entregues: entregues,
+        cestas_devolvidas: devolvidas,
+        total_recebido: Math.round(totalRecebido * 100) / 100,
+        tem_divergencia: temDiv,
+        divergencia_detalhes: temDiv ? JSON.stringify(div) : null,
+      }
+    })
+  },
+
+  /**
+   * 18. Relatório de Inadimplência por Faixas (RPC `get_relatorio_inadimplencia_faixas`)
+   */
+  async getInadimplenciaFaixas(): Promise<InadimplenciaFaixasData> {
+    const { data, error } = await supabase.rpc('get_relatorio_inadimplencia_faixas')
+    if (error) throw error
+    return data as InadimplenciaFaixasData
   },
 }

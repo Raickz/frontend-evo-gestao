@@ -33,6 +33,7 @@ import {
 import { Link } from 'react-router-dom'
 import { canAccessPage } from '@/lib/permissions'
 import { supabase } from '@/lib/supabase/client'
+import { PainelDistribuidora } from '@/components/dashboard/PainelDistribuidora'
 import { VendasService } from '@/services/vendas'
 import { ClientesService } from '@/services/clientes'
 import { ProdutosService } from '@/services/produtos'
@@ -918,6 +919,9 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 pb-12">
+      {/* PAINEL ESPECIALIZADO DA DISTRIBUIDORA DE CESTAS (Quando módulo Cestas ativo) */}
+      {temModuloCestas && <PainelDistribuidora onRefresh={loadDashboardData} />}
+
       {/* 4. HEADER DO DASHBOARD */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200/70 dark:border-[#152342]">
         <div>

@@ -1591,6 +1591,33 @@ export default function ComprasPage() {
                         />
                       </div>
 
+                      {/* Lote (Opcional) */}
+                      <div className="sm:col-span-2 space-y-1">
+                        <Label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                          Lote (Opcional)
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder="Ex: LOTE-123"
+                          value={item.numero_lote || ''}
+                          onChange={(e) => handleUpdateItemLote(idx, e.target.value)}
+                          className="text-xs h-9 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A] rounded-xl"
+                        />
+                      </div>
+
+                      {/* Validade (Opcional) */}
+                      <div className="sm:col-span-2 space-y-1">
+                        <Label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                          Validade (Opcional)
+                        </Label>
+                        <Input
+                          type="date"
+                          value={item.data_validade || ''}
+                          onChange={(e) => handleUpdateItemValidade(idx, e.target.value)}
+                          className="text-xs h-9 bg-white dark:bg-[#0A1328] border-slate-200 dark:border-[#1A294A] rounded-xl"
+                        />
+                      </div>
+
                       {/* Subtotal */}
                       <div className="sm:col-span-2 space-y-1 text-right">
                         <Label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">

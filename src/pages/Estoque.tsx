@@ -113,6 +113,19 @@ export default function EstoquePage() {
   const [quantidadeEntrada, setQuantidadeEntrada] = useState('')
   const [precoCustoEntrada, setPrecoCustoEntrada] = useState('')
   const [motivoEntrada, setMotivoEntrada] = useState('Entrada de estoque')
+  const [numeroLoteEntrada, setNumeroLoteEntrada] = useState('')
+  const [dataValidadeEntrada, setDataValidadeEntrada] = useState('')
+  const [alertasLotes, setAlertasLotes] = useState<{
+    vencidos: any[]
+    total_vencidos: number
+    vencendo: any[]
+    total_vencendo: number
+  }>({
+    vencidos: [],
+    total_vencidos: 0,
+    vencendo: [],
+    total_vencendo: 0,
+  })
   const [submittingEntrada, setSubmittingEntrada] = useState(false)
   const [entradaErrors, setEntradaErrors] = useState<{
     fornecedor?: string
@@ -139,15 +152,21 @@ export default function EstoquePage() {
     return () => clearTimeout(handler)
   }, [searchMov])
 
-  // Carregar Indicadores
+  // Carregar Indicadores e Alertas de Lotes
   const loadIndicadores = useCallback(async () => {
     if (!empresaId) return
     setLoadingIndicadores(true)
     try {
-      const { data, error } = await EstoqueService.getIndicadores(empresaId)
+      const [{ data, error }, lotesRes] = await Promise.all([
+        EstoqueService.getIndicadores(empresaId),
+        EstoqueService.getAlertasLotes(30),
+      ])
       if (error) throw error
       if (data) {
         setIndicadores(data)
+      }
+      if (lotesRes) {
+        setAlertasLotes(lotesRes)
       }
     } catch {
       // Ignora erro silenciosamente nos KPIs
@@ -295,6 +314,8 @@ export default function EstoquePage() {
     setQuantidadeEntrada('')
     setPrecoCustoEntrada('')
     setMotivoEntrada('Entrada de estoque')
+    setNumeroLoteEntrada('')
+    setDataValidadeEntrada('')
     setFiltroFornecedorEntrada('')
     setFiltroProdutoEntrada('')
     setEntradaErrors({})
@@ -357,10 +378,21 @@ export default function EstoquePage() {
       const prodSelected = produtosParaEntrada.find((p) => p.id === selectedProdutoId)
       const motivoFinal = motivoEntrada.trim() || 'Entrada de estoque'
 
+      // Se houver lote informado, usa registrarEntrada com lote
+      if (numeroLoteEntrada.trim()) {
+        await EstoqueService.registrarEntrada(
+          selectedProdutoId,
+          qtdNum,
+          motivoFinal,
+          numeroLoteEntrada.trim(),
+          dataValidadeEntrada || undefined,
+        )
+      }
+
       const { data, error } = await EstoqueService.registrarEntradaPorFornecedor(
         selectedFornecedorId,
         selectedProdutoId,
-        qtdNum,
+        numeroLoteEntrada.trim() ? 0 : qtdNum,
         precoCustoNum,
         motivoFinal,
       )
@@ -400,6 +432,8 @@ export default function EstoquePage() {
       setQuantidadeEntrada('')
       setPrecoCustoEntrada('')
       setMotivoEntrada('Entrada de estoque')
+      setNumeroLoteEntrada('')
+      setDataValidadeEntrada('')
 
       // Recarrega indicadores e saldos/movimentações
       loadIndicadores()
@@ -1563,6 +1597,42 @@ export default function EstoquePage() {
                 placeholder="Ex: Entrada de estoque, Nota fiscal 1234..."
                 className="h-9 text-xs bg-white dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl"
               />
+            </div>
+
+            {/* Lote e Validade Opcionais */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="lote"
+                  className="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                >
+                  Número do Lote (Opcional)
+                </Label>
+                <Input
+                  id="lote"
+                  type="text"
+                  value={numeroLoteEntrada}
+                  onChange={(e) => setNumeroLoteEntrada(e.target.value)}
+                  placeholder="Ex: LOTE-2026-A"
+                  className="h-9 text-xs bg-white dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-xl"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="validade"
+                  className="text-xs font-semibold text-slate-700 dark:text-slate-300"
+                >
+                  Data de Validade (Opcional)
+                </Label>
+                <Input
+                  id="validade"
+                  type="date"
+                  value={dataValidadeEntrada}
+                  onChange={(e) => setDataValidadeEntrada(e.target.value)}
+                  className="h-9 text-xs bg-white dark:bg-[#071126] border-slate-200 dark:border-[#1A294A] text-slate-900 dark:text-slate-100 rounded-xl"
+                />
+              </div>
             </div>
 
             {/* Resumo da Operação */}

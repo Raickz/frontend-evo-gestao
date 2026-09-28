@@ -37,6 +37,7 @@ import {
 
 import { useEmpresa } from '@/hooks/use-empresa'
 import { formatCurrency } from '@/lib/utils'
+import { RelatoriosCestasAvancados } from '@/components/relatorios/RelatoriosCestasAvancados'
 import {
   PageHeader,
   MetricCard,
@@ -505,6 +506,9 @@ export default function RelatoriosPage() {
 
       {/* Erro global */}
       {error && <ErrorState message={error} onRetry={carregarDados} />}
+
+      {/* RELATÓRIOS ESPECÍFICOS DA DISTRIBUIDORA DE CESTAS (Quando módulo Cestas ativo) */}
+      {temModuloCestas && <RelatoriosCestasAvancados periodo={periodo} />}
 
       {/* SEÇÃO 1: RESUMO GERAL */}
       <section className="space-y-3">
