@@ -49,21 +49,41 @@ export function MobileBottomNav({ onOpenMenu }: BottomNavProps) {
     }
   }, [])
 
-  // Detecta se algum Dialog ou modal com aria-modal ou radix-dialog está aberto
+  // Detecta se algum Dialog, modal ou formulário ativo com aria-modal ou radix-dialog está aberto
   useEffect(() => {
-    const checkModal = () => {
+    const checkModalOrForm = () => {
       const modalActive =
         document.querySelector('[data-state="open"][role="dialog"]') !== null ||
+        document.querySelector('[role="alertdialog"][data-state="open"]') !== null ||
         document.body.classList.contains('overflow-hidden') ||
         document.querySelector('[aria-modal="true"]') !== null
-      setIsModalOpen(modalActive)
+
+      // Detecta se há campo de entrada com foco ativo no celular
+      const activeEl = document.activeElement
+      const inputActive =
+        activeEl instanceof HTMLInputElement ||
+        activeEl instanceof HTMLTextAreaElement ||
+        (activeEl instanceof HTMLElement && activeEl.isContentEditable)
+
+      setIsModalOpen(modalActive || inputActive)
     }
 
-    const observer = new MutationObserver(checkModal)
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true })
-    checkModal()
+    const handleFocusChange = () => {
+      checkModalOrForm()
+    }
 
-    return () => observer.disconnect()
+    window.addEventListener('focusin', handleFocusChange)
+    window.addEventListener('focusout', handleFocusChange)
+
+    const observer = new MutationObserver(checkModalOrForm)
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true })
+    checkModalOrForm()
+
+    return () => {
+      window.removeEventListener('focusin', handleFocusChange)
+      window.removeEventListener('focusout', handleFocusChange)
+      observer.disconnect()
+    }
   }, [])
 
   const role = normalizeRole(usuario?.perfil)
