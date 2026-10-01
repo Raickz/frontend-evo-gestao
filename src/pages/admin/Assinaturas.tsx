@@ -585,7 +585,9 @@ export default function AdminAssinaturasPage() {
                                     {ass.empresa_nome_fantasia || ass.empresa_nome}
                                   </p>
                                   <p className="text-[11px] text-slate-400 truncate">
-                                    {ass.empresa_cnpj ? `CNPJ: ${ass.empresa_cnpj}` : ass.empresa_nome}
+                                    {ass.empresa_cnpj
+                                      ? `CNPJ: ${ass.empresa_cnpj}`
+                                      : ass.empresa_nome}
                                   </p>
                                 </div>
                               </div>
