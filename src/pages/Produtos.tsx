@@ -653,7 +653,7 @@ export default function ProdutosPage() {
           {/* Visualização em Cartões Mobile (< 768px) */}
           <div className="block md:hidden p-2 space-y-3">
             {paginatedProdutos.map((produto) => {
-              const saldo = produto.estoque?.[0]?.quantidade || 0
+              const saldo = produto.estoques?.[0]?.quantidade || 0
               const estoqueMin = produto.estoque_minimo || 0
               const isZerado = saldo <= 0
               const isAbaixoMinimo = saldo < estoqueMin
@@ -768,7 +768,7 @@ export default function ProdutosPage() {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-[#1A294A]">
                 {paginatedProdutos.map((produto) => {
-                  const saldo = produto.estoque?.[0]?.quantidade || 0
+                  const saldo = produto.estoques?.[0]?.quantidade || 0
                   const estoqueMin = produto.estoque_minimo || 0
                   const isZerado = saldo <= 0
                   const isAbaixoMinimo = saldo < estoqueMin

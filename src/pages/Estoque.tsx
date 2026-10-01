@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useEmpresa } from '@/hooks/use-empresa'
+import { useAuth } from '@/hooks/use-auth'
 import {
   EstoqueService,
   EstoqueIndicadores,
@@ -62,6 +63,10 @@ const PAGE_SIZE = 20
 
 export default function EstoquePage() {
   const { empresaId, moduloCestas } = useEmpresa()
+  const { usuario } = useAuth()
+  const perfil = usuario?.perfil?.toLowerCase()
+  const podeEditar =
+    perfil === 'master' || perfil === 'admin' || perfil === 'gerente' || perfil === 'operador'
 
   // Tab State
   const [activeTab, setActiveTab] = useState<'saldos' | 'movimentacoes'>('saldos')
