@@ -1,6 +1,6 @@
-# Projeto Criado com o Skip
+# EVO Gestão
 
-Este projeto foi criado de ponta a ponta com o [Skip](https://goskip.dev).
+Sistema integrado de gestão empresarial, vendas, rotas e financeiro.
 
 ## 🚀 Stack Tecnológica
 

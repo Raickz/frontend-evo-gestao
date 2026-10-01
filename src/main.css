@@ -209,4 +209,17 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(110, 119, 133, 0.5);
   }
+
+  /* Ocultar qualquer selo/badge/watermark de plataforma ou gerador Skip */
+  [data-skip-badge],
+  [id*='skip-badge'],
+  [class*='skip-badge'],
+  [class*='skip_badge'],
+  a[href*='goskip.dev'],
+  a[href*='helloskip.com'] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
 }
